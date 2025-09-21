@@ -1,0 +1,226 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "han-solo MCP Server Tools Contract",
+  "description": "Defines the tools exposed by the han-solo MCP server",
+  "type": "object",
+  "properties": {
+    "tools": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Tool"
+      }
+    }
+  },
+  "definitions": {
+    "Tool": {
+      "type": "object",
+      "required": ["name", "description", "inputSchema", "outputSchema"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "configure_workflow",
+            "start_workflow",
+            "execute_workflow_step",
+            "get_sessions_status",
+            "swap_session",
+            "abort_workflow",
+            "validate_environment",
+            "manage_status_line",
+            "create_branch",
+            "cleanup_operations",
+            "rebase_on_main"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "inputSchema": {
+          "$ref": "#/definitions/InputSchema"
+        },
+        "outputSchema": {
+          "$ref": "#/definitions/OutputSchema"
+        }
+      }
+    },
+    "InputSchema": {
+      "type": "object"
+    },
+    "OutputSchema": {
+      "type": "object"
+    }
+  },
+  "examples": [
+    {
+      "name": "configure_workflow",
+      "description": "Initialize han-solo in a project or update configuration",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": ["init", "config"]
+          },
+          "options": {
+            "type": "object",
+            "properties": {
+              "createRemote": {
+                "type": "boolean"
+              },
+              "platform": {
+                "type": "string",
+                "enum": ["github", "gitlab"]
+              },
+              "components": {
+                "type": "object",
+                "properties": {
+                  "statusLines": { "type": "boolean" },
+                  "gitHooks": { "type": "boolean" },
+                  "gitTemplates": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "required": ["mode"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "initialized": { "type": "boolean" },
+          "configPath": { "type": "string" },
+          "message": { "type": "string" }
+        },
+        "required": ["success", "initialized"]
+      }
+    },
+    {
+      "name": "start_workflow",
+      "description": "Start a new workflow session",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "workflowType": {
+            "type": "string",
+            "enum": ["launch", "ship", "hotfix"]
+          },
+          "branchName": {
+            "type": "string"
+          }
+        },
+        "required": ["workflowType"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "sessionId": { "type": "string" },
+          "branchName": { "type": "string" },
+          "currentState": { "type": "string" },
+          "nextActions": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["success", "sessionId", "currentState"]
+      }
+    },
+    {
+      "name": "execute_workflow_step",
+      "description": "Execute the next step in the active workflow",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sessionId": { "type": "string" },
+          "action": { "type": "string" },
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "commitMessage": { "type": "string" },
+              "prTitle": { "type": "string" },
+              "prBody": { "type": "string" }
+            }
+          }
+        },
+        "required": ["sessionId", "action"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "currentState": { "type": "string" },
+          "previousState": { "type": "string" },
+          "nextActions": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "message": { "type": "string" }
+        },
+        "required": ["success", "currentState"]
+      }
+    },
+    {
+      "name": "get_sessions_status",
+      "description": "Get status of all workflow sessions",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "filter": {
+            "type": "string",
+            "enum": ["all", "active", "expired", "completed"]
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "branchName": { "type": "string" },
+                "workflowType": { "type": "string" },
+                "currentState": { "type": "string" },
+                "createdAt": { "type": "string" },
+                "updatedAt": { "type": "string" }
+              }
+            }
+          },
+          "activeSession": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["success", "sessions"]
+      }
+    },
+    {
+      "name": "abort_workflow",
+      "description": "Abort the active workflow and rollback changes",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sessionId": { "type": "string" },
+          "keepBranch": { "type": "boolean" }
+        },
+        "required": ["sessionId"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "rolledBack": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "message": { "type": "string" }
+        },
+        "required": ["success"]
+      }
+    }
+  ]
+}

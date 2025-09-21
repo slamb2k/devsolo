@@ -1,0 +1,242 @@
+# han-solo State Machine Contracts
+# Defines the immutable state machines for all workflow types
+
+version: "1.0.0"
+description: "State machine definitions for han-solo workflows"
+
+workflows:
+  launch:
+    description: "Create and develop a feature branch"
+    initial_state: "INIT"
+    terminal_states: ["COMPLETE", "ABORTED"]
+    states:
+      INIT:
+        description: "Workflow initialized"
+        allowed_transitions:
+          - to: "BRANCH_READY"
+            trigger: "branch_created"
+        requires_user_input: false
+
+      BRANCH_READY:
+        description: "Branch created and ready for development"
+        allowed_transitions:
+          - to: "CHANGES_COMMITTED"
+            trigger: "commit_changes"
+          - to: "ABORTED"
+            trigger: "abort_command"
+        requires_user_input: true
+
+      CHANGES_COMMITTED:
+        description: "Changes committed locally"
+        allowed_transitions:
+          - to: "PUSHED"
+            trigger: "push_changes"
+          - to: "BRANCH_READY"
+            trigger: "amend_commit"
+        requires_user_input: true
+
+      PUSHED:
+        description: "Changes pushed to remote"
+        allowed_transitions:
+          - to: "PR_CREATED"
+            trigger: "create_pr"
+        requires_user_input: false
+
+      PR_CREATED:
+        description: "Pull request created"
+        allowed_transitions:
+          - to: "COMPLETE"
+            trigger: "finish_workflow"
+        requires_user_input: false
+
+      COMPLETE:
+        description: "Workflow completed successfully"
+        allowed_transitions: []
+        is_terminal: true
+
+      ABORTED:
+        description: "Workflow aborted by user"
+        allowed_transitions: []
+        is_terminal: true
+
+  ship:
+    description: "Ship feature branch to production"
+    initial_state: "BRANCH_READY"
+    terminal_states: ["COMPLETE", "ABORTED"]
+    states:
+      BRANCH_READY:
+        description: "Starting ship workflow on existing branch"
+        allowed_transitions:
+          - to: "CHANGES_COMMITTED"
+            trigger: "commit_changes"
+          - to: "PUSHED"
+            trigger: "already_pushed"
+          - to: "ABORTED"
+            trigger: "abort_command"
+        requires_user_input: true
+
+      CHANGES_COMMITTED:
+        description: "Final changes committed"
+        allowed_transitions:
+          - to: "PUSHED"
+            trigger: "push_changes"
+        requires_user_input: true
+
+      PUSHED:
+        description: "All changes pushed to remote"
+        allowed_transitions:
+          - to: "PR_CREATED"
+            trigger: "create_pr"
+          - to: "WAITING_APPROVAL"
+            trigger: "pr_exists"
+        requires_user_input: false
+
+      PR_CREATED:
+        description: "Pull request created or updated"
+        allowed_transitions:
+          - to: "WAITING_APPROVAL"
+            trigger: "await_approval"
+        requires_user_input: false
+
+      WAITING_APPROVAL:
+        description: "Waiting for PR approval"
+        allowed_transitions:
+          - to: "REBASING"
+            trigger: "approval_received"
+          - to: "ABORTED"
+            trigger: "abort_command"
+        requires_user_input: false
+
+      REBASING:
+        description: "Rebasing on latest main"
+        allowed_transitions:
+          - to: "MERGING"
+            trigger: "rebase_success"
+          - to: "CONFLICT_RESOLUTION"
+            trigger: "rebase_conflict"
+        requires_user_input: false
+
+      CONFLICT_RESOLUTION:
+        description: "Resolving merge conflicts"
+        allowed_transitions:
+          - to: "REBASING"
+            trigger: "conflicts_resolved"
+          - to: "ABORTED"
+            trigger: "abort_command"
+        requires_user_input: true
+
+      MERGING:
+        description: "Merging to main branch"
+        allowed_transitions:
+          - to: "CLEANUP"
+            trigger: "merge_complete"
+        requires_user_input: false
+
+      CLEANUP:
+        description: "Cleaning up branches and sessions"
+        allowed_transitions:
+          - to: "COMPLETE"
+            trigger: "cleanup_complete"
+        requires_user_input: false
+
+      COMPLETE:
+        description: "Ship workflow completed"
+        allowed_transitions: []
+        is_terminal: true
+
+      ABORTED:
+        description: "Workflow aborted"
+        allowed_transitions: []
+        is_terminal: true
+
+  hotfix:
+    description: "Emergency fix workflow"
+    initial_state: "HOTFIX_INIT"
+    terminal_states: ["HOTFIX_COMPLETE", "ROLLBACK_COMPLETE"]
+    states:
+      HOTFIX_INIT:
+        description: "Hotfix workflow initialized"
+        allowed_transitions:
+          - to: "HOTFIX_READY"
+            trigger: "hotfix_branch_created"
+        requires_user_input: false
+
+      HOTFIX_READY:
+        description: "Hotfix branch ready for changes"
+        allowed_transitions:
+          - to: "HOTFIX_COMMITTED"
+            trigger: "commit_hotfix"
+          - to: "ROLLBACK_COMPLETE"
+            trigger: "abort_command"
+        requires_user_input: true
+
+      HOTFIX_COMMITTED:
+        description: "Hotfix committed locally"
+        allowed_transitions:
+          - to: "HOTFIX_PUSHED"
+            trigger: "push_hotfix"
+        requires_user_input: true
+
+      HOTFIX_PUSHED:
+        description: "Hotfix pushed to remote"
+        allowed_transitions:
+          - to: "HOTFIX_VALIDATED"
+            trigger: "validation_complete"
+        requires_user_input: false
+
+      HOTFIX_VALIDATED:
+        description: "Hotfix validated and ready to deploy"
+        allowed_transitions:
+          - to: "HOTFIX_DEPLOYED"
+            trigger: "deploy_hotfix"
+          - to: "ROLLBACK"
+            trigger: "validation_failed"
+        requires_user_input: true
+
+      ROLLBACK:
+        description: "Rolling back hotfix"
+        allowed_transitions:
+          - to: "ROLLBACK_COMPLETE"
+            trigger: "rollback_complete"
+        requires_user_input: false
+
+      HOTFIX_DEPLOYED:
+        description: "Hotfix deployed to production"
+        allowed_transitions:
+          - to: "HOTFIX_CLEANUP"
+            trigger: "begin_cleanup"
+        requires_user_input: false
+
+      HOTFIX_CLEANUP:
+        description: "Cleaning up hotfix branches"
+        allowed_transitions:
+          - to: "HOTFIX_COMPLETE"
+            trigger: "cleanup_complete"
+        requires_user_input: false
+
+      HOTFIX_COMPLETE:
+        description: "Hotfix workflow completed"
+        allowed_transitions: []
+        is_terminal: true
+
+      ROLLBACK_COMPLETE:
+        description: "Hotfix rolled back"
+        allowed_transitions: []
+        is_terminal: true
+
+validation_rules:
+  state_transition:
+    - "Source state must exist in workflow"
+    - "Target state must be in allowed_transitions"
+    - "Terminal states accept no transitions"
+    - "Trigger must be valid for transition"
+
+  session_state:
+    - "Current state must exist in workflow"
+    - "State history must be chronological"
+    - "No gaps in state transition chain"
+
+  workflow_selection:
+    - "Launch requires no existing session on branch"
+    - "Ship requires existing branch with commits"
+    - "Hotfix requires main branch to be clean"
