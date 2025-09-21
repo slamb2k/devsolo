@@ -17,11 +17,11 @@ process.env['HANSOLO_TEST_MODE'] = 'true';
 // Mock Git operations by default
 jest.mock('simple-git', () => {
   return () => ({
-    init: jest.fn().mockResolvedValue(undefined as any),
-    branch: jest.fn().mockResolvedValue({ all: [], current: 'main' } as any),
-    checkout: jest.fn().mockResolvedValue(undefined as any),
-    checkoutBranch: jest.fn().mockResolvedValue(undefined as any),
-    status: jest.fn().mockResolvedValue({
+    init: jest.fn(() => Promise.resolve(undefined)),
+    branch: jest.fn(() => Promise.resolve({ all: [], current: 'main' })),
+    checkout: jest.fn(() => Promise.resolve(undefined)),
+    checkoutBranch: jest.fn(() => Promise.resolve(undefined)),
+    status: jest.fn(() => Promise.resolve({
       current: 'main',
       tracking: 'origin/main',
       ahead: 0,
@@ -34,15 +34,25 @@ jest.mock('simple-git', () => {
       renamed: [],
       conflicted: [],
       created: [],
-    } as any),
-    add: jest.fn().mockResolvedValue(undefined as any),
-    commit: jest.fn().mockResolvedValue({ commit: 'abc123' } as any),
-    push: jest.fn().mockResolvedValue(undefined as any),
-    pull: jest.fn().mockResolvedValue(undefined as any),
-    rebase: jest.fn().mockResolvedValue(undefined as any),
-    merge: jest.fn().mockResolvedValue(undefined as any),
-    deleteLocalBranch: jest.fn().mockResolvedValue(undefined as any),
-    raw: jest.fn().mockResolvedValue('' as any),
+      isClean: () => true,
+    })),
+    add: jest.fn(() => Promise.resolve(undefined)),
+    commit: jest.fn(() => Promise.resolve({ commit: 'abc123' })),
+    push: jest.fn(() => Promise.resolve(undefined)),
+    pull: jest.fn(() => Promise.resolve(undefined)),
+    rebase: jest.fn(() => Promise.resolve(undefined)),
+    merge: jest.fn(() => Promise.resolve(undefined)),
+    deleteLocalBranch: jest.fn(() => Promise.resolve(undefined)),
+    raw: jest.fn(() => Promise.resolve('')),
+    getRemotes: jest.fn(() => Promise.resolve([])),
+    revparse: jest.fn(() => Promise.resolve('abc123')),
+    diff: jest.fn(() => Promise.resolve('')),
+    log: jest.fn(() => Promise.resolve({ all: [] })),
+    tags: jest.fn(() => Promise.resolve({ all: [] })),
+    tag: jest.fn(() => Promise.resolve(undefined)),
+    addRemote: jest.fn(() => Promise.resolve(undefined)),
+    fetch: jest.fn(() => Promise.resolve(undefined)),
+    stash: jest.fn(() => Promise.resolve('')),
   });
 });
 

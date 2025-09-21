@@ -5,6 +5,7 @@ import {
   SessionMetadata,
   StateTransitionRecord,
   TransitionTrigger,
+  ValidationResult,
 } from './types';
 
 export class WorkflowSession {
@@ -180,6 +181,31 @@ export class WorkflowSession {
       const minutes = Math.floor(diffMs / (1000 * 60));
       return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
     }
+  }
+
+  public validate(): ValidationResult {
+    const errors: string[] = [];
+
+    if (!this.branchName || this.branchName.trim() === '') {
+      errors.push('Branch name is required');
+    }
+
+    if (!this.workflowType || !['launch', 'ship', 'hotfix'].includes(this.workflowType)) {
+      errors.push('Invalid workflow type');
+    }
+
+    if (!this.isValidState(this.currentState)) {
+      errors.push(`Invalid state: ${this.currentState}`);
+    }
+
+    if (this.isExpired()) {
+      errors.push('Session has expired');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
   }
 
   public toJSON(): Record<string, unknown> {

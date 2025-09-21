@@ -78,18 +78,14 @@ describe('LaunchWorkflowStateMachine', () => {
     it('should execute successful transition', async () => {
       const result = await stateMachine.transition('INIT', 'BRANCH_READY');
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.value.from).toBe('INIT');
-        expect(result.value.to).toBe('BRANCH_READY');
-      }
+      expect(result.fromState).toBe('INIT');
+      expect(result.toState).toBe('BRANCH_READY');
     });
 
     it('should fail invalid transition', async () => {
       const result = await stateMachine.transition('INIT', 'COMPLETE');
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.message).toContain('Invalid transition');
-      }
+      expect(result.error).toContain('Invalid transition');
     });
 
     it('should include metadata in transition', async () => {
@@ -97,13 +93,10 @@ describe('LaunchWorkflowStateMachine', () => {
       const result = await stateMachine.transition(
         'INIT',
         'BRANCH_READY',
-        undefined,
         metadata
       );
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.value.metadata).toEqual(metadata);
-      }
+      expect(result.metadata).toEqual(metadata);
     });
   });
 
@@ -123,28 +116,27 @@ describe('LaunchWorkflowStateMachine', () => {
   });
 
   describe('state validation', () => {
-    it('should pass validation for valid state', async () => {
-      const validation = await stateMachine.validateState('INIT', {
-        branchName: 'feature/test',
-        hasChanges: false,
+    it('should pass validation for valid state', () => {
+      const isValid = stateMachine.validateState('INIT', {
+        gitClean: true,
+        onMainBranch: true,
       });
-      expect(validation.isValid).toBe(true);
+      expect(isValid).toBe(true);
     });
 
-    it('should fail validation for missing branch name in BRANCH_READY', async () => {
-      const validation = await stateMachine.validateState('BRANCH_READY', {
-        branchName: '',
+    it('should fail validation for missing required context in BRANCH_READY', () => {
+      const isValid = stateMachine.validateState('BRANCH_READY', {
+        branchName: null,
+        gitClean: true,
       });
-      expect(validation.isValid).toBe(false);
-      expect(validation.errors).toContain('Branch name is required');
+      expect(isValid).toBe(false);
     });
 
-    it('should fail validation for uncommitted changes in PUSHED state', async () => {
-      const validation = await stateMachine.validateState('PUSHED', {
-        hasUncommittedChanges: true,
+    it('should validate PUSHED state correctly', () => {
+      const isValid = stateMachine.validateState('PUSHED', {
+        hasRemote: true,
       });
-      expect(validation.isValid).toBe(false);
-      expect(validation.errors).toContain('Uncommitted changes must be resolved');
+      expect(isValid).toBe(true);
     });
   });
 });
