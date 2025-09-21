@@ -1,0 +1,12 @@
+{
+  "name": "hansolo-example-plugin",
+  "version": "1.0.0",
+  "description": "Example plugin for han-solo",
+  "main": "index.js",
+  "hansolo": {
+    "commands": ["example", "hello"],
+    "hooks": ["pre-commit", "post-commit", "pre-push"]
+  },
+  "author": "han-solo",
+  "license": "MIT"
+}

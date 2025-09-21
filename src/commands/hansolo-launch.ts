@@ -5,6 +5,7 @@ import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
 import { WorkflowSession } from '../models/workflow-session';
 import { LaunchWorkflowStateMachine } from '../state-machines/launch-workflow';
+import { TemplateManager } from '../templates/workflow-templates';
 
 export class LaunchCommand {
   private output = new ConsoleOutput();
@@ -13,18 +14,21 @@ export class LaunchCommand {
   private sessionRepo: SessionRepository;
   private gitOps: GitOperations;
   private stateMachine: LaunchWorkflowStateMachine;
+  private templateManager: TemplateManager;
 
   constructor(basePath: string = '.hansolo') {
     this.configManager = new ConfigurationManager(basePath);
     this.sessionRepo = new SessionRepository(basePath);
     this.gitOps = new GitOperations();
     this.stateMachine = new LaunchWorkflowStateMachine();
+    this.templateManager = new TemplateManager();
   }
 
   async execute(options: {
     branchName?: string;
     force?: boolean;
     description?: string;
+    template?: string;
   } = {}): Promise<void> {
     this.output.header('🚀 Launching New Feature Workflow');
 

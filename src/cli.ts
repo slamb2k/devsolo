@@ -10,6 +10,7 @@ import { SwapCommand } from './commands/hansolo-swap';
 import { AbortCommand } from './commands/hansolo-abort';
 import { ShipCommand } from './commands/hansolo-ship';
 import { HotfixCommand } from './commands/hansolo-hotfix';
+import { runInteractiveMode } from './commands/interactive';
 
 const HANSOLO_ASCII = `
 ╔═══════════════════════════════════════════╗
@@ -37,6 +38,12 @@ export async function main(): Promise<void> {
 
   if (command === '--version' || command === '-v') {
     showVersion();
+    return;
+  }
+
+  // Interactive mode
+  if (command === 'interactive' || command === 'i') {
+    await runInteractiveMode();
     return;
   }
 
@@ -117,6 +124,7 @@ function showHelp(): void {
   console.log('  sessions     List all active sessions');
   console.log('  swap         Switch between sessions');
   console.log('  abort        Abort current workflow');
+  console.log('  interactive  Start interactive mode');
   console.log('  demo         Run a demonstration');
   console.log('\nOptions:');
   console.log('  --help, -h    Show this help message');
