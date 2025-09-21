@@ -1,0 +1,59 @@
+{
+  "workflow": {
+    "mainBranch": "main",
+    "branchPrefix": {
+      "feature": "feature/",
+      "hotfix": "hotfix/",
+      "release": "release/"
+    },
+    "autoCleanup": true,
+    "confirmBeforePush": true
+  },
+  "git": {
+    "conventionalCommits": true,
+    "squashOnMerge": true
+  },
+  "github": {
+    "autoCreatePR": true,
+    "requireReviews": 2,
+    "dismissStaleReviews": true,
+    "requiredChecks": ["build", "test", "lint"]
+  },
+  "sessions": {
+    "maxAge": 30,
+    "maxConcurrent": 5,
+    "autoSave": true
+  },
+  "hotfix": {
+    "allowSkipTests": true,
+    "autoMerge": false,
+    "severityLevels": {
+      "critical": {
+        "skipTests": true,
+        "skipReview": true,
+        "autoMerge": true
+      },
+      "high": {
+        "skipTests": false,
+        "skipReview": false,
+        "autoMerge": true
+      },
+      "medium": {
+        "skipTests": false,
+        "skipReview": false,
+        "autoMerge": false
+      }
+    }
+  },
+  "display": {
+    "colorOutput": true,
+    "verboseLogging": false,
+    "showProgress": true,
+    "showBanners": true
+  },
+  "security": {
+    "protectedBranches": ["main", "master", "production"],
+    "secretScanning": true,
+    "requireUserConfig": true
+  }
+}

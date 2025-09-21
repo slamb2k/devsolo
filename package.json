@@ -9,12 +9,21 @@
   },
   "scripts": {
     "build": "tsc",
+    "clean": "rimraf dist coverage",
+    "dev": "tsc --watch",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:unit": "jest --testPathPattern=unit",
+    "test:integration": "jest --testPathPattern=integration",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "package": "npm run build && npm pack"
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "prepack": "npm run clean && npm run build",
+    "package": "npm run build && npm pack",
+    "docker:build": "docker build -t hansolo:latest .",
+    "docker:run": "docker run -it --rm -v $(pwd):/workspace hansolo:latest"
   },
   "keywords": [
     "git",

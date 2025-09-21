@@ -66,24 +66,22 @@ export class WorkflowSession {
   }
 
   public isValidBranchName(): boolean {
-    // Cannot be protected branches
-    const protectedBranches = ['main', 'master', 'develop'];
-    if (protectedBranches.includes(this.branchName)) {
+    // Check if branch name follows Git conventions
+    const invalidPatterns = [
+      /^[\/\.]/, // starts with / or .
+      /\/$/, // ends with /
+      /\.\./, // contains ..
+      /\s/, // contains spaces
+      /[~^:?*\[]/, // contains special chars
+    ];
+
+    const reservedNames = ['main', 'master', 'develop'];
+
+    if (reservedNames.includes(this.branchName)) {
       return false;
     }
 
-    // Must follow Git naming rules
-    const validBranchRegex = /^[^/][\w\-./]+$/;
-    if (!validBranchRegex.test(this.branchName)) {
-      return false;
-    }
-
-    // Cannot have spaces
-    if (this.branchName.includes(' ')) {
-      return false;
-    }
-
-    return true;
+    return !invalidPatterns.some(pattern => pattern.test(this.branchName));
   }
 
   public isValidState(state: StateName): boolean {
