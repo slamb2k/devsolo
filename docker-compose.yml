@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  hansolo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hansolo:latest
+    container_name: hansolo-cli
+    volumes:
+      # Mount your project directory
+      - ${PROJECT_PATH:-./}:/workspace
+      # Mount Git configuration
+      - ~/.gitconfig:/home/hansolo/.gitconfig:ro
+      - ~/.ssh:/home/hansolo/.ssh:ro
+      # Persist han-solo data
+      - hansolo-data:/home/hansolo/.hansolo
+    environment:
+      # Git configuration
+      - GIT_AUTHOR_NAME=${GIT_AUTHOR_NAME}
+      - GIT_AUTHOR_EMAIL=${GIT_AUTHOR_EMAIL}
+      - GIT_COMMITTER_NAME=${GIT_COMMITTER_NAME}
+      - GIT_COMMITTER_EMAIL=${GIT_COMMITTER_EMAIL}
+      # GitHub integration (optional)
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      # GitLab integration (optional)
+      - GITLAB_TOKEN=${GITLAB_TOKEN}
+      # Display preferences
+      - HANSOLO_COLOR_OUTPUT=true
+      - HANSOLO_VERBOSE=false
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    networks:
+      - hansolo-network
+
+  # Optional: Local Git server for testing
+  gitea:
+    image: gitea/gitea:latest
+    container_name: hansolo-gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=sqlite3
+      - GITEA__database__PATH=/data/gitea.db
+      - GITEA__server__DOMAIN=gitea
+      - GITEA__server__ROOT_URL=http://gitea:3000/
+      - GITEA__server__HTTP_PORT=3000
+    volumes:
+      - gitea-data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3000:3000"
+      - "222:22"
+    networks:
+      - hansolo-network
+    profiles:
+      - testing
+
+networks:
+  hansolo-network:
+    driver: bridge
+
+volumes:
+  hansolo-data:
+    driver: local
+  gitea-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${GITEA_DATA_PATH:-./data/gitea}

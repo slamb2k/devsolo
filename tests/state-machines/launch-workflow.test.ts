@@ -190,7 +190,7 @@ describe('LaunchWorkflow State Machine', () => {
 
   describe('State Machine Lifecycle', () => {
     it('should handle onEnter hooks', async () => {
-      const onEnterSpy = jest.fn();
+      const onEnterSpy = jest.fn(() => Promise.resolve());
       stateMachine.setHook('BRANCH_READY', 'onEnter', onEnterSpy);
 
       await stateMachine.transition('INIT', 'BRANCH_READY');
@@ -204,7 +204,7 @@ describe('LaunchWorkflow State Machine', () => {
     });
 
     it('should handle onExit hooks', async () => {
-      const onExitSpy = jest.fn();
+      const onExitSpy = jest.fn(() => Promise.resolve());
       stateMachine.setHook('INIT', 'onExit', onExitSpy);
 
       await stateMachine.transition('INIT', 'BRANCH_READY');
@@ -218,7 +218,7 @@ describe('LaunchWorkflow State Machine', () => {
     });
 
     it('should handle transition validation hooks', async () => {
-      const validationSpy = jest.fn().mockResolvedValue(false);
+      const validationSpy = jest.fn(() => Promise.reject(new Error('Validation failed')));
       stateMachine.setHook('BRANCH_READY', 'validate', validationSpy);
 
       const result = await stateMachine.transition('INIT', 'BRANCH_READY');

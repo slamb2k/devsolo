@@ -1,0 +1,194 @@
+# Example han-solo configuration file
+# Copy to .hansolo.yaml and customize for your project
+
+# Workflow Configuration
+workflow:
+  # Default branch to create features from
+  mainBranch: main
+
+  # Branch naming conventions
+  branchPrefix:
+    feature: feature/
+    hotfix: hotfix/
+    release: release/
+
+  # Automatic cleanup after merge
+  autoCleanup: true
+
+  # Require confirmation before push
+  confirmBeforePush: true
+
+# Git Configuration
+git:
+  # Commit message template
+  commitTemplate: |
+    [{{type}}] {{subject}}
+
+    {{body}}
+
+    {{footer}}
+
+  # Enforce conventional commits
+  conventionalCommits: true
+
+  # Squash commits before merge
+  squashOnMerge: true
+
+# GitHub Integration (optional)
+github:
+  # Automatically create PR after push
+  autoCreatePR: true
+
+  # PR template
+  prTemplate: |
+    ## Summary
+    {{description}}
+
+    ## Type of Change
+    - [ ] Bug fix
+    - [ ] New feature
+    - [ ] Breaking change
+    - [ ] Documentation update
+
+    ## Testing
+    - [ ] Tests pass locally
+    - [ ] Added new tests
+
+    ## Checklist
+    - [ ] Code follows project style
+    - [ ] Self-reviewed code
+    - [ ] Updated documentation
+
+  # Require PR reviews before merge
+  requireReviews: 2
+
+  # Dismiss stale reviews on push
+  dismissStaleReviews: true
+
+  # Require status checks
+  requiredChecks:
+    - build
+    - test
+    - lint
+
+# Session Management
+sessions:
+  # Maximum session age (days)
+  maxAge: 30
+
+  # Maximum concurrent sessions
+  maxConcurrent: 5
+
+  # Auto-save session state
+  autoSave: true
+
+  # Session storage location
+  storagePath: .hansolo/sessions
+
+# Hotfix Configuration
+hotfix:
+  # Allow skipping tests for critical hotfixes
+  allowSkipTests: true
+
+  # Auto-merge after approval
+  autoMerge: false
+
+  # Notification settings
+  notifications:
+    slack:
+      webhook: ${SLACK_WEBHOOK_URL}
+      channel: "#deployments"
+
+    email:
+      recipients:
+        - team@example.com
+
+  # Severity levels
+  severityLevels:
+    critical:
+      skipTests: true
+      skipReview: true
+      autoMerge: true
+    high:
+      skipTests: false
+      skipReview: false
+      autoMerge: true
+    medium:
+      skipTests: false
+      skipReview: false
+      autoMerge: false
+
+# Hooks (optional)
+hooks:
+  # Pre-commit hook
+  preCommit: |
+    npm run lint
+    npm run test:unit
+
+  # Pre-push hook
+  prePush: |
+    npm run test
+    npm run build
+
+  # Post-merge hook
+  postMerge: |
+    npm install
+    npm run build
+
+# Display Configuration
+display:
+  # Enable color output
+  colorOutput: true
+
+  # Verbose logging
+  verboseLogging: false
+
+  # Show progress bars
+  showProgress: true
+
+  # ASCII art banners
+  showBanners: true
+
+# Security
+security:
+  # Prevent commits to protected branches
+  protectedBranches:
+    - main
+    - master
+    - production
+
+  # Scan for secrets before commit
+  secretScanning: true
+
+  # Required Git user configuration
+  requireUserConfig: true
+
+# Custom Scripts (optional)
+scripts:
+  # Run before workflow starts
+  beforeWorkflow: |
+    echo "Starting workflow..."
+    npm run clean
+
+  # Run after workflow completes
+  afterWorkflow: |
+    echo "Workflow completed!"
+    npm run notify
+
+  # Custom validation
+  validate: |
+    npm run lint
+    npm run typecheck
+    npm run test:unit
+
+# Environment Variables
+env:
+  # Set environment-specific configs
+  development:
+    confirmBeforePush: false
+    verboseLogging: true
+
+  production:
+    confirmBeforePush: true
+    verboseLogging: false
+    requireReviews: 2
