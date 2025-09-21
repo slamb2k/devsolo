@@ -1,0 +1,46 @@
+#!/bin/bash
+# han-solo commit-msg hook
+# Enforces conventional commit messages
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat $COMMIT_MSG_FILE)
+
+# Conventional commit pattern
+CONVENTIONAL_PATTERN="^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .{1,50}"
+
+# Check if message follows conventional commits
+if ! echo "$COMMIT_MSG" | grep -qE "$CONVENTIONAL_PATTERN"; then
+  echo "❌ Commit message doesn't follow Conventional Commits format!"
+  echo ""
+  echo "Format: <type>(<scope>): <subject>"
+  echo ""
+  echo "Types:"
+  echo "  feat:     New feature"
+  echo "  fix:      Bug fix"
+  echo "  docs:     Documentation changes"
+  echo "  style:    Code style changes (formatting, etc.)"
+  echo "  refactor: Code refactoring"
+  echo "  test:     Test additions or fixes"
+  echo "  chore:    Maintenance tasks"
+  echo "  perf:     Performance improvements"
+  echo "  ci:       CI/CD changes"
+  echo "  build:    Build system changes"
+  echo "  revert:   Revert a previous commit"
+  echo ""
+  echo "Example: feat(auth): add OAuth2 integration"
+  exit 1
+fi
+
+# Check message length
+FIRST_LINE=$(echo "$COMMIT_MSG" | head -1)
+if [ ${#FIRST_LINE} -gt 72 ]; then
+  echo "⚠️  Warning: First line of commit message is ${#FIRST_LINE} characters (recommended: 72 max)"
+fi
+
+# Check for issue references (optional)
+if ! echo "$COMMIT_MSG" | grep -qE "(#[0-9]+|[A-Z]+-[0-9]+)"; then
+  echo "💡 Tip: Consider referencing an issue (e.g., #123 or JIRA-456)"
+fi
+
+echo "✅ Commit message validated"
+exit 0
