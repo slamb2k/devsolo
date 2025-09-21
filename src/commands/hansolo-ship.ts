@@ -5,6 +5,7 @@ import { GitOperations } from '../services/git-operations';
 import { ConfigurationManager } from '../services/configuration-manager';
 import { WorkflowSession } from '../models/workflow-session';
 import { LaunchWorkflowStateMachine } from '../state-machines/launch-workflow';
+import { GitHubIntegration } from '../services/github-integration';
 import readline from 'readline';
 
 export class ShipCommand {
@@ -14,12 +15,14 @@ export class ShipCommand {
   private gitOps: GitOperations;
   private configManager: ConfigurationManager;
   private stateMachine: LaunchWorkflowStateMachine;
+  private githubIntegration: GitHubIntegration;
 
   constructor(basePath: string = '.hansolo') {
     this.sessionRepo = new SessionRepository(basePath);
     this.gitOps = new GitOperations();
     this.configManager = new ConfigurationManager(basePath);
     this.stateMachine = new LaunchWorkflowStateMachine();
+    this.githubIntegration = new GitHubIntegration(basePath);
   }
 
   async execute(options: {
@@ -227,9 +230,6 @@ export class ShipCommand {
   private async performCreatePR(session: WorkflowSession, _options: any): Promise<void> {
     this.output.subheader('Creating Pull Request');
 
-    // For now, we'll prepare the PR info and show instructions
-    // In the future, this will integrate with GitHub API
-
     const prInfo = {
       title: `[${session.workflowType}] ${session.branchName}`,
       body: this.generatePRDescription(session),
@@ -237,24 +237,52 @@ export class ShipCommand {
       head: session.branchName,
     };
 
-    this.output.box(
-      `Title: ${prInfo.title}\n` +
-      `Base: ${prInfo.base}\n` +
-      `Head: ${prInfo.head}\n\n` +
-      `Body:\n${prInfo.body}`,
-      'Pull Request Details'
-    );
+    try {
+      // Try to use GitHub API
+      const pr = await this.githubIntegration.createPullRequest(prInfo);
 
-    // Update session state
-    if (this.stateMachine.canTransition(session.currentState, 'PR_CREATED')) {
-      session.transitionTo('PR_CREATED', 'ship_command', { pr: prInfo });
-      await this.sessionRepo.updateSession(session.id, session);
+      if (pr) {
+        this.output.successMessage(`Pull request #${pr.number} created successfully!`);
+        this.output.infoMessage(`View PR: ${pr.html_url}`);
+
+        // Update session state with PR info
+        if (this.stateMachine.canTransition(session.currentState, 'PR_CREATED')) {
+          session.transitionTo('PR_CREATED', 'ship_command', {
+            pr: {
+              ...prInfo,
+              number: pr.number,
+              url: pr.html_url,
+            },
+          });
+          await this.sessionRepo.updateSession(session.id, session);
+        }
+
+        this.output.infoMessage('Run "hansolo ship --merge" after PR is approved');
+      } else {
+        throw new Error('GitHub API not configured');
+      }
+    } catch (error) {
+      // Fallback to manual instructions
+      this.output.warningMessage('Could not create PR via GitHub API');
+      this.output.dim('Set GITHUB_TOKEN environment variable to enable automatic PR creation');
+
+      this.output.box(
+        `Title: ${prInfo.title}\n` +
+        `Base: ${prInfo.base}\n` +
+        `Head: ${prInfo.head}\n\n` +
+        `Body:\n${prInfo.body}`,
+        'Pull Request Details'
+      );
+
+      // Update session state
+      if (this.stateMachine.canTransition(session.currentState, 'PR_CREATED')) {
+        session.transitionTo('PR_CREATED', 'ship_command', { pr: prInfo });
+        await this.sessionRepo.updateSession(session.id, session);
+      }
+
+      this.output.infoMessage('Create the PR manually on GitHub');
+      this.output.infoMessage('Run "hansolo ship --merge" after PR is approved');
     }
-
-    this.output.successMessage('Pull request prepared');
-    this.output.infoMessage('GitHub API integration coming soon!');
-    this.output.infoMessage('For now, create the PR manually on GitHub');
-    this.output.infoMessage('Run "hansolo ship --merge" after PR is approved');
   }
 
   private async performMerge(session: WorkflowSession, options: any): Promise<void> {
