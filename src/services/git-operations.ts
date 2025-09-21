@@ -56,7 +56,15 @@ export class GitOperations {
     }
   }
 
+  async deleteRemoteBranch(branchName: string): Promise<void> {
+    await this.git.push('origin', branchName, ['--delete']);
+  }
+
   async status(): Promise<StatusResult> {
+    return await this.git.status();
+  }
+
+  async getStatus(): Promise<StatusResult> {
     return await this.git.status();
   }
 
@@ -89,6 +97,10 @@ export class GitOperations {
     }
   }
 
+  async stageAll(): Promise<void> {
+    await this.git.add('.');
+  }
+
   async commit(message: string, options?: { noVerify?: boolean }): Promise<{ commit: string }> {
     const args = ['--message', message];
     if (options?.noVerify) {
@@ -100,10 +112,14 @@ export class GitOperations {
     return { commit: match?.[1] || 'unknown' };
   }
 
-  async push(remote: string = 'origin', branch?: string, setUpstream: boolean = false): Promise<void> {
+  async push(remote: string = 'origin', branch?: string, options?: boolean | string[]): Promise<void> {
     const currentBranch = branch || await this.getCurrentBranch();
 
-    if (setUpstream) {
+    if (Array.isArray(options)) {
+      // Pass through options array
+      await this.git.push(remote, currentBranch, options);
+    } else if (typeof options === 'boolean' && options) {
+      // Legacy setUpstream parameter or force push
       await this.git.push(remote, currentBranch, ['--set-upstream']);
     } else {
       await this.git.push(remote, currentBranch);
@@ -175,8 +191,12 @@ export class GitOperations {
     await this.git.addRemote(name, url);
   }
 
-  async fetch(remote: string = 'origin'): Promise<void> {
-    await this.git.fetch(remote);
+  async fetch(remote: string = 'origin', branch?: string): Promise<void> {
+    if (branch) {
+      await this.git.fetch(remote, branch);
+    } else {
+      await this.git.fetch(remote);
+    }
   }
 
   async getTags(): Promise<string[]> {

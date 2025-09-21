@@ -4,6 +4,11 @@ import { WorkflowSession } from './models/workflow-session';
 import { Configuration } from './models/configuration';
 import { LaunchWorkflowStateMachine } from './state-machines/launch-workflow';
 import { InitCommand } from './commands/hansolo-init';
+import { LaunchCommand } from './commands/hansolo-launch';
+import { SessionsCommand } from './commands/hansolo-sessions';
+import { SwapCommand } from './commands/hansolo-swap';
+import { AbortCommand } from './commands/hansolo-abort';
+import { ShipCommand } from './commands/hansolo-ship';
 
 const HANSOLO_ASCII = `
 ╔═══════════════════════════════════════════╗
@@ -49,6 +54,42 @@ export async function main(): Promise<void> {
   // Status command
   if (command === 'status') {
     await runStatus();
+    return;
+  }
+
+  // Launch command
+  if (command === 'launch') {
+    await runLaunch(args.slice(1));
+    return;
+  }
+
+  // Sessions command
+  if (command === 'sessions') {
+    await runSessions(args.slice(1));
+    return;
+  }
+
+  // Resume command
+  if (command === 'resume') {
+    await runResume(args.slice(1));
+    return;
+  }
+
+  // Swap command
+  if (command === 'swap') {
+    await runSwap(args.slice(1));
+    return;
+  }
+
+  // Abort command
+  if (command === 'abort') {
+    await runAbort(args.slice(1));
+    return;
+  }
+
+  // Ship command
+  if (command === 'ship') {
+    await runShip(args.slice(1));
     return;
   }
 
@@ -133,6 +174,118 @@ async function runInit(): Promise<void> {
 async function runStatus(): Promise<void> {
   const initCommand = new InitCommand();
   await initCommand.showStatus();
+}
+
+async function runLaunch(args: string[]): Promise<void> {
+  const launchCommand = new LaunchCommand();
+
+  // Parse arguments
+  const options: any = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--force' || args[i] === '-f') {
+      options.force = true;
+    } else if (args[i] === '--branch' || args[i] === '-b') {
+      options.branchName = args[++i];
+    } else if (args[i] === '--description' || args[i] === '-d') {
+      options.description = args[++i];
+    }
+  }
+
+  await launchCommand.execute(options);
+}
+
+async function runSessions(args: string[]): Promise<void> {
+  const sessionsCommand = new SessionsCommand();
+
+  // Parse arguments
+  const options: any = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--all' || args[i] === '-a') {
+      options.all = true;
+    } else if (args[i] === '--verbose' || args[i] === '-v') {
+      options.verbose = true;
+    } else if (args[i] === '--cleanup' || args[i] === '-c') {
+      options.cleanup = true;
+    }
+  }
+
+  await sessionsCommand.execute(options);
+}
+
+async function runResume(args: string[]): Promise<void> {
+  const launchCommand = new LaunchCommand();
+  const branchName = args[0];
+  await launchCommand.resume(branchName);
+}
+
+async function runSwap(args: string[]): Promise<void> {
+  const swapCommand = new SwapCommand();
+  const branchName = args[0];
+
+  // Parse options
+  const options: any = {};
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === '--force' || args[i] === '-f') {
+      options.force = true;
+    } else if (args[i] === '--stash' || args[i] === '-s') {
+      options.stash = true;
+    }
+  }
+
+  await swapCommand.execute(branchName, options);
+}
+
+async function runAbort(args: string[]): Promise<void> {
+  const abortCommand = new AbortCommand();
+
+  // Parse options
+  const options: any = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--force' || args[i] === '-f') {
+      options.force = true;
+    } else if (args[i] === '--delete-branch' || args[i] === '-d') {
+      options.deleteBranch = true;
+    } else if (args[i] === '--yes' || args[i] === '-y') {
+      options.yes = true;
+    } else if (args[i] === '--all') {
+      // Abort all workflows
+      const force = options.force !== undefined ? options.force : false;
+      const yes = options.yes !== undefined ? options.yes : false;
+      await abortCommand.abortAll({ force, yes });
+      return;
+    } else {
+      const arg = args[i];
+      if (arg && !arg.startsWith('--')) {
+        options.branchName = arg;
+      }
+    }
+  }
+
+  await abortCommand.execute(options);
+}
+
+async function runShip(args: string[]): Promise<void> {
+  const shipCommand = new ShipCommand();
+
+  // Parse options
+  const options: any = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--message' || args[i] === '-m') {
+      options.message = args[++i];
+    } else if (args[i] === '--push') {
+      options.push = true;
+    } else if (args[i] === '--create-pr') {
+      options.createPR = true;
+    } else if (args[i] === '--merge') {
+      options.merge = true;
+    } else if (args[i] === '--force' || args[i] === '-f') {
+      options.force = true;
+    } else if (args[i] === '--yes' || args[i] === '-y') {
+      options.yes = true;
+    }
+  }
+
+  await shipCommand.execute(options);
 }
 
 // Run if executed directly
