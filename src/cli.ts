@@ -6,6 +6,8 @@ import { LaunchWorkflowStateMachine } from './state-machines/launch-workflow';
 import { InitCommand } from './commands/hansolo-init';
 import { LaunchCommand } from './commands/hansolo-launch';
 import { SessionsCommand } from './commands/hansolo-sessions';
+import { SwapCommand } from './commands/hansolo-swap';
+import { AbortCommand } from './commands/hansolo-abort';
 
 const HANSOLO_ASCII = `
 ╔═══════════════════════════════════════════╗
@@ -69,6 +71,18 @@ export async function main(): Promise<void> {
   // Resume command
   if (command === 'resume') {
     await runResume(args.slice(1));
+    return;
+  }
+
+  // Swap command
+  if (command === 'swap') {
+    await runSwap(args.slice(1));
+    return;
+  }
+
+  // Abort command
+  if (command === 'abort') {
+    await runAbort(args.slice(1));
     return;
   }
 
@@ -195,6 +209,52 @@ async function runResume(args: string[]): Promise<void> {
   const launchCommand = new LaunchCommand();
   const branchName = args[0];
   await launchCommand.resume(branchName);
+}
+
+async function runSwap(args: string[]): Promise<void> {
+  const swapCommand = new SwapCommand();
+  const branchName = args[0];
+
+  // Parse options
+  const options: any = {};
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === '--force' || args[i] === '-f') {
+      options.force = true;
+    } else if (args[i] === '--stash' || args[i] === '-s') {
+      options.stash = true;
+    }
+  }
+
+  await swapCommand.execute(branchName, options);
+}
+
+async function runAbort(args: string[]): Promise<void> {
+  const abortCommand = new AbortCommand();
+
+  // Parse options
+  const options: any = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--force' || args[i] === '-f') {
+      options.force = true;
+    } else if (args[i] === '--delete-branch' || args[i] === '-d') {
+      options.deleteBranch = true;
+    } else if (args[i] === '--yes' || args[i] === '-y') {
+      options.yes = true;
+    } else if (args[i] === '--all') {
+      // Abort all workflows
+      const force = options.force !== undefined ? options.force : false;
+      const yes = options.yes !== undefined ? options.yes : false;
+      await abortCommand.abortAll({ force, yes });
+      return;
+    } else {
+      const arg = args[i];
+      if (arg && !arg.startsWith('--')) {
+        options.branchName = arg;
+      }
+    }
+  }
+
+  await abortCommand.execute(options);
 }
 
 // Run if executed directly
