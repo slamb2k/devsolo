@@ -1,0 +1,234 @@
+.TH HANSOLO 1 "January 2024" "hansolo 1.0.0" "User Commands"
+.SH NAME
+hansolo \- Git workflow automation tool enforcing linear history
+.SH SYNOPSIS
+.B hansolo
+\fICOMMAND\fR [\fIOPTIONS\fR]
+.SH DESCRIPTION
+han-solo is a Git workflow automation tool that enforces linear history and prevents merge conflicts through intelligent state machine control.
+.PP
+It provides a structured approach to feature development, ensuring clean commit history and preventing common Git pitfalls.
+.SH COMMANDS
+.TP
+.B init
+Initialize han-solo in your project. This sets up the necessary configuration and hooks.
+.TP
+.B launch \fR[\fIOPTIONS\fR]
+Start a new feature workflow. Creates a feature branch and begins a new session.
+.RS
+.TP
+\fB\-\-branch\fR, \fB\-b\fR \fINAME\fR
+Specify branch name
+.TP
+\fB\-\-description\fR, \fB\-d\fR \fITEXT\fR
+Branch description
+.TP
+\fB\-\-force\fR, \fB\-f\fR
+Force launch even with uncommitted changes
+.RE
+.TP
+.B ship \fR[\fIOPTIONS\fR]
+Complete the current workflow and prepare for merge.
+.RS
+.TP
+\fB\-\-message\fR, \fB\-m\fR \fIMESSAGE\fR
+Commit message
+.TP
+\fB\-\-push\fR
+Push to remote repository
+.TP
+\fB\-\-create\-pr\fR
+Create pull request
+.TP
+\fB\-\-merge\fR
+Merge to main branch
+.TP
+\fB\-\-force\fR, \fB\-f\fR
+Force ship operation
+.TP
+\fB\-\-yes\fR, \fB\-y\fR
+Skip confirmations
+.RE
+.TP
+.B hotfix \fR[\fIOPTIONS\fR]
+Create an emergency hotfix with expedited deployment.
+.RS
+.TP
+\fB\-\-issue\fR, \fB\-i\fR \fIID\fR
+Issue or ticket ID
+.TP
+\fB\-\-severity\fR, \fB\-s\fR \fILEVEL\fR
+Severity level (critical, high, medium)
+.TP
+\fB\-\-skip\-tests\fR
+Skip test execution
+.TP
+\fB\-\-skip\-review\fR
+Skip code review
+.TP
+\fB\-\-auto\-merge\fR
+Automatically merge when ready
+.RE
+.TP
+.B status
+Display the current workflow status, including session information and Git state.
+.TP
+.B sessions \fR[\fIOPTIONS\fR]
+List all active workflow sessions.
+.RS
+.TP
+\fB\-\-all\fR, \fB\-a\fR
+Show all sessions including expired
+.TP
+\fB\-\-verbose\fR, \fB\-v\fR
+Verbose output
+.TP
+\fB\-\-cleanup\fR, \fB\-c\fR
+Clean up expired sessions
+.RE
+.TP
+.B swap \fIBRANCH\fR \fR[\fIOPTIONS\fR]
+Switch to a different workflow session.
+.RS
+.TP
+\fB\-\-force\fR, \fB\-f\fR
+Force swap even with uncommitted changes
+.TP
+\fB\-\-stash\fR, \fB\-s\fR
+Stash changes before swapping
+.RE
+.TP
+.B abort \fR[\fIOPTIONS\fR]
+Abort the current workflow and optionally clean up.
+.RS
+.TP
+\fB\-\-force\fR, \fB\-f\fR
+Force abort
+.TP
+\fB\-\-delete\-branch\fR, \fB\-d\fR
+Delete the feature branch
+.TP
+\fB\-\-yes\fR, \fB\-y\fR
+Skip confirmations
+.TP
+\fB\-\-all\fR
+Abort all workflows
+.RE
+.TP
+.B resume \fIBRANCH\fR
+Resume an existing workflow session.
+.TP
+.B demo
+Run a demonstration of han-solo features.
+.SH OPTIONS
+.TP
+.B \-\-help\fR, \fB\-h
+Display help information
+.TP
+.B \-\-version\fR, \fB\-v
+Display version information
+.SH WORKFLOW STATES
+han-solo manages workflows through a series of states:
+.PP
+.B Standard Workflow:
+.RS
+INIT → BRANCH_READY → CHANGES_COMMITTED → PUSHED → PR_CREATED → WAITING_APPROVAL → REBASING → MERGING → CLEANUP → COMPLETE
+.RE
+.PP
+.B Hotfix Workflow:
+.RS
+HOTFIX_INIT → HOTFIX_READY → HOTFIX_COMMITTED → HOTFIX_PUSHED → HOTFIX_VALIDATED → HOTFIX_DEPLOYED → HOTFIX_CLEANUP → HOTFIX_COMPLETE
+.RE
+.SH CONFIGURATION
+han-solo can be configured using \fB.hansolo.yaml\fR or \fB.hansolo.json\fR files.
+.PP
+Configuration locations (in order of precedence):
+.RS
+1. Project directory: \fB./.hansolo.yaml\fR
+.br
+2. User home: \fB~/.hansolo.yaml\fR
+.br
+3. System-wide: \fB/etc/hansolo/config.yaml\fR
+.RE
+.SH ENVIRONMENT VARIABLES
+.TP
+.B HANSOLO_HOME
+Override default configuration directory
+.TP
+.B HANSOLO_COLOR_OUTPUT
+Enable/disable colored output (true/false)
+.TP
+.B HANSOLO_VERBOSE
+Enable verbose logging (true/false)
+.TP
+.B GITHUB_TOKEN
+GitHub personal access token for API integration
+.TP
+.B GITLAB_TOKEN
+GitLab personal access token for API integration
+.SH FILES
+.TP
+.B ~/.hansolo/
+User configuration and session storage
+.TP
+.B .hansolo/sessions/
+Project-level session storage
+.TP
+.B .hansolo.yaml
+Project configuration file
+.TP
+.B .git/hooks/
+Git hooks installed by han-solo
+.SH EXIT STATUS
+.TP
+.B 0
+Successful execution
+.TP
+.B 1
+General error
+.TP
+.B 2
+Invalid command or arguments
+.TP
+.B 3
+Git operation failed
+.TP
+.B 4
+Session error
+.TP
+.B 5
+Configuration error
+.SH EXAMPLES
+.TP
+Initialize han-solo in a project:
+.B hansolo init
+.TP
+Start a new feature:
+.B hansolo launch --branch feature/awesome-feature
+.TP
+Commit and ship changes:
+.B hansolo ship --message "feat: add awesome feature" --push --create-pr
+.TP
+Create an emergency hotfix:
+.B hansolo hotfix --issue PROD-123 --severity critical
+.TP
+List active sessions:
+.B hansolo sessions --verbose
+.TP
+Switch to another session:
+.B hansolo swap feature/other-feature
+.TP
+Abort current workflow:
+.B hansolo abort --yes
+.SH SEE ALSO
+.BR git (1),
+.BR git-flow (1)
+.SH BUGS
+Report bugs at: https://github.com/slamb2k/hansolo/issues
+.SH AUTHOR
+Written by slamb2k and contributors.
+.SH COPYRIGHT
+Copyright (C) 2024 slamb2k. License MIT: <https://opensource.org/licenses/MIT>
+.PP
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.

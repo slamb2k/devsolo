@@ -1,0 +1,70 @@
+#!/bin/bash
+# han-solo pre-push hook
+# Validates workflow state before pushing
+
+PROTECTED_BRANCHES="main master develop production"
+CURRENT_BRANCH=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+REMOTE=$1
+URL=$2
+
+# Check if pushing to protected branch
+while read LOCAL_REF LOCAL_SHA REMOTE_REF REMOTE_SHA; do
+  REMOTE_BRANCH=$(echo $REMOTE_REF | sed -e 's,.*/\(.*\),\1,')
+
+  for BRANCH in $PROTECTED_BRANCHES; do
+    if [[ "$REMOTE_BRANCH" == "$BRANCH" ]]; then
+      echo "❌ Direct pushes to $BRANCH branch are not allowed!"
+      echo "Please create a pull request instead."
+      exit 1
+    fi
+  done
+done
+
+# Check han-solo session state
+if command -v hansolo &> /dev/null; then
+  # Verify session is in correct state for push
+  HANSOLO_STATE=$(hansolo status 2>/dev/null | grep "Current state:" | awk '{print $3}')
+
+  case "$HANSOLO_STATE" in
+    "CHANGES_COMMITTED"|"PUSHED"|"PR_CREATED"|"REBASING"|"MERGING")
+      echo "✅ han-solo session in valid state for push: $HANSOLO_STATE"
+      ;;
+    "")
+      echo "⚠️  No active han-solo session. Proceeding with manual push."
+      ;;
+    *)
+      echo "⚠️  han-solo session in state: $HANSOLO_STATE"
+      echo "Consider using 'hansolo ship' for managed workflow."
+      ;;
+  esac
+fi
+
+# Run tests if available
+if [ -f "package.json" ] && command -v npm &> /dev/null; then
+  if grep -q '"test"' package.json; then
+    echo "Running tests before push..."
+    npm test --silent
+    if [ $? -ne 0 ]; then
+      echo "❌ Tests failed. Fix issues before pushing."
+      exit 1
+    fi
+  fi
+fi
+
+# Check for uncommitted changes
+if ! git diff-index --quiet HEAD --; then
+  echo "❌ Uncommitted changes detected!"
+  echo "Please commit or stash changes before pushing."
+  exit 1
+fi
+
+# Verify no merge commits (enforce linear history)
+MERGE_COMMITS=$(git log --merges origin/$CURRENT_BRANCH..$CURRENT_BRANCH 2>/dev/null | wc -l)
+if [ $MERGE_COMMITS -gt 0 ]; then
+  echo "❌ Merge commits detected! han-solo enforces linear history."
+  echo "Please rebase instead of merging."
+  exit 1
+fi
+
+echo "✅ Pre-push checks passed"
+exit 0

@@ -275,9 +275,54 @@ npm run test:watch
 npm run test:coverage
 ```
 
+## Documentation
+
+- **[Installation Guide](INSTALL.md)** - Detailed installation instructions
+- **[API Documentation](docs/API.md)** - Complete API reference
+- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute to han-solo
+- **[Changelog](CHANGELOG.md)** - Version history and changes
+- **[Examples](examples/)** - Usage examples and workflows
+- **[Man Page](man/hansolo.1)** - Unix manual page
+
+## Shell Completions
+
+han-solo provides shell completions for enhanced CLI experience:
+
+- **Bash**: `source completions/hansolo.bash`
+- **ZSH**: `source completions/hansolo.zsh`
+- **Fish**: Copy to `~/.config/fish/completions/`
+
+## Git Hooks
+
+Install Git hooks to enforce han-solo workflows:
+
+```bash
+sh hooks/install.sh
+```
+
+Available hooks:
+- **pre-commit**: Prevents direct commits to protected branches
+- **pre-push**: Validates workflow state before pushing
+- **commit-msg**: Enforces conventional commit messages
+
+## Docker Support
+
+Run han-solo in a container:
+
+```bash
+# Build image
+docker build -t hansolo .
+
+# Run container
+docker run -it --rm -v $(pwd):/workspace hansolo
+
+# Using docker-compose
+docker-compose run hansolo
+```
+
 ## Contributing
 
-Contributions are welcome! Please follow these guidelines:
+Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 1. Fork the repository
 2. Create a feature branch (`hansolo launch --branch feature/your-feature`)

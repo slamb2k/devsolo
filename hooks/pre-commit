@@ -1,0 +1,65 @@
+#!/bin/bash
+# han-solo pre-commit hook
+# Prevents direct commits to protected branches
+
+PROTECTED_BRANCHES="main master develop production"
+CURRENT_BRANCH=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+
+# Check if current branch is protected
+for BRANCH in $PROTECTED_BRANCHES; do
+  if [[ "$CURRENT_BRANCH" == "$BRANCH" ]]; then
+    echo "❌ Direct commits to $BRANCH branch are not allowed!"
+    echo "Please use 'hansolo launch' to create a feature branch."
+    exit 1
+  fi
+done
+
+# Check if han-solo session exists for this branch
+if command -v hansolo &> /dev/null; then
+  HANSOLO_STATUS=$(hansolo status 2>/dev/null | grep -c "Active session")
+  if [[ $HANSOLO_STATUS -eq 0 ]]; then
+    echo "⚠️  Warning: No active han-solo session for this branch."
+    echo "Consider using 'hansolo launch' for workflow management."
+  fi
+fi
+
+# Run linting if available
+if [ -f "package.json" ] && command -v npm &> /dev/null; then
+  if grep -q '"lint"' package.json; then
+    echo "Running lint checks..."
+    npm run lint --silent
+    if [ $? -ne 0 ]; then
+      echo "❌ Linting failed. Please fix errors before committing."
+      exit 1
+    fi
+  fi
+fi
+
+# Check for sensitive information
+SENSITIVE_PATTERNS=(
+  "PRIVATE KEY"
+  "BEGIN RSA"
+  "BEGIN DSA"
+  "BEGIN EC"
+  "BEGIN OPENSSH"
+  "BEGIN PGP"
+  "aws_access_key_id"
+  "aws_secret_access_key"
+  "API[_\s]KEY"
+  "api[_\s]?key"
+  "access[_\s]?token"
+  "auth[_\s]?token"
+  "client[_\s]?secret"
+  "password\s*=\s*[\"'][^\"']+[\"']"
+)
+
+for PATTERN in "${SENSITIVE_PATTERNS[@]}"; do
+  if git diff --cached --name-only | xargs grep -E "$PATTERN" 2>/dev/null; then
+    echo "❌ Sensitive information detected in commit!"
+    echo "Please remove secrets before committing."
+    exit 1
+  fi
+done
+
+echo "✅ Pre-commit checks passed"
+exit 0
