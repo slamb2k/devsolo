@@ -109,10 +109,10 @@
 - [ ] T048 Create src/state-machines/index.ts with state machine factory
 
 ### Core Services
-- [ ] T049 Create src/services/session-repository.ts for session persistence
-- [ ] T050 Create src/services/git-operations.ts wrapping Git CLI commands
+- [X] T049 Create src/services/session-repository.ts for session persistence
+- [X] T050 Create src/services/git-operations.ts wrapping Git CLI commands
 - [ ] T051 Create src/services/audit-logger.ts for audit trail management
-- [ ] T052 Create src/services/configuration-manager.ts for config handling
+- [X] T052 Create src/services/configuration-manager.ts for config handling
 - [ ] T053 Create src/services/validation-service.ts for state/input validation
 
 ### MCP Server Implementation
@@ -138,13 +138,13 @@
 - [ ] T069 Create src/integrations/git-platform-factory.ts for platform selection
 
 ### Visual Output System
-- [ ] T070 Create src/ui/console-output.ts with chalk colors and icons
-- [ ] T071 Create src/ui/progress-indicators.ts with ora spinners
-- [ ] T072 Create src/ui/table-formatter.ts with cli-table3
-- [ ] T073 Create src/ui/box-formatter.ts with boxen for banners
+- [X] T070 Create src/ui/console-output.ts with chalk colors and icons
+- [X] T071 Create src/ui/progress-indicators.ts with ora spinners
+- [X] T072 Create src/ui/table-formatter.ts with cli-table3
+- [X] T073 Create src/ui/box-formatter.ts with boxen for banners
 
 ### Command Handlers
-- [ ] T074 Create src/commands/hansolo-init.ts for /hansolo:init command
+- [X] T074 Create src/commands/hansolo-init.ts for /hansolo:init command
 - [ ] T075 Create src/commands/hansolo-launch.ts for /hansolo:launch command
 - [ ] T076 Create src/commands/hansolo-ship.ts for /hansolo:ship command
 - [ ] T077 Create src/commands/hansolo-hotfix.ts for /hansolo:hotfix command

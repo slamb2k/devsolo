@@ -3,6 +3,7 @@
 import { WorkflowSession } from './models/workflow-session';
 import { Configuration } from './models/configuration';
 import { LaunchWorkflowStateMachine } from './state-machines/launch-workflow';
+import { InitCommand } from './commands/hansolo-init';
 
 const HANSOLO_ASCII = `
 ╔═══════════════════════════════════════════╗
@@ -36,6 +37,18 @@ export async function main(): Promise<void> {
   // Simple demo to show the system is working
   if (command === 'demo') {
     runDemo();
+    return;
+  }
+
+  // Initialize command
+  if (command === 'init') {
+    await runInit();
+    return;
+  }
+
+  // Status command
+  if (command === 'status') {
+    await runStatus();
     return;
   }
 
@@ -110,6 +123,16 @@ function runDemo(): void {
 
   console.log('\n✨ Demo completed successfully!');
   console.log('   Run "hansolo init" to set up han-solo in your project.');
+}
+
+async function runInit(): Promise<void> {
+  const initCommand = new InitCommand();
+  await initCommand.execute();
+}
+
+async function runStatus(): Promise<void> {
+  const initCommand = new InitCommand();
+  await initCommand.showStatus();
 }
 
 // Run if executed directly
