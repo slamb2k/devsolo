@@ -8,6 +8,7 @@ import { LaunchCommand } from './commands/hansolo-launch';
 import { SessionsCommand } from './commands/hansolo-sessions';
 import { SwapCommand } from './commands/hansolo-swap';
 import { AbortCommand } from './commands/hansolo-abort';
+import { ShipCommand } from './commands/hansolo-ship';
 
 const HANSOLO_ASCII = `
 ╔═══════════════════════════════════════════╗
@@ -83,6 +84,12 @@ export async function main(): Promise<void> {
   // Abort command
   if (command === 'abort') {
     await runAbort(args.slice(1));
+    return;
+  }
+
+  // Ship command
+  if (command === 'ship') {
+    await runShip(args.slice(1));
     return;
   }
 
@@ -255,6 +262,30 @@ async function runAbort(args: string[]): Promise<void> {
   }
 
   await abortCommand.execute(options);
+}
+
+async function runShip(args: string[]): Promise<void> {
+  const shipCommand = new ShipCommand();
+
+  // Parse options
+  const options: any = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--message' || args[i] === '-m') {
+      options.message = args[++i];
+    } else if (args[i] === '--push') {
+      options.push = true;
+    } else if (args[i] === '--create-pr') {
+      options.createPR = true;
+    } else if (args[i] === '--merge') {
+      options.merge = true;
+    } else if (args[i] === '--force' || args[i] === '-f') {
+      options.force = true;
+    } else if (args[i] === '--yes' || args[i] === '-y') {
+      options.yes = true;
+    }
+  }
+
+  await shipCommand.execute(options);
 }
 
 // Run if executed directly

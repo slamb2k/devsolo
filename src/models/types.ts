@@ -10,6 +10,7 @@ export type StateName =
   | 'WAITING_APPROVAL'
   | 'REBASING'
   | 'MERGING'
+  | 'MERGED'
   | 'CLEANUP'
   | 'COMPLETE'
   // Hotfix workflow states
@@ -30,7 +31,8 @@ export type TransitionTrigger =
   | 'user_action'
   | 'auto_progression'
   | 'error_recovery'
-  | 'abort_command';
+  | 'abort_command'
+  | 'ship_command';
 
 export type AuditAction =
   | 'session_created'
