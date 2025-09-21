@@ -4,6 +4,8 @@ import { WorkflowSession } from './models/workflow-session';
 import { Configuration } from './models/configuration';
 import { LaunchWorkflowStateMachine } from './state-machines/launch-workflow';
 import { InitCommand } from './commands/hansolo-init';
+import { LaunchCommand } from './commands/hansolo-launch';
+import { SessionsCommand } from './commands/hansolo-sessions';
 
 const HANSOLO_ASCII = `
 ╔═══════════════════════════════════════════╗
@@ -49,6 +51,24 @@ export async function main(): Promise<void> {
   // Status command
   if (command === 'status') {
     await runStatus();
+    return;
+  }
+
+  // Launch command
+  if (command === 'launch') {
+    await runLaunch(args.slice(1));
+    return;
+  }
+
+  // Sessions command
+  if (command === 'sessions') {
+    await runSessions(args.slice(1));
+    return;
+  }
+
+  // Resume command
+  if (command === 'resume') {
+    await runResume(args.slice(1));
     return;
   }
 
@@ -133,6 +153,48 @@ async function runInit(): Promise<void> {
 async function runStatus(): Promise<void> {
   const initCommand = new InitCommand();
   await initCommand.showStatus();
+}
+
+async function runLaunch(args: string[]): Promise<void> {
+  const launchCommand = new LaunchCommand();
+
+  // Parse arguments
+  const options: any = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--force' || args[i] === '-f') {
+      options.force = true;
+    } else if (args[i] === '--branch' || args[i] === '-b') {
+      options.branchName = args[++i];
+    } else if (args[i] === '--description' || args[i] === '-d') {
+      options.description = args[++i];
+    }
+  }
+
+  await launchCommand.execute(options);
+}
+
+async function runSessions(args: string[]): Promise<void> {
+  const sessionsCommand = new SessionsCommand();
+
+  // Parse arguments
+  const options: any = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--all' || args[i] === '-a') {
+      options.all = true;
+    } else if (args[i] === '--verbose' || args[i] === '-v') {
+      options.verbose = true;
+    } else if (args[i] === '--cleanup' || args[i] === '-c') {
+      options.cleanup = true;
+    }
+  }
+
+  await sessionsCommand.execute(options);
+}
+
+async function runResume(args: string[]): Promise<void> {
+  const launchCommand = new LaunchCommand();
+  const branchName = args[0];
+  await launchCommand.resume(branchName);
 }
 
 // Run if executed directly
