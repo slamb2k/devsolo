@@ -207,6 +207,38 @@ export class SessionRepository {
     await fs.unlink(lockFile).catch(() => {});
   }
 
+  async isLocked(sessionId: string): Promise<boolean> {
+    const lockFile = path.join(this.lockPath, `${sessionId}.lock`);
+    try {
+      await fs.access(lockFile);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async cleanupOrphanedLocks(): Promise<number> {
+    await this.initialize();
+    const lockFiles = await fs.readdir(this.lockPath);
+    let cleaned = 0;
+
+    for (const file of lockFiles) {
+      if (file.endsWith('.lock')) {
+        const lockPath = path.join(this.lockPath, file);
+        const stat = await fs.stat(lockPath);
+        const ageMs = Date.now() - stat.mtimeMs;
+
+        // Remove locks older than 1 hour
+        if (ageMs > 60 * 60 * 1000) {
+          await fs.unlink(lockPath).catch(() => {});
+          cleaned++;
+        }
+      }
+    }
+
+    return cleaned;
+  }
+
   private async readIndex(): Promise<any> {
     const indexFile = path.join(this.sessionPath, 'index.json');
 

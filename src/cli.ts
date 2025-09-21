@@ -9,6 +9,7 @@ import { SessionsCommand } from './commands/hansolo-sessions';
 import { SwapCommand } from './commands/hansolo-swap';
 import { AbortCommand } from './commands/hansolo-abort';
 import { ShipCommand } from './commands/hansolo-ship';
+import { HotfixCommand } from './commands/hansolo-hotfix';
 
 const HANSOLO_ASCII = `
 ╔═══════════════════════════════════════════╗
@@ -90,6 +91,12 @@ export async function main(): Promise<void> {
   // Ship command
   if (command === 'ship') {
     await runShip(args.slice(1));
+    return;
+  }
+
+  // Hotfix command
+  if (command === 'hotfix') {
+    await runHotfix(args.slice(1));
     return;
   }
 
@@ -286,6 +293,45 @@ async function runShip(args: string[]): Promise<void> {
   }
 
   await shipCommand.execute(options);
+}
+
+async function runHotfix(args: string[]): Promise<void> {
+  const hotfixCommand = new HotfixCommand();
+
+  // Check for subcommands
+  const subcommand = args[0];
+  if (subcommand === 'deploy') {
+    await hotfixCommand.deploy();
+    return;
+  } else if (subcommand === 'rollback') {
+    await hotfixCommand.rollback();
+    return;
+  }
+
+  // Parse options for create
+  const options: any = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--issue' || args[i] === '-i') {
+      options.issue = args[++i];
+    } else if (args[i] === '--severity' || args[i] === '-s') {
+      const severity = args[++i];
+      if (severity && ['critical', 'high', 'medium'].includes(severity)) {
+        options.severity = severity;
+      }
+    } else if (args[i] === '--skip-tests') {
+      options.skipTests = true;
+    } else if (args[i] === '--skip-review') {
+      options.skipReview = true;
+    } else if (args[i] === '--auto-merge') {
+      options.autoMerge = true;
+    } else if (args[i] === '--force' || args[i] === '-f') {
+      options.force = true;
+    } else if (args[i] === '--yes' || args[i] === '-y') {
+      options.yes = true;
+    }
+  }
+
+  await hotfixCommand.execute(options);
 }
 
 // Run if executed directly

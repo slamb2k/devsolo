@@ -46,8 +46,8 @@ describe('WorkflowSession', () => {
 
       expect(session.currentState).toBe('BRANCH_READY');
       expect(session.stateHistory).toHaveLength(1);
-      expect(session.stateHistory[0].from).toBe('INIT');
-      expect(session.stateHistory[0].to).toBe('BRANCH_READY');
+      expect(session.stateHistory[0]?.from).toBe('INIT');
+      expect(session.stateHistory[0]?.to).toBe('BRANCH_READY');
     });
 
     it('should track transition trigger and metadata', () => {
@@ -55,8 +55,8 @@ describe('WorkflowSession', () => {
       session.transitionTo('CHANGES_COMMITTED', 'user_action', metadata);
 
       const lastTransition = session.stateHistory[0];
-      expect(lastTransition.trigger).toBe('user_action');
-      expect(lastTransition.metadata).toEqual(metadata);
+      expect(lastTransition?.trigger).toBe('user_action');
+      expect(lastTransition?.metadata).toEqual(metadata);
     });
   });
 

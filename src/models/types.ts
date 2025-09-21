@@ -63,6 +63,10 @@ export interface SessionMetadata {
   userName?: string;
   tags?: string[];
   context?: Record<string, unknown>;
+  severity?: string;
+  skipTests?: boolean;
+  skipReview?: boolean;
+  startedAt?: string;
 }
 
 export interface GitBranchStatus {
@@ -103,6 +107,12 @@ export interface UserPreferences {
   confirmBeforePush: boolean;
   colorOutput: boolean;
   verboseLogging: boolean;
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings?: string[];
 }
 
 export interface AuditDetails {

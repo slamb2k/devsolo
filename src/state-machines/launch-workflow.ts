@@ -2,6 +2,22 @@ import { StateMachine } from './base-state-machine';
 import { StateName } from '../models/types';
 
 export class LaunchWorkflowStateMachine extends StateMachine {
+  getFinalStates(): StateName[] {
+    return ['COMPLETE', 'ABORTED'];
+  }
+
+  isFinalState(state: StateName): boolean {
+    return this.getFinalStates().includes(state);
+  }
+
+  isValidState(state: StateName): boolean {
+    return this.hasState(state);
+  }
+
+  getNextStates(state: StateName): StateName[] {
+    const stateDefinition = this.getStateDefinition(state);
+    return stateDefinition?.allowedTransitions || [];
+  }
   protected defineStates(): void {
     // Initial state
     this.addState({

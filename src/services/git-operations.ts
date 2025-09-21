@@ -283,4 +283,8 @@ export class GitOperations {
     args.push(key, value);
     await this.git.raw(args);
   }
+
+  async raw(args: string[]): Promise<string> {
+    return await this.git.raw(args);
+  }
 }

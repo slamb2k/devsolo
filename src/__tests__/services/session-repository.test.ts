@@ -119,7 +119,7 @@ describe('SessionRepository', () => {
 
       const activeSessions = await repository.listSessions(false); // Only active
       expect(activeSessions).toHaveLength(1);
-      expect(activeSessions[0].branchName).toBe('feature/active');
+      expect(activeSessions[0]?.branchName).toBe('feature/active');
     });
 
     it('should get session by branch name', async () => {
@@ -211,7 +211,7 @@ describe('SessionRepository', () => {
 
       const sessions = await repository.listSessions(true);
       expect(sessions).toHaveLength(1);
-      expect(sessions[0].branchName).toBe('feature/active');
+      expect(sessions[0]?.branchName).toBe('feature/active');
     });
 
     it('should clean up orphaned locks', async () => {
