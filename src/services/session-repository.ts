@@ -175,7 +175,11 @@ export class SessionRepository {
 
   // Add save method for test compatibility
   async save(session: WorkflowSession): Promise<void> {
-    await this.updateSession(session);
+    if (await this.getSession(session.id)) {
+      await this.updateSession(session.id, session);
+    } else {
+      await this.createSession(session);
+    }
   }
 
   // Add findById method for test compatibility
