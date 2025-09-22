@@ -40,7 +40,7 @@ export class LaunchWorkflowStateMachine extends StateMachine {
       isTerminal: false,
       isReversible: false,
       validationRules: [
-        (context) => context.branchName != null,
+        (context) => context.branchName !== null && context.branchName !== undefined,
         (context) => context.gitClean === true,
       ],
     });
@@ -54,7 +54,7 @@ export class LaunchWorkflowStateMachine extends StateMachine {
       isReversible: true,
       validationRules: [
         (context) => context.hasChanges === true,
-        (context) => context.commitMessage != null,
+        (context) => context.commitMessage !== null && context.commitMessage !== undefined,
       ],
     });
 
@@ -79,8 +79,8 @@ export class LaunchWorkflowStateMachine extends StateMachine {
       isTerminal: false,
       isReversible: false,
       validationRules: [
-        (context) => context.prNumber != null,
-        (context) => context.prUrl != null,
+        (context) => context.prNumber !== null && context.prNumber !== undefined,
+        (context) => context.prUrl !== null && context.prUrl !== undefined,
       ],
     });
 
@@ -139,42 +139,42 @@ export class LaunchWorkflowStateMachine extends StateMachine {
 
   public getNextAction(currentState: StateName): string | null {
     switch (currentState) {
-      case 'INIT':
-        return 'start';
-      case 'BRANCH_READY':
-        return 'commit';
-      case 'CHANGES_COMMITTED':
-        return 'push';
-      case 'PUSHED':
-        return 'create_pr';
-      case 'PR_CREATED':
-        return 'complete';
-      case 'COMPLETE':
-      case 'ABORTED':
-        return null;
-      default:
-        return null;
+    case 'INIT':
+      return 'start';
+    case 'BRANCH_READY':
+      return 'commit';
+    case 'CHANGES_COMMITTED':
+      return 'push';
+    case 'PUSHED':
+      return 'create_pr';
+    case 'PR_CREATED':
+      return 'complete';
+    case 'COMPLETE':
+    case 'ABORTED':
+      return null;
+    default:
+      return null;
     }
   }
 
   public getStateDescription(state: StateName): string {
     switch (state) {
-      case 'INIT':
-        return 'Workflow initialized, ready to create branch';
-      case 'BRANCH_READY':
-        return 'Branch created, ready for development';
-      case 'CHANGES_COMMITTED':
-        return 'Changes committed locally';
-      case 'PUSHED':
-        return 'Changes pushed to remote';
-      case 'PR_CREATED':
-        return 'Pull request created and ready for review';
-      case 'COMPLETE':
-        return 'Workflow completed successfully';
-      case 'ABORTED':
-        return 'Workflow aborted';
-      default:
-        return 'Unknown state';
+    case 'INIT':
+      return 'Workflow initialized, ready to create branch';
+    case 'BRANCH_READY':
+      return 'Branch created, ready for development';
+    case 'CHANGES_COMMITTED':
+      return 'Changes committed locally';
+    case 'PUSHED':
+      return 'Changes pushed to remote';
+    case 'PR_CREATED':
+      return 'Pull request created and ready for review';
+    case 'COMPLETE':
+      return 'Workflow completed successfully';
+    case 'ABORTED':
+      return 'Workflow aborted';
+    default:
+      return 'Unknown state';
     }
   }
 }

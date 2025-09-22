@@ -61,7 +61,7 @@ export class OptimizedSessionRepository {
       // Create new index if not exists
       this.indexCache = {
         sessions: [],
-        version: '1.0.0'
+        version: '1.0.0',
       };
       await this.saveIndex();
       return this.indexCache;
@@ -69,7 +69,9 @@ export class OptimizedSessionRepository {
   }
 
   private async saveIndex(): Promise<void> {
-    if (!this.indexCache) return;
+    if (!this.indexCache) {
+      return;
+    }
 
     const indexPath = path.join(this.basePath, this.INDEX_FILE);
     const tempPath = `${indexPath}.tmp`;
@@ -262,7 +264,7 @@ export class OptimizedSessionRepository {
       workflowType: session.workflowType,
       currentState: session.currentState,
       startedAt: new Date(session.createdAt),
-      lastModified: new Date()
+      lastModified: new Date(),
     };
 
     if (existingIndex >= 0) {
@@ -328,7 +330,7 @@ export class OptimizedSessionRepository {
       totalSessions: index.sessions.length,
       activeSessions: activeSessions.length,
       cacheHitRate: 0, // Would need to track this
-      averageLoadTime: perfStats.operationBreakdown['session_load']?.avgDuration || 0
+      averageLoadTime: perfStats.operationBreakdown['session_load']?.avgDuration || 0,
     };
   }
 }

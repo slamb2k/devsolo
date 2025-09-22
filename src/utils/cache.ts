@@ -16,7 +16,7 @@ export class Cache<T = any> {
     this.cache.set(key, {
       value,
       timestamp: Date.now(),
-      ttl: ttl || this.defaultTTL
+      ttl: ttl || this.defaultTTL,
     });
   }
 

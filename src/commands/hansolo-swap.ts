@@ -112,7 +112,7 @@ export class SwapCommand {
 
     this.output.table(headers, rows);
     this.output.newline();
-    this.output.infoMessage(`Use "hansolo swap <branch-name>" to switch`);
+    this.output.infoMessage('Use "hansolo swap <branch-name>" to switch');
   }
 
   private async stashChanges(): Promise<void> {
@@ -198,30 +198,30 @@ export class SwapCommand {
     this.output.subheader('Recommended Next Step');
 
     switch (session.currentState) {
-      case 'INIT':
-      case 'BRANCH_READY':
-        this.output.infoMessage('Make your changes and run "hansolo ship" when ready');
-        break;
-      case 'CHANGES_COMMITTED':
-        this.output.infoMessage('Push changes with "hansolo ship --push"');
-        break;
-      case 'PUSHED':
-        this.output.infoMessage('Create PR with "hansolo ship --create-pr"');
-        break;
-      case 'PR_CREATED':
-        this.output.infoMessage('Wait for PR approval or run "hansolo ship --merge"');
-        break;
-      case 'WAITING_APPROVAL':
-        this.output.infoMessage('PR is waiting for approval');
-        break;
-      case 'COMPLETE':
-        this.output.successMessage('Workflow is complete!');
-        break;
-      case 'ABORTED':
-        this.output.warningMessage('This workflow was aborted');
-        break;
-      default:
-        this.output.infoMessage('Continue with your workflow');
+    case 'INIT':
+    case 'BRANCH_READY':
+      this.output.infoMessage('Make your changes and run "hansolo ship" when ready');
+      break;
+    case 'CHANGES_COMMITTED':
+      this.output.infoMessage('Push changes with "hansolo ship --push"');
+      break;
+    case 'PUSHED':
+      this.output.infoMessage('Create PR with "hansolo ship --create-pr"');
+      break;
+    case 'PR_CREATED':
+      this.output.infoMessage('Wait for PR approval or run "hansolo ship --merge"');
+      break;
+    case 'WAITING_APPROVAL':
+      this.output.infoMessage('PR is waiting for approval');
+      break;
+    case 'COMPLETE':
+      this.output.successMessage('Workflow is complete!');
+      break;
+    case 'ABORTED':
+      this.output.warningMessage('This workflow was aborted');
+      break;
+    default:
+      this.output.infoMessage('Continue with your workflow');
     }
   }
 

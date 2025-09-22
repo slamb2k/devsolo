@@ -52,7 +52,7 @@ export class PerformanceMonitor {
       duration,
       timestamp: Date.now(),
       success,
-      metadata
+      metadata,
     });
 
     return duration;
@@ -97,7 +97,7 @@ export class PerformanceMonitor {
         minDuration: 0,
         maxDuration: 0,
         successRate: 0,
-        operationBreakdown: {}
+        operationBreakdown: {},
       };
     }
 
@@ -122,7 +122,7 @@ export class PerformanceMonitor {
       operationBreakdown[op] = {
         count: metrics.length,
         avgDuration: opDurations.reduce((a, b) => a + b, 0) / opDurations.length,
-        successRate: opSuccessCount / metrics.length
+        successRate: opSuccessCount / metrics.length,
       };
     }
 
@@ -132,7 +132,7 @@ export class PerformanceMonitor {
       minDuration: Math.min(...durations),
       maxDuration: Math.max(...durations),
       successRate: successCount / relevantMetrics.length,
-      operationBreakdown
+      operationBreakdown,
     };
   }
 

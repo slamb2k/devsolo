@@ -43,12 +43,12 @@ export class WorkflowSession {
 
   private getInitialState(): StateName {
     switch (this.workflowType) {
-      case 'launch':
-        return 'INIT';
-      case 'ship':
-        return 'BRANCH_READY';
-      case 'hotfix':
-        return 'HOTFIX_INIT';
+    case 'launch':
+      return 'INIT';
+    case 'ship':
+      return 'BRANCH_READY';
+    case 'hotfix':
+      return 'HOTFIX_INIT';
     }
   }
 
@@ -68,11 +68,11 @@ export class WorkflowSession {
   public isValidBranchName(): boolean {
     // Check if branch name follows Git conventions
     const invalidPatterns = [
-      /^[\/\.]/, // starts with / or .
+      /^[/.]/, // starts with / or .
       /\/$/, // ends with /
       /\.\./, // contains ..
       /\s/, // contains spaces
-      /[~^:?*\[]/, // contains special chars
+      /[~^:?*[]/, // contains special chars
     ];
 
     const reservedNames = ['main', 'master', 'develop'];

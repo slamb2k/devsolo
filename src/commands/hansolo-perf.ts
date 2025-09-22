@@ -21,24 +21,24 @@ export class PerfCommand {
     const command = options.command || 'stats';
 
     switch (command) {
-      case 'stats':
-        await this.showStats(options.since);
-        break;
-      case 'slow':
-        await this.showSlowestOperations(options.limit || 10);
-        break;
-      case 'failed':
-        await this.showFailedOperations();
-        break;
-      case 'session':
-        await this.showSessionStats();
-        break;
-      case 'clear':
-        await this.clearMetrics();
-        break;
-      default:
-        this.output.errorMessage(`Unknown command: ${command}`);
-        this.showHelp();
+    case 'stats':
+      await this.showStats(options.since);
+      break;
+    case 'slow':
+      await this.showSlowestOperations(options.limit || 10);
+      break;
+    case 'failed':
+      await this.showFailedOperations();
+      break;
+    case 'session':
+      await this.showSessionStats();
+      break;
+    case 'clear':
+      await this.clearMetrics();
+      break;
+    default:
+      this.output.errorMessage(`Unknown command: ${command}`);
+      this.showHelp();
     }
   }
 
@@ -63,8 +63,8 @@ export class PerfCommand {
 
     for (const [op, data] of table) {
       const successColor = data.successRate === 1 ? chalk.green : 
-                          data.successRate > 0.8 ? chalk.yellow : 
-                          chalk.red;
+        data.successRate > 0.8 ? chalk.yellow : 
+          chalk.red;
       
       console.log(
         `${chalk.blue(op.padEnd(25))} ` +

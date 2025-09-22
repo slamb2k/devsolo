@@ -119,8 +119,8 @@ export class SessionRepository {
     }
 
     // Delete files
-    await fs.unlink(sessionFile).catch(() => {});
-    await fs.unlink(lockFile).catch(() => {});
+    await fs.unlink(sessionFile).catch(() => { /* ignore */ });
+    await fs.unlink(lockFile).catch(() => { /* ignore */ });
 
     // Update index
     await this.removeFromIndex(sessionId, session.branchName);
@@ -204,7 +204,7 @@ export class SessionRepository {
 
   async releaseLock(sessionId: string): Promise<void> {
     const lockFile = path.join(this.lockPath, `${sessionId}.lock`);
-    await fs.unlink(lockFile).catch(() => {});
+    await fs.unlink(lockFile).catch(() => { /* ignore */ });
   }
 
   async isLocked(sessionId: string): Promise<boolean> {
@@ -230,7 +230,7 @@ export class SessionRepository {
 
         // Remove locks older than 1 hour
         if (ageMs > 60 * 60 * 1000) {
-          await fs.unlink(lockPath).catch(() => {});
+          await fs.unlink(lockPath).catch(() => { /* ignore error */ });
           cleaned++;
         }
       }

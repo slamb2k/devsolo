@@ -16,7 +16,7 @@ export class InteractiveMode {
     this.rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-      prompt: chalk.cyan('hansolo> ')
+      prompt: chalk.cyan('hansolo> '),
     });
     this.gitOps = new GitOperations();
     this.stateMachine = new LaunchWorkflowStateMachine();
@@ -53,52 +53,52 @@ export class InteractiveMode {
     const [command, ...args] = input.split(' ');
 
     switch (command) {
-      case 'help':
-        this.showHelp();
-        break;
+    case 'help':
+      this.showHelp();
+      break;
 
-      case 'launch':
-        await this.launchWorkflow(args);
-        break;
+    case 'launch':
+      await this.launchWorkflow(args);
+      break;
 
-      case 'status':
-        await this.showStatus();
-        break;
+    case 'status':
+      await this.showStatus();
+      break;
 
-      case 'ship':
-        await this.shipWorkflow();
-        break;
+    case 'ship':
+      await this.shipWorkflow();
+      break;
 
-      case 'abort':
-        await this.abortWorkflow();
-        break;
+    case 'abort':
+      await this.abortWorkflow();
+      break;
 
-      case 'sessions':
-        await this.listSessions();
-        break;
+    case 'sessions':
+      await this.listSessions();
+      break;
 
-      case 'swap':
-        await this.swapSession(args[0] || '');
-        break;
+    case 'swap':
+      await this.swapSession(args[0] || '');
+      break;
 
-      case 'hotfix':
-        await this.createHotfix(args);
-        break;
+    case 'hotfix':
+      await this.createHotfix(args);
+      break;
 
-      case 'clear':
-        console.clear();
-        break;
+    case 'clear':
+      console.clear();
+      break;
 
-      case 'exit':
-      case 'quit':
-        this.rl.close();
-        break;
+    case 'exit':
+    case 'quit':
+      this.rl.close();
+      break;
 
-      default:
-        if (command) {
-          console.log(chalk.red(`Unknown command: ${command}`));
-          console.log('Type "help" for available commands');
-        }
+    default:
+      if (command) {
+        console.log(chalk.red(`Unknown command: ${command}`));
+        console.log('Type "help" for available commands');
+      }
     }
   }
 
@@ -129,7 +129,7 @@ export class InteractiveMode {
     // Create new session
     this.session = new WorkflowSession({
       branchName,
-      workflowType: 'launch'
+      workflowType: 'launch',
     });
     this.session.currentState = 'INIT';
 
@@ -228,7 +228,7 @@ export class InteractiveMode {
 
     this.session = new WorkflowSession({
       branchName,
-      workflowType: 'hotfix'
+      workflowType: 'hotfix',
     });
     this.session.currentState = 'INIT';
 

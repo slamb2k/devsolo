@@ -32,7 +32,9 @@ export class ParallelExecutor {
       }
 
       const taskFn = tasks[i];
-      if (!taskFn) continue;
+      if (!taskFn) {
+        continue;
+      }
       const task = this.wrapTask(taskFn, options.timeout);
       const promise = task.then(
         result => {
@@ -153,7 +155,7 @@ export class ParallelExecutor {
     return {
       success: false,
       error: lastError || new Error('Task failed after retries'),
-      duration: 0
+      duration: 0,
     };
   }
 
@@ -182,13 +184,13 @@ export class ParallelExecutor {
       return {
         success: true,
         result,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       };
     } catch (error) {
       return {
         success: false,
         error: error instanceof Error ? error : new Error(String(error)),
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       };
     }
   }
@@ -201,7 +203,7 @@ export class ParallelExecutor {
       promise,
       new Promise<T>((_, reject) =>
         setTimeout(() => reject(new Error('Task timed out')), timeout)
-      )
+      ),
     ]);
   }
 

@@ -115,9 +115,9 @@ export class LaunchCommand {
         `Branch: ${session.branchName}\n` +
         `State: ${this.output.formatState(session.currentState)}\n` +
         `Type: ${session.workflowType}\n\n` +
-        `Next steps:\n` +
-        `1. Make your changes\n` +
-        `2. Run "hansolo ship" to complete the workflow`,
+        'Next steps:\n' +
+        '1. Make your changes\n' +
+        '2. Run "hansolo ship" to complete the workflow',
         '✨ Workflow Ready'
       );
 

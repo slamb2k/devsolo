@@ -132,7 +132,7 @@ export class InitCommand {
     // This would integrate with GitHub/GitLab API to create the repo
     // For now, just show a message
     this.output.warningMessage(`Manual step required: Create repository on ${platform}`);
-    this.output.dim(`Run: git remote add origin <repository-url>`);
+    this.output.dim('Run: git remote add origin <repository-url>');
   }
 
   async validate(): Promise<boolean> {

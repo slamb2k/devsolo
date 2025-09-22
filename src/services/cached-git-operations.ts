@@ -145,7 +145,7 @@ export class CachedGitOperations extends GitOperations {
     return {
       size: this.cache.size(),
       hits: 0, // Would need to track this
-      misses: 0 // Would need to track this
+      misses: 0, // Would need to track this
     };
   }
 }

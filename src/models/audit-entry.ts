@@ -62,29 +62,29 @@ export class AuditEntry {
 
   private getActionDescription(): string {
     switch (this.action) {
-      case 'session_created':
-        return `Created new session for ${this.details.command}`;
-      case 'session_resumed':
-        return `Resumed session from branch ${this.details.gitOperation || 'unknown'}`;
-      case 'state_transition':
-        if (this.details.stateTransition) {
-          return `State: ${this.details.stateTransition.from} → ${this.details.stateTransition.to}`;
-        }
-        return 'State transition occurred';
-      case 'git_operation':
-        return `Git: ${this.details.gitOperation || 'operation'}`;
-      case 'api_call':
-        return `API: ${this.details.command}`;
-      case 'user_decision':
-        return `User: ${this.details.userDecision || 'made decision'}`;
-      case 'error_occurred':
-        return `Error: ${this.errorMessage || 'Unknown error'}`;
-      case 'session_completed':
-        return 'Session completed successfully';
-      case 'session_aborted':
-        return `Session aborted: ${this.details.userDecision || 'by user'}`;
-      default:
-        return this.details.command || 'Action performed';
+    case 'session_created':
+      return `Created new session for ${this.details.command}`;
+    case 'session_resumed':
+      return `Resumed session from branch ${this.details.gitOperation || 'unknown'}`;
+    case 'state_transition':
+      if (this.details.stateTransition) {
+        return `State: ${this.details.stateTransition.from} → ${this.details.stateTransition.to}`;
+      }
+      return 'State transition occurred';
+    case 'git_operation':
+      return `Git: ${this.details.gitOperation || 'operation'}`;
+    case 'api_call':
+      return `API: ${this.details.command}`;
+    case 'user_decision':
+      return `User: ${this.details.userDecision || 'made decision'}`;
+    case 'error_occurred':
+      return `Error: ${this.errorMessage || 'Unknown error'}`;
+    case 'session_completed':
+      return 'Session completed successfully';
+    case 'session_aborted':
+      return `Session aborted: ${this.details.userDecision || 'by user'}`;
+    default:
+      return this.details.command || 'Action performed';
     }
   }
 
