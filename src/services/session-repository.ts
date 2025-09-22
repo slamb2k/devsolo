@@ -163,6 +163,16 @@ export class SessionRepository {
     );
   }
 
+  // Alias for listSessions to match MCP tool expectations
+  async getAllSessions(): Promise<WorkflowSession[]> {
+    return this.listSessions(true);
+  }
+
+  // Alias for createSession to match MCP tool expectations
+  async saveSession(session: WorkflowSession): Promise<WorkflowSession> {
+    return this.createSession(session);
+  }
+
   async cleanupExpiredSessions(): Promise<number> {
     const sessions = await this.listSessions(true);
     let cleaned = 0;

@@ -42,6 +42,16 @@ export class ConfigurationManager {
     this.config = config;
   }
 
+  // Alias for load to match MCP tool expectations
+  async loadConfig(): Promise<Configuration> {
+    return this.load();
+  }
+
+  // Alias for save to match MCP tool expectations
+  async saveConfig(config: Configuration): Promise<void> {
+    return this.save(config);
+  }
+
   async initialize(): Promise<Configuration> {
     const existingConfig = await this.exists();
 

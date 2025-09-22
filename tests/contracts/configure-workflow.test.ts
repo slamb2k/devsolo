@@ -3,7 +3,7 @@ import { ConfigureWorkflowTool } from '../../src/mcp-server/tools/configure-work
 import { SessionRepository } from '../../src/services/session-repository';
 import { ConfigurationManager } from '../../src/services/configuration-manager';
 
-describe.skip('ConfigureWorkflow Tool Contract', () => {
+describe('ConfigureWorkflow Tool Contract', () => {
   let tool: ConfigureWorkflowTool;
   let sessionRepo: jest.Mocked<SessionRepository>;
   let configManager: jest.Mocked<ConfigurationManager>;
