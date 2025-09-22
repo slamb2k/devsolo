@@ -1,7 +1,7 @@
 import { ConsoleOutput } from '../ui/console-output';
 import { globalMonitor } from '../utils/performance-monitor';
 import { OptimizedSessionRepository } from '../services/optimized-session-repository';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 
 export class PerfCommand {
   private output = new ConsoleOutput();

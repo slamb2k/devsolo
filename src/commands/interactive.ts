@@ -1,16 +1,16 @@
 import * as readline from 'readline';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import { WorkflowSession } from '../models/workflow-session';
-import { GitOperations } from '../utils/git-operations';
-import { WorkflowStateMachine } from '../state/workflow-state-machine';
-import { Logger } from '../utils/logger';
+import { GitOperations } from '../services/git-operations';
+import { LaunchWorkflowStateMachine } from '../state-machines/launch-workflow';
+import { ConsoleOutput } from '../ui/console-output';
 
 export class InteractiveMode {
   private rl: readline.Interface;
   private session?: WorkflowSession;
   private gitOps: GitOperations;
-  private stateMachine: WorkflowStateMachine;
-  private logger: Logger;
+  private stateMachine: LaunchWorkflowStateMachine;
+  private output: ConsoleOutput;
 
   constructor() {
     this.rl = readline.createInterface({
@@ -19,13 +19,12 @@ export class InteractiveMode {
       prompt: chalk.cyan('hansolo> ')
     });
     this.gitOps = new GitOperations();
-    this.stateMachine = new WorkflowStateMachine();
-    this.logger = new Logger();
+    this.stateMachine = new LaunchWorkflowStateMachine();
+    this.output = new ConsoleOutput();
   }
 
   public async start(): Promise<void> {
-    console.log(chalk.green(`
-${'═'.repeat(60)}`);
+    console.log(chalk.green(`\n${'═'.repeat(60)}`));
     console.log(chalk.green('  HAN-SOLO INTERACTIVE MODE'));
     console.log(chalk.green(`${'═'.repeat(60)}\n`));
     console.log('Type "help" for available commands or "exit" to quit\n');
@@ -38,7 +37,7 @@ ${'═'.repeat(60)}`);
       try {
         await this.handleCommand(command);
       } catch (error) {
-        this.logger.error(`Error: ${error.message}`);
+        this.output.errorMessage(`Error: ${error instanceof Error ? error.message : String(error)}`);
       }
       
       this.rl.prompt();
@@ -79,7 +78,7 @@ ${'═'.repeat(60)}`);
         break;
 
       case 'swap':
-        await this.swapSession(args[0]);
+        await this.swapSession(args[0] || '');
         break;
 
       case 'hotfix':
@@ -130,15 +129,14 @@ ${'═'.repeat(60)}`);
     // Create new session
     this.session = new WorkflowSession({
       branchName,
-      workflowType: 'feature',
-      startedAt: new Date(),
-      currentState: 'INIT'
+      workflowType: 'launch'
     });
+    this.session.currentState = 'INIT';
 
-    // Initialize workflow
+    // Initialize workflow - transition to BRANCH_READY
     const result = await this.stateMachine.transition(
       this.session.currentState,
-      'START_FEATURE'
+      'BRANCH_READY' as any
     );
 
     if (result.success) {
@@ -160,7 +158,7 @@ ${'═'.repeat(60)}`);
     console.log(`  Branch: ${this.session.branchName}`);
     console.log(`  Type: ${this.session.workflowType}`);
     console.log(`  State: ${this.session.currentState}`);
-    console.log(`  Started: ${this.session.startedAt.toLocaleString()}\n`);
+    console.log(`  Session ID: ${this.session.id}\n`);
   }
 
   private async shipWorkflow(): Promise<void> {
@@ -213,7 +211,7 @@ ${'═'.repeat(60)}`);
     }
 
     console.log(chalk.blue(`Swapping to ${branch}...`));
-    await this.gitOps.switchBranch(branch);
+    await this.gitOps.checkoutBranch(branch);
     console.log(chalk.green(`✅ Switched to ${branch}`));
   }
 
@@ -227,13 +225,12 @@ ${'═'.repeat(60)}`);
 
     console.log(chalk.blue(`Creating hotfix for ${issue}...`));
     const branchName = `hotfix/${issue}`;
-    
+
     this.session = new WorkflowSession({
       branchName,
-      workflowType: 'hotfix',
-      startedAt: new Date(),
-      currentState: 'INIT'
+      workflowType: 'hotfix'
     });
+    this.session.currentState = 'INIT';
 
     await this.gitOps.createBranch(branchName);
     console.log(chalk.green(`✅ Hotfix branch created: ${branchName}`));

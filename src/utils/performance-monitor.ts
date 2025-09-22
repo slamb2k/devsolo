@@ -110,7 +110,7 @@ export class PerformanceMonitor {
       if (!acc[metric.operation]) {
         acc[metric.operation] = [];
       }
-      acc[metric.operation].push(metric);
+      acc[metric.operation]!.push(metric);
       return acc;
     }, {} as Record<string, PerformanceMetrics[]>);
 

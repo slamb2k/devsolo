@@ -358,12 +358,24 @@ async function runPerf(args: string[]): Promise<void> {
   const options: any = { command };
 
   for (let i = 1; i < args.length; i++) {
-    if (args[i] === '--since' && args[i + 1]) {
-      options.since = parseInt(args[i + 1]);
-      i++;
-    } else if (args[i] === '--limit' && args[i + 1]) {
-      options.limit = parseInt(args[i + 1]);
-      i++;
+    if (args[i] === '--since') {
+      const nextArg = args[i + 1];
+      if (nextArg !== undefined) {
+        const value = parseInt(nextArg, 10);
+        if (!isNaN(value)) {
+          options.since = value;
+          i++;
+        }
+      }
+    } else if (args[i] === '--limit') {
+      const nextArg = args[i + 1];
+      if (nextArg !== undefined) {
+        const value = parseInt(nextArg, 10);
+        if (!isNaN(value)) {
+          options.limit = value;
+          i++;
+        }
+      }
     }
   }
 

@@ -5,7 +5,7 @@ import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
 import { WorkflowSession } from '../models/workflow-session';
 import { LaunchWorkflowStateMachine } from '../state-machines/launch-workflow';
-import { TemplateManager } from '../templates/workflow-templates';
+// import { TemplateManager } from '../templates/workflow-templates'; // For future use
 
 export class LaunchCommand {
   private output = new ConsoleOutput();
@@ -14,14 +14,14 @@ export class LaunchCommand {
   private sessionRepo: SessionRepository;
   private gitOps: GitOperations;
   private stateMachine: LaunchWorkflowStateMachine;
-  private templateManager: TemplateManager;
+  // private templateManager: TemplateManager; // For future template support
 
   constructor(basePath: string = '.hansolo') {
     this.configManager = new ConfigurationManager(basePath);
     this.sessionRepo = new SessionRepository(basePath);
     this.gitOps = new GitOperations();
     this.stateMachine = new LaunchWorkflowStateMachine();
-    this.templateManager = new TemplateManager();
+    // this.templateManager = new TemplateManager(); // For future template support
   }
 
   async execute(options: {

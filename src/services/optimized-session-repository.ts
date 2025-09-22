@@ -148,11 +148,7 @@ export class OptimizedSessionRepository {
         const data = await fs.readFile(sessionPath, 'utf-8');
         const session = JSON.parse(data) as WorkflowSession;
         
-        // Restore Date objects
-        session.startedAt = new Date(session.startedAt);
-        if (session.completedAt) {
-          session.completedAt = new Date(session.completedAt);
-        }
+        // Session dates are already strings in ISO format
 
         // Update cache
         this.sessionCache.set(sessionId, session);
@@ -265,7 +261,7 @@ export class OptimizedSessionRepository {
       branchName: session.branchName,
       workflowType: session.workflowType,
       currentState: session.currentState,
-      startedAt: session.startedAt,
+      startedAt: new Date(session.createdAt),
       lastModified: new Date()
     };
 

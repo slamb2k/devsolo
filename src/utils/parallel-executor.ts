@@ -31,7 +31,9 @@ export class ParallelExecutor {
         break;
       }
 
-      const task = this.wrapTask(tasks[i], options.timeout);
+      const taskFn = tasks[i];
+      if (!taskFn) continue;
+      const task = this.wrapTask(taskFn, options.timeout);
       const promise = task.then(
         result => {
           results[i] = result;

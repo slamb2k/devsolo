@@ -21,10 +21,13 @@ export class CachedGitOperations extends GitOperations {
     );
   }
 
-  async getBranches(): Promise<string[]> {
+  async getLocalBranches(): Promise<string[]> {
     return this.cache.getOrSet(
       'branches',
-      () => super.getBranches(),
+      async () => {
+        const branchSummary = await (this as any).git.branchLocal();
+        return branchSummary.all;
+      },
       this.BRANCH_TTL
     );
   }
@@ -48,7 +51,10 @@ export class CachedGitOperations extends GitOperations {
   async getLastCommit(): Promise<any> {
     return this.cache.getOrSet(
       'last_commit',
-      () => super.getLastCommit(),
+      async () => {
+        const log = await (this as any).git.log({ maxCount: 1 });
+        return log.latest;
+      },
       this.COMMIT_TTL
     );
   }
@@ -56,7 +62,10 @@ export class CachedGitOperations extends GitOperations {
   async getCommitHistory(limit: number = 10): Promise<any[]> {
     return this.cache.getOrSet(
       `commit_history_${limit}`,
-      () => super.getCommitHistory(limit),
+      async () => {
+        const log = await (this as any).git.log({ maxCount: limit });
+        return log.all;
+      },
       this.COMMIT_TTL
     );
   }
@@ -75,8 +84,8 @@ export class CachedGitOperations extends GitOperations {
     this.invalidateBranchCache();
   }
 
-  async switchBranch(branchName: string): Promise<void> {
-    await super.switchBranch(branchName);
+  async checkoutBranch(branchName: string): Promise<void> {
+    await super.checkoutBranch(branchName);
     this.invalidateBranchCache();
     this.invalidateStatusCache();
   }
@@ -86,31 +95,28 @@ export class CachedGitOperations extends GitOperations {
     this.invalidateBranchCache();
   }
 
-  async commit(message: string): Promise<void> {
-    await super.commit(message);
+  async commit(message: string, options?: { noVerify?: boolean }): Promise<{ commit: string }> {
+    const result = await super.commit(message, options);
+    this.invalidateStatusCache();
+    this.invalidateCommitCache();
+    return result;
+  }
+
+  async push(remote: string = 'origin', branch?: string, options?: boolean | string[]): Promise<void> {
+    await super.push(remote, branch, options);
+    this.invalidateStatusCache();
+  }
+
+  async pull(remote: string = 'origin', branch?: string): Promise<void> {
+    await super.pull(remote, branch);
     this.invalidateStatusCache();
     this.invalidateCommitCache();
   }
 
-  async push(branch?: string, force: boolean = false): Promise<void> {
-    await super.push(branch, force);
+  async stashChanges(message?: string): Promise<{ stashRef: string }> {
+    const result = await super.stashChanges(message);
     this.invalidateStatusCache();
-  }
-
-  async pull(branch?: string): Promise<void> {
-    await super.pull(branch);
-    this.invalidateStatusCache();
-    this.invalidateCommitCache();
-  }
-
-  async stash(message?: string): Promise<void> {
-    await super.stash(message);
-    this.invalidateStatusCache();
-  }
-
-  async stashPop(): Promise<void> {
-    await super.stashPop();
-    this.invalidateStatusCache();
+    return result;
   }
 
   private invalidateBranchCache(): void {
