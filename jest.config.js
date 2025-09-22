@@ -27,6 +27,8 @@ module.exports = {
   // Temporarily skip tests that require full implementation
   testPathIgnorePatterns: [
     '/node_modules/',
+    // Skip src/__tests__ directory (duplicate tests)
+    '/src/__tests__/',
     // Skip integration tests until MCP server is fully implemented
     '/tests/integration/',
     // Skip contract tests until tools are fully implemented
