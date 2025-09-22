@@ -65,11 +65,11 @@ export class MCPServer {
           defaultBranch: { type: 'string' },
           platform: { type: 'string', enum: ['github', 'gitlab'] },
           remoteUrl: { type: 'string' },
-          settings: { type: 'object' }
+          settings: { type: 'object' },
         },
-        required: ['projectPath']
+        required: ['projectPath'],
       },
-      handler: async (params) => this.configureWorkflow(params)
+      handler: async (params) => this.configureWorkflow(params),
     });
 
     // Start Workflow Tool
@@ -81,11 +81,11 @@ export class MCPServer {
         properties: {
           workflowType: { type: 'string', enum: ['launch', 'ship', 'hotfix'] },
           branch: { type: 'string' },
-          metadata: { type: 'object' }
+          metadata: { type: 'object' },
         },
-        required: ['workflowType']
+        required: ['workflowType'],
       },
-      handler: async (params) => this.startWorkflow(params)
+      handler: async (params) => this.startWorkflow(params),
     });
 
     // Execute Workflow Step Tool
@@ -97,11 +97,11 @@ export class MCPServer {
         properties: {
           sessionId: { type: 'string' },
           action: { type: 'string' },
-          metadata: { type: 'object' }
+          metadata: { type: 'object' },
         },
-        required: ['sessionId', 'action']
+        required: ['sessionId', 'action'],
       },
-      handler: async (params) => this.executeWorkflowStep(params)
+      handler: async (params) => this.executeWorkflowStep(params),
     });
 
     // Get Sessions Status Tool
@@ -112,10 +112,10 @@ export class MCPServer {
         type: 'object',
         properties: {
           sessionId: { type: 'string' },
-          includeCompleted: { type: 'boolean' }
-        }
+          includeCompleted: { type: 'boolean' },
+        },
       },
-      handler: async (params) => this.getSessionsStatus(params)
+      handler: async (params) => this.getSessionsStatus(params),
     });
 
     // Swap Session Tool
@@ -125,11 +125,11 @@ export class MCPServer {
       inputSchema: {
         type: 'object',
         properties: {
-          sessionId: { type: 'string' }
+          sessionId: { type: 'string' },
         },
-        required: ['sessionId']
+        required: ['sessionId'],
       },
-      handler: async (params) => this.swapSession(params)
+      handler: async (params) => this.swapSession(params),
     });
 
     // Abort Workflow Tool
@@ -141,11 +141,11 @@ export class MCPServer {
         properties: {
           sessionId: { type: 'string' },
           force: { type: 'boolean' },
-          cleanup: { type: 'boolean' }
+          cleanup: { type: 'boolean' },
         },
-        required: ['sessionId']
+        required: ['sessionId'],
       },
-      handler: async (params) => this.abortWorkflow(params)
+      handler: async (params) => this.abortWorkflow(params),
     });
 
     // Validate Environment Tool
@@ -156,10 +156,10 @@ export class MCPServer {
         type: 'object',
         properties: {
           checks: { type: 'array', items: { type: 'string' } },
-          verbose: { type: 'boolean' }
-        }
+          verbose: { type: 'boolean' },
+        },
       },
-      handler: async (params) => this.validateEnvironment(params)
+      handler: async (params) => this.validateEnvironment(params),
     });
 
     // Manage Status Line Tool
@@ -172,11 +172,11 @@ export class MCPServer {
           action: { type: 'string', enum: ['enable', 'disable', 'update'] },
           content: { type: 'object' },
           format: { type: 'string' },
-          colorScheme: { type: 'string' }
+          colorScheme: { type: 'string' },
         },
-        required: ['action']
+        required: ['action'],
       },
-      handler: async (params) => this.manageStatusLine(params)
+      handler: async (params) => this.manageStatusLine(params),
     });
 
     // Create Branch Tool
@@ -190,11 +190,11 @@ export class MCPServer {
           baseBranch: { type: 'string' },
           sessionId: { type: 'string' },
           workflowType: { type: 'string' },
-          updateFromMain: { type: 'boolean' }
+          updateFromMain: { type: 'boolean' },
         },
-        required: ['branchName']
+        required: ['branchName'],
       },
-      handler: async (params) => this.createBranch(params)
+      handler: async (params) => this.createBranch(params),
     });
 
     // Cleanup Operations Tool
@@ -209,10 +209,10 @@ export class MCPServer {
           deleteRemote: { type: 'boolean' },
           archiveSession: { type: 'boolean' },
           preserveArtifacts: { type: 'boolean' },
-          cleanupCompleted: { type: 'boolean' }
-        }
+          cleanupCompleted: { type: 'boolean' },
+        },
       },
-      handler: async (params) => this.cleanupOperations(params)
+      handler: async (params) => this.cleanupOperations(params),
     });
 
     // Rebase on Main Tool
@@ -227,10 +227,10 @@ export class MCPServer {
           strategy: { type: 'string', enum: ['standard', 'interactive', 'squash'] },
           forcePush: { type: 'boolean' },
           useLease: { type: 'boolean' },
-          createBackup: { type: 'boolean' }
-        }
+          createBackup: { type: 'boolean' },
+        },
       },
-      handler: async (params) => this.rebaseOnMain(params)
+      handler: async (params) => this.rebaseOnMain(params),
     });
   }
 
@@ -238,7 +238,7 @@ export class MCPServer {
     return Array.from(this.tools.values()).map(tool => ({
       name: tool.name,
       description: tool.description,
-      inputSchema: tool.inputSchema
+      inputSchema: tool.inputSchema,
     }));
   }
 
@@ -252,53 +252,54 @@ export class MCPServer {
         error: {
           code: -32600,
           message: 'Invalid Request',
-          data: 'JSON-RPC version must be 2.0'
+          data: 'JSON-RPC version must be 2.0',
         },
-        id: request.id
+        id: request.id,
       };
     }
 
     switch (request.method) {
-      case 'tools/list':
+    case 'tools/list':
+      return {
+        jsonrpc: '2.0',
+        result: {
+          tools: this.getRegisteredTools(),
+        },
+        id: request.id,
+      };
+
+    case 'tools/call': {
+      const { name, arguments: args } = request.params;
+      try {
+        const result = await this.handleToolCall(name, args);
         return {
           jsonrpc: '2.0',
-          result: {
-            tools: this.getRegisteredTools()
-          },
-          id: request.id
+          result,
+          id: request.id,
         };
-
-      case 'tools/call':
-        const { name, arguments: args } = request.params;
-        try {
-          const result = await this.handleToolCall(name, args);
-          return {
-            jsonrpc: '2.0',
-            result,
-            id: request.id
-          };
-        } catch (error: any) {
-          return {
-            jsonrpc: '2.0',
-            error: {
-              code: -32603,
-              message: 'Internal error',
-              data: error.message
-            },
-            id: request.id
-          };
-        }
-
-      default:
+      } catch (error: any) {
         return {
           jsonrpc: '2.0',
           error: {
-            code: -32601,
-            message: 'Method not found',
-            data: `Method ${request.method} is not supported`
+            code: -32603,
+            message: 'Internal error',
+            data: error.message,
           },
-          id: request.id
+          id: request.id,
         };
+      }
+    }
+
+    default:
+      return {
+        jsonrpc: '2.0',
+        error: {
+          code: -32601,
+          message: 'Method not found',
+          data: `Method ${request.method} is not supported`,
+        },
+        id: request.id,
+      };
     }
   }
 
@@ -332,7 +333,7 @@ export class MCPServer {
     if (params.platform) {
       config.gitPlatform = {
         type: params.platform,
-        token: params.token || config.gitPlatform?.token
+        token: params.token || config.gitPlatform?.token,
       };
     }
     if (params.settings) {
@@ -348,7 +349,7 @@ export class MCPServer {
       success: true,
       configuration: config.toJSON(),
       existingRepo: gitInitialized,
-      remoteUrl
+      remoteUrl,
     };
   }
 
@@ -361,7 +362,7 @@ export class MCPServer {
       return {
         success: false,
         error: 'Already in an active session',
-        session: existingSession.toJSON()
+        session: existingSession.toJSON(),
       };
     }
 
@@ -369,7 +370,7 @@ export class MCPServer {
     const session = new WorkflowSession({
       workflowType: params.workflowType,
       branchName: params.branch || `${params.workflowType}/${Date.now()}`,
-      metadata: params.metadata || {}
+      metadata: params.metadata || {},
     });
 
     await this.sessionRepo.createSession(session);
@@ -377,7 +378,7 @@ export class MCPServer {
 
     return {
       success: true,
-      session: session.toJSON()
+      session: session.toJSON(),
     };
   }
 
@@ -386,7 +387,7 @@ export class MCPServer {
     if (!session) {
       return {
         success: false,
-        error: 'Session not found'
+        error: 'Session not found',
       };
     }
 
@@ -406,7 +407,7 @@ export class MCPServer {
         metadata: params.metadata || {},
         fallbackToManual: false,
         manualInputRequired: false,
-        requiresUserInput: false
+        requiresUserInput: false,
       };
     }
 
@@ -421,13 +422,13 @@ export class MCPServer {
         metadata: result.metadata || {},
         fallbackToManual: result.fallbackToManual || false,
         manualInputRequired: result.manualInputRequired || false,
-        requiresUserInput: result.requiresUserInput || false
+        requiresUserInput: result.requiresUserInput || false,
       };
     } catch (error: any) {
       return {
         success: false,
         error: error.message,
-        sessionId: params.sessionId
+        sessionId: params.sessionId,
       };
     }
   }
@@ -449,7 +450,7 @@ export class MCPServer {
       activeSessions: activeSessions.length,
       initialized,
       ready: initialized && activeSessions.length < 5, // Max 5 concurrent sessions
-      session: sessionDetails
+      session: sessionDetails,
     };
   }
 
@@ -460,7 +461,7 @@ export class MCPServer {
     if (!newSession) {
       return {
         success: false,
-        error: 'Session not found'
+        error: 'Session not found',
       };
     }
 
@@ -471,7 +472,7 @@ export class MCPServer {
     return {
       success: true,
       previousSessionId: previousSession?.id,
-      currentSession: newSession.toJSON()
+      currentSession: newSession.toJSON(),
     };
   }
 
@@ -480,7 +481,7 @@ export class MCPServer {
     if (!session) {
       return {
         success: false,
-        error: 'Session not found'
+        error: 'Session not found',
       };
     }
 
@@ -498,7 +499,7 @@ export class MCPServer {
 
     return {
       success: true,
-      session: session.toJSON()
+      session: session.toJSON(),
     };
   }
 
@@ -512,7 +513,7 @@ export class MCPServer {
       const gitVersion = await this.gitOps.raw(['--version']);
       checks.git = {
         installed: true,
-        version: gitVersion.replace('git version ', '').trim()
+        version: gitVersion.replace('git version ', '').trim(),
       };
     } catch {
       checks.git = { installed: false };
@@ -525,7 +526,7 @@ export class MCPServer {
     checks.node = {
       installed: true,
       version: nodeVersion,
-      meetsMinimum: majorVersion >= 20
+      meetsMinimum: majorVersion >= 20,
     };
     if (!checks.node.meetsMinimum) {
       warnings.push('Node.js version 20 or higher is recommended');
@@ -538,14 +539,14 @@ export class MCPServer {
     checks.repository = {
       isGitRepo,
       remote: remoteUrl ? 'origin' : null,
-      branch: currentBranch
+      branch: currentBranch,
     };
 
     // Check config
     const initialized = await this.configManager.isInitialized();
     checks.config = {
       hansoloYaml: initialized,
-      initialized
+      initialized,
     };
     if (!initialized) {
       recommendations.push('Run /hansolo:init to initialize the project');
@@ -554,7 +555,7 @@ export class MCPServer {
     // Check permissions
     checks.permissions = {
       canWrite: true, // Simplified check
-      hansoloDir: true
+      hansoloDir: true,
     };
 
     // Check GitHub CLI (optional)
@@ -563,12 +564,12 @@ export class MCPServer {
       execSync('gh --version', { stdio: 'pipe' });
       checks.github = {
         cliInstalled: true,
-        authenticated: true // Simplified
+        authenticated: true, // Simplified
       };
     } catch {
       checks.github = {
         cliInstalled: false,
-        authenticated: false
+        authenticated: false,
       };
       recommendations.push('Install GitHub CLI for enhanced features');
     }
@@ -589,7 +590,7 @@ export class MCPServer {
       platformSpecific: {},
       allChecksPassed,
       recommendations,
-      warnings
+      warnings,
     };
   }
 
@@ -599,7 +600,7 @@ export class MCPServer {
       enabled: params.action === 'enable',
       format: params.format || 'default',
       content: params.content || {},
-      colorScheme: params.colorScheme || 'default'
+      colorScheme: params.colorScheme || 'default',
     };
 
     if (params.action === 'update' && params.content) {
@@ -609,7 +610,7 @@ export class MCPServer {
     return {
       success: true,
       statusLine,
-      message: `Status line ${params.action}d`
+      message: `Status line ${params.action}d`,
     };
   }
 
@@ -639,7 +640,7 @@ export class MCPServer {
       session = new WorkflowSession({
         workflowType: params.workflowType,
         branchName: params.branchName,
-        metadata: { projectPath: process.cwd() }
+        metadata: { projectPath: process.cwd() },
       });
       await this.sessionRepo.createSession(session);
     }
@@ -650,10 +651,10 @@ export class MCPServer {
         name: params.branchName,
         baseBranch,
         created: true,
-        upToDate: true
+        upToDate: true,
       },
       session: session?.toJSON(),
-      mainUpdated: params.updateFromMain || false
+      mainUpdated: params.updateFromMain || false,
     };
   }
 
@@ -666,7 +667,7 @@ export class MCPServer {
       tempFilesCleaned: 0,
       hooksRemoved: [],
       stashPopped: false,
-      artifactsPreserved: params.preserveArtifacts || false
+      artifactsPreserved: params.preserveArtifacts || false,
     };
 
     // Switch to main before cleanup
@@ -713,7 +714,7 @@ export class MCPServer {
       success: true,
       cleanup,
       sessionsRemoved,
-      message: 'Cleanup complete'
+      message: 'Cleanup complete',
     };
   }
 
@@ -769,11 +770,11 @@ export class MCPServer {
         forcePushed,
         usedLease: params.useLease || false,
         backupRef,
-        aborted: false
+        aborted: false,
       },
       conflictFiles,
       instructions: hasConflicts ? 'Resolve conflicts and run `git rebase --continue`' : '',
-      message: hasConflicts ? 'Rebase has conflicts' : 'Rebase successful'
+      message: hasConflicts ? 'Rebase has conflicts' : 'Rebase successful',
     };
   }
 
@@ -787,7 +788,7 @@ export class MCPServer {
       'PR_CREATED': { 'wait': 'WAITING_APPROVAL' },
       'WAITING_APPROVAL': { 'approved': 'APPROVED' },
       'APPROVED': { 'merge': 'MERGED' },
-      'MERGED': { 'cleanup': 'COMPLETE' }
+      'MERGED': { 'cleanup': 'COMPLETE' },
     };
 
     return transitions[currentState]?.[action] || currentState;

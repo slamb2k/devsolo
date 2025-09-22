@@ -22,7 +22,7 @@ export class ShipWorkflow {
     'ERROR',
     'ABORTED',
     'MERGE_CONFLICT',
-    'CHANGES_REQUESTED'
+    'CHANGES_REQUESTED',
   ];
   private history: any[] = [];
 
@@ -51,7 +51,7 @@ export class ShipWorkflow {
         success: false,
         error: `Invalid transition from ${fromState} to ${toState}`,
         fromState,
-        toState
+        toState,
       };
     }
 
@@ -59,7 +59,7 @@ export class ShipWorkflow {
     if (toState === 'PR_CREATED' && !(this.session.metadata as any)?.hasChanges) {
       return {
         success: false,
-        error: 'No changes to create PR'
+        error: 'No changes to create PR',
       };
     }
 
@@ -68,7 +68,7 @@ export class ShipWorkflow {
       if (currentApprovals < (this.session.metadata as any).requiredApprovals) {
         return {
           success: false,
-          error: `Insufficient approvals: ${currentApprovals} of ${(this.session.metadata as any).requiredApprovals}`
+          error: `Insufficient approvals: ${currentApprovals} of ${(this.session.metadata as any).requiredApprovals}`,
         };
       }
     }
@@ -76,14 +76,14 @@ export class ShipWorkflow {
     if (toState === 'REBASING' && (this.session.metadata as any)?.ciStatus === 'failed') {
       return {
         success: false,
-        error: 'CI checks failed'
+        error: 'CI checks failed',
       };
     }
 
     if (toState === 'ABORTED' && this.session.currentState === 'MERGING') {
       return {
         success: false,
-        error: 'Cannot abort during merge'
+        error: 'Cannot abort during merge',
       };
     }
 
@@ -101,7 +101,7 @@ export class ShipWorkflow {
       actor: options.actor,
       metadata: options.metadata,
       timestamp: new Date(),
-      isRecovery: options.isRecovery
+      isRecovery: options.isRecovery,
     };
     this.history.push(transition);
 
@@ -109,7 +109,7 @@ export class ShipWorkflow {
       success: true,
       fromState,
       toState,
-      metadata: options.metadata || {}
+      metadata: options.metadata || {},
     };
   }
 
@@ -128,7 +128,7 @@ export class ShipWorkflow {
       'CLEANUP': ['COMPLETE'],
       'ERROR': ['VALIDATING', 'ABORTED'],
       'MERGE_CONFLICT': ['REBASING'],
-      'CHANGES_REQUESTED': ['PUSHED']
+      'CHANGES_REQUESTED': ['PUSHED'],
     };
 
     const allowedStates = validTransitions[this.session.currentState] || [];
@@ -137,7 +137,7 @@ export class ShipWorkflow {
 
   getNextStates(): string[] {
     const validTransitions: { [key: string]: string[] } = {
-      'APPROVED': ['REBASING', 'ABORTED']
+      'APPROVED': ['REBASING', 'ABORTED'],
     };
     return validTransitions[this.session.currentState] || [];
   }
@@ -146,7 +146,7 @@ export class ShipWorkflow {
     return {
       name: this.session.currentState,
       description: `State: ${this.session.currentState}`,
-      allowedTransitions: this.getNextStates()
+      allowedTransitions: this.getNextStates(),
     };
   }
 
@@ -167,7 +167,7 @@ export class ShipWorkflow {
       'MERGING': 80,
       'MERGED': 90,
       'CLEANUP': 95,
-      'COMPLETE': 100
+      'COMPLETE': 100,
     };
     return progressMap[this.session.currentState] || 0;
   }

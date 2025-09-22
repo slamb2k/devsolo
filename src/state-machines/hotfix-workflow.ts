@@ -313,7 +313,7 @@ export class HotfixWorkflow {
     'COMPLETE',
     'ERROR',
     'ROLLBACK',
-    'BACKPORT_CONFLICT'
+    'BACKPORT_CONFLICT',
   ];
   private history: any[] = [];
 
@@ -340,7 +340,7 @@ export class HotfixWorkflow {
     if (toState === 'HOTFIX_BRANCH_CREATED' && (this.session.metadata as any)?.productionBranchExists === false) {
       return {
         success: false,
-        error: 'Production branch not found'
+        error: 'Production branch not found',
       };
     }
 
@@ -350,7 +350,7 @@ export class HotfixWorkflow {
         success: true,
         fromState,
         toState,
-        metadata: options.metadata || {}
+        metadata: options.metadata || {},
       };
     }
 
@@ -358,7 +358,7 @@ export class HotfixWorkflow {
     if (toState === 'ABORTED' && fromState === 'DEPLOYING_TO_PRODUCTION' as any) {
       return {
         success: false,
-        error: 'Cannot abort during production deployment'
+        error: 'Cannot abort during production deployment',
       };
     }
 
@@ -366,7 +366,7 @@ export class HotfixWorkflow {
     if (options.metadata?.skipValidation && (this.session.metadata as any)?.priority === 'low') {
       return {
         success: false,
-        error: 'Fast track not allowed for low priority'
+        error: 'Fast track not allowed for low priority',
       };
     }
 
@@ -374,7 +374,7 @@ export class HotfixWorkflow {
     if (options.metadata?.bypassChecks && (this.session.metadata as any)?.emergencyAccess === false) {
       return {
         success: false,
-        error: 'Emergency access not authorized'
+        error: 'Emergency access not authorized',
       };
     }
 
@@ -382,7 +382,7 @@ export class HotfixWorkflow {
     if (toState === 'DEPLOYING_TO_PRODUCTION' as any && (this.session.metadata as any)?.requiresApproval && !(this.session.metadata as any)?.approvals?.length) {
       return {
         success: false,
-        error: 'Approval required'
+        error: 'Approval required',
       };
     }
 
@@ -398,7 +398,7 @@ export class HotfixWorkflow {
         ...options.metadata,
         escalated: true,
         notificationSent: true,
-        notifiedTeams: ['oncall', 'leadership']
+        notifiedTeams: ['oncall', 'leadership'],
       };
     }
 
@@ -412,7 +412,7 @@ export class HotfixWorkflow {
       error: options.error,
       timestamp: new Date(),
       isRollback: options.isRollback,
-      isRecovery: options.isRecovery
+      isRecovery: options.isRecovery,
     };
     this.history.push(transition);
 
@@ -421,7 +421,7 @@ export class HotfixWorkflow {
       fromState,
       toState,
       newState: toState,
-      metadata: options.metadata || {}
+      metadata: options.metadata || {},
     };
   }
 

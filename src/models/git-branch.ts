@@ -79,10 +79,18 @@ export class GitBranch {
   }
 
   getType(): string {
-    if (this.name.startsWith('feature/') || this.name.startsWith('feat/')) return 'feature';
-    if (this.name.startsWith('hotfix/') || this.name.startsWith('fix/')) return 'hotfix';
-    if (this.name.startsWith('release/')) return 'release';
-    if (this.name.startsWith('bugfix/')) return 'bugfix';
+    if (this.name.startsWith('feature/') || this.name.startsWith('feat/')) {
+      return 'feature';
+    }
+    if (this.name.startsWith('hotfix/') || this.name.startsWith('fix/')) {
+      return 'hotfix';
+    }
+    if (this.name.startsWith('release/')) {
+      return 'release';
+    }
+    if (this.name.startsWith('bugfix/')) {
+      return 'bugfix';
+    }
     return 'other';
   }
 
@@ -115,7 +123,9 @@ export class GitBranch {
   }
 
   validateProtectionRules(pr: any): boolean {
-    if (!this.protectionRules) return true;
+    if (!this.protectionRules) {
+      return true;
+    }
     if (this.protectionRules.requireApprovals && pr.approvals < this.protectionRules.requireApprovals) {
       return false;
     }
@@ -144,7 +154,7 @@ export class GitBranch {
       ahead: this.ahead,
       behind: this.behind,
       hasRemote: this.hasRemote,
-      metadata: this.metadata
+      metadata: this.metadata,
     };
   }
 

@@ -29,32 +29,32 @@ export class ConfigureWorkflowTool {
       workflowType: {
         type: 'string',
         enum: ['launch', 'ship', 'hotfix'],
-        description: 'Type of workflow to configure'
+        description: 'Type of workflow to configure',
       },
       config: {
         type: 'object',
         properties: {
           requireTests: {
             type: 'boolean',
-            description: 'Require tests to pass before merging'
+            description: 'Require tests to pass before merging',
           },
           requireReview: {
             type: 'boolean',
-            description: 'Require code review before merging'
+            description: 'Require code review before merging',
           },
           autoMerge: {
             type: 'boolean',
-            description: 'Automatically merge when conditions are met'
+            description: 'Automatically merge when conditions are met',
           },
           protectedBranches: {
             type: 'array',
             items: { type: 'string' },
-            description: 'List of protected branch patterns'
-          }
-        }
-      }
+            description: 'List of protected branch patterns',
+          },
+        },
+      },
     },
-    required: ['workflowType']
+    required: ['workflowType'],
   };
 
   private sessionRepo: SessionRepository;
@@ -67,7 +67,7 @@ export class ConfigureWorkflowTool {
     try {
       // Store workflow configuration in session metadata
       const metadata: any = {
-        projectPath: process.cwd()
+        projectPath: process.cwd(),
       };
 
       if (input.config) {
@@ -75,14 +75,14 @@ export class ConfigureWorkflowTool {
           requireTests: input.config.requireTests,
           requireReview: input.config.requireReview,
           autoMerge: input.config.autoMerge,
-          protectedBranches: input.config.protectedBranches
+          protectedBranches: input.config.protectedBranches,
         };
       }
 
       // Create a new session with the workflow type and configuration
       const session = new WorkflowSession({
         workflowType: input.workflowType,
-        metadata
+        metadata,
       });
 
       // Save the session
@@ -91,12 +91,12 @@ export class ConfigureWorkflowTool {
       return {
         success: true,
         session,
-        message: `Workflow configured and session created: ${session.id}`
+        message: `Workflow configured and session created: ${session.id}`,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }

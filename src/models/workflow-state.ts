@@ -57,7 +57,9 @@ export class WorkflowState {
   }
 
   canTransitionTo(targetState: string): boolean {
-    if (this.isTerminal) return false;
+    if (this.isTerminal) {
+      return false;
+    }
     return this.allowedTransitions.includes(targetState);
   }
 
@@ -116,7 +118,7 @@ export class WorkflowState {
       description: this.description,
       isTerminal: this.isTerminal,
       allowedTransitions: this.allowedTransitions,
-      metadata: this.metadata
+      metadata: this.metadata,
     };
   }
 

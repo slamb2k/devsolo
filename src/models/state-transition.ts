@@ -78,8 +78,12 @@ export class StateTransition {
 
   isValid(): boolean {
     // Simplified validation logic
-    if (this.isRecovery) return true;
-    if (this.fromState === 'COMPLETE') return false;
+    if (this.isRecovery) {
+      return true;
+    }
+    if (this.fromState === 'COMPLETE') {
+      return false;
+    }
     return true;
   }
 
@@ -98,10 +102,18 @@ export class StateTransition {
   }
 
   getTriggerType(): string {
-    if (this.trigger.includes('user')) return 'user';
-    if (this.trigger.includes('system')) return 'system';
-    if (this.trigger.includes('webhook')) return 'webhook';
-    if (this.trigger.includes('timeout')) return 'timeout';
+    if (this.trigger.includes('user')) {
+      return 'user';
+    }
+    if (this.trigger.includes('system')) {
+      return 'system';
+    }
+    if (this.trigger.includes('webhook')) {
+      return 'webhook';
+    }
+    if (this.trigger.includes('timeout')) {
+      return 'timeout';
+    }
     return 'unknown';
   }
 
@@ -144,7 +156,9 @@ export class StateTransition {
   }
 
   getDuration(): number | null {
-    if (!this.completedAt) return null;
+    if (!this.completedAt) {
+      return null;
+    }
     return this.completedAt.getTime() - this.timestamp.getTime();
   }
 
@@ -182,9 +196,15 @@ export class StateTransition {
   }
 
   matches(pattern: any): boolean {
-    if (pattern.workflowType && pattern.workflowType !== this.workflowType) return false;
-    if (pattern.fromState && pattern.fromState !== this.fromState) return false;
-    if (pattern.toState && pattern.toState !== this.toState) return false;
+    if (pattern.workflowType && pattern.workflowType !== this.workflowType) {
+      return false;
+    }
+    if (pattern.fromState && pattern.fromState !== this.fromState) {
+      return false;
+    }
+    if (pattern.toState && pattern.toState !== this.toState) {
+      return false;
+    }
     return true;
   }
 
@@ -201,13 +221,13 @@ export class StateTransition {
     events.push({
       type: 'STATE_CHANGED',
       from: this.fromState,
-      to: this.toState
+      to: this.toState,
     });
     if (this.error) {
       events.push({
         type: 'ERROR_OCCURRED',
         error: this.error.message,
-        code: this.error.code
+        code: this.error.code,
       });
     }
     return events;
@@ -223,7 +243,7 @@ export class StateTransition {
       trigger: this.trigger,
       timestamp: this.timestamp,
       actor: this.actor,
-      metadata: this.metadata
+      metadata: this.metadata,
     };
   }
 
@@ -231,7 +251,7 @@ export class StateTransition {
     return new StateTransition({
       ...json,
       timestamp: new Date(json.timestamp),
-      completedAt: json.completedAt ? new Date(json.completedAt) : undefined
+      completedAt: json.completedAt ? new Date(json.completedAt) : undefined,
     });
   }
 }
