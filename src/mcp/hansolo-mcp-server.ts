@@ -239,141 +239,141 @@ export class HanSoloMCPServer {
 
       try {
         switch (name) {
-          case 'hansolo_init': {
-            const params = InitSchema.parse(args);
-            const initCommand = new InitCommand(this.basePath);
-            await initCommand.execute(params);
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: 'han-solo initialized successfully',
-                },
-              ],
-            };
-          }
+        case 'hansolo_init': {
+          const params = InitSchema.parse(args);
+          const initCommand = new InitCommand(this.basePath);
+          await initCommand.execute(params);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'han-solo initialized successfully',
+              },
+            ],
+          };
+        }
 
-          case 'hansolo_launch': {
-            const params = LaunchSchema.parse(args);
-            const launchCommand = new LaunchCommand(this.basePath);
-            await launchCommand.execute(params);
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: `Launched new workflow on branch: ${params.branchName || 'auto-generated'}`,
-                },
-              ],
-            };
-          }
+        case 'hansolo_launch': {
+          const params = LaunchSchema.parse(args);
+          const launchCommand = new LaunchCommand(this.basePath);
+          await launchCommand.execute(params);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Launched new workflow on branch: ${params.branchName || 'auto-generated'}`,
+              },
+            ],
+          };
+        }
 
-          case 'hansolo_sessions': {
-            const params = SessionsSchema.parse(args);
-            // SessionsCommand is available but we'll use SessionRepository directly
-            const sessionRepo = new SessionRepository(this.basePath);
-            const sessions = await sessionRepo.listSessions(params.all);
+        case 'hansolo_sessions': {
+          const params = SessionsSchema.parse(args);
+          // SessionsCommand is available but we'll use SessionRepository directly
+          const sessionRepo = new SessionRepository(this.basePath);
+          const sessions = await sessionRepo.listSessions(params.all);
 
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  totalSessions: sessions.length,
+                  activeSessions: sessions.filter(s => s.isActive()).length,
+                  sessions: sessions.map(s => ({
+                    id: s.id,
+                    branch: s.branchName,
+                    state: s.currentState,
+                    type: s.workflowType,
+                    age: s.getAge(),
+                  })),
+                }, null, 2),
+              },
+            ],
+          };
+        }
+
+        case 'hansolo_swap': {
+          const params = SwapSchema.parse(args);
+          const swapCommand = new SwapCommand(this.basePath);
+          await swapCommand.execute(params.branchName, {
+            force: params.force,
+            stash: params.stash,
+          });
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Swapped to branch: ${params.branchName}`,
+              },
+            ],
+          };
+        }
+
+        case 'hansolo_abort': {
+          const params = AbortSchema.parse(args);
+          const abortCommand = new AbortCommand(this.basePath);
+          await abortCommand.execute(params);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Aborted workflow on branch: ${params.branchName || 'current'}`,
+              },
+            ],
+          };
+        }
+
+        case 'hansolo_ship': {
+          const params = ShipSchema.parse(args);
+          const shipCommand = new ShipCommand(this.basePath);
+          await shipCommand.execute(params);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'Workflow shipped successfully',
+              },
+            ],
+          };
+        }
+
+        case 'hansolo_status': {
+          const gitOps = new GitOperations();
+          const sessionRepo = new SessionRepository(this.basePath);
+          const currentBranch = await gitOps.getCurrentBranch();
+          const session = await sessionRepo.getSessionByBranch(currentBranch);
+
+          if (session) {
             return {
               content: [
                 {
                   type: 'text',
                   text: JSON.stringify({
-                    totalSessions: sessions.length,
-                    activeSessions: sessions.filter(s => s.isActive()).length,
-                    sessions: sessions.map(s => ({
-                      id: s.id,
-                      branch: s.branchName,
-                      state: s.currentState,
-                      type: s.workflowType,
-                      age: s.getAge(),
-                    })),
+                    sessionId: session.id,
+                    branch: session.branchName,
+                    state: session.currentState,
+                    type: session.workflowType,
+                    age: session.getAge(),
+                    isActive: session.isActive(),
                   }, null, 2),
                 },
               ],
             };
-          }
-
-          case 'hansolo_swap': {
-            const params = SwapSchema.parse(args);
-            const swapCommand = new SwapCommand(this.basePath);
-            await swapCommand.execute(params.branchName, {
-              force: params.force,
-              stash: params.stash,
-            });
+          } else {
             return {
               content: [
                 {
                   type: 'text',
-                  text: `Swapped to branch: ${params.branchName}`,
+                  text: 'No active workflow session on current branch',
                 },
               ],
             };
           }
+        }
 
-          case 'hansolo_abort': {
-            const params = AbortSchema.parse(args);
-            const abortCommand = new AbortCommand(this.basePath);
-            await abortCommand.execute(params);
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: `Aborted workflow on branch: ${params.branchName || 'current'}`,
-                },
-              ],
-            };
-          }
-
-          case 'hansolo_ship': {
-            const params = ShipSchema.parse(args);
-            const shipCommand = new ShipCommand(this.basePath);
-            await shipCommand.execute(params);
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: 'Workflow shipped successfully',
-                },
-              ],
-            };
-          }
-
-          case 'hansolo_status': {
-            const gitOps = new GitOperations();
-            const sessionRepo = new SessionRepository(this.basePath);
-            const currentBranch = await gitOps.getCurrentBranch();
-            const session = await sessionRepo.getSessionByBranch(currentBranch);
-
-            if (session) {
-              return {
-                content: [
-                  {
-                    type: 'text',
-                    text: JSON.stringify({
-                      sessionId: session.id,
-                      branch: session.branchName,
-                      state: session.currentState,
-                      type: session.workflowType,
-                      age: session.getAge(),
-                      isActive: session.isActive(),
-                    }, null, 2),
-                  },
-                ],
-              };
-            } else {
-              return {
-                content: [
-                  {
-                    type: 'text',
-                    text: 'No active workflow session on current branch',
-                  },
-                ],
-              };
-            }
-          }
-
-          default:
-            throw new Error(`Unknown tool: ${name}`);
+        default:
+          throw new Error(`Unknown tool: ${name}`);
         }
       } catch (error) {
         return {

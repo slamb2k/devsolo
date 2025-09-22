@@ -80,23 +80,23 @@ export class ShipCommand {
 
       // Execute the appropriate action
       switch (nextAction) {
-        case 'commit':
-          await this.performCommit(session, options);
-          break;
-        case 'push':
-          await this.performPush(session, options);
-          break;
-        case 'create-pr':
-          await this.performCreatePR(session, options);
-          break;
-        case 'merge':
-          await this.performMerge(session, options);
-          break;
-        case 'complete':
-          await this.performComplete(session, options);
-          break;
-        default:
-          this.output.errorMessage(`Unknown action: ${nextAction}`);
+      case 'commit':
+        await this.performCommit(session, options);
+        break;
+      case 'push':
+        await this.performPush(session, options);
+        break;
+      case 'create-pr':
+        await this.performCreatePR(session, options);
+        break;
+      case 'merge':
+        await this.performMerge(session, options);
+        break;
+      case 'complete':
+        await this.performComplete(session, options);
+        break;
+      default:
+        this.output.errorMessage(`Unknown action: ${nextAction}`);
       }
 
     } catch (error) {
@@ -109,26 +109,32 @@ export class ShipCommand {
     const { push, createPR, merge } = options;
 
     // Check explicit flags first
-    if (merge) return 'merge';
-    if (createPR) return 'create-pr';
-    if (push) return 'push';
+    if (merge) {
+      return 'merge';
+    }
+    if (createPR) {
+      return 'create-pr';
+    }
+    if (push) {
+      return 'push';
+    }
 
     // Otherwise, determine based on state
     switch (session.currentState) {
-      case 'INIT':
-      case 'BRANCH_READY':
-        return 'commit';
-      case 'CHANGES_COMMITTED':
-        return 'push';
-      case 'PUSHED':
-        return 'create-pr';
-      case 'PR_CREATED':
-      case 'WAITING_APPROVAL':
-        return 'merge';
-      case 'MERGED':
-        return 'complete';
-      default:
-        return null;
+    case 'INIT':
+    case 'BRANCH_READY':
+      return 'commit';
+    case 'CHANGES_COMMITTED':
+      return 'push';
+    case 'PUSHED':
+      return 'create-pr';
+    case 'PR_CREATED':
+    case 'WAITING_APPROVAL':
+      return 'merge';
+    case 'MERGED':
+      return 'complete';
+    default:
+      return null;
     }
   }
 
@@ -420,7 +426,9 @@ export class ShipCommand {
   }
 
   private async confirmAction(message: string, ask: boolean = true): Promise<boolean> {
-    if (!ask) return true;
+    if (!ask) {
+      return true;
+    }
 
     const rl = readline.createInterface({
       input: process.stdin,
@@ -469,7 +477,7 @@ export class ShipCommand {
       `Branch: ${session.branchName}\n` +
       `Duration: ${hours}h ${minutes}m\n` +
       `State Transitions: ${session.stateHistory.length}\n\n` +
-      `Workflow Timeline:\n` +
+      'Workflow Timeline:\n' +
       session.stateHistory.map(t => {
         const time = new Date(t.timestamp).toLocaleTimeString();
         return `  ${time}: ${t.from} → ${t.to}`;

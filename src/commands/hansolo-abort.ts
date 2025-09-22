@@ -112,7 +112,9 @@ export class AbortCommand {
   }
 
   private async confirmAction(message: string, ask: boolean = true): Promise<boolean> {
-    if (!ask) return true;
+    if (!ask) {
+      return true;
+    }
 
     const rl = readline.createInterface({
       input: process.stdin,

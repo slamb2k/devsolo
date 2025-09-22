@@ -11,6 +11,7 @@ import { AbortCommand } from './commands/hansolo-abort';
 import { ShipCommand } from './commands/hansolo-ship';
 import { HotfixCommand } from './commands/hansolo-hotfix';
 import { runInteractiveMode } from './commands/interactive';
+import { PerfCommand } from './commands/hansolo-perf';
 
 const HANSOLO_ASCII = `
 ╔═══════════════════════════════════════════╗
@@ -107,6 +108,12 @@ export async function main(): Promise<void> {
     return;
   }
 
+  // Performance command
+  if (command === 'perf' || command === 'performance') {
+    await runPerf(args.slice(1));
+    return;
+  }
+
   console.log(`Unknown command: ${command}`);
   console.log('Run "hansolo --help" for usage information.');
   process.exit(1);
@@ -125,6 +132,7 @@ function showHelp(): void {
   console.log('  swap         Switch between sessions');
   console.log('  abort        Abort current workflow');
   console.log('  interactive  Start interactive mode');
+  console.log('  perf         Show performance metrics');
   console.log('  demo         Run a demonstration');
   console.log('\nOptions:');
   console.log('  --help, -h    Show this help message');
@@ -340,6 +348,38 @@ async function runHotfix(args: string[]): Promise<void> {
   }
 
   await hotfixCommand.execute(options);
+}
+
+async function runPerf(args: string[]): Promise<void> {
+  const perfCommand = new PerfCommand();
+
+  // Parse command and options
+  const command = args[0] || 'stats';
+  const options: any = { command };
+
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === '--since') {
+      const nextArg = args[i + 1];
+      if (nextArg !== undefined) {
+        const value = parseInt(nextArg, 10);
+        if (!isNaN(value)) {
+          options.since = value;
+          i++;
+        }
+      }
+    } else if (args[i] === '--limit') {
+      const nextArg = args[i + 1];
+      if (nextArg !== undefined) {
+        const value = parseInt(nextArg, 10);
+        if (!isNaN(value)) {
+          options.limit = value;
+          i++;
+        }
+      }
+    }
+  }
+
+  await perfCommand.execute(options);
 }
 
 // Run if executed directly

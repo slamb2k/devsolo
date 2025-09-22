@@ -91,7 +91,9 @@ export class ProgressIndicator {
 
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
-      if (!step) continue;
+      if (!step) {
+        continue;
+      }
       const stepNumber = `[${i + 1}/${steps.length}]`;
       const stepText = `${stepNumber} ${step.name}`;
 

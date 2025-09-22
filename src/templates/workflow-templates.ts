@@ -47,14 +47,14 @@ export const templates: Record<string, WorkflowTemplate> = {
 - [ ] No new warnings`,
     hooks: {
       preCommit: ['npm run lint', 'npm run test:unit'],
-      prePush: ['npm run test']
+      prePush: ['npm run test'],
     },
     validations: {
       requireTests: true,
       requireReview: true,
       requireCI: true,
-      minReviewers: 1
-    }
+      minReviewers: 1,
+    },
   },
 
   hotfix: {
@@ -87,14 +87,14 @@ export const templates: Record<string, WorkflowTemplate> = {
 - [ ] Requires coordination`,
     hooks: {
       preCommit: ['npm run lint:fix'],
-      postPush: ['npm run deploy:staging']
+      postPush: ['npm run deploy:staging'],
     },
     validations: {
       requireTests: false,
       requireReview: true,
       requireCI: false,
-      minReviewers: 2
-    }
+      minReviewers: 2,
+    },
   },
 
   release: {
@@ -131,14 +131,14 @@ export const templates: Record<string, WorkflowTemplate> = {
     hooks: {
       preCommit: ['npm run build', 'npm run test'],
       postCommit: ['npm run changelog:generate'],
-      prePush: ['npm run test:e2e']
+      prePush: ['npm run test:e2e'],
     },
     validations: {
       requireTests: true,
       requireReview: true,
       requireCI: true,
-      minReviewers: 2
-    }
+      minReviewers: 2,
+    },
   },
 
   experiment: {
@@ -171,14 +171,14 @@ export const templates: Record<string, WorkflowTemplate> = {
 - [ ] Can be refactored for production
 - [ ] Should be discarded`,
     hooks: {
-      preCommit: ['npm run lint']
+      preCommit: ['npm run lint'],
     },
     validations: {
       requireTests: false,
       requireReview: false,
       requireCI: false,
-      minReviewers: 0
-    }
+      minReviewers: 0,
+    },
   },
 
   bugfix: {
@@ -215,14 +215,14 @@ After:
 {afterScreenshot}`,
     hooks: {
       preCommit: ['npm run lint', 'npm run test:unit'],
-      prePush: ['npm run test']
+      prePush: ['npm run test'],
     },
     validations: {
       requireTests: true,
       requireReview: true,
       requireCI: true,
-      minReviewers: 1
-    }
+      minReviewers: 1,
+    },
   },
 
   documentation: {
@@ -250,15 +250,15 @@ After:
 - [ ] Code examples tested
 - [ ] Screenshots updated (if needed)`,
     hooks: {
-      preCommit: ['npm run docs:lint']
+      preCommit: ['npm run docs:lint'],
     },
     validations: {
       requireTests: false,
       requireReview: true,
       requireCI: false,
-      minReviewers: 1
-    }
-  }
+      minReviewers: 1,
+    },
+  },
 };
 
 export class TemplateManager {
@@ -289,7 +289,7 @@ export class TemplateManager {
     return {
       branchName,
       commitMessage,
-      prDescription
+      prDescription,
     };
   }
 
@@ -337,7 +337,7 @@ export class TemplateManager {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }

@@ -150,38 +150,38 @@ export abstract class StateMachine {
     // Map transitions to actions
     for (const nextState of stateDefinition.allowedTransitions) {
       switch (nextState) {
-        case 'BRANCH_READY':
-          actions.push('start');
-          break;
-        case 'CHANGES_COMMITTED':
-          actions.push('commit');
-          break;
-        case 'PUSHED':
-          actions.push('push');
-          break;
-        case 'PR_CREATED':
-          actions.push('create_pr');
-          break;
-        case 'WAITING_APPROVAL':
-          actions.push('wait');
-          break;
-        case 'REBASING':
-          actions.push('rebase');
-          break;
-        case 'MERGING':
-          actions.push('merge');
-          break;
-        case 'COMPLETE':
-          actions.push('complete');
-          break;
-        case 'ABORTED':
-          actions.push('abort');
-          break;
-        default:
-          // Handle workflow-specific states
-          if (nextState.startsWith('HOTFIX_')) {
-            actions.push(nextState.toLowerCase().replace('hotfix_', ''));
-          }
+      case 'BRANCH_READY':
+        actions.push('start');
+        break;
+      case 'CHANGES_COMMITTED':
+        actions.push('commit');
+        break;
+      case 'PUSHED':
+        actions.push('push');
+        break;
+      case 'PR_CREATED':
+        actions.push('create_pr');
+        break;
+      case 'WAITING_APPROVAL':
+        actions.push('wait');
+        break;
+      case 'REBASING':
+        actions.push('rebase');
+        break;
+      case 'MERGING':
+        actions.push('merge');
+        break;
+      case 'COMPLETE':
+        actions.push('complete');
+        break;
+      case 'ABORTED':
+        actions.push('abort');
+        break;
+      default:
+        // Handle workflow-specific states
+        if (nextState.startsWith('HOTFIX_')) {
+          actions.push(nextState.toLowerCase().replace('hotfix_', ''));
+        }
       }
     }
 

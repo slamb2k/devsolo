@@ -138,7 +138,7 @@ export class SessionsCommand {
       `Updated: ${new Date(session.updatedAt).toLocaleString()}\n` +
       `Age: ${session.getAge()}\n` +
       `Expires: ${session.getTimeRemaining()}\n` +
-      `\nGit Status:\n` +
+      '\nGit Status:\n' +
       `  Ahead: ${branchStatus.ahead}\n` +
       `  Behind: ${branchStatus.behind}\n` +
       `  Clean: ${branchStatus.isClean ? '✅' : '❌'}\n` +

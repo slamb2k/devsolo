@@ -94,7 +94,7 @@ export class GitHubIntegration {
 
     for (const pattern of patterns) {
       const match = url.match(pattern);
-      if (match && match[1] && match[2]) {
+      if (match?.[1] && match[2]) {
         return {
           owner: match[1],
           repo: match[2],

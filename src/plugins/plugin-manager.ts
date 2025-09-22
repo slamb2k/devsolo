@@ -53,12 +53,12 @@ export class PluginManager extends EventEmitter {
     // Default plugin directories
     this.pluginPaths = [
       path.join(process.cwd(), '.hansolo', 'plugins'),
-      path.join(process.env.HOME || '', '.hansolo', 'plugins'),
+      path.join(process.env['HOME'] || '', '.hansolo', 'plugins'),
       path.join(__dirname, '..', '..', 'plugins'),
     ];
 
     // Add custom plugin paths from environment
-    const customPath = process.env.HANSOLO_PLUGIN_PATH;
+    const customPath = process.env['HANSOLO_PLUGIN_PATH'];
     if (customPath) {
       this.pluginPaths.unshift(...customPath.split(':'));
     }
@@ -73,7 +73,7 @@ export class PluginManager extends EventEmitter {
         warn: (message: string) => console.warn(`[Plugin] ⚠️  ${message}`),
         error: (message: string) => console.error(`[Plugin] ❌ ${message}`),
         debug: (message: string) => {
-          if (process.env.DEBUG) {
+          if (process.env['DEBUG']) {
             console.debug(`[Plugin] 🔍 ${message}`);
           }
         },
@@ -83,10 +83,10 @@ export class PluginManager extends EventEmitter {
           return this.emit('command', command, args);
         },
         registerCommand: (name: string, handler: Function) => {
-          this.on(`command:${name}`, handler);
+          this.on(`command:${name}`, handler as (...args: any[]) => void);
         },
         registerHook: (name: string, handler: Function) => {
-          this.on(`hook:${name}`, handler);
+          this.on(`hook:${name}`, handler as (...args: any[]) => void);
         },
         getSession: () => {
           // This would be connected to the actual session repository

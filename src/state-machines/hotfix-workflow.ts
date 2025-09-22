@@ -114,33 +114,33 @@ export class HotfixWorkflowStateMachine extends StateMachine {
     // Map hotfix transitions to actions
     for (const nextState of stateDefinition.allowedTransitions) {
       switch (nextState) {
-        case 'HOTFIX_READY':
-          actions.push('start');
-          break;
-        case 'HOTFIX_COMMITTED':
-          actions.push('commit');
-          break;
-        case 'HOTFIX_PUSHED':
-          actions.push('push');
-          break;
-        case 'HOTFIX_VALIDATED':
-          actions.push('validate');
-          break;
-        case 'HOTFIX_DEPLOYED':
-          actions.push('deploy');
-          break;
-        case 'HOTFIX_CLEANUP':
-          actions.push('cleanup');
-          break;
-        case 'HOTFIX_COMPLETE':
-          actions.push('complete');
-          break;
-        case 'ROLLBACK':
-          actions.push('rollback');
-          break;
-        case 'ABORTED':
-          actions.push('abort');
-          break;
+      case 'HOTFIX_READY':
+        actions.push('start');
+        break;
+      case 'HOTFIX_COMMITTED':
+        actions.push('commit');
+        break;
+      case 'HOTFIX_PUSHED':
+        actions.push('push');
+        break;
+      case 'HOTFIX_VALIDATED':
+        actions.push('validate');
+        break;
+      case 'HOTFIX_DEPLOYED':
+        actions.push('deploy');
+        break;
+      case 'HOTFIX_CLEANUP':
+        actions.push('cleanup');
+        break;
+      case 'HOTFIX_COMPLETE':
+        actions.push('complete');
+        break;
+      case 'ROLLBACK':
+        actions.push('rollback');
+        break;
+      case 'ABORTED':
+        actions.push('abort');
+        break;
       }
     }
 
@@ -239,16 +239,16 @@ export class HotfixWorkflowStateMachine extends StateMachine {
 
   async validateStateAsync(state: StateName, context: Record<string, unknown>): Promise<ValidationResult> {
     switch (state) {
-      case 'HOTFIX_READY':
-        return this.validateHotfixReady(context);
-      case 'HOTFIX_COMMITTED':
-        return this.validateHotfixCommitted(context);
-      case 'HOTFIX_VALIDATED':
-        return this.validateHotfixValidated(context);
-      case 'HOTFIX_DEPLOYED':
-        return this.validateHotfixDeployed(context);
-      default:
-        return { isValid: true, errors: [] };
+    case 'HOTFIX_READY':
+      return this.validateHotfixReady(context);
+    case 'HOTFIX_COMMITTED':
+      return this.validateHotfixCommitted(context);
+    case 'HOTFIX_VALIDATED':
+      return this.validateHotfixValidated(context);
+    case 'HOTFIX_DEPLOYED':
+      return this.validateHotfixDeployed(context);
+    default:
+      return { isValid: true, errors: [] };
     }
   }
 
