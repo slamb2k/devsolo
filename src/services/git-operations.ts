@@ -293,31 +293,8 @@ export class GitOperations {
     return this.isInitialized();
   }
 
-  async setConfig(key: string, value: string): Promise<void> {
-    await this.git.addConfig(key, value);
-  }
-
-  async add(files: string): Promise<void> {
-    await this.git.add(files);
-  }
-
-  async commit(message: string): Promise<void> {
-    await this.git.commit(message);
-  }
-
-  async addRemote(name: string, url: string): Promise<void> {
-    await this.git.addRemote(name, url);
-  }
-
   async checkout(branch: string): Promise<void> {
     await this.git.checkout(branch);
-  }
-
-  async push(remote?: string, branch?: string): Promise<any> {
-    if (remote && branch) {
-      return await this.git.push(remote, branch);
-    }
-    return await this.git.push();
   }
 
   async isInstalled(): Promise<boolean> {
@@ -342,7 +319,7 @@ export class GitOperations {
     return this.listBranches();
   }
 
-  async getLog(branchOrLimit: string | number, limit?: number): Promise<any[]> {
+  async getLogWithBranch(branchOrLimit: string | number, limit?: number): Promise<any[]> {
     if (typeof branchOrLimit === 'number') {
       // Called with just limit
       const result = await this.git.log(['-n', branchOrLimit.toString()]);
@@ -350,7 +327,7 @@ export class GitOperations {
     } else {
       // Called with branch and limit
       const result = await this.git.log([branchOrLimit, '-n', (limit || 10).toString()]);
-      return result.all;
+      return [...result.all];
     }
   }
 
@@ -363,7 +340,7 @@ export class GitOperations {
     }
   }
 
-  async rebase(branch?: string): Promise<any> {
+  async rebaseInteractive(branch?: string): Promise<any> {
     if (branch) {
       return await this.git.rebase([branch]);
     }

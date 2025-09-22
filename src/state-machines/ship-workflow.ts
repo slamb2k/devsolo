@@ -56,24 +56,24 @@ export class ShipWorkflow {
     }
 
     // Special validations
-    if (toState === 'PR_CREATED' && !this.session.metadata?.hasChanges) {
+    if (toState === 'PR_CREATED' && !(this.session.metadata as any)?.hasChanges) {
       return {
         success: false,
         error: 'No changes to create PR'
       };
     }
 
-    if (toState === 'APPROVED' && this.session.metadata?.requiredApprovals) {
-      const currentApprovals = this.session.metadata.currentApprovals || 0;
-      if (currentApprovals < this.session.metadata.requiredApprovals) {
+    if (toState === 'APPROVED' && (this.session.metadata as any)?.requiredApprovals) {
+      const currentApprovals = (this.session.metadata as any).currentApprovals || 0;
+      if (currentApprovals < (this.session.metadata as any).requiredApprovals) {
         return {
           success: false,
-          error: `Insufficient approvals: ${currentApprovals} of ${this.session.metadata.requiredApprovals}`
+          error: `Insufficient approvals: ${currentApprovals} of ${(this.session.metadata as any).requiredApprovals}`
         };
       }
     }
 
-    if (toState === 'REBASING' && this.session.metadata?.ciStatus === 'failed') {
+    if (toState === 'REBASING' && (this.session.metadata as any)?.ciStatus === 'failed') {
       return {
         success: false,
         error: 'CI checks failed'
@@ -88,7 +88,7 @@ export class ShipWorkflow {
     }
 
     // Update session
-    this.session.currentState = toState;
+    this.session.currentState = toState as any;
     if (options.metadata) {
       this.session.metadata = { ...this.session.metadata, ...options.metadata };
     }

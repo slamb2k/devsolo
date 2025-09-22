@@ -8,7 +8,6 @@ import { GitOperations } from '../services/git-operations';
 import { WorkflowSession } from '../models/workflow-session';
 import { ShipWorkflow } from '../state-machines/ship-workflow';
 import { HotfixWorkflow } from '../state-machines/hotfix-workflow';
-import * as path from 'path';
 import * as os from 'os';
 
 interface ToolDefinition {
@@ -326,11 +325,9 @@ export class MCPServer {
   private async configureWorkflow(params: any): Promise<any> {
     const config = await this.configManager.load();
 
-    if (params.projectPath) {
-      config.projectPath = params.projectPath;
-    }
+    // Update preferences
     if (params.defaultBranch) {
-      config.defaultBranch = params.defaultBranch;
+      config.preferences.defaultBranchPrefix = params.defaultBranch;
     }
     if (params.platform) {
       config.gitPlatform = {
@@ -360,7 +357,7 @@ export class MCPServer {
     const currentBranch = await this.gitOps.getCurrentBranch();
     const existingSession = await this.sessionRepo.getSessionByBranch(currentBranch);
 
-    if (existingSession && existingSession.status === 'active') {
+    if (existingSession && !existingSession.isExpired()) {
       return {
         success: false,
         error: 'Already in an active session',
@@ -372,7 +369,6 @@ export class MCPServer {
     const session = new WorkflowSession({
       workflowType: params.workflowType,
       branchName: params.branch || `${params.workflowType}/${Date.now()}`,
-      currentState: 'INIT',
       metadata: params.metadata || {}
     });
 
@@ -395,11 +391,11 @@ export class MCPServer {
     }
 
     // Get appropriate workflow
-    let workflow;
+    let workflow: any;
     if (session.workflowType === 'ship') {
-      workflow = new ShipWorkflow(session, this.gitOps, this.sessionRepo);
+      workflow = new ShipWorkflow(session);
     } else if (session.workflowType === 'hotfix') {
-      workflow = new HotfixWorkflow(session, this.gitOps, this.sessionRepo);
+      workflow = new HotfixWorkflow(session);
     } else {
       // Default workflow for launch
       return {
@@ -414,9 +410,9 @@ export class MCPServer {
       };
     }
 
-    // Execute action
+    // Execute action (for now, just simulate)
     try {
-      const result = await workflow.executeAction(params.action, params.metadata);
+      const result = await workflow.transition(params.action, params.metadata || {});
       return {
         success: true,
         sessionId: params.sessionId,
@@ -438,7 +434,7 @@ export class MCPServer {
 
   private async getSessionsStatus(params: any): Promise<any> {
     const sessions = await this.sessionRepo.listSessions(params.includeCompleted);
-    const activeSessions = sessions.filter(s => s.status === 'active');
+    const activeSessions = sessions.filter(s => !s.isExpired());
     const initialized = await this.configManager.isInitialized();
 
     let sessionDetails;
@@ -488,8 +484,9 @@ export class MCPServer {
       };
     }
 
-    session.status = 'aborted';
-    await this.sessionRepo.updateSession(params.sessionId, { status: 'aborted' });
+    // Mark session as expired by setting expiresAt to past
+    session.expiresAt = new Date(Date.now() - 1000).toISOString();
+    await this.sessionRepo.updateSession(params.sessionId, { expiresAt: session.expiresAt });
 
     if (params.cleanup) {
       await this.gitOps.checkoutBranch('main');
@@ -505,7 +502,7 @@ export class MCPServer {
     };
   }
 
-  private async validateEnvironment(params: any): Promise<any> {
+  private async validateEnvironment(_params: any): Promise<any> {
     const checks: any = {};
     const warnings: string[] = [];
     const recommendations: string[] = [];
@@ -524,7 +521,7 @@ export class MCPServer {
 
     // Check Node.js
     const nodeVersion = process.version;
-    const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
+    const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0] || '0');
     checks.node = {
       installed: true,
       version: nodeVersion,
@@ -555,7 +552,6 @@ export class MCPServer {
     }
 
     // Check permissions
-    const hansoloDir = path.join(process.cwd(), '.hansolo');
     checks.permissions = {
       canWrite: true, // Simplified check
       hansoloDir: true
@@ -579,7 +575,7 @@ export class MCPServer {
 
     // Platform info
     const platform = os.platform();
-    checks.platform = { type: platform };
+    checks.platform = { type: platform as string };
 
     const allChecksPassed =
       checks.git?.installed &&
@@ -643,7 +639,7 @@ export class MCPServer {
       session = new WorkflowSession({
         workflowType: params.workflowType,
         branchName: params.branchName,
-        currentState: 'BRANCH_READY'
+        metadata: { projectPath: process.cwd() }
       });
       await this.sessionRepo.createSession(session);
     }
@@ -701,7 +697,9 @@ export class MCPServer {
 
     // Archive or delete session
     if (params.archiveSession && params.sessionId) {
-      await this.sessionRepo.updateSession(params.sessionId, { status: 'archived' });
+      // Mark as expired
+      const expiredDate = new Date(Date.now() - 1000).toISOString();
+      await this.sessionRepo.updateSession(params.sessionId, { expiresAt: expiredDate });
       cleanup.sessionArchived = true;
     }
 

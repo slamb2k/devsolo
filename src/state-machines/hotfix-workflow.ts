@@ -337,7 +337,7 @@ export class HotfixWorkflow {
     const fromState = this.session.currentState;
 
     // Validation for production branch
-    if (toState === 'HOTFIX_BRANCH_CREATED' && this.session.metadata?.productionBranchExists === false) {
+    if (toState === 'HOTFIX_BRANCH_CREATED' && (this.session.metadata as any)?.productionBranchExists === false) {
       return {
         success: false,
         error: 'Production branch not found'
@@ -345,7 +345,7 @@ export class HotfixWorkflow {
     }
 
     // Test validation
-    if (fromState === 'TESTING' && toState === 'ERROR' && !this.session.metadata?.testsPassed) {
+    if (fromState === 'TESTING' as any && toState === 'ERROR' && !(this.session.metadata as any)?.testsPassed) {
       return {
         success: true,
         fromState,
@@ -355,7 +355,7 @@ export class HotfixWorkflow {
     }
 
     // Deployment validation
-    if (toState === 'ABORTED' && fromState === 'DEPLOYING_TO_PRODUCTION') {
+    if (toState === 'ABORTED' && fromState === 'DEPLOYING_TO_PRODUCTION' as any) {
       return {
         success: false,
         error: 'Cannot abort during production deployment'
@@ -363,7 +363,7 @@ export class HotfixWorkflow {
     }
 
     // Fast-track validation
-    if (options.metadata?.skipValidation && this.session.metadata?.priority === 'low') {
+    if (options.metadata?.skipValidation && (this.session.metadata as any)?.priority === 'low') {
       return {
         success: false,
         error: 'Fast track not allowed for low priority'
@@ -371,7 +371,7 @@ export class HotfixWorkflow {
     }
 
     // Emergency access validation
-    if (options.metadata?.bypassChecks && this.session.metadata?.emergencyAccess === false) {
+    if (options.metadata?.bypassChecks && (this.session.metadata as any)?.emergencyAccess === false) {
       return {
         success: false,
         error: 'Emergency access not authorized'
@@ -379,7 +379,7 @@ export class HotfixWorkflow {
     }
 
     // Approval validation
-    if (toState === 'DEPLOYING_TO_PRODUCTION' && this.session.metadata?.requiresApproval && !this.session.metadata?.approvals?.length) {
+    if (toState === 'DEPLOYING_TO_PRODUCTION' as any && (this.session.metadata as any)?.requiresApproval && !(this.session.metadata as any)?.approvals?.length) {
       return {
         success: false,
         error: 'Approval required'
@@ -387,7 +387,7 @@ export class HotfixWorkflow {
     }
 
     // Update session
-    this.session.currentState = toState;
+    this.session.currentState = toState as any;
     if (options.metadata) {
       this.session.metadata = { ...this.session.metadata, ...options.metadata };
     }
@@ -434,11 +434,11 @@ export class HotfixWorkflow {
   }
 
   calculateMTTR(): number | null {
-    if (this.session.currentState !== 'COMPLETE' || !this.session.metadata?.completedAt) {
+    if (this.session.currentState !== 'COMPLETE' || !(this.session.metadata as any)?.completedAt) {
       return null;
     }
-    const start = this.session.createdAt.getTime();
-    const end = (this.session.metadata.completedAt as Date).getTime();
+    const start = new Date(this.session.createdAt).getTime();
+    const end = new Date((this.session.metadata as any).completedAt).getTime();
     return end - start;
   }
 }
