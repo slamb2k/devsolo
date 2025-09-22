@@ -5,7 +5,7 @@ import { StateMachine } from '../../src/state-machines/base-state-machine';
 import { GitOperations } from '../../src/services/git-operations';
 import { WorkflowSession } from '../../src/models/workflow-session';
 
-describe.skip('ExecuteWorkflowStep Tool Contract', () => {
+describe('ExecuteWorkflowStep Tool Contract', () => {
   let tool: ExecuteWorkflowStepTool;
   let sessionRepo: jest.Mocked<SessionRepository>;
   let gitOps: jest.Mocked<GitOperations>;

@@ -4,7 +4,7 @@ import { SessionRepository } from '../../src/services/session-repository';
 import { GitOperations } from '../../src/services/git-operations';
 import { WorkflowSession } from '../../src/models/workflow-session';
 
-describe.skip('StartWorkflow Tool Contract', () => {
+describe('StartWorkflow Tool Contract', () => {
   let tool: StartWorkflowTool;
   let sessionRepo: jest.Mocked<SessionRepository>;
   let gitOps: jest.Mocked<GitOperations>;
