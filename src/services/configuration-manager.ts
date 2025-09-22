@@ -315,4 +315,37 @@ Closes #
 
     await fs.writeFile(path.join(templatesPath, 'pull-request.md'), prTemplate);
   }
+
+  // Additional methods for test compatibility
+  async exists(): Promise<boolean> {
+    try {
+      await fs.access(this.configPath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async setSetting(key: string, value: any): Promise<void> {
+    if (!this.config) {
+      await this.load();
+    }
+    if (this.config) {
+      (this.config as any)[key] = value;
+      await this.save(this.config);
+    }
+  }
+
+  async setWorkflowConfig(workflowType: string, config: any): Promise<void> {
+    if (!this.config) {
+      await this.load();
+    }
+    if (this.config) {
+      if (!(this.config as any).workflows) {
+        (this.config as any).workflows = {};
+      }
+      (this.config as any).workflows[workflowType] = config;
+      await this.save(this.config);
+    }
+  }
 }

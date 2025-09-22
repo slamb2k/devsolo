@@ -256,7 +256,7 @@ describe('GitBranch Model', () => {
 
   describe('Protection Rules', () => {
     it('should check if branch is protected', () => {
-      const protected = new GitBranch({
+      const protectedBranch = new GitBranch({
         name: 'main',
         protected: true,
         protectionRules: {
@@ -271,7 +271,7 @@ describe('GitBranch Model', () => {
         name: 'feature/test'
       });
 
-      expect(protected.isProtected()).toBe(true);
+      expect(protectedBranch.isProtected()).toBe(true);
       expect(unprotected.isProtected()).toBe(false);
     });
 
