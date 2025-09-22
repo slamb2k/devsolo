@@ -32,23 +32,23 @@ export class ExecuteWorkflowStepTool {
     properties: {
       sessionId: {
         type: 'string',
-        description: 'Session ID of the workflow'
+        description: 'Session ID of the workflow',
       },
       action: {
         type: 'string',
         enum: ['commit', 'push', 'create-pr', 'merge', 'next'],
-        description: 'Action to execute'
+        description: 'Action to execute',
       },
       data: {
         type: 'object',
         properties: {
           commitMessage: { type: 'string' },
           prTitle: { type: 'string' },
-          prBody: { type: 'string' }
-        }
-      }
+          prBody: { type: 'string' },
+        },
+      },
     },
-    required: ['sessionId', 'action']
+    required: ['sessionId', 'action'],
   };
 
   private sessionRepo: SessionRepository;
@@ -70,7 +70,7 @@ export class ExecuteWorkflowStepTool {
       if (!session) {
         return {
           success: false,
-          error: 'Session not found'
+          error: 'Session not found',
         };
       }
 
@@ -78,62 +78,65 @@ export class ExecuteWorkflowStepTool {
 
       // Execute the action
       switch (input.action) {
-        case 'commit':
-          if (!input.data?.commitMessage) {
-            return {
-              success: false,
-              error: 'Commit message required'
-            };
-          }
-          await this.gitOps.add();
-          const commitResult = await this.gitOps.commit(input.data.commitMessage);
-          result = { commit: commitResult.commit };
-          session.currentState = 'CHANGES_COMMITTED';
-          break;
+      case 'commit': {
+        if (!input.data?.commitMessage) {
+          return {
+            success: false,
+            error: 'Commit message required',
+          };
+        }
+        await this.gitOps.add();
+        const commitResult = await this.gitOps.commit(input.data.commitMessage);
+        result = { commit: commitResult.commit };
+        session.currentState = 'CHANGES_COMMITTED';
+        break;
+      }
 
-        case 'push':
-          await this.gitOps.push('origin', session.branchName);
-          session.currentState = 'PUSHED';
-          result = { pushed: true };
-          break;
+      case 'push':
+        await this.gitOps.push('origin', session.branchName);
+        session.currentState = 'PUSHED';
+        result = { pushed: true };
+        break;
 
-        case 'create-pr':
-          if (!input.data?.prTitle) {
-            return {
-              success: false,
-              error: 'PR title required'
-            };
-          }
-          const pr = await this.github.createPullRequest({
-            title: input.data.prTitle,
-            body: input.data.prBody || '',
-            head: session.branchName,
-            base: 'main'
-          });
-          if (pr) {
-            result = { prNumber: pr.number, prUrl: pr.html_url };
-          }
-          session.currentState = 'PR_CREATED';
-          break;
+      case 'create-pr': {
+        if (!input.data?.prTitle) {
+          return {
+            success: false,
+            error: 'PR title required',
+          };
+        }
+        const pr = await this.github.createPullRequest({
+          title: input.data.prTitle,
+          body: input.data.prBody || '',
+          head: session.branchName,
+          base: 'main',
+        });
+        if (pr) {
+          result = { prNumber: pr.number, prUrl: pr.html_url };
+        }
+        session.currentState = 'PR_CREATED';
+        break;
+      }
 
-        case 'merge':
-          // This would require PR number from session metadata
-          session.currentState = 'MERGING';
-          break;
+      case 'merge':
+        // This would require PR number from session metadata
+        session.currentState = 'MERGING';
+        break;
 
-        case 'next':
-          // Transition to next valid state
-          const nextStates = this.stateMachine.getNextStates(session.currentState);
-          if (nextStates.length > 0 && nextStates[0]) {
-            const transitionResult = await this.stateMachine.transition(
-              session.currentState,
-              nextStates[0]
-            );
-            if (transitionResult.success) {
-              session.currentState = transitionResult.toState;
-            }
+      case 'next': {
+        // Transition to next valid state
+        const nextStates = this.stateMachine.getNextStates(session.currentState);
+        if (nextStates.length > 0 && nextStates[0]) {
+          const transitionResult = await this.stateMachine.transition(
+            session.currentState,
+            nextStates[0]
+          );
+          if (transitionResult.success) {
+            session.currentState = transitionResult.toState;
           }
-          break;
+        }
+        break;
+      }
       }
 
       // Save updated session
@@ -144,12 +147,12 @@ export class ExecuteWorkflowStepTool {
         currentState: session.currentState,
         nextStates: this.stateMachine.getNextStates(session.currentState),
         message: `Action '${input.action}' executed successfully`,
-        data: result
+        data: result,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }

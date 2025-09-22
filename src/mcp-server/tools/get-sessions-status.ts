@@ -41,14 +41,14 @@ export class GetSessionsStatusTool {
       includeCompleted: {
         type: 'boolean',
         description: 'Include completed sessions',
-        default: false
+        default: false,
       },
       includeAborted: {
         type: 'boolean',
         description: 'Include aborted sessions',
-        default: false
-      }
-    }
+        default: false,
+      },
+    },
   };
 
   private sessionRepo: SessionRepository;
@@ -102,20 +102,20 @@ export class GetSessionsStatusTool {
           isActive: this.isActiveState(session.currentState),
           isCurrent,
           createdAt: session.createdAt,
-          branchStatus
+          branchStatus,
         });
       }
 
       return {
         success: true,
         sessions: sessionStatuses,
-        currentSessionId
+        currentSessionId,
       };
     } catch (error) {
       return {
         success: false,
         sessions: [],
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }

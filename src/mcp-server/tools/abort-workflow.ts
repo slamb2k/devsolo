@@ -25,17 +25,17 @@ export class AbortWorkflowTool {
     properties: {
       sessionId: {
         type: 'string',
-        description: 'Session ID to abort (uses current if not provided)'
+        description: 'Session ID to abort (uses current if not provided)',
       },
       stashChanges: {
         type: 'boolean',
-        description: 'Stash uncommitted changes before aborting'
+        description: 'Stash uncommitted changes before aborting',
       },
       force: {
         type: 'boolean',
-        description: 'Force abort even with uncommitted changes'
-      }
-    }
+        description: 'Force abort even with uncommitted changes',
+      },
+    },
   };
 
   private sessionRepo: SessionRepository;
@@ -62,7 +62,7 @@ export class AbortWorkflowTool {
       if (!session) {
         return {
           success: false,
-          error: 'No active workflow session found'
+          error: 'No active workflow session found',
         };
       }
 
@@ -79,7 +79,7 @@ export class AbortWorkflowTool {
         } else if (!input.force) {
           return {
             success: false,
-            error: 'Uncommitted changes detected. Use stashChanges or force option'
+            error: 'Uncommitted changes detected. Use stashChanges or force option',
           };
         }
       }
@@ -101,12 +101,12 @@ export class AbortWorkflowTool {
       return {
         success: true,
         message: `Workflow ${session.id} aborted successfully`,
-        stashRef
+        stashRef,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }

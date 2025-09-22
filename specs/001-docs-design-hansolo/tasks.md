@@ -61,34 +61,34 @@
 - [X] T012 [P] Create tests/contracts/start-workflow.test.ts for start_workflow tool
 - [X] T013 [P] Create tests/contracts/execute-workflow-step.test.ts for execute_workflow_step tool
 - [X] T014 [P] Create tests/contracts/get-sessions-status.test.ts for get_sessions_status tool
-- [ ] T015 [P] Create tests/contracts/swap-session.test.ts for swap_session tool
+- [X] T015 [P] Create tests/contracts/swap-session.test.ts for swap_session tool
 - [X] T016 [P] Create tests/contracts/abort-workflow.test.ts for abort_workflow tool
-- [ ] T017 [P] Create tests/contracts/validate-environment.test.ts for validate_environment tool
-- [ ] T018 [P] Create tests/contracts/manage-status-line.test.ts for manage_status_line tool
-- [ ] T019 [P] Create tests/contracts/create-branch.test.ts for create_branch tool
-- [ ] T020 [P] Create tests/contracts/cleanup-operations.test.ts for cleanup_operations tool
-- [ ] T021 [P] Create tests/contracts/rebase-on-main.test.ts for rebase_on_main tool
+- [X] T017 [P] Create tests/contracts/validate-environment.test.ts for validate_environment tool
+- [X] T018 [P] Create tests/contracts/manage-status-line.test.ts for manage_status_line tool
+- [X] T019 [P] Create tests/contracts/create-branch.test.ts for create_branch tool
+- [X] T020 [P] Create tests/contracts/cleanup-operations.test.ts for cleanup_operations tool
+- [X] T021 [P] Create tests/contracts/rebase-on-main.test.ts for rebase_on_main tool
 
 ### Entity Model Tests
 - [X] T022 [P] Create tests/models/workflow-session.test.ts for WorkflowSession entity
-- [ ] T023 [P] Create tests/models/workflow-state.test.ts for WorkflowState entity
-- [ ] T024 [P] Create tests/models/configuration.test.ts for Configuration entity
-- [ ] T025 [P] Create tests/models/git-branch.test.ts for GitBranch entity
-- [ ] T026 [P] Create tests/models/audit-entry.test.ts for AuditEntry entity
-- [ ] T027 [P] Create tests/models/state-transition.test.ts for StateTransition entity
+- [X] T023 [P] Create tests/models/workflow-state.test.ts for WorkflowState entity
+- [X] T024 [P] Create tests/models/configuration.test.ts for Configuration entity
+- [X] T025 [P] Create tests/models/git-branch.test.ts for GitBranch entity
+- [X] T026 [P] Create tests/models/audit-entry.test.ts for AuditEntry entity
+- [X] T027 [P] Create tests/models/state-transition.test.ts for StateTransition entity
 
 ### State Machine Tests
 - [X] T028 [P] Create tests/state-machines/launch-workflow.test.ts for launch state machine
-- [ ] T029 [P] Create tests/state-machines/ship-workflow.test.ts for ship state machine
-- [ ] T030 [P] Create tests/state-machines/hotfix-workflow.test.ts for hotfix state machine
+- [X] T029 [P] Create tests/state-machines/ship-workflow.test.ts for ship state machine
+- [X] T030 [P] Create tests/state-machines/hotfix-workflow.test.ts for hotfix state machine
 
 ### Integration Tests (from Quickstart)
-- [ ] T031 Create tests/integration/scenario-1-init-project.test.ts for project initialization
-- [ ] T032 Create tests/integration/scenario-2-feature-development.test.ts for launch workflow
-- [ ] T033 Create tests/integration/scenario-3-ship-code.test.ts for ship workflow
-- [ ] T034 Create tests/integration/scenario-4-hotfix.test.ts for emergency hotfix
-- [ ] T035 Create tests/integration/scenario-5-multi-session.test.ts for session management
-- [ ] T036 Create tests/integration/scenario-6-no-ai-fallback.test.ts for AI degradation
+- [X] T031 Create tests/integration/scenario-1-init-project.test.ts for project initialization
+- [X] T032 Create tests/integration/scenario-2-feature-development.test.ts for launch workflow
+- [X] T033 Create tests/integration/scenario-3-ship-code.test.ts for ship workflow
+- [X] T034 Create tests/integration/scenario-4-hotfix.test.ts for emergency hotfix
+- [X] T035 Create tests/integration/scenario-5-multi-session.test.ts for session management
+- [X] T036 Create tests/integration/scenario-6-no-ai-fallback.test.ts for AI degradation
 
 ## Phase 3.3: Core Implementation
 

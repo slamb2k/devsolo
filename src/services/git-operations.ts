@@ -287,4 +287,63 @@ export class GitOperations {
   async raw(args: string[]): Promise<string> {
     return await this.git.raw(args);
   }
+
+  // Additional methods for test compatibility
+  async isGitRepository(): Promise<boolean> {
+    return this.isInitialized();
+  }
+
+  async checkout(branch: string): Promise<void> {
+    await this.git.checkout(branch);
+  }
+
+  async isInstalled(): Promise<boolean> {
+    try {
+      await this.git.version();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async hasCommits(): Promise<boolean> {
+    try {
+      await this.git.log(['-1']);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async getBranches(): Promise<string[]> {
+    return this.listBranches();
+  }
+
+  async getLogWithBranch(branchOrLimit: string | number, limit?: number): Promise<any[]> {
+    if (typeof branchOrLimit === 'number') {
+      // Called with just limit
+      const result = await this.git.log(['-n', branchOrLimit.toString()]);
+      return result.all.map(commit => `${commit.hash.substring(0, 7)} - ${commit.message}`);
+    } else {
+      // Called with branch and limit
+      const result = await this.git.log([branchOrLimit, '-n', (limit || 10).toString()]);
+      return [...result.all];
+    }
+  }
+
+  async isRebasing(): Promise<boolean> {
+    try {
+      await this.git.raw(['rev-parse', '--git-path', 'rebase-merge']);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async rebaseInteractive(branch?: string): Promise<any> {
+    if (branch) {
+      return await this.git.rebase([branch]);
+    }
+    return await this.git.rebase(['--continue']);
+  }
 }

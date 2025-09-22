@@ -173,6 +173,44 @@ export class SessionRepository {
     return this.createSession(session);
   }
 
+  // Add save method for test compatibility
+  async save(session: WorkflowSession): Promise<void> {
+    if (await this.getSession(session.id)) {
+      await this.updateSession(session.id, session);
+    } else {
+      await this.createSession(session);
+    }
+  }
+
+  // Add findById method for test compatibility
+  async findById(sessionId: string): Promise<WorkflowSession | null> {
+    return this.getSession(sessionId);
+  }
+
+  // Add findByBranch method for test compatibility
+  async findByBranch(branchName: string): Promise<WorkflowSession | null> {
+    const sessions = await this.listSessions();
+    return sessions.find(s => s.branchName === branchName) || null;
+  }
+
+  // Add setCurrentSession method for test compatibility
+  async setCurrentSession(sessionId: string): Promise<void> {
+    const currentFile = path.join(this.sessionPath, 'current.json');
+    await fs.writeFile(currentFile, JSON.stringify({ sessionId }));
+  }
+
+  // Add getCurrentSession method for test compatibility
+  async getCurrentSession(): Promise<WorkflowSession | null> {
+    try {
+      const currentFile = path.join(this.sessionPath, 'current.json');
+      const data = await fs.readFile(currentFile, 'utf-8');
+      const { sessionId } = JSON.parse(data);
+      return this.getSession(sessionId);
+    } catch {
+      return null;
+    }
+  }
+
   async cleanupExpiredSessions(): Promise<number> {
     const sessions = await this.listSessions(true);
     let cleaned = 0;

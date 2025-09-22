@@ -27,18 +27,18 @@ export class StartWorkflowTool {
       workflowType: {
         type: 'string',
         enum: ['launch', 'ship', 'hotfix'],
-        description: 'Type of workflow to start'
+        description: 'Type of workflow to start',
       },
       branchName: {
         type: 'string',
-        description: 'Optional branch name'
+        description: 'Optional branch name',
       },
       description: {
         type: 'string',
-        description: 'Optional workflow description'
-      }
+        description: 'Optional workflow description',
+      },
     },
-    required: ['workflowType']
+    required: ['workflowType'],
   };
 
   private sessionRepo: SessionRepository;
@@ -55,7 +55,7 @@ export class StartWorkflowTool {
       if (!await this.gitOps.isInitialized()) {
         return {
           success: false,
-          error: 'Git repository not initialized'
+          error: 'Git repository not initialized',
         };
       }
 
@@ -63,7 +63,7 @@ export class StartWorkflowTool {
       if (!await this.gitOps.isClean()) {
         return {
           success: false,
-          error: 'Working directory has uncommitted changes'
+          error: 'Working directory has uncommitted changes',
         };
       }
 
@@ -73,8 +73,8 @@ export class StartWorkflowTool {
         branchName: input.branchName,
         metadata: {
           projectPath: process.cwd(),
-          context: input.description ? { description: input.description } : {}
-        }
+          context: input.description ? { description: input.description } : {},
+        },
       });
 
       // Save session
@@ -89,12 +89,12 @@ export class StartWorkflowTool {
         success: true,
         sessionId: session.id,
         branchName: session.branchName,
-        message: `Workflow started successfully`
+        message: 'Workflow started successfully',
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
