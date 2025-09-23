@@ -133,9 +133,9 @@
 ## Phase 3.4: Integration Layer
 
 ### Git Platform Integration
-- [ ] T067 Create src/integrations/github-client.ts using Octokit
-- [ ] T068 Create src/integrations/gitlab-client.ts using @gitbeaker
-- [ ] T069 Create src/integrations/git-platform-factory.ts for platform selection
+- [X] T067 Create src/integrations/github-client.ts using Octokit
+- [X] T068 Create src/integrations/gitlab-client.ts using @gitbeaker
+- [X] T069 Create src/integrations/git-platform-factory.ts for platform selection
 
 ### Visual Output System
 - [X] T070 Create src/ui/console-output.ts with chalk colors and icons
@@ -145,26 +145,26 @@
 
 ### Command Handlers
 - [X] T074 Create src/commands/hansolo-init.ts for /hansolo:init command
-- [ ] T075 Create src/commands/hansolo-launch.ts for /hansolo:launch command
-- [ ] T076 Create src/commands/hansolo-ship.ts for /hansolo:ship command
-- [ ] T077 Create src/commands/hansolo-hotfix.ts for /hansolo:hotfix command
-- [ ] T078 Create src/commands/hansolo-status.ts for /hansolo:status command
-- [ ] T079 Create src/commands/hansolo-sessions.ts for /hansolo:sessions command
-- [ ] T080 Create src/commands/hansolo-swap.ts for /hansolo:swap command
-- [ ] T081 Create src/commands/hansolo-abort.ts for /hansolo:abort command
-- [ ] T082 Create src/commands/hansolo-cleanup.ts for /hansolo:cleanup command
-- [ ] T083 Create src/commands/hansolo-validate.ts for /hansolo:validate command
-- [ ] T084 Create src/commands/hansolo-config.ts for /hansolo:config command
-- [ ] T085 Create src/commands/hansolo-status-line.ts for /hansolo:status-line command
-- [ ] T086 Create src/commands/command-registry.ts registering all commands
+- [X] T075 Create src/commands/hansolo-launch.ts for /hansolo:launch command
+- [X] T076 Create src/commands/hansolo-ship.ts for /hansolo:ship command
+- [X] T077 Create src/commands/hansolo-hotfix.ts for /hansolo:hotfix command
+- [X] T078 Create src/commands/hansolo-status.ts for /hansolo:status command
+- [X] T079 Create src/commands/hansolo-sessions.ts for /hansolo:sessions command
+- [X] T080 Create src/commands/hansolo-swap.ts for /hansolo:swap command
+- [X] T081 Create src/commands/hansolo-abort.ts for /hansolo:abort command
+- [X] T082 Create src/commands/hansolo-cleanup.ts for /hansolo:cleanup command
+- [X] T083 Create src/commands/hansolo-validate.ts for /hansolo:validate command
+- [X] T084 Create src/commands/hansolo-config.ts for /hansolo:config command
+- [X] T085 Create src/commands/hansolo-status-line.ts for /hansolo:status-line command
+- [X] T086 Create src/commands/command-registry.ts registering all commands
 
 ### Hooks and Templates
-- [ ] T087 Create src/hooks/pre-commit.ts blocking direct main commits
-- [ ] T088 Create src/hooks/pre-push.ts validating branch state
-- [ ] T089 Create src/hooks/post-merge.ts for cleanup operations
-- [ ] T090 Create src/hooks/install-hooks.ts for hook installation
-- [ ] T091 [P] Create templates/commit-message.txt template
-- [ ] T092 [P] Create templates/pull-request.md template
+- [X] T087 Create src/hooks/pre-commit.ts blocking direct main commits
+- [X] T088 Create src/hooks/pre-push.ts validating branch state
+- [X] T089 Create src/hooks/post-merge.ts for cleanup operations
+- [X] T090 Create src/hooks/install-hooks.ts for hook installation
+- [X] T091 [P] Create templates/commit-message.txt template
+- [X] T092 [P] Create templates/pull-request.md template
 
 ## Phase 3.5: Polish & Quality
 

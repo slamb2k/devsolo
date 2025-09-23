@@ -2,14 +2,19 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { WorkflowSession } from '../models/workflow-session';
 import { AuditEntry } from '../models/audit-entry';
+import { Configuration } from '../models/configuration';
+import { ConfigurationManager } from './configuration-manager';
+import { StateName, TransitionTrigger } from '../models/types';
 
 export class SessionRepository {
   private sessionPath: string;
   private lockPath: string;
+  private configManager: ConfigurationManager;
 
   constructor(basePath: string = '.hansolo') {
     this.sessionPath = path.join(basePath, 'sessions');
     this.lockPath = path.join(basePath, 'locks');
+    this.configManager = new ConfigurationManager(basePath);
   }
 
   async initialize(): Promise<void> {
@@ -380,5 +385,35 @@ export class SessionRepository {
     const line = JSON.stringify(entry.toJSON()) + '\n';
 
     await fs.appendFile(auditFile, line);
+  }
+
+  // Configuration management methods
+  async loadConfiguration(): Promise<Configuration> {
+    return this.configManager.loadConfiguration();
+  }
+
+  async saveConfiguration(config: Configuration): Promise<void> {
+    return this.configManager.saveConfiguration(config);
+  }
+
+  // Additional state update method
+  async updateSessionState(sessionId: string, newState: string): Promise<void> {
+    const session = await this.getSession(sessionId);
+    if (!session) {
+      throw new Error(`Session ${sessionId} not found`);
+    }
+
+    // Add state transition to history
+    session.stateHistory.push({
+      from: session.currentState,
+      to: newState as StateName,
+      trigger: 'user_action' as TransitionTrigger,
+      timestamp: new Date().toISOString(),
+    });
+
+    session.currentState = newState as StateName;
+    session.updatedAt = new Date().toISOString();
+
+    await this.updateSession(session.id, session);
   }
 }

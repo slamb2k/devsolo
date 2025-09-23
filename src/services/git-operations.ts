@@ -351,4 +351,77 @@ export class GitOperations {
   async execute(args: string[]): Promise<string> {
     return await this.git.raw(args);
   }
+
+  // Additional methods for quality checks
+  async getGitVersion(): Promise<string> {
+    const result = await this.git.raw(['--version']);
+    const match = result.match(/git version (\d+\.\d+\.\d+)/);
+    return match?.[1] || '0.0.0';
+  }
+
+  async getMainBranch(): Promise<string> {
+    // Try to detect main branch name (main or master)
+    const branches = await this.git.branchLocal();
+    if (branches.all.includes('main')) {
+      return 'main';
+    }
+    if (branches.all.includes('master')) {
+      return 'master';
+    }
+    return 'main'; // default
+  }
+
+  async getCommitsBehindMain(branch: string): Promise<number> {
+    const mainBranch = await this.getMainBranch();
+    const result = await this.git.raw(['rev-list', '--count', `${branch}..${mainBranch}`]);
+    return parseInt(result.trim()) || 0;
+  }
+
+  async getCommitsSince(branch: string): Promise<any[]> {
+    const commits = await this.git.log({ from: branch, to: 'HEAD' });
+    return [...commits.all];
+  }
+
+  async getAheadBehindCount(): Promise<{ ahead: number; behind: number }> {
+    try {
+      const status = await this.git.status();
+      return {
+        ahead: status.ahead || 0,
+        behind: status.behind || 0,
+      };
+    } catch {
+      return { ahead: 0, behind: 0 };
+    }
+  }
+
+  async hasRemote(): Promise<boolean> {
+    const remotes = await this.git.getRemotes();
+    return remotes.length > 0;
+  }
+
+  async fetchRemote(): Promise<void> {
+    await this.git.fetch();
+  }
+
+  async getLastCommit(): Promise<{ message: string }> {
+    const log = await this.git.log({ maxCount: 1 });
+    return {
+      message: log.latest?.message || '',
+    };
+  }
+
+  async isBranchMerged(branch: string): Promise<boolean> {
+    try {
+      const mainBranch = await this.getMainBranch();
+      const mergedBranches = await this.git.raw(['branch', '--merged', mainBranch]);
+      return mergedBranches.includes(branch);
+    } catch {
+      return false;
+    }
+  }
+
+  async getFilesInCommit(commit: string): Promise<string[]> {
+    const result = await this.git.raw(['diff-tree', '--no-commit-id', '--name-only', '-r', commit]);
+    return result.split('\n').filter(f => f.trim());
+  }
 }
