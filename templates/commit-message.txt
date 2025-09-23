@@ -1,0 +1,50 @@
+# Commit Message Template for han-solo
+#
+# Format: <type>(<scope>): <subject>
+#
+# <body>
+#
+# <footer>
+#
+# Types:
+#   feat:     A new feature
+#   fix:      A bug fix
+#   docs:     Documentation only changes
+#   style:    Formatting, whitespace, etc (no code change)
+#   refactor: Code change that neither fixes a bug nor adds a feature
+#   test:     Adding missing tests or correcting existing tests
+#   chore:    Changes to build process or auxiliary tools
+#
+# Scope:
+#   Optional scope of the change (e.g., component, file, or feature name)
+#
+# Subject:
+#   Brief description in present tense. Not capitalized. No period at the end.
+#
+# Body:
+#   Detailed explanation of what and why (not how). Wrap at 72 characters.
+#   Can be multiple paragraphs.
+#
+# Footer:
+#   References to issues, PRs, or breaking changes
+#   Example: Closes #123, Refs #456
+#
+# Example:
+# --------
+# feat(auth): add OAuth2 integration
+#
+# Implemented OAuth2 authentication flow to allow users to sign in
+# with their Google or GitHub accounts. This provides a more secure
+# and convenient authentication method.
+#
+# The implementation includes:
+# - OAuth2 callback handler
+# - Token management service
+# - User profile synchronization
+#
+# Closes #42
+# --------
+#
+# han-solo session: {{SESSION_ID}}
+# Branch: {{BRANCH_NAME}}
+# Workflow: {{WORKFLOW_TYPE}}
