@@ -169,11 +169,11 @@
 ## Phase 3.5: Polish & Quality
 
 ### Additional Unit Tests
-- [ ] T093 [P] Create tests/services/session-repository.test.ts
-- [ ] T094 [P] Create tests/services/git-operations.test.ts
-- [ ] T095 [P] Create tests/services/audit-logger.test.ts
-- [ ] T096 [P] Create tests/ui/console-output.test.ts
-- [ ] T097 [P] Create tests/hooks/pre-commit.test.ts
+- [X] T093 [P] Create tests/services/session-repository.test.ts
+- [X] T094 [P] Create tests/services/git-operations.test.ts
+- [X] T095 [P] Create tests/services/audit-logger.test.ts
+- [X] T096 [P] Create tests/ui/console-output.test.ts
+- [X] T097 [P] Create tests/hooks/pre-commit.test.ts
 
 ### CLI Entry Points
 - [X] T098 Create src/cli.ts as main CLI entry point with command parsing
@@ -181,20 +181,20 @@
 - [X] T100 Create bin/hansolo.js as executable script
 
 ### Build and Package
-- [ ] T101 Configure package.json scripts: build, test, lint, package
-- [ ] T102 Create .npmignore for package publishing
-- [ ] T103 Create rollup.config.js for bundling
-- [ ] T104 Create scripts/install.js for post-install setup
+- [X] T101 Configure package.json scripts: build, test, lint, package
+- [X] T102 Create .npmignore for package publishing
+- [X] T103 Create rollup.config.js for bundling
+- [X] T104 Create scripts/install.js for post-install setup
 
 ### Documentation
-- [ ] T105 [P] Create README.md with installation and usage instructions
-- [ ] T106 [P] Create docs/api.md documenting MCP tools
-- [ ] T107 [P] Create docs/configuration.md for config options
-- [ ] T108 [P] Create docs/troubleshooting.md for common issues
+- [X] T105 [P] Create README.md with installation and usage instructions
+- [X] T106 [P] Create docs/api.md documenting MCP tools
+- [X] T107 [P] Create docs/configuration.md for config options
+- [X] T108 [P] Create docs/troubleshooting.md for common issues
 
 ### Performance Testing
-- [ ] T109 Create tests/performance/command-response.test.ts (<100ms requirement)
-- [ ] T110 Create tests/performance/session-load.test.ts (100+ sessions)
+- [X] T109 Create tests/performance/command-response.test.ts (<100ms requirement)
+- [X] T110 Create tests/performance/session-load.test.ts (100+ sessions)
 
 ---
 
