@@ -32,12 +32,12 @@ export class ConsoleOutput {
     return this.useColor ? chalk.green(text) : text;
   }
 
-  error(text: string, err?: Error): string | void {
+  error(text: string, err?: Error): string {
     // Handle two-parameter version for logging
     if (err) {
       console.error(this.useColor ? chalk.red(text) : text);
       console.error(err);
-      return;
+      return '';
     }
     return this.useColor ? chalk.red(text) : text;
   }
@@ -310,10 +310,10 @@ export class ConsoleOutput {
 
   async select(message: string, choices: string[], defaultChoice?: string): Promise<string> {
     console.log(this.info(message));
-    choices.forEach((choice, index) => {
+    choices.forEach((choice) => {
       const prefix = choice === defaultChoice ? this.success('→') : '  ';
       console.log(`${prefix} ${choice}`);
     });
-    return defaultChoice || choices[0];
+    return defaultChoice || choices[0] || '';
   }
 }

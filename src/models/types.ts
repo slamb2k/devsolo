@@ -43,7 +43,8 @@ export type AuditAction =
   | 'user_decision'
   | 'error_occurred'
   | 'session_completed'
-  | 'session_aborted';
+  | 'session_aborted'
+  | 'POST_MERGE';
 
 export type Result<T, E = Error> =
   | {
@@ -129,6 +130,8 @@ export interface AuditDetails {
   };
   userDecision?: string;
   affectedFiles?: string[];
+  branch?: string;
+  isSquashMerge?: boolean;
 }
 
 export interface GitPlatformConfig {

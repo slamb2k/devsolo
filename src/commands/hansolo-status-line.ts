@@ -275,7 +275,7 @@ export class HansoloStatusLineCommand implements CommandHandler {
   private async getDirtyIndicator(): Promise<string> {
     try {
       const status = await this.gitOps.getStatus();
-      if (status.isClean) return '';
+      if (status.isClean()) return '';
 
       const modified = status.modified.length + status.staged.length;
       const untracked = status.not_added.length;
@@ -357,7 +357,7 @@ end
     ];
 
     const content = options.map(([token, desc]) =>
-      `${chalk.cyan(token.padEnd(15))} ${desc}`
+      `${chalk.cyan((token || '').padEnd(15))} ${desc}`
     ).join('\n');
 
     this.box.printBox('Available Format Tokens', content);
@@ -377,8 +377,9 @@ end
       return true; // Default to 'show'
     }
 
-    if (!validActions.includes(args[0])) {
-      this.console.error(`Invalid action: ${args[0]}`);
+    const firstArg = args[0];
+    if (!firstArg || !validActions.includes(firstArg)) {
+      this.console.error(`Invalid action: ${firstArg || 'none'}`);
       this.console.info(`Valid actions: ${validActions.join(', ')}`);
       return false;
     }

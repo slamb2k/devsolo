@@ -82,6 +82,7 @@ export class HansoloConfigCommand implements CommandHandler {
 
     for (let i = 0; i < args.length; i++) {
       const arg = args[i];
+      if (!arg) continue;
 
       if (arg.startsWith('--')) {
         switch (arg) {
@@ -103,13 +104,15 @@ export class HansoloConfigCommand implements CommandHandler {
             break;
           case '--export':
             action = 'export';
-            if (i + 1 < args.length && !args[i + 1].startsWith('-')) {
+            const nextArg = args[i + 1];
+            if (i + 1 < args.length && nextArg && !nextArg.startsWith('-')) {
               options.exportPath = args[++i];
             }
             break;
           case '--import':
             action = 'import';
-            if (i + 1 < args.length && !args[i + 1].startsWith('-')) {
+            const nextArgImport = args[i + 1];
+            if (i + 1 < args.length && nextArgImport && !nextArgImport.startsWith('-')) {
               options.importPath = args[++i];
             }
             break;
@@ -174,8 +177,8 @@ export class HansoloConfigCommand implements CommandHandler {
 
     // Git platform configuration
     if (config.gitPlatform) {
-      const platformRows = [
-        ['Platform', config.gitPlatform.platform],
+      const platformRows: string[][] = [
+        ['Platform', config.gitPlatform.platform || config.gitPlatform.type || 'Not set'],
         ['API Token', config.gitPlatform.token ? '****** (configured)' : 'Not configured'],
       ];
 
@@ -218,13 +221,19 @@ export class HansoloConfigCommand implements CommandHandler {
     let target: any = config;
 
     for (let i = 0; i < keys.length - 1; i++) {
-      if (!target[keys[i]]) {
-        target[keys[i]] = {};
+      const currentKey = keys[i];
+      if (!currentKey) continue;
+      if (!target[currentKey]) {
+        target[currentKey] = {};
       }
-      target = target[keys[i]];
+      target = target[currentKey] as any;
     }
 
     const finalKey = keys[keys.length - 1];
+    if (!finalKey) {
+      console.error('Invalid configuration key');
+      return;
+    }
     const oldValue = target[finalKey];
 
     // Convert string values to appropriate types
@@ -264,7 +273,7 @@ export class HansoloConfigCommand implements CommandHandler {
     this.console.log(this.formatValue(value));
   }
 
-  private async resetConfiguration(options: ConfigOptions): Promise<void> {
+  private async resetConfiguration(_options: ConfigOptions): Promise<void> {
     const confirmed = await this.console.confirm(
       'Reset configuration to defaults? This cannot be undone.'
     );
@@ -420,7 +429,7 @@ exit 0`;
 
         if (platform === 'github') {
           const remoteUrl = await this.gitOps.getRemoteUrl();
-          if (remoteUrl.includes('github.com')) {
+          if (remoteUrl && remoteUrl.includes('github.com')) {
             const match = remoteUrl.match(/github\.com[:/]([^/]+)\/([^/]+?)(\.git)?$/);
             if (match) {
               config.gitPlatform.owner = match[1];
@@ -502,9 +511,9 @@ exit 0`;
   private async showAdvancedConfiguration(): Promise<void> {
     // Show environment variables
     const envVars = [
-      ['HANSOLO_AI_ENABLED', process.env.HANSOLO_AI_ENABLED || 'true'],
-      ['HANSOLO_DEBUG', process.env.HANSOLO_DEBUG || 'false'],
-      ['HANSOLO_CONFIG_PATH', process.env.HANSOLO_CONFIG_PATH || '.hansolo'],
+      ['HANSOLO_AI_ENABLED', process.env['HANSOLO_AI_ENABLED'] || 'true'],
+      ['HANSOLO_DEBUG', process.env['HANSOLO_DEBUG'] || 'false'],
+      ['HANSOLO_CONFIG_PATH', process.env['HANSOLO_CONFIG_PATH'] || '.hansolo'],
     ];
 
     const envContent = this.table.formatTable(

@@ -104,7 +104,10 @@ export class HansoloCleanupCommand implements CommandHandler {
           break;
         case '--days':
           if (i + 1 < args.length) {
-            options.days = parseInt(args[++i], 10);
+            const nextArg = args[++i];
+            if (nextArg) {
+              options.days = parseInt(nextArg, 10);
+            }
           }
           break;
       }

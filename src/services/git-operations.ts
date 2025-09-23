@@ -356,7 +356,7 @@ export class GitOperations {
   async getGitVersion(): Promise<string> {
     const result = await this.git.raw(['--version']);
     const match = result.match(/git version (\d+\.\d+\.\d+)/);
-    return match ? match[1] : '0.0.0';
+    return match?.[1] || '0.0.0';
   }
 
   async getMainBranch(): Promise<string> {
@@ -375,7 +375,7 @@ export class GitOperations {
 
   async getCommitsSince(branch: string): Promise<any[]> {
     const commits = await this.git.log({ from: branch, to: 'HEAD' });
-    return commits.all;
+    return [...commits.all];
   }
 
   async getAheadBehindCount(): Promise<{ ahead: number; behind: number }> {

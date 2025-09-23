@@ -25,7 +25,7 @@ export class HansoloStatusCommand implements CommandHandler {
     this.box = new BoxFormatter();
   }
 
-  async execute(args: string[]): Promise<void> {
+  async execute(_args: string[]): Promise<void> {
     try {
       // Show banner
       this.console.printBanner('📊 han-solo Status');
@@ -95,7 +95,7 @@ export class HansoloStatusCommand implements CommandHandler {
       ['Current Branch', branch],
       ['Tracking', hasRemote ? 'Remote configured' : 'Local only'],
       ['Ahead/Behind', `↑${ahead.ahead} ↓${ahead.behind}`],
-      ['Working Tree', status.isClean ? '✅ Clean' : '⚠️ Modified'],
+      ['Working Tree', status.isClean() ? '✅ Clean' : '⚠️ Modified'],
       ['Staged Files', status.staged.length.toString()],
       ['Modified Files', status.modified.length.toString()],
       ['Untracked Files', status.not_added.length.toString()],
@@ -109,7 +109,7 @@ export class HansoloStatusCommand implements CommandHandler {
     this.box.printBox('Git Repository Status', content);
 
     // Show file details if working tree is dirty
-    if (!status.isClean) {
+    if (!status.isClean()) {
       if (status.staged.length > 0) {
         this.console.info('\nStaged files:');
         status.staged.forEach(file => this.console.log(`  ${chalk.green('+')} ${file}`));

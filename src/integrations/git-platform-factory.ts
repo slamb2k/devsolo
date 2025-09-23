@@ -52,7 +52,7 @@ export class GitPlatformFactory {
     if (!match) {
       throw new Error(`Invalid GitHub URL: ${url}`);
     }
-    return { owner: match[1], repo: match[2] };
+    return { owner: match[1] || '', repo: match[2] || '' };
   }
 
   static parseGitLabUrl(url: string): { projectPath: string } {
@@ -60,7 +60,7 @@ export class GitPlatformFactory {
     if (!match) {
       throw new Error(`Invalid GitLab URL: ${url}`);
     }
-    return { projectPath: match[1] };
+    return { projectPath: match[1] || '' };
   }
 
   static async createFromRemote(remoteUrl: string, token: string): Promise<GitPlatformClient> {
@@ -69,14 +69,14 @@ export class GitPlatformFactory {
     switch (platform) {
       case 'github': {
         const { owner, repo } = this.parseGitHubUrl(remoteUrl);
-        return this.create({ platform: 'github', token, owner, repo });
+        return this.create({ platform: 'github', token, owner: owner || '', repo: repo || '' });
       }
 
       case 'gitlab': {
         const { projectPath } = this.parseGitLabUrl(remoteUrl);
         // Note: For GitLab, we'd need to fetch the project ID from the path
         // This is a simplified version - in production you'd make an API call
-        return this.create({ platform: 'gitlab', token, projectId: projectPath });
+        return this.create({ platform: 'gitlab', token, projectId: projectPath || '' });
       }
 
       default:

@@ -141,7 +141,8 @@ export class GitLabClient implements GitPlatformClient {
 
   async waitForChecks(mrNumber: number): Promise<boolean> {
     try {
-      const mr = await this.gitlab.MergeRequests.show(this.projectId, mrNumber);
+      // Check merge request status
+      await this.gitlab.MergeRequests.show(this.projectId, mrNumber);
       const pipelines = await this.gitlab.MergeRequests.pipelines(this.projectId, mrNumber);
 
       if (pipelines.length === 0) {

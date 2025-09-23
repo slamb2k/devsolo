@@ -1,5 +1,4 @@
 import boxen from 'boxen';
-import chalk from 'chalk';
 
 export class BoxFormatter {
   printBox(title: string, content: string, options?: BoxOptions): void {

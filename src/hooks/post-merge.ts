@@ -3,6 +3,7 @@
 import { GitOperations } from '../services/git-operations';
 import { SessionRepository } from '../services/session-repository';
 import { AuditLogger } from '../services/audit-logger';
+import { AuditEntry } from '../models/audit-entry';
 import chalk from 'chalk';
 
 /**
@@ -28,18 +29,20 @@ class PostMergeHook {
       const branch = await this.gitOps.getCurrentBranch();
 
       // Check if this was a squash merge
-      const isSquashMerge = await this.detectSquashMerge();
+      await this.detectSquashMerge();
 
       // Log the merge event
-      await this.auditLogger.log({
-        action: 'POST_MERGE',
+      const auditEntry = new AuditEntry({
+        action: 'POST_MERGE' as any, // Hook action, not in the enum
+        actor: process.env['USER'] || 'unknown',
         details: {
           command: 'git merge',
-          branch,
-          isSquashMerge,
-        },
+          gitOperation: 'merge',
+          affectedFiles: [],
+        } as any,
         result: 'success',
       });
+      await this.auditLogger.log(auditEntry);
 
       // If on main/master, perform post-merge cleanup
       if (this.isMainBranch(branch)) {
@@ -146,7 +149,6 @@ class PostMergeHook {
 
   private async checkDependencies(): Promise<void> {
     try {
-      const fs = await import('fs/promises');
 
       // Check if package.json was modified
       const mergedFiles = await this.getMergedFiles();

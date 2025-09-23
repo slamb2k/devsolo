@@ -237,7 +237,7 @@ export class HansoloValidateCommand implements CommandHandler {
       const config = await this.sessionRepo.loadConfiguration();
 
       // Validate configuration schema
-      const isValid = await this.validator.validateConfiguration(config);
+      const isValid = await this.validator.validateConfiguration(config as unknown as Record<string, unknown>);
 
       result.checks.push({
         name: 'Configuration schema',
@@ -369,7 +369,9 @@ export class HansoloValidateCommand implements CommandHandler {
       const packageJson = await import('../../package.json');
 
       for (const pkg of requiredPackages) {
-        const installed = packageJson.dependencies?.[pkg] || packageJson.devDependencies?.[pkg];
+        const deps = packageJson.dependencies as Record<string, string>;
+        const devDeps = packageJson.devDependencies as Record<string, string>;
+        const installed = deps?.[pkg] || devDeps?.[pkg];
         result.checks.push({
           name: pkg,
           status: installed ? 'success' : 'error',
@@ -439,7 +441,7 @@ export class HansoloValidateCommand implements CommandHandler {
           message: 'No remote configured (local only)',
         });
       } else {
-        const remoteUrl = await this.gitOps.getRemoteUrl();
+        const remoteUrl = await this.gitOps.getRemoteUrl() || '';
         result.checks.push({
           name: 'Remote URL',
           status: 'success',

@@ -450,7 +450,7 @@ export class ValidationService {
     }
   }
 
-  async validateConfiguration(config: any): Promise<boolean> {
+  async validateConfigurationAsync(config: any): Promise<boolean> {
     try {
       if (!config) return false;
       if (!config.version) return false;

@@ -4,6 +4,7 @@ import { WorkflowSession } from '../models/workflow-session';
 import { AuditEntry } from '../models/audit-entry';
 import { Configuration } from '../models/configuration';
 import { ConfigurationManager } from './configuration-manager';
+import { StateName, TransitionTrigger } from '../models/types';
 
 export class SessionRepository {
   private sessionPath: string;
@@ -405,14 +406,14 @@ export class SessionRepository {
     // Add state transition to history
     session.stateHistory.push({
       from: session.currentState,
-      to: newState,
-      trigger: 'manual',
+      to: newState as StateName,
+      trigger: 'user_action' as TransitionTrigger,
       timestamp: new Date().toISOString(),
     });
 
-    session.currentState = newState;
+    session.currentState = newState as StateName;
     session.updatedAt = new Date().toISOString();
 
-    await this.updateSession(session);
+    await this.updateSession(session.id, session);
   }
 }

@@ -117,7 +117,7 @@ export class HookInstaller {
     }
   }
 
-  private async installHook(hook: HookDefinition, options: InstallOptions): Promise<void> {
+  private async installHook(hook: HookDefinition, _options: InstallOptions): Promise<void> {
     this.progress.start(`Installing ${hook.name} hook...`);
 
     try {
@@ -361,5 +361,3 @@ if (require.main === module) {
       installer.install({ force: process.argv.includes('--force') }).catch(console.error);
   }
 }
-
-export { HookInstaller };

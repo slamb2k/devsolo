@@ -140,7 +140,7 @@ class PrePushHook {
     }
   }
 
-  private async validateCommitMessages(branch: string): Promise<void> {
+  private async validateCommitMessages(_branch: string): Promise<void> {
     try {
       // Get commits not in main
       const mainBranch = await this.gitOps.getMainBranch();
