@@ -346,4 +346,9 @@ export class GitOperations {
     }
     return await this.git.rebase(['--continue']);
   }
+
+  // Generic execute method for raw git commands
+  async execute(args: string[]): Promise<string> {
+    return await this.git.raw(args);
+  }
 }

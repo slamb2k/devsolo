@@ -18,6 +18,8 @@ export class WorkflowSession {
   public createdAt: string;
   public updatedAt: string;
   public expiresAt: string;
+  public lastUpdated?: string;  // Alias for updatedAt for compatibility
+  public gitBranch?: string;     // Alias for branchName for compatibility
 
   constructor(options: {
     workflowType: WorkflowType;
@@ -34,6 +36,8 @@ export class WorkflowSession {
     const now = new Date();
     this.createdAt = now.toISOString();
     this.updatedAt = now.toISOString();
+    this.lastUpdated = this.updatedAt;  // Set alias
+    this.gitBranch = this.branchName;   // Set alias
 
     // Sessions expire after 30 days
     const expirationDate = new Date(now);
