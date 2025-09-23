@@ -1,12 +1,14 @@
 import { CommandHandler } from './types';
-import { HansoloInitCommand } from './hansolo-init';
-import { HansoloLaunchCommand } from './hansolo-launch';
-import { HansoloShipCommand } from './hansolo-ship';
-import { HansoloHotfixCommand } from './hansolo-hotfix';
+import {
+  InitCommandAdapter,
+  LaunchCommandAdapter,
+  ShipCommandAdapter,
+  HotfixCommandAdapter,
+  SessionsCommandAdapter,
+  SwapCommandAdapter,
+  AbortCommandAdapter,
+} from './adapters';
 import { HansoloStatusCommand } from './hansolo-status';
-import { HansoloSessionsCommand } from './hansolo-sessions';
-import { HansoloSwapCommand } from './hansolo-swap';
-import { HansoloAbortCommand } from './hansolo-abort';
 import { HansoloCleanupCommand } from './hansolo-cleanup';
 import { HansoloValidateCommand } from './hansolo-validate';
 import { HansoloConfigCommand } from './hansolo-config';
@@ -30,16 +32,16 @@ export class CommandRegistry {
 
   private registerCommands(): void {
     // Core workflow commands
-    this.register(new HansoloInitCommand());
-    this.register(new HansoloLaunchCommand());
-    this.register(new HansoloShipCommand());
-    this.register(new HansoloHotfixCommand());
+    this.register(new InitCommandAdapter());
+    this.register(new LaunchCommandAdapter());
+    this.register(new ShipCommandAdapter());
+    this.register(new HotfixCommandAdapter());
 
     // Status and session management
     this.register(new HansoloStatusCommand());
-    this.register(new HansoloSessionsCommand());
-    this.register(new HansoloSwapCommand());
-    this.register(new HansoloAbortCommand());
+    this.register(new SessionsCommandAdapter());
+    this.register(new SwapCommandAdapter());
+    this.register(new AbortCommandAdapter());
 
     // Maintenance commands
     this.register(new HansoloCleanupCommand());

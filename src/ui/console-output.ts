@@ -27,12 +27,18 @@ export class ConsoleOutput {
     bullet: '•',
   };
 
-  // Color methods
+  // Color formatting methods - return formatted strings
   success(text: string): string {
     return this.useColor ? chalk.green(text) : text;
   }
 
-  error(text: string): string {
+  error(text: string, err?: Error): string | void {
+    // Handle two-parameter version for logging
+    if (err) {
+      console.error(this.useColor ? chalk.red(text) : text);
+      console.error(err);
+      return;
+    }
     return this.useColor ? chalk.red(text) : text;
   }
 
@@ -258,5 +264,56 @@ export class ConsoleOutput {
 
   printLogo(): void {
     console.log(this.info(this.logo));
+  }
+
+  // Additional utility methods for commands
+  log(text: string): void {
+    console.log(text);
+  }
+
+  warn(text: string): void {
+    console.warn(this.warning(text));
+  }
+
+  printBanner(text: string): void {
+    console.log('\n' + boxen(chalk.bold(text), {
+      padding: 1,
+      borderStyle: 'double',
+      borderColor: 'cyan',
+      textAlignment: 'center',
+    }) + '\n');
+  }
+
+  async confirm(message: string, defaultValue: boolean = false): Promise<boolean> {
+    // Simple implementation - in production would use inquirer or similar
+    console.log(this.warning(message + ` (${defaultValue ? 'Y/n' : 'y/N'}): `));
+
+    // For now, return default since we can't actually prompt in this context
+    return defaultValue;
+  }
+
+  async prompt(message: string, defaultValue?: string): Promise<string> {
+    console.log(this.info(message));
+    if (defaultValue) {
+      console.log(this.dim(`Default: ${defaultValue}`));
+    }
+    // Return default value for now
+    return defaultValue || '';
+  }
+
+  async promptSecret(message: string): Promise<string> {
+    console.log(this.info(message));
+    console.log(this.dim('(input hidden)'));
+    // Return empty string for now
+    return '';
+  }
+
+  async select(message: string, choices: string[], defaultChoice?: string): Promise<string> {
+    console.log(this.info(message));
+    choices.forEach((choice, index) => {
+      const prefix = choice === defaultChoice ? this.success('→') : '  ';
+      console.log(`${prefix} ${choice}`);
+    });
+    return defaultChoice || choices[0];
   }
 }

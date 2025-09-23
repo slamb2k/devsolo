@@ -69,8 +69,8 @@ class PreCommitHook {
   }
 
   private isProtectedBranch(branch: string): boolean {
-    const protected = ['main', 'master', 'develop', 'production'];
-    return protected.includes(branch);
+    const protectedBranches = ['main', 'master', 'develop', 'production'];
+    return protectedBranches.includes(branch);
   }
 
   private isLocalBranch(branch: string): boolean {

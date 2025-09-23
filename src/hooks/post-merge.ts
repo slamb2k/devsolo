@@ -232,8 +232,8 @@ class PostMergeHook {
   }
 
   private isProtectedBranch(branch: string): boolean {
-    const protected = ['main', 'master', 'develop', 'production', 'staging'];
-    return protected.includes(branch);
+    const protectedBranches = ['main', 'master', 'develop', 'production', 'staging'];
+    return protectedBranches.includes(branch);
   }
 }
 

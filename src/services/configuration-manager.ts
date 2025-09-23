@@ -57,6 +57,19 @@ export class ConfigurationManager {
     return this.save(config);
   }
 
+  // Additional aliases for commands
+  async loadConfiguration(): Promise<Configuration> {
+    return this.load();
+  }
+
+  async saveConfiguration(config: Configuration): Promise<void> {
+    return this.save(config);
+  }
+
+  async createDefaultConfiguration(): Promise<Configuration> {
+    return Configuration.getDefault();
+  }
+
   async initialize(): Promise<Configuration> {
     const existingConfig = await this.exists();
 

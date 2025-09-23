@@ -218,8 +218,8 @@ class PrePushHook {
   }
 
   private isProtectedBranch(branch: string): boolean {
-    const protected = ['main', 'master', 'develop', 'production'];
-    return protected.includes(branch);
+    const protectedBranches = ['main', 'master', 'develop', 'production'];
+    return protectedBranches.includes(branch);
   }
 
   private exitWithError(...messages: string[]): void {
