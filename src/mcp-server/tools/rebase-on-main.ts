@@ -191,7 +191,7 @@ export class RebaseOnMainTool {
       const result = await this.gitOps.execute([
         'rev-list',
         '--count',
-        `main..${branchName}`
+        `main..${branchName}`,
       ]);
       return parseInt(result.trim(), 10) || 0;
     } catch {

@@ -368,7 +368,9 @@ Closes #
       let target: any = this.config;
       for (let i = 0; i < keys.length - 1; i++) {
         const currentKey = keys[i];
-        if (!currentKey) continue;
+        if (!currentKey) {
+          continue;
+        }
         if (!target[currentKey]) {
           target[currentKey] = {};
         }

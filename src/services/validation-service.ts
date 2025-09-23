@@ -385,7 +385,7 @@ export class ValidationService {
       const result = await this.gitOps.execute([
         'rev-list',
         '@{upstream}..HEAD',
-        '--count'
+        '--count',
       ]);
       const count = parseInt(result.trim(), 10);
       return count > 0;
@@ -415,7 +415,7 @@ export class ValidationService {
     if (config['gitProvider']) {
       const validProviders = ['github', 'gitlab', 'bitbucket', 'local'];
       if (!validProviders.includes(config['gitProvider'] as string)) {
-        result.errors.push(`Invalid git provider: ${config['gitProvider']}`);
+        result.errors.push(`Invalid git provider: ${String(config['gitProvider'])}`);
         result.valid = false;
       }
     }
