@@ -27,27 +27,27 @@ export class HansoloStatusLineCommand implements CommandHandler {
       const action = args[0] || 'show';
 
       switch (action) {
-        case 'show':
-          await this.showStatusLine();
-          break;
-        case 'enable':
-          await this.enableStatusLine();
-          break;
-        case 'disable':
-          await this.disableStatusLine();
-          break;
-        case 'format':
-          await this.configureFormat(args.slice(1));
-          break;
-        case 'watch':
-          await this.watchStatusLine();
-          break;
-        case 'test':
-          await this.testStatusLine();
-          break;
-        default:
-          this.console.error(`Unknown action: ${action}`);
-          this.console.info('Available actions: show, enable, disable, format, watch, test');
+      case 'show':
+        await this.showStatusLine();
+        break;
+      case 'enable':
+        await this.enableStatusLine();
+        break;
+      case 'disable':
+        await this.disableStatusLine();
+        break;
+      case 'format':
+        await this.configureFormat(args.slice(1));
+        break;
+      case 'watch':
+        await this.watchStatusLine();
+        break;
+      case 'test':
+        await this.testStatusLine();
+        break;
+      default:
+        this.console.error(`Unknown action: ${action}`);
+        this.console.info('Available actions: show, enable, disable, format, watch, test');
       }
 
     } catch (error) {
@@ -201,13 +201,15 @@ export class HansoloStatusLineCommand implements CommandHandler {
   }
 
   private getIcon(session: any): string {
-    if (!session) return '📁';
+    if (!session) {
+      return '📁';
+    }
 
     switch (session.workflowType) {
-      case 'launch': return '🚀';
-      case 'ship': return '🚢';
-      case 'hotfix': return '🔥';
-      default: return '📦';
+    case 'launch': return '🚀';
+    case 'ship': return '🚢';
+    case 'hotfix': return '🔥';
+    default: return '📦';
     }
   }
 
@@ -225,12 +227,16 @@ export class HansoloStatusLineCommand implements CommandHandler {
   }
 
   private formatSession(session: any): string {
-    if (!session) return '';
+    if (!session) {
+      return '';
+    }
     return chalk.gray(`[${session.id.substring(0, 8)}]`);
   }
 
   private formatState(state?: string): string {
-    if (!state) return '';
+    if (!state) {
+      return '';
+    }
 
     const stateEmojis: Record<string, string> = {
       'INIT': '🌱',
@@ -253,19 +259,21 @@ export class HansoloStatusLineCommand implements CommandHandler {
 
   private getStateColor(state: string): (str: string) => string {
     switch (state) {
-      case 'COMPLETE': return chalk.green;
-      case 'ABORTED': return chalk.red;
-      case 'WAITING_APPROVAL': return chalk.yellow;
-      case 'REBASING':
-      case 'MERGING': return chalk.blue;
-      default: return chalk.gray;
+    case 'COMPLETE': return chalk.green;
+    case 'ABORTED': return chalk.red;
+    case 'WAITING_APPROVAL': return chalk.yellow;
+    case 'REBASING':
+    case 'MERGING': return chalk.blue;
+    default: return chalk.gray;
     }
   }
 
   private async getAheadBehind(): Promise<string> {
     try {
       const counts = await this.gitOps.getAheadBehindCount();
-      if (counts.ahead === 0 && counts.behind === 0) return '';
+      if (counts.ahead === 0 && counts.behind === 0) {
+        return '';
+      }
       return chalk.gray(`↑${counts.ahead} ↓${counts.behind}`);
     } catch {
       return '';
@@ -275,7 +283,9 @@ export class HansoloStatusLineCommand implements CommandHandler {
   private async getDirtyIndicator(): Promise<string> {
     try {
       const status = await this.gitOps.getStatus();
-      if (status.isClean()) return '';
+      if (status.isClean()) {
+        return '';
+      }
 
       const modified = status.modified.length + status.staged.length;
       const untracked = status.not_added.length;

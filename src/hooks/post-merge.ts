@@ -90,7 +90,9 @@ class PostMergeHook {
     const mergedBranches: string[] = [];
 
     for (const branch of branches) {
-      if (this.isProtectedBranch(branch)) continue;
+      if (this.isProtectedBranch(branch)) {
+        continue;
+      }
 
       try {
         const isMerged = await this.gitOps.isBranchMerged(branch);
@@ -127,7 +129,9 @@ class PostMergeHook {
     try {
       const session = await this.sessionRepo.getSessionByBranch(branch);
 
-      if (!session) return;
+      if (!session) {
+        return;
+      }
 
       // If we're on main and just merged, the workflow is complete
       if (this.isMainBranch(branch)) {
@@ -139,7 +143,7 @@ class PostMergeHook {
         // If we merged into a feature branch, update state
         if (session.currentState === 'REBASING') {
           await this.sessionRepo.updateSessionState(session.id, 'BRANCH_READY');
-          console.log(chalk.blue(`  Updated session state to BRANCH_READY`));
+          console.log(chalk.blue('  Updated session state to BRANCH_READY'));
         }
       }
     } catch {

@@ -86,30 +86,30 @@ export class HansoloCleanupCommand implements CommandHandler {
       const arg = args[i];
 
       switch (arg) {
-        case '--dry-run':
-          options.dryRun = true;
-          break;
-        case '--force':
-        case '-f':
-          options.force = true;
-          break;
-        case '--all':
-          options.all = true;
-          break;
-        case '--sessions-only':
-          options.sessionsOnly = true;
-          break;
-        case '--branches-only':
-          options.branchesOnly = true;
-          break;
-        case '--days':
-          if (i + 1 < args.length) {
-            const nextArg = args[++i];
-            if (nextArg) {
-              options.days = parseInt(nextArg, 10);
-            }
+      case '--dry-run':
+        options.dryRun = true;
+        break;
+      case '--force':
+      case '-f':
+        options.force = true;
+        break;
+      case '--all':
+        options.all = true;
+        break;
+      case '--sessions-only':
+        options.sessionsOnly = true;
+        break;
+      case '--branches-only':
+        options.branchesOnly = true;
+        break;
+      case '--days':
+        if (i + 1 < args.length) {
+          const nextArg = args[++i];
+          if (nextArg) {
+            options.days = parseInt(nextArg, 10);
           }
-          break;
+        }
+        break;
       }
     }
 
@@ -225,7 +225,7 @@ export class HansoloCleanupCommand implements CommandHandler {
     if (candidates.sessions.length > 0) {
       this.progress.start('Removing expired sessions...');
       for (const item of candidates.sessions) {
-        if (item.session && item.session.id) {
+        if (item.session?.id) {
           await this.sessionRepo.deleteSession(item.session.id);
         }
       }

@@ -109,16 +109,16 @@ export class HansoloValidateCommand implements CommandHandler {
 
     for (const arg of args) {
       switch (arg) {
-        case '--fix':
-          options.fix = true;
-          break;
-        case '--verbose':
-        case '-v':
-          options.verbose = true;
-          break;
-        case '--offline':
-          options.offline = true;
-          break;
+      case '--fix':
+        options.fix = true;
+        break;
+      case '--verbose':
+      case '-v':
+        options.verbose = true;
+        break;
+      case '--offline':
+        options.offline = true;
+        break;
       }
     }
 
@@ -518,17 +518,21 @@ export class HansoloValidateCommand implements CommandHandler {
 
   private getStatusIcon(status: CheckStatus): string {
     switch (status) {
-      case 'success': return chalk.green('✓');
-      case 'warning': return chalk.yellow('⚠');
-      case 'error': return chalk.red('✗');
-      case 'info': return chalk.blue('ℹ');
-      default: return ' ';
+    case 'success': return chalk.green('✓');
+    case 'warning': return chalk.yellow('⚠');
+    case 'error': return chalk.red('✗');
+    case 'info': return chalk.blue('ℹ');
+    default: return ' ';
     }
   }
 
   private getOverallStatus(checks: ValidationCheck[]): CheckStatus {
-    if (checks.some(c => c.status === 'error')) return 'error';
-    if (checks.some(c => c.status === 'warning')) return 'warning';
+    if (checks.some(c => c.status === 'error')) {
+      return 'error';
+    }
+    if (checks.some(c => c.status === 'warning')) {
+      return 'warning';
+    }
     return 'success';
   }
 
@@ -539,8 +543,12 @@ export class HansoloValidateCommand implements CommandHandler {
     for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
       const p1 = parts1[i] || 0;
       const p2 = parts2[i] || 0;
-      if (p1 > p2) return 1;
-      if (p1 < p2) return -1;
+      if (p1 > p2) {
+        return 1;
+      }
+      if (p1 < p2) {
+        return -1;
+      }
     }
     return 0;
   }

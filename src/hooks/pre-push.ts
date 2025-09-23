@@ -74,7 +74,7 @@ class PrePushHook {
       'PR_CREATED',
       'WAITING_APPROVAL',
       'HOTFIX_COMMITTED',
-      'HOTFIX_PUSHED'
+      'HOTFIX_PUSHED',
     ];
 
     if (!pushAllowedStates.includes(session.currentState)) {
@@ -227,7 +227,9 @@ class PrePushHook {
     console.log(chalk.red.bold('❌ Push blocked by han-solo'));
     console.log();
     messages.forEach(msg => {
-      if (msg) console.log(chalk.red(`  ${msg}`));
+      if (msg) {
+        console.log(chalk.red(`  ${msg}`));
+      }
     });
     console.log();
     process.exit(1);

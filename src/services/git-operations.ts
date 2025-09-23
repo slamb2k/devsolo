@@ -362,8 +362,12 @@ export class GitOperations {
   async getMainBranch(): Promise<string> {
     // Try to detect main branch name (main or master)
     const branches = await this.git.branchLocal();
-    if (branches.all.includes('main')) return 'main';
-    if (branches.all.includes('master')) return 'master';
+    if (branches.all.includes('main')) {
+      return 'main';
+    }
+    if (branches.all.includes('master')) {
+      return 'master';
+    }
     return 'main'; // default
   }
 

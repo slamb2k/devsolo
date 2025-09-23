@@ -52,14 +52,14 @@ export class TableFormatter {
       const status = item.completed
         ? chalk.green('✓')
         : item.inProgress
-        ? chalk.yellow('⋯')
-        : chalk.gray('○');
+          ? chalk.yellow('⋯')
+          : chalk.gray('○');
 
       const name = item.completed
         ? chalk.gray.strikethrough(item.name)
         : item.inProgress
-        ? chalk.yellow(item.name)
-        : item.name;
+          ? chalk.yellow(item.name)
+          : item.name;
 
       return [status, name, item.description || ''];
     });

@@ -348,16 +348,16 @@ if (require.main === module) {
   const command = process.argv[2];
 
   switch (command) {
-    case 'uninstall':
-      installer.uninstall().catch(console.error);
-      break;
-    case 'verify':
-      installer.verify().then(result => {
-        console.log(result ? '✅ All hooks installed' : '❌ Some hooks missing');
-        process.exit(result ? 0 : 1);
-      });
-      break;
-    default:
-      installer.install({ force: process.argv.includes('--force') }).catch(console.error);
+  case 'uninstall':
+    installer.uninstall().catch(console.error);
+    break;
+  case 'verify':
+    installer.verify().then(result => {
+      console.log(result ? '✅ All hooks installed' : '❌ Some hooks missing');
+      process.exit(result ? 0 : 1);
+    });
+    break;
+  default:
+    installer.install({ force: process.argv.includes('--force') }).catch(console.error);
   }
 }

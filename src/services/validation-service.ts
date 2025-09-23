@@ -431,10 +431,18 @@ export class ValidationService {
   async validateSession(session: any): Promise<boolean> {
     try {
       // Basic validation checks
-      if (!session || !session.id) return false;
-      if (!session.branchName) return false;
-      if (!session.workflowType) return false;
-      if (!session.currentState) return false;
+      if (!session?.id) {
+        return false;
+      }
+      if (!session.branchName) {
+        return false;
+      }
+      if (!session.workflowType) {
+        return false;
+      }
+      if (!session.currentState) {
+        return false;
+      }
 
       // Check if state is valid for workflow type
       const validTransitions = this.getValidTransitions(session.workflowType);
@@ -452,8 +460,12 @@ export class ValidationService {
 
   async validateConfigurationAsync(config: any): Promise<boolean> {
     try {
-      if (!config) return false;
-      if (!config.version) return false;
+      if (!config) {
+        return false;
+      }
+      if (!config.version) {
+        return false;
+      }
       return true;
     } catch {
       return false;

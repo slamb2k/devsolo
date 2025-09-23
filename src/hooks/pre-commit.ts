@@ -39,7 +39,7 @@ class PreCommitHook {
           'BRANCH_READY',
           'CHANGES_COMMITTED',
           'HOTFIX_READY',
-          'HOTFIX_COMMITTED'
+          'HOTFIX_COMMITTED',
         ];
 
         if (!allowedStates.includes(session.currentState)) {
@@ -106,7 +106,7 @@ class PreCommitHook {
       'token',
       'key',
       '.pem',
-      '.pfx'
+      '.pfx',
     ];
 
     const sensitiveFiles = status.staged.filter(file => {

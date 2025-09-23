@@ -164,14 +164,14 @@ export class GitLabClient implements GitPlatformClient {
 
   private mapMRState(gitlabState: string): 'open' | 'closed' | 'merged' {
     switch (gitlabState) {
-      case 'opened':
-        return 'open';
-      case 'closed':
-        return 'closed';
-      case 'merged':
-        return 'merged';
-      default:
-        return 'open';
+    case 'opened':
+      return 'open';
+    case 'closed':
+      return 'closed';
+    case 'merged':
+      return 'merged';
+    default:
+      return 'open';
     }
   }
 }

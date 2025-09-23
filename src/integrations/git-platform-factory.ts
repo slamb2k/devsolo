@@ -14,23 +14,23 @@ export interface GitPlatformConfig {
 export class GitPlatformFactory {
   static create(config: GitPlatformConfig): GitPlatformClient {
     switch (config.platform) {
-      case 'github':
-        if (!config.owner || !config.repo) {
-          throw new Error('GitHub requires owner and repo configuration');
-        }
-        return new GitHubClient(config.token, config.owner, config.repo);
+    case 'github':
+      if (!config.owner || !config.repo) {
+        throw new Error('GitHub requires owner and repo configuration');
+      }
+      return new GitHubClient(config.token, config.owner, config.repo);
 
-      case 'gitlab':
-        if (!config.projectId) {
-          throw new Error('GitLab requires projectId configuration');
-        }
-        return new GitLabClient(config.token, config.projectId, config.host);
+    case 'gitlab':
+      if (!config.projectId) {
+        throw new Error('GitLab requires projectId configuration');
+      }
+      return new GitLabClient(config.token, config.projectId, config.host);
 
-      case 'bitbucket':
-        throw new Error('Bitbucket support not yet implemented');
+    case 'bitbucket':
+      throw new Error('Bitbucket support not yet implemented');
 
-      default:
-        throw new Error(`Unsupported git platform: ${config.platform}`);
+    default:
+      throw new Error(`Unsupported git platform: ${config.platform}`);
     }
   }
 
@@ -67,20 +67,20 @@ export class GitPlatformFactory {
     const platform = await this.detectPlatform(remoteUrl);
 
     switch (platform) {
-      case 'github': {
-        const { owner, repo } = this.parseGitHubUrl(remoteUrl);
-        return this.create({ platform: 'github', token, owner: owner || '', repo: repo || '' });
-      }
+    case 'github': {
+      const { owner, repo } = this.parseGitHubUrl(remoteUrl);
+      return this.create({ platform: 'github', token, owner: owner || '', repo: repo || '' });
+    }
 
-      case 'gitlab': {
-        const { projectPath } = this.parseGitLabUrl(remoteUrl);
-        // Note: For GitLab, we'd need to fetch the project ID from the path
-        // This is a simplified version - in production you'd make an API call
-        return this.create({ platform: 'gitlab', token, projectId: projectPath || '' });
-      }
+    case 'gitlab': {
+      const { projectPath } = this.parseGitLabUrl(remoteUrl);
+      // Note: For GitLab, we'd need to fetch the project ID from the path
+      // This is a simplified version - in production you'd make an API call
+      return this.create({ platform: 'gitlab', token, projectId: projectPath || '' });
+    }
 
-      default:
-        throw new Error(`Platform ${platform} not supported`);
+    default:
+      throw new Error(`Platform ${platform} not supported`);
     }
   }
 }

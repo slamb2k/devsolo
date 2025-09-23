@@ -17,8 +17,12 @@ export class InitCommandAdapter implements CommandHandler {
   async execute(args: string[]): Promise<void> {
     const options: any = {};
     for (const arg of args) {
-      if (arg === '--force') options.force = true;
-      if (arg === '--create-remote') options.createRemote = true;
+      if (arg === '--force') {
+        options.force = true;
+      }
+      if (arg === '--create-remote') {
+        options.createRemote = true;
+      }
       if (arg.startsWith('--platform=')) {
         options.gitPlatform = arg.split('=')[1];
       }
@@ -38,7 +42,9 @@ export class LaunchCommandAdapter implements CommandHandler {
 
   async execute(args: string[]): Promise<void> {
     const options: any = {};
-    if (args[0]) options.branchName = args[0];
+    if (args[0]) {
+      options.branchName = args[0];
+    }
     return this.command.execute(options);
   }
 
@@ -55,8 +61,12 @@ export class ShipCommandAdapter implements CommandHandler {
   async execute(args: string[]): Promise<void> {
     const options: any = {};
     for (const arg of args) {
-      if (arg === '--force') options.force = true;
-      if (arg === '--no-pr') options.skipPR = true;
+      if (arg === '--force') {
+        options.force = true;
+      }
+      if (arg === '--no-pr') {
+        options.skipPR = true;
+      }
     }
     return this.command.execute(options);
   }
@@ -73,7 +83,9 @@ export class HotfixCommandAdapter implements CommandHandler {
 
   async execute(args: string[]): Promise<void> {
     const options: any = {};
-    if (args[0]) options.branchName = args[0];
+    if (args[0]) {
+      options.branchName = args[0];
+    }
     return this.command.execute(options);
   }
 
@@ -90,8 +102,12 @@ export class SessionsCommandAdapter implements CommandHandler {
   async execute(args: string[]): Promise<void> {
     const options: any = {};
     for (const arg of args) {
-      if (arg === '--all') options.all = true;
-      if (arg === '--json') options.json = true;
+      if (arg === '--all') {
+        options.all = true;
+      }
+      if (arg === '--json') {
+        options.json = true;
+      }
     }
     return this.command.execute(options);
   }
@@ -108,7 +124,9 @@ export class SwapCommandAdapter implements CommandHandler {
 
   async execute(args: string[]): Promise<void> {
     const options: any = {};
-    if (args[0]) options.target = args[0];
+    if (args[0]) {
+      options.target = args[0];
+    }
     return this.command.execute(options);
   }
 
@@ -125,8 +143,12 @@ export class AbortCommandAdapter implements CommandHandler {
   async execute(args: string[]): Promise<void> {
     const options: any = {};
     for (const arg of args) {
-      if (arg === '--force') options.force = true;
-      if (arg === '--clean') options.clean = true;
+      if (arg === '--force') {
+        options.force = true;
+      }
+      if (arg === '--clean') {
+        options.clean = true;
+      }
     }
     return this.command.execute(options);
   }

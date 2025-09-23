@@ -38,32 +38,32 @@ export class HansoloConfigCommand implements CommandHandler {
       const { action, options } = this.parseArgs(args);
 
       switch (action) {
-        case 'show':
-          await this.showConfiguration(options);
-          break;
-        case 'set':
-          await this.setConfiguration(options);
-          break;
-        case 'get':
-          await this.getConfiguration(options);
-          break;
-        case 'reset':
-          await this.resetConfiguration(options);
-          break;
-        case 'reinstall-hooks':
-          await this.reinstallHooks();
-          break;
-        case 'team':
-          await this.configureTeamSettings();
-          break;
-        case 'export':
-          await this.exportConfiguration(options);
-          break;
-        case 'import':
-          await this.importConfiguration(options);
-          break;
-        default:
-          await this.showConfiguration(options);
+      case 'show':
+        await this.showConfiguration(options);
+        break;
+      case 'set':
+        await this.setConfiguration(options);
+        break;
+      case 'get':
+        await this.getConfiguration(options);
+        break;
+      case 'reset':
+        await this.resetConfiguration(options);
+        break;
+      case 'reinstall-hooks':
+        await this.reinstallHooks();
+        break;
+      case 'team':
+        await this.configureTeamSettings();
+        break;
+      case 'export':
+        await this.exportConfiguration(options);
+        break;
+      case 'import':
+        await this.importConfiguration(options);
+        break;
+      default:
+        await this.showConfiguration(options);
       }
 
     } catch (error) {
@@ -82,40 +82,44 @@ export class HansoloConfigCommand implements CommandHandler {
 
     for (let i = 0; i < args.length; i++) {
       const arg = args[i];
-      if (!arg) continue;
+      if (!arg) {
+        continue;
+      }
 
       if (arg.startsWith('--')) {
         switch (arg) {
-          case '--global':
-            options.scope = 'user';
-            break;
-          case '--project':
-            options.scope = 'project';
-            break;
-          case '--verbose':
-          case '-v':
-            options.verbose = true;
-            break;
-          case '--reinstall-hooks':
-            action = 'reinstall-hooks';
-            break;
-          case '--team':
-            action = 'team';
-            break;
-          case '--export':
-            action = 'export';
-            const nextArg = args[i + 1];
-            if (i + 1 < args.length && nextArg && !nextArg.startsWith('-')) {
-              options.exportPath = args[++i];
-            }
-            break;
-          case '--import':
-            action = 'import';
-            const nextArgImport = args[i + 1];
-            if (i + 1 < args.length && nextArgImport && !nextArgImport.startsWith('-')) {
-              options.importPath = args[++i];
-            }
-            break;
+        case '--global':
+          options.scope = 'user';
+          break;
+        case '--project':
+          options.scope = 'project';
+          break;
+        case '--verbose':
+        case '-v':
+          options.verbose = true;
+          break;
+        case '--reinstall-hooks':
+          action = 'reinstall-hooks';
+          break;
+        case '--team':
+          action = 'team';
+          break;
+        case '--export': {
+          action = 'export';
+          const nextArg = args[i + 1];
+          if (i + 1 < args.length && nextArg && !nextArg.startsWith('-')) {
+            options.exportPath = args[++i];
+          }
+          break;
+        }
+        case '--import': {
+          action = 'import';
+          const nextArgImport = args[i + 1];
+          if (i + 1 < args.length && nextArgImport && !nextArgImport.startsWith('-')) {
+            options.importPath = args[++i];
+          }
+          break;
+        }
         }
       } else if (arg && (arg === 'set' || arg === 'get' || arg === 'reset')) {
         action = arg;
@@ -217,16 +221,18 @@ export class HansoloConfigCommand implements CommandHandler {
     const config = await this.configManager.loadConfiguration();
 
     // Parse nested keys (e.g., preferences.colorOutput)
-    const keys = options.key!.split('.');
+    const keys = options.key.split('.');
     let target: any = config;
 
     for (let i = 0; i < keys.length - 1; i++) {
       const currentKey = keys[i];
-      if (!currentKey) continue;
+      if (!currentKey) {
+        continue;
+      }
       if (!target[currentKey]) {
         target[currentKey] = {};
       }
-      target = target[currentKey] as any;
+      target = target[currentKey];
     }
 
     const finalKey = keys[keys.length - 1];
@@ -238,15 +244,19 @@ export class HansoloConfigCommand implements CommandHandler {
 
     // Convert string values to appropriate types
     let value: any = options.value;
-    if (value === 'true') value = true;
-    else if (value === 'false') value = false;
-    else if (!isNaN(Number(value))) value = Number(value);
+    if (value === 'true') {
+      value = true;
+    } else if (value === 'false') {
+      value = false;
+    } else if (!isNaN(Number(value))) {
+      value = Number(value);
+    }
 
     target[finalKey] = value;
 
     await this.configManager.saveConfiguration(config);
 
-    this.console.success(`✅ Configuration updated`);
+    this.console.success('✅ Configuration updated');
     this.console.info(`   ${options.key}: ${oldValue} → ${value}`);
   }
 
@@ -259,7 +269,7 @@ export class HansoloConfigCommand implements CommandHandler {
     const config = await this.configManager.loadConfiguration();
 
     // Parse nested keys
-    const keys = options.key!.split('.');
+    const keys = options.key.split('.');
     let value: any = config;
 
     for (const key of keys) {
