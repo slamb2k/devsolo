@@ -193,6 +193,15 @@ export class SessionRepository {
     return sessions.find(s => s.branchName === branchName) || null;
   }
 
+  // Alias methods for compatibility with new tools
+  async load(sessionId: string): Promise<WorkflowSession | null> {
+    return this.getSession(sessionId);
+  }
+
+  async delete(sessionId: string): Promise<void> {
+    return this.deleteSession(sessionId);
+  }
+
   // Add setCurrentSession method for test compatibility
   async setCurrentSession(sessionId: string): Promise<void> {
     const currentFile = path.join(this.sessionPath, 'current.json');

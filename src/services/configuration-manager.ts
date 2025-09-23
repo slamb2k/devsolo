@@ -28,18 +28,23 @@ export class ConfigurationManager {
     }
   }
 
-  async save(config: Configuration): Promise<void> {
+  async save(config?: Configuration): Promise<void> {
+    const configToSave = config || this.config;
+    if (!configToSave) {
+      throw new Error('No configuration to save');
+    }
+
     const dir = path.dirname(this.configPath);
     await fs.mkdir(dir, { recursive: true });
 
-    const data = yaml.stringify(config.toJSON());
+    const data = yaml.stringify(configToSave.toJSON());
 
     // Write atomically
     const tempFile = `${this.configPath}.tmp`;
     await fs.writeFile(tempFile, data);
     await fs.rename(tempFile, this.configPath);
 
-    this.config = config;
+    this.config = configToSave;
   }
 
   // Alias for load to match MCP tool expectations
@@ -338,6 +343,41 @@ Closes #
       }
       (this.config as any).workflows[workflowType] = config;
       await this.save(this.config);
+    }
+  }
+
+  // Alias methods for compatibility with new tools
+  get(key: string): any {
+    if (!this.config) {
+      return undefined;
+    }
+    const keys = key.split('.');
+    let value: any = this.config;
+    for (const k of keys) {
+      value = value?.[k];
+    }
+    return value;
+  }
+
+  async set(key: string, value: any): Promise<void> {
+    if (!this.config) {
+      await this.load();
+    }
+    if (this.config) {
+      const keys = key.split('.');
+      let target: any = this.config;
+      for (let i = 0; i < keys.length - 1; i++) {
+        const currentKey = keys[i];
+        if (!currentKey) continue;
+        if (!target[currentKey]) {
+          target[currentKey] = {};
+        }
+        target = target[currentKey];
+      }
+      const lastKey = keys[keys.length - 1];
+      if (lastKey) {
+        target[lastKey] = value;
+      }
     }
   }
 }
