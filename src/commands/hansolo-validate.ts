@@ -543,7 +543,7 @@ export class HansoloValidateCommand implements CommandHandler {
     return 0;
   }
 
-  validate(args: string[]): boolean {
+  validate(_args: string[]): boolean {
     // All arguments are optional
     return true;
   }

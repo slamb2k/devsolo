@@ -107,6 +107,11 @@ export interface UserPreferences {
   confirmBeforePush: boolean;
   colorOutput: boolean;
   verboseLogging: boolean;
+  statusLineFormat?: {
+    template?: string;
+  };
+  enforceConventionalCommits?: boolean;
+  runTestsOnPush?: boolean;
 }
 
 export interface ValidationResult {
@@ -127,9 +132,12 @@ export interface AuditDetails {
 }
 
 export interface GitPlatformConfig {
-  type: 'github' | 'gitlab' | 'bitbucket';
+  platform?: 'github' | 'gitlab' | 'bitbucket';
+  type?: 'github' | 'gitlab' | 'bitbucket'; // Alias for backward compatibility
   apiUrl?: string;
   token?: string;
   owner?: string;
   repo?: string;
+  projectId?: string | number; // For GitLab
+  host?: string; // For self-hosted GitLab
 }

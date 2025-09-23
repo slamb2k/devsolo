@@ -98,7 +98,7 @@ export class HansoloStatusCommand implements CommandHandler {
       ['Working Tree', status.isClean ? '✅ Clean' : '⚠️ Modified'],
       ['Staged Files', status.staged.length.toString()],
       ['Modified Files', status.modified.length.toString()],
-      ['Untracked Files', status.untracked.length.toString()],
+      ['Untracked Files', status.not_added.length.toString()],
     ];
 
     const content = this.table.formatTable(
@@ -118,9 +118,9 @@ export class HansoloStatusCommand implements CommandHandler {
         this.console.info('\nModified files:');
         status.modified.forEach(file => this.console.log(`  ${chalk.yellow('M')} ${file}`));
       }
-      if (status.untracked.length > 0) {
+      if (status.not_added.length > 0) {
         this.console.info('\nUntracked files:');
-        status.untracked.forEach(file => this.console.log(`  ${chalk.gray('?')} ${file}`));
+        status.not_added.forEach((file: string) => this.console.log(`  ${chalk.gray('?')} ${file}`));
       }
     }
   }
@@ -212,7 +212,7 @@ export class HansoloStatusCommand implements CommandHandler {
     }
   }
 
-  validate(args: string[]): boolean {
+  validate(_args: string[]): boolean {
     // No arguments required for status command
     return true;
   }

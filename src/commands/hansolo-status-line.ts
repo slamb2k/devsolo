@@ -278,7 +278,7 @@ export class HansoloStatusLineCommand implements CommandHandler {
       if (status.isClean) return '';
 
       const modified = status.modified.length + status.staged.length;
-      const untracked = status.untracked.length;
+      const untracked = status.not_added.length;
 
       return chalk.yellow(`*${modified}+${untracked}`);
     } catch {

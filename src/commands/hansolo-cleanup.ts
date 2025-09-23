@@ -222,7 +222,9 @@ export class HansoloCleanupCommand implements CommandHandler {
     if (candidates.sessions.length > 0) {
       this.progress.start('Removing expired sessions...');
       for (const item of candidates.sessions) {
-        await this.sessionRepo.deleteSession(item.session.id);
+        if (item.session && item.session.id) {
+          await this.sessionRepo.deleteSession(item.session.id);
+        }
       }
       this.progress.succeed(`Removed ${candidates.sessions.length} sessions`);
     }
@@ -315,7 +317,7 @@ export class HansoloCleanupCommand implements CommandHandler {
     }
   }
 
-  validate(args: string[]): boolean {
+  validate(_args: string[]): boolean {
     // All arguments are optional
     return true;
   }

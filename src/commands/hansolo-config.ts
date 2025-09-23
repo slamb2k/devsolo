@@ -114,7 +114,7 @@ export class HansoloConfigCommand implements CommandHandler {
             }
             break;
         }
-      } else if (arg === 'set' || arg === 'get' || arg === 'reset') {
+      } else if (arg && (arg === 'set' || arg === 'get' || arg === 'reset')) {
         action = arg;
         if (i + 1 < args.length) {
           options.key = args[++i];
@@ -214,7 +214,7 @@ export class HansoloConfigCommand implements CommandHandler {
     const config = await this.configManager.loadConfiguration();
 
     // Parse nested keys (e.g., preferences.colorOutput)
-    const keys = options.key.split('.');
+    const keys = options.key!.split('.');
     let target: any = config;
 
     for (let i = 0; i < keys.length - 1; i++) {
@@ -250,7 +250,7 @@ export class HansoloConfigCommand implements CommandHandler {
     const config = await this.configManager.loadConfiguration();
 
     // Parse nested keys
-    const keys = options.key.split('.');
+    const keys = options.key!.split('.');
     let value: any = config;
 
     for (const key of keys) {
@@ -544,7 +544,7 @@ exit 0`;
     return String(value);
   }
 
-  validate(args: string[]): boolean {
+  validate(_args: string[]): boolean {
     // All arguments are optional
     return true;
   }

@@ -26,7 +26,7 @@ export class InitCommandAdapter implements CommandHandler {
     return this.command.execute(options);
   }
 
-  validate(args: string[]): boolean {
+  validate(_args: string[]): boolean {
     return true;
   }
 }
@@ -42,7 +42,7 @@ export class LaunchCommandAdapter implements CommandHandler {
     return this.command.execute(options);
   }
 
-  validate(args: string[]): boolean {
+  validate(_args: string[]): boolean {
     return true;
   }
 }
@@ -61,7 +61,7 @@ export class ShipCommandAdapter implements CommandHandler {
     return this.command.execute(options);
   }
 
-  validate(args: string[]): boolean {
+  validate(_args: string[]): boolean {
     return true;
   }
 }
@@ -77,7 +77,7 @@ export class HotfixCommandAdapter implements CommandHandler {
     return this.command.execute(options);
   }
 
-  validate(args: string[]): boolean {
+  validate(_args: string[]): boolean {
     return true;
   }
 }
@@ -96,7 +96,7 @@ export class SessionsCommandAdapter implements CommandHandler {
     return this.command.execute(options);
   }
 
-  validate(args: string[]): boolean {
+  validate(_args: string[]): boolean {
     return true;
   }
 }
@@ -112,7 +112,7 @@ export class SwapCommandAdapter implements CommandHandler {
     return this.command.execute(options);
   }
 
-  validate(args: string[]): boolean {
+  validate(_args: string[]): boolean {
     return true;
   }
 }
@@ -131,7 +131,7 @@ export class AbortCommandAdapter implements CommandHandler {
     return this.command.execute(options);
   }
 
-  validate(args: string[]): boolean {
+  validate(_args: string[]): boolean {
     return true;
   }
 }
