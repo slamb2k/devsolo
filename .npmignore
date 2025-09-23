@@ -1,0 +1,62 @@
+# Source files
+src/
+tests/
+specs/
+
+# Configuration files
+.eslintrc.js
+.prettierrc
+jest.config.js
+tsconfig.json
+rollup.config.js
+docker-compose.yml
+Dockerfile
+
+# Development files
+.vscode/
+.idea/
+*.log
+*.tmp
+.env
+.env.local
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Documentation source
+docs/
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Build artifacts not needed in package
+*.tsbuildinfo
+*.map
+
+# han-solo runtime files
+.hansolo/
+hansolo.yaml
+
+# Temporary files
+tmp/
+temp/
+
+# macOS
+.DS_Store
+
+# CI/CD
+.travis.yml
+.gitlab-ci.yml
+.circleci/
+
+# Specify feature files
+.specify/
+
+# Local development
+node_modules/
+.npm/
