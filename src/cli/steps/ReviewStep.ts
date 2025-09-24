@@ -50,7 +50,6 @@ export class ReviewStep {
   }
 
   private displaySummary(data: any, context: InstallationContext): void {
-    const box = require('boxen');
 
     console.log(chalk.cyan('\n  Installation Type: ') + chalk.white(context.installationType));
     console.log(chalk.cyan('  Configuration Path: ') + chalk.white(
@@ -92,19 +91,14 @@ export class ReviewStep {
     }
 
     // Show configuration location
-    console.log('\n' + box(
-      chalk.gray('Configuration will be saved to:\n') +
-      chalk.white(context.installationType === 'global'
-        ? '~/.hansolo/config.yaml'
-        : './.hansolo/config.yaml'),
-      {
-        padding: { top: 0, right: 1, bottom: 0, left: 1 },
-        margin: { top: 1, right: 0, bottom: 1, left: 2 },
-        borderStyle: 'single',
-        borderColor: 'gray',
-        dimBorder: true,
-      }
-    ));
+    const configPath = context.installationType === 'global'
+      ? '~/.hansolo/config.yaml'
+      : './.hansolo/config.yaml';
+
+    console.log('\n' + chalk.gray('  ┌─────────────────────────────────────────────────┐'));
+    console.log(chalk.gray('  │') + ' Configuration will be saved to:                ' + chalk.gray('│'));
+    console.log(chalk.gray('  │') + ' ' + chalk.white(configPath.padEnd(48)) + chalk.gray('│'));
+    console.log(chalk.gray('  └─────────────────────────────────────────────────┘'));
   }
 
   private formatBoolean(value: boolean): string {

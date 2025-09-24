@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Post-install script for @hansolo/cli
+ * Post-install script for hansolo-cli
  * Launches the interactive installer wizard after npm installation
  */
 

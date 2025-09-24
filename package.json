@@ -1,5 +1,5 @@
 {
-  "name": "@hansolo/cli",
+  "name": "hansolo-cli",
   "version": "1.0.0",
   "description": "Git workflow automation tool that enforces linear history and prevents merge conflicts",
   "main": "dist/index.js",

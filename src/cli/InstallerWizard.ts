@@ -175,25 +175,18 @@ export class InstallerWizard {
   }
 
   private showCompletionMessage(): void {
-    const box = require('boxen');
-
-    const message = [
-      chalk.green.bold('🚀 han-solo setup complete!'),
-      '',
-      chalk.white('Next steps:'),
-      chalk.gray('1. Navigate to your Git project'),
-      chalk.gray('2. Run: ') + chalk.cyan('hansolo init'),
-      chalk.gray('3. Start a feature: ') + chalk.cyan('hansolo launch <branch-name>'),
-      '',
-      chalk.gray('For help: ') + chalk.cyan('hansolo --help'),
-    ].join('\n');
-
-    console.log('\n' + box(message, {
-      padding: 1,
-      margin: 1,
-      borderStyle: 'round',
-      borderColor: 'green',
-    }));
+    console.log('\n' + chalk.green('╭─────────────────────────────────────────────────────╮'));
+    console.log(chalk.green('│                                                     │'));
+    console.log(chalk.green('│  ') + chalk.green.bold('🚀 han-solo setup complete!') + chalk.green('                     │'));
+    console.log(chalk.green('│                                                     │'));
+    console.log(chalk.green('│  ') + chalk.white('Next steps:') + chalk.green('                                      │'));
+    console.log(chalk.green('│  ') + chalk.gray('1. Navigate to your Git project') + chalk.green('                 │'));
+    console.log(chalk.green('│  ') + chalk.gray('2. Run: ') + chalk.cyan('hansolo init') + chalk.green('                          │'));
+    console.log(chalk.green('│  ') + chalk.gray('3. Start a feature: ') + chalk.cyan('hansolo launch <branch>') + chalk.green('   │'));
+    console.log(chalk.green('│                                                     │'));
+    console.log(chalk.green('│  ') + chalk.gray('For help: ') + chalk.cyan('hansolo --help') + chalk.green('                      │'));
+    console.log(chalk.green('│                                                     │'));
+    console.log(chalk.green('╰─────────────────────────────────────────────────────╯'));
   }
 
   private handleError(error: Error | unknown): void {

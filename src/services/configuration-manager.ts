@@ -9,7 +9,9 @@ export class ConfigurationManager {
   private fileWatcher: any | null = null;
 
   constructor(basePath: string = '.hansolo') {
-    this.configPath = path.join(basePath, 'config.yaml');
+    // Always resolve relative to current working directory
+    const resolvedBasePath = path.resolve(process.cwd(), basePath);
+    this.configPath = path.join(resolvedBasePath, 'config.yaml');
   }
 
   async load(): Promise<Configuration> {
