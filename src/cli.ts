@@ -48,6 +48,12 @@ export async function main(): Promise<void> {
     return;
   }
 
+  // Configure command
+  if (command === 'configure' || command === 'config') {
+    await runConfigure();
+    return;
+  }
+
   // Simple demo to show the system is working
   if (command === 'demo') {
     runDemo();
@@ -124,6 +130,7 @@ function showHelp(): void {
   console.log('\nUsage: hansolo <command> [options]');
   console.log('\nCommands:');
   console.log('  init         Initialize han-solo in your project');
+  console.log('  configure    Configure han-solo settings');
   console.log('  launch       Start a new feature workflow');
   console.log('  ship         Complete workflow and merge to main');
   console.log('  hotfix       Create emergency hotfix');
@@ -192,6 +199,12 @@ function runDemo(): void {
 async function runInit(): Promise<void> {
   const initCommand = new InitCommand();
   await initCommand.execute();
+}
+
+async function runConfigure(): Promise<void> {
+  const { InstallerWizard } = await import('./cli/InstallerWizard');
+  const wizard = new InstallerWizard();
+  await wizard.run();
 }
 
 async function runStatus(): Promise<void> {
