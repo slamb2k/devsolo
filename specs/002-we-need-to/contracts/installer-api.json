@@ -1,0 +1,507 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "han-solo Installer API",
+    "description": "Internal API for installer operations and configuration management",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/installer/context": {
+      "get": {
+        "summary": "Detect installation context",
+        "operationId": "getInstallationContext",
+        "responses": {
+          "200": {
+            "description": "Installation context detected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationContext"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/installer/session": {
+      "post": {
+        "summary": "Start new installer session",
+        "operationId": "startInstallerSession",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallationContext"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Session created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallerSession"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Resume existing session",
+        "operationId": "resumeInstallerSession",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session resumed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallerSession"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found"
+          }
+        }
+      }
+    },
+    "/installer/prompts/{step}": {
+      "get": {
+        "summary": "Get prompts for wizard step",
+        "operationId": "getStepPrompts",
+        "parameters": [
+          {
+            "name": "step",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["welcome", "workflow", "integration", "ui", "review"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Step prompts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InstallerPrompt"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/installer/validate": {
+      "post": {
+        "summary": "Validate user input",
+        "operationId": "validateInput",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "promptId": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "any"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean"
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/config": {
+      "post": {
+        "summary": "Save configuration",
+        "operationId": "saveConfiguration",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurationProfile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Configuration saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Load existing configuration",
+        "operationId": "loadConfiguration",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Configuration loaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationProfile"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No configuration found"
+          }
+        }
+      }
+    },
+    "/config/migrate": {
+      "post": {
+        "summary": "Migrate configuration to new version",
+        "operationId": "migrateConfiguration",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currentConfig": {
+                    "$ref": "#/components/schemas/ConfigurationProfile"
+                  },
+                  "targetVersion": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Configuration migrated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationProfile"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "InstallationContext": {
+        "type": "object",
+        "required": ["type", "npmVersion", "nodeVersion", "platform", "isCI", "isTTY", "installPath"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["global", "local", "npx"]
+          },
+          "npmVersion": {
+            "type": "string"
+          },
+          "nodeVersion": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["darwin", "linux", "win32"]
+          },
+          "isCI": {
+            "type": "boolean"
+          },
+          "isTTY": {
+            "type": "boolean"
+          },
+          "installPath": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ConfigurationProfile": {
+        "type": "object",
+        "required": ["version", "workflow", "integration", "ui", "metadata"],
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "workflow": {
+            "$ref": "#/components/schemas/WorkflowSettings"
+          },
+          "integration": {
+            "$ref": "#/components/schemas/IntegrationSettings"
+          },
+          "ui": {
+            "$ref": "#/components/schemas/UISettings"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/ConfigMetadata"
+          }
+        }
+      },
+      "WorkflowSettings": {
+        "type": "object",
+        "required": ["branchPattern", "commitStyle", "autoRebase", "squashMerge", "reviewRequirements"],
+        "properties": {
+          "branchPattern": {
+            "type": "string"
+          },
+          "commitStyle": {
+            "type": "string",
+            "enum": ["conventional", "semantic", "custom"]
+          },
+          "autoRebase": {
+            "type": "boolean"
+          },
+          "squashMerge": {
+            "type": "string",
+            "enum": ["always", "prompt", "never"]
+          },
+          "prTemplate": {
+            "type": "string",
+            "nullable": true
+          },
+          "reviewRequirements": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "IntegrationSettings": {
+        "type": "object",
+        "required": ["ci", "notifications", "issueTracker"],
+        "properties": {
+          "ci": {
+            "type": "string",
+            "enum": ["github-actions", "gitlab-ci", "jenkins", "circle-ci", "none"]
+          },
+          "notifications": {
+            "type": "string",
+            "enum": ["slack", "email", "teams", "none"]
+          },
+          "issueTracker": {
+            "type": "string",
+            "enum": ["github", "gitlab", "jira", "none"]
+          },
+          "customHooks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UISettings": {
+        "type": "object",
+        "required": ["colors", "emoji", "animations", "verbosity", "theme"],
+        "properties": {
+          "colors": {
+            "type": "boolean"
+          },
+          "emoji": {
+            "type": "boolean"
+          },
+          "animations": {
+            "type": "boolean"
+          },
+          "verbosity": {
+            "type": "string",
+            "enum": ["quiet", "normal", "verbose"]
+          },
+          "theme": {
+            "type": "string",
+            "enum": ["default", "minimal", "neon"]
+          }
+        }
+      },
+      "ConfigMetadata": {
+        "type": "object",
+        "required": ["createdAt", "updatedAt", "createdBy", "lastModifiedBy", "installationId"],
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "lastModifiedBy": {
+            "type": "string"
+          },
+          "installationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "InstallerSession": {
+        "type": "object",
+        "required": ["sessionId", "startedAt", "currentStep", "completedSteps", "isComplete"],
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentStep": {
+            "type": "string",
+            "enum": ["welcome", "workflow", "integration", "ui", "review", "complete"]
+          },
+          "responses": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "completedSteps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isComplete": {
+            "type": "boolean"
+          }
+        }
+      },
+      "InstallerPrompt": {
+        "type": "object",
+        "required": ["id", "type", "message"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["select", "multiselect", "input", "confirm", "password"]
+          },
+          "message": {
+            "type": "string"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "type": "any"
+          },
+          "validation": {
+            "type": "object",
+            "properties": {
+              "pattern": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          },
+          "when": {
+            "type": "object",
+            "properties": {
+              "field": {
+                "type": "string"
+              },
+              "value": {
+                "type": "any"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
