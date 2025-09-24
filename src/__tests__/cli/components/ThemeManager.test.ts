@@ -98,6 +98,13 @@ describe('ThemeManager', () => {
 
   describe('setTheme', () => {
     it('should update theme settings', () => {
+      // Ensure we're on a platform that supports emoji by default
+      Object.defineProperty(process, 'platform', {
+        value: 'linux',
+        writable: true,
+      });
+      themeManager = new ThemeManager();
+
       themeManager.setTheme({ colors: false, verbose: true });
       const theme = themeManager.getTheme();
 
