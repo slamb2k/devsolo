@@ -17,8 +17,8 @@ export class ReviewStep {
         type: 'confirm',
         name: 'confirm',
         message: '\nSave this configuration?',
-        default: true
-      }
+        default: true,
+      },
     ]);
 
     if (!confirm) {
@@ -31,9 +31,9 @@ export class ReviewStep {
           choices: [
             { name: 'Start over', value: 'restart' },
             { name: 'Exit without saving', value: 'exit' },
-            { name: 'Save anyway', value: 'save' }
-          ]
-        }
+            { name: 'Save anyway', value: 'save' },
+          ],
+        },
       ]);
 
       if (action === 'restart') {
@@ -95,14 +95,14 @@ export class ReviewStep {
     console.log('\n' + box(
       chalk.gray('Configuration will be saved to:\n') +
       chalk.white(context.installationType === 'global'
-        ? `~/.hansolo/config.yaml`
-        : `./.hansolo/config.yaml`),
+        ? '~/.hansolo/config.yaml'
+        : './.hansolo/config.yaml'),
       {
         padding: { top: 0, right: 1, bottom: 0, left: 1 },
         margin: { top: 1, right: 0, bottom: 1, left: 2 },
         borderStyle: 'single',
         borderColor: 'gray',
-        dimBorder: true
+        dimBorder: true,
       }
     ));
   }

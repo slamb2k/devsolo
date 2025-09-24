@@ -18,38 +18,38 @@ export class UIStep {
         name: 'colors',
         message: 'Use colored output?',
         default: supportsColor,
-        when: () => supportsColor // Only ask if terminal supports it
+        when: () => supportsColor, // Only ask if terminal supports it
       },
       {
         type: 'confirm',
         name: 'emoji',
         message: 'Use emoji in output?',
         default: supportsUnicode,
-        when: () => supportsUnicode // Only ask if terminal supports it
+        when: () => supportsUnicode, // Only ask if terminal supports it
       },
       {
         type: 'confirm',
         name: 'timestamps',
         message: 'Show timestamps in output?',
-        default: false
+        default: false,
       },
       {
         type: 'confirm',
         name: 'verbose',
         message: 'Enable verbose logging?',
-        default: false
+        default: false,
       },
       {
         type: 'confirm',
         name: 'progressBars',
         message: 'Show progress bars for long operations?',
-        default: true
+        default: true,
       },
       {
         type: 'confirm',
         name: 'notifications',
         message: 'Enable desktop notifications?',
-        default: false
+        default: false,
       },
       {
         type: 'list',
@@ -58,19 +58,19 @@ export class UIStep {
         choices: [
           {
             name: 'Detailed (more information)',
-            value: 'detailed'
+            value: 'detailed',
           },
           {
             name: 'Compact (essential info only)',
-            value: 'compact'
+            value: 'compact',
           },
           {
             name: 'Minimal (quiet mode)',
-            value: 'minimal'
-          }
+            value: 'minimal',
+          },
         ],
-        default: 'detailed'
-      }
+        default: 'detailed',
+      },
     ]);
 
     // Apply defaults for unsupported features
@@ -81,7 +81,7 @@ export class UIStep {
       verbose: answers.verbose,
       progressBars: answers.progressBars,
       notifications: answers.notifications,
-      outputStyle: answers.outputStyle
+      outputStyle: answers.outputStyle,
     };
 
     // Show preview of selected style

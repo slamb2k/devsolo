@@ -59,13 +59,13 @@ export class InstallerWizard {
       // Check for existing session
       const existingSession = await this.sessionManager.loadSession();
       if (existingSession && existingSession.status !== 'complete') {
-        const { resume } = await inquirer.prompt([
+        const { resume } = await inquirer.prompt<{ resume: boolean }>([
           {
             type: 'confirm',
             name: 'resume',
             message: 'Previous setup was interrupted. Would you like to resume?',
-            default: true
-          }
+            default: true,
+          },
         ]);
 
         if (resume) {
@@ -94,12 +94,14 @@ export class InstallerWizard {
       { name: 'Workflow Settings', handler: new WorkflowStep() },
       { name: 'Integrations', handler: new IntegrationStep() },
       { name: 'UI Preferences', handler: new UIStep() },
-      { name: 'Review & Confirm', handler: new ReviewStep() }
+      { name: 'Review & Confirm', handler: new ReviewStep() },
     ];
 
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
-      if (!step) continue;
+      if (!step) {
+        continue;
+      }
 
       // Update progress
       this.progress.update(i + 1, steps.length, step.name);
@@ -143,19 +145,19 @@ export class InstallerWizard {
           autoRebase: true,
           squashMerge: true,
           deleteAfterMerge: true,
-          requireApproval: true
+          requireApproval: true,
         },
         integrations: {
           github: this.context!.hasGitHub,
           gitlab: this.context!.hasGitLab,
-          slack: false
+          slack: false,
         },
         ui: {
           colors: true,
           emoji: true,
           timestamps: false,
-          verbose: false
-        }
+          verbose: false,
+        },
       };
 
       // Save configuration
@@ -183,19 +185,20 @@ export class InstallerWizard {
       chalk.gray('2. Run: ') + chalk.cyan('hansolo init'),
       chalk.gray('3. Start a feature: ') + chalk.cyan('hansolo launch <branch-name>'),
       '',
-      chalk.gray('For help: ') + chalk.cyan('hansolo --help')
+      chalk.gray('For help: ') + chalk.cyan('hansolo --help'),
     ].join('\n');
 
     console.log('\n' + box(message, {
       padding: 1,
       margin: 1,
       borderStyle: 'round',
-      borderColor: 'green'
+      borderColor: 'green',
     }));
   }
 
-  private handleError(error: any): void {
-    console.error('\n' + chalk.red('✖ Setup failed:'), error.message);
+  private handleError(error: Error | unknown): void {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('\n' + chalk.red('✖ Setup failed:'), message);
 
     if (this.session) {
       console.log(chalk.yellow('\nYour progress has been saved.'));

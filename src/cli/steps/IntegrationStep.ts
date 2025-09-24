@@ -18,29 +18,29 @@ export class IntegrationStep {
           type: 'confirm',
           name: 'enabled',
           message: 'Enable GitHub integration?',
-          default: true
+          default: true,
         },
         {
           type: 'confirm',
           name: 'autoCreatePR',
           message: 'Automatically create pull requests?',
           default: true,
-          when: (answers) => answers.enabled
+          when: (answers) => answers.enabled,
         },
         {
           type: 'confirm',
           name: 'assignReviewers',
           message: 'Auto-assign reviewers from CODEOWNERS?',
           default: true,
-          when: (answers) => answers.enabled
+          when: (answers) => answers.enabled,
         },
         {
           type: 'confirm',
           name: 'addLabels',
           message: 'Add labels to PRs automatically?',
           default: true,
-          when: (answers) => answers.enabled
-        }
+          when: (answers) => answers.enabled,
+        },
       ]);
       integrations.github = github;
     }
@@ -53,22 +53,22 @@ export class IntegrationStep {
           type: 'confirm',
           name: 'enabled',
           message: 'Enable GitLab integration?',
-          default: true
+          default: true,
         },
         {
           type: 'confirm',
           name: 'autoCreateMR',
           message: 'Automatically create merge requests?',
           default: true,
-          when: (answers) => answers.enabled
+          when: (answers) => answers.enabled,
         },
         {
           type: 'confirm',
           name: 'assignReviewers',
           message: 'Auto-assign reviewers?',
           default: true,
-          when: (answers) => answers.enabled
-        }
+          when: (answers) => answers.enabled,
+        },
       ]);
       integrations.gitlab = gitlab;
     }
@@ -80,8 +80,8 @@ export class IntegrationStep {
         type: 'confirm',
         name: 'enabled',
         message: 'Would you like to set up Slack notifications?',
-        default: false
-      }
+        default: false,
+      },
     ]);
 
     if (slackEnabled.enabled) {
@@ -91,25 +91,27 @@ export class IntegrationStep {
           name: 'webhookUrl',
           message: 'Slack webhook URL:',
           validate: (input) => {
-            if (!input) return 'Webhook URL is required for Slack integration';
+            if (!input) {
+              return 'Webhook URL is required for Slack integration';
+            }
             if (!input.startsWith('https://hooks.slack.com/')) {
               return 'Invalid Slack webhook URL';
             }
             return true;
-          }
+          },
         },
         {
           type: 'confirm',
           name: 'notifyOnPR',
           message: 'Notify when PRs are created?',
-          default: true
+          default: true,
         },
         {
           type: 'confirm',
           name: 'notifyOnMerge',
           message: 'Notify when branches are merged?',
-          default: true
-        }
+          default: true,
+        },
       ]);
       integrations.slack = { enabled: true, ...slackConfig };
     } else {
@@ -128,16 +130,16 @@ export class IntegrationStep {
             { name: 'GitHub', value: 'github' },
             { name: 'GitLab', value: 'gitlab' },
             { name: 'Bitbucket', value: 'bitbucket' },
-            { name: 'None / I\'ll configure later', value: 'none' }
+            { name: 'None / I\'ll configure later', value: 'none' },
           ],
-          default: 'github'
-        }
+          default: 'github',
+        },
       ]);
 
       if (platform.prepare !== 'none') {
         integrations[platform.prepare] = {
           enabled: false,
-          prepared: true
+          prepared: true,
         };
       }
     }

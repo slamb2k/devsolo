@@ -52,7 +52,7 @@ export class ContextDetector {
     // Check if installed globally
     try {
       const globalPrefix = execSync('npm config get prefix', {
-        encoding: 'utf8'
+        encoding: 'utf8',
       }).trim();
 
       const scriptPath = process.argv[1];
@@ -76,7 +76,7 @@ export class ContextDetector {
       'TRAVIS',
       'CIRCLECI',
       'BUILDKITE',
-      'DRONE'
+      'DRONE',
     ];
 
     return ciVars.some(varName => process.env[varName] !== undefined);
@@ -135,7 +135,7 @@ export class ContextDetector {
     try {
       const remotes = execSync('git remote -v', {
         encoding: 'utf8',
-        stdio: 'pipe'
+        stdio: 'pipe',
       });
       return remotes.includes('github.com');
     } catch {
@@ -147,7 +147,7 @@ export class ContextDetector {
     try {
       const remotes = execSync('git remote -v', {
         encoding: 'utf8',
-        stdio: 'pipe'
+        stdio: 'pipe',
       });
       return remotes.includes('gitlab.com') ||
              fs.existsSync('.gitlab-ci.yml');
@@ -160,7 +160,7 @@ export class ContextDetector {
     try {
       const remotes = execSync('git remote -v', {
         encoding: 'utf8',
-        stdio: 'pipe'
+        stdio: 'pipe',
       });
       return remotes.includes('bitbucket.org');
     } catch {

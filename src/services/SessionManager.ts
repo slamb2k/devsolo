@@ -27,7 +27,7 @@ export class SessionManager {
       currentStep: 0,
       completedSteps: [],
       context: context,
-      data: {}
+      data: {},
     };
 
     await this.saveSession(session);

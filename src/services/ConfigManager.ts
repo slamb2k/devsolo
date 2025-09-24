@@ -47,26 +47,26 @@ export class ConfigManager {
           deleteAfterMerge: true,
           requireApproval: true,
           protectedBranches: ['main', 'master'],
-          branchNamingPattern: '^(feature|bugfix|hotfix)/[a-z0-9-]+$'
+          branchNamingPattern: '^(feature|bugfix|hotfix)/[a-z0-9-]+$',
         },
         integrations: data.integrations || {
           github: {
             enabled: context.hasGitHub,
             autoCreatePR: true,
             assignReviewers: true,
-            addLabels: true
+            addLabels: true,
           },
           gitlab: {
             enabled: context.hasGitLab,
             autoCreateMR: true,
-            assignReviewers: true
+            assignReviewers: true,
           },
           slack: {
             enabled: false,
             webhookUrl: '',
             notifyOnPR: true,
-            notifyOnMerge: true
-          }
+            notifyOnMerge: true,
+          },
         },
         ui: data.ui || {
           colors: true,
@@ -74,13 +74,13 @@ export class ConfigManager {
           timestamps: false,
           verbose: false,
           progressBars: true,
-          notifications: true
+          notifications: true,
         },
         metadata: {
           lastModified: new Date().toISOString(),
           modifiedBy: process.env['USER'] || 'unknown',
-          installerVersion: '1.0.0'
-        }
+          installerVersion: '1.0.0',
+        },
       };
 
       // Convert to YAML with comments
@@ -107,22 +107,22 @@ export class ConfigManager {
       installationType: oldConfig.installationType || 'local',
       workflow: {
         ...this.getDefaultWorkflow(),
-        ...oldConfig.workflow
+        ...oldConfig.workflow,
       },
       integrations: {
         ...this.getDefaultIntegrations(),
-        ...oldConfig.integrations
+        ...oldConfig.integrations,
       },
       ui: {
         ...this.getDefaultUI(),
-        ...oldConfig.ui
+        ...oldConfig.ui,
       },
       metadata: {
         lastModified: new Date().toISOString(),
         modifiedBy: process.env['USER'] || 'unknown',
         installerVersion: newVersion,
-        migratedFrom: oldConfig.version
-      }
+        migratedFrom: oldConfig.version,
+      },
     };
 
     return migrated;
@@ -156,7 +156,7 @@ export class ConfigManager {
     const yamlContent = yaml.stringify(config, {
       lineWidth: 0,
       defaultStringType: 'PLAIN',
-      defaultKeyType: 'PLAIN'
+      defaultKeyType: 'PLAIN',
     });
 
     // Add section comments
@@ -176,7 +176,7 @@ export class ConfigManager {
       deleteAfterMerge: true,
       requireApproval: true,
       protectedBranches: ['main', 'master'],
-      branchNamingPattern: '^(feature|bugfix|hotfix)/[a-z0-9-]+$'
+      branchNamingPattern: '^(feature|bugfix|hotfix)/[a-z0-9-]+$',
     };
   }
 
@@ -186,19 +186,19 @@ export class ConfigManager {
         enabled: false,
         autoCreatePR: true,
         assignReviewers: true,
-        addLabels: true
+        addLabels: true,
       },
       gitlab: {
         enabled: false,
         autoCreateMR: true,
-        assignReviewers: true
+        assignReviewers: true,
       },
       slack: {
         enabled: false,
         webhookUrl: '',
         notifyOnPR: true,
-        notifyOnMerge: true
-      }
+        notifyOnMerge: true,
+      },
     };
   }
 
@@ -209,7 +209,7 @@ export class ConfigManager {
       timestamps: false,
       verbose: false,
       progressBars: true,
-      notifications: true
+      notifications: true,
     };
   }
 }

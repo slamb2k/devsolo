@@ -13,32 +13,32 @@ export class WorkflowStep {
         type: 'confirm',
         name: 'autoRebase',
         message: 'Automatically rebase feature branches?',
-        default: true
+        default: true,
       },
       {
         type: 'confirm',
         name: 'squashMerge',
         message: 'Squash commits when merging?',
-        default: true
+        default: true,
       },
       {
         type: 'confirm',
         name: 'deleteAfterMerge',
         message: 'Delete feature branches after merge?',
-        default: true
+        default: true,
       },
       {
         type: 'confirm',
         name: 'requireApproval',
         message: 'Require PR/MR approval before merge?',
-        default: true
+        default: true,
       },
       {
         type: 'input',
         name: 'protectedBranches',
         message: 'Protected branches (comma-separated):',
         default: 'main,master',
-        filter: (input: string) => input.split(',').map(b => b.trim()).filter(b => b)
+        filter: (input: string) => input.split(',').map(b => b.trim()).filter(b => b),
       },
       {
         type: 'list',
@@ -47,23 +47,23 @@ export class WorkflowStep {
         choices: [
           {
             name: 'feature/*, bugfix/*, hotfix/* (Recommended)',
-            value: 'standard'
+            value: 'standard',
           },
           {
             name: 'feat/*, fix/*, chore/* (Short form)',
-            value: 'short'
+            value: 'short',
           },
           {
             name: 'JIRA-123-description (Ticket-based)',
-            value: 'ticket'
+            value: 'ticket',
           },
           {
             name: 'Custom (I\'ll configure later)',
-            value: 'custom'
-          }
+            value: 'custom',
+          },
         ],
-        default: 'standard'
-      }
+        default: 'standard',
+      },
     ]);
 
     // Map branch naming choice to pattern
@@ -71,7 +71,7 @@ export class WorkflowStep {
       standard: '^(feature|bugfix|hotfix)/[a-z0-9-]+$',
       short: '^(feat|fix|chore)/[a-z0-9-]+$',
       ticket: '^[A-Z]+-[0-9]+-[a-z0-9-]+$',
-      custom: '.*'
+      custom: '.*',
     };
 
     return {
@@ -81,8 +81,8 @@ export class WorkflowStep {
         deleteAfterMerge: answers.deleteAfterMerge,
         requireApproval: answers.requireApproval,
         protectedBranches: answers.protectedBranches,
-        branchNamingPattern: branchPatterns[answers.branchNaming]
-      }
+        branchNamingPattern: branchPatterns[answers.branchNaming],
+      },
     };
   }
 }

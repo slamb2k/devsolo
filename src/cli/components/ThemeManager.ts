@@ -19,7 +19,7 @@ export class ThemeManager {
       colors: supportsColor,
       emoji: supportsUnicode,
       timestamps: false,
-      verbose: false
+      verbose: false,
     };
 
     // Check environment variables for overrides
@@ -75,5 +75,5 @@ const styles = {
   info: chalk.cyan,
   muted: chalk.gray,
   bold: chalk.bold,
-  highlight: chalk.white.bold
+  highlight: chalk.white.bold,
 };
