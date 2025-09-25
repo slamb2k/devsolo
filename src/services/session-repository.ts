@@ -12,8 +12,10 @@ export class SessionRepository {
   private configManager: ConfigurationManager;
 
   constructor(basePath: string = '.hansolo') {
-    this.sessionPath = path.join(basePath, 'sessions');
-    this.lockPath = path.join(basePath, 'locks');
+    // Always resolve relative to current working directory
+    const resolvedBasePath = path.resolve(process.cwd(), basePath);
+    this.sessionPath = path.join(resolvedBasePath, 'sessions');
+    this.lockPath = path.join(resolvedBasePath, 'locks');
     this.configManager = new ConfigurationManager(basePath);
   }
 
