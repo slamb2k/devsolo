@@ -75,6 +75,14 @@ export interface SessionMetadata {
     body?: string;
     base?: string;
     head?: string;
+    merged?: boolean;
+    mergedAt?: string;
+  };
+  branch?: {
+    remoteDeleted?: boolean;
+    deletedAt?: string;
+    recreated?: boolean;
+    recreatedAt?: string;
   };
 }
 

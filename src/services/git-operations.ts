@@ -239,6 +239,20 @@ export class GitOperations {
     return result.all;
   }
 
+  async branchExists(branchName: string): Promise<boolean> {
+    const branches = await this.listBranches();
+    return branches.includes(branchName);
+  }
+
+  async remoteBranchExists(branchName: string): Promise<boolean> {
+    try {
+      const result = await this.git.raw(['ls-remote', '--heads', 'origin', branchName]);
+      return result.trim().length > 0;
+    } catch {
+      return false;
+    }
+  }
+
   async hasConflicts(): Promise<boolean> {
     const status = await this.git.status();
     return status.conflicted.length > 0;

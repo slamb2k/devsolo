@@ -6,13 +6,18 @@ han-solo is a powerful CLI tool designed to streamline Git workflows while maint
 
 ## Features
 
-- **Linear History Enforcement**: Ensures all merges result in clean, linear commit history
-- **Session Management**: Track multiple concurrent workflows with isolated sessions
-- **State Machine Control**: Deterministic workflow states prevent invalid operations
-- **GitHub Integration**: Automatic PR creation, review tracking, and merging
-- **MCP Server**: Native Claude Code integration for AI-assisted workflows
-- **Visual Feedback**: Rich terminal UI with progress indicators and status displays
-- **Safety First**: Built-in safeguards prevent accidental commits to main
+- **🚀 One-Command Workflow**: Ship entire feature in a single command (v2)
+- **🛡️ Pre/Post-Flight Checks**: Comprehensive validation before and after every operation
+- **🚫 Branch Reuse Prevention**: Blocks reusing branch names after merge
+- **✓ PR Conflict Detection**: Ensures single PR per branch lifecycle
+- **📊 ASCII Art Banners**: Professional visual feedback for all commands
+- **📈 Linear History Enforcement**: Ensures all merges result in clean, linear commit history
+- **🔄 Session Management**: Track multiple concurrent workflows with isolated sessions
+- **⚙️ State Machine Control**: Deterministic workflow states prevent invalid operations
+- **🔗 GitHub Integration**: Automatic PR creation, CI monitoring, and merging
+- **🤖 MCP Server**: Native Claude Code integration for AI-assisted workflows
+- **🎨 Rich Terminal UI**: Progress indicators, status displays, and clear reporting
+- **🔒 Safety First**: Built-in safeguards prevent accidental commits to main
 
 ## Installation
 
@@ -37,26 +42,28 @@ This creates a `.hansolo` directory with configuration and session storage.
 
 ### 2. Start a new feature workflow
 ```bash
-hansolo launch --branch feature/my-awesome-feature
+hansolo launch "my-awesome-feature"
 ```
 
 ### 3. Make your changes
 Work on your feature as normal. han-solo tracks your session automatically.
 
-### 4. Ship your changes
+### 4. Ship your changes (One Command! 🚀)
 ```bash
-# Commit changes
 hansolo ship
-
-# Push to remote
-hansolo ship --push
-
-# Create PR
-hansolo ship --create-pr
-
-# Merge after approval
-hansolo ship --merge
 ```
+
+That's it! This single command:
+- ✅ Commits your changes
+- ✅ Pushes to remote
+- ✅ Creates or updates PR
+- ✅ Waits for CI checks
+- ✅ Auto-merges when ready
+- ✅ Syncs main branch
+- ✅ Deletes feature branches
+- ✅ Completes session
+
+Ready for your next feature!
 
 ## Core Commands
 
@@ -76,15 +83,36 @@ Start a new feature workflow with automatic branch creation.
 - `--force` - Launch even with uncommitted changes
 
 ### `hansolo ship`
-Complete workflow stages from commit to merge.
+**NEW IN V2:** Complete the entire workflow automatically in a single command!
+
+Ship now handles everything: commit → push → PR → CI wait → merge → cleanup
+
+**What it does:**
+1. Commits any uncommitted changes (runs pre-commit hooks)
+2. Pushes to remote (runs pre-push hooks)
+3. Creates or updates GitHub PR
+4. Waits for CI checks to pass
+5. Auto-merges PR with squash
+6. Syncs local main branch
+7. Deletes feature branches (local & remote)
+8. Marks session as complete
 
 **Options:**
-- `--message <msg>` - Commit message
-- `--push` - Push changes to remote
-- `--create-pr` - Create GitHub pull request
-- `--merge` - Merge PR to main (after approval)
-- `--force` - Force operations
-- `--yes` - Skip confirmations
+- `--message <msg>` - Custom commit message
+- `--force` - Override safety checks
+- `--yes` - Skip confirmations (for automation)
+
+**Example:**
+```bash
+# Ship everything at once
+hansolo ship
+
+# With custom commit message
+hansolo ship --message "feat: add user authentication"
+
+# Skip confirmations for CI/CD
+hansolo ship --yes
+```
 
 ### `hansolo sessions`
 List and manage active workflow sessions.
@@ -149,6 +177,104 @@ hansolo cleanup
 - After merging a PR on GitHub
 - Periodically to keep repository tidy
 - Before starting new work to ensure clean state
+
+## V2 Features (NEW! 🎉)
+
+### Pre-Flight and Post-Flight Checks
+
+Every command now includes comprehensive validation:
+
+**Pre-Flight Checks** (before execution):
+```
+🔍 Pre-Flight Checks (5/5 passed)
+  ✓ On main/master branch: main
+  ✓ Working directory clean
+  ✓ Main up to date with origin
+  ✓ No existing session
+  ✓ Branch name available: feature/my-feature
+
+✓ All checks passed (5/5)
+```
+
+**Post-Flight Verifications** (after execution):
+```
+✅ Post-Flight Verification (5/5 passed)
+  ✓ Session created: ID: abc12345...
+  ✓ Feature branch created: feature/my-feature
+  ✓ Branch checked out: feature/my-feature
+  ✓ Session state: BRANCH_READY
+  ✓ No uncommitted changes
+```
+
+**Benefits:**
+- Catch issues before making changes
+- Confirm expected state after operations
+- Clear visual feedback (✓/⚠/✗)
+- Actionable suggestions for failures
+
+See [PRE-FLIGHT-CHECKS.md](./docs/PRE-FLIGHT-CHECKS.md) for complete documentation.
+
+### Branch Reuse Prevention
+
+Han-solo now prevents branch name reuse after merge:
+
+| Scenario | Action |
+|----------|--------|
+| Branch merged & deleted | **BLOCKED** - Name retired |
+| Branch merged, deleted, recreated | **BLOCKED** - Critical error |
+| Branch aborted (never merged) | **ALLOWED** - Safe to reuse |
+| Adding commits after merge | **ALLOWED** - Creates new PR |
+
+**Example:**
+```bash
+hansolo launch "add-auth"
+# ... work, ship, merge ...
+
+hansolo launch "add-auth"
+# ✗ Branch name available: Previously used for PR #15
+#   Branch names cannot be reused after merge
+#   Suggestion: feature/add-auth-v2
+```
+
+### PR Conflict Detection
+
+Enforces single PR per branch lifecycle:
+
+| Scenario | Action |
+|----------|--------|
+| Multiple open PRs | **BLOCKED** - Manual fix needed |
+| Single open PR | **UPDATES** existing PR |
+| Previous PR merged | **CREATES** new PR |
+| No PR exists | **CREATES** new PR |
+
+### ASCII Art Banners
+
+All commands now display professional banners:
+
+```
+  ╔═══════════════════════════════════════════╗
+  ║        🚀  LAUNCHING WORKFLOW  🚀         ║
+  ╚═══════════════════════════════════════════╝
+```
+
+Consistent branding across:
+- 🚀 Launch
+- 🚢 Ship
+- 🧹 Cleanup
+- ⛔ Abort
+- 🔄 Swap
+- 📊 Status
+- 📋 Sessions
+
+### Migration from V1
+
+See [MIGRATION-V2.md](./docs/MIGRATION-V2.md) for complete migration guide.
+
+**Key Changes:**
+- `hansolo ship` now does everything automatically (no more flags)
+- Pre/post-flight checks on all commands
+- Better error messages with suggestions
+- Consistent visual output
 
 ## Workflow States
 
