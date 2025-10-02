@@ -201,6 +201,58 @@ git push --force-with-lease
 # Visit GitHub/GitLab settings
 ```
 
+### Branch Sync Issues
+
+#### Error: Local main out of sync after PR merge
+
+**Cause**: PR was merged on GitHub (squash merge), but local main doesn't have the squashed commit.
+
+**Solution**:
+```bash
+# Run cleanup which automatically syncs main
+hansolo cleanup
+
+# Or manually sync
+git checkout main
+git pull origin main
+```
+
+**Prevention**: Always run `hansolo cleanup` after merging PRs on GitHub.
+
+#### Error: Cleanup not detecting merged branches
+
+**Cause**: Local main is behind remote, so cleanup can't detect which branches have been merged.
+
+**Solution**:
+```bash
+# Ensure main is synced (cleanup does this automatically)
+hansolo cleanup
+
+# If you used --no-sync, run again without it
+hansolo cleanup  # Will sync main first
+```
+
+**Why**: Squash merges create new commits on remote that don't exist locally. Cleanup needs the latest main to determine which branches are truly merged.
+
+#### Error: "Cannot fast-forward" during cleanup
+
+**Cause**: Local main has commits that conflict with remote main.
+
+**Solution**:
+```bash
+# Check what's on local main that shouldn't be
+git checkout main
+git log origin/main..HEAD
+
+# If local commits are wrong, reset to remote
+git reset --hard origin/main
+
+# Then run cleanup
+hansolo cleanup
+```
+
+**Prevention**: Never commit directly to main. Always use `hansolo launch` for feature work.
+
 ### Platform Integration Issues
 
 #### Error: GitHub API rate limit exceeded
@@ -209,7 +261,10 @@ git push --force-with-lease
 
 **Solution**:
 ```bash
-# Set GitHub token
+# Option 1: Use GitHub CLI authentication (recommended for local dev)
+gh auth login
+
+# Option 2: Set GitHub token explicitly (for CI/CD)
 export GITHUB_TOKEN=ghp_your_token_here
 
 # Or configure in han-solo
@@ -219,6 +274,8 @@ hansolo config --global platform.github.token ghp_xxx
 curl -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/rate_limit
 ```
+
+**Note**: han-solo automatically uses `gh` CLI authentication if available, so `gh auth login` is often sufficient.
 
 #### Error: GitLab authentication failed
 
@@ -478,6 +535,12 @@ A: Yes, most features can be disabled in configuration.
 
 **Q: How do I migrate from git-flow?**
 A: Run `hansolo migrate git-flow` for automatic migration.
+
+**Q: My local main is out of sync after merging PR on GitHub. How do I fix this?**
+A: Run `hansolo cleanup` which automatically syncs main with remote before cleaning up branches. This ensures your local main has the squashed PR commits.
+
+**Q: Why does cleanup want to sync main before cleaning branches?**
+A: When PRs are merged on GitHub with squash merge, the squashed commit only exists on the remote. Your local main needs to pull this commit before cleanup can properly detect which branches have been merged. Skipping this step (with `--no-sync`) may result in cleanup not detecting merged branches.
 
 **Q: Is han-solo compatible with CI/CD?**
 A: Yes, use `HANSOLO_AUTO_YES=1` for non-interactive mode.

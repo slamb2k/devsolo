@@ -424,4 +424,21 @@ export class GitOperations {
     const result = await this.git.raw(['diff-tree', '--no-commit-id', '--name-only', '-r', commit]);
     return result.split('\n').filter(f => f.trim());
   }
+
+  async stash(message?: string): Promise<void> {
+    if (message) {
+      await this.git.stash(['push', '-m', message]);
+    } else {
+      await this.git.stash();
+    }
+  }
+
+  async stashPop(): Promise<void> {
+    await this.git.stash(['pop']);
+  }
+
+  async stashList(): Promise<string[]> {
+    const result = await this.git.stash(['list']);
+    return result.split('\n').filter(line => line.trim());
+  }
 }

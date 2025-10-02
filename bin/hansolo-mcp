@@ -1,3 +1,26 @@
 #!/usr/bin/env node
 
-require('../dist/mcp/hansolo-mcp-server.js');
+const path = require('path');
+const fs = require('fs');
+
+try {
+  // Resolve the real path (follows symlinks) to find where the package is actually installed
+  const realPath = fs.realpathSync(__filename);
+  const serverPath = path.join(path.dirname(realPath), '../dist/mcp/hansolo-mcp-server.js');
+
+  if (!fs.existsSync(serverPath)) {
+    console.error('[hansolo-mcp] ERROR: Server file not found at:', serverPath);
+    process.exit(1);
+  }
+
+  const { HanSoloMCPServer } = require(serverPath);
+  const server = new HanSoloMCPServer();
+  server.run().catch((error) => {
+    console.error('[hansolo-mcp] Server error:', error);
+    process.exit(1);
+  });
+} catch (error) {
+  console.error('[hansolo-mcp] FATAL ERROR:', error.message);
+  console.error(error.stack);
+  process.exit(1);
+}

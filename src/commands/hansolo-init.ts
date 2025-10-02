@@ -3,6 +3,10 @@ import { WorkflowProgress } from '../ui/progress-indicators';
 import { ConfigurationManager } from '../services/configuration-manager';
 import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
+import { MCPConfigService } from '../services/mcp-config-service';
+import { InstallationStrategyService } from '../services/installation-strategy';
+import { HooksStrategyService } from '../services/hooks-strategy';
+import inquirer from 'inquirer';
 
 export class InitCommand {
   private output = new ConsoleOutput();
@@ -10,11 +14,17 @@ export class InitCommand {
   private configManager: ConfigurationManager;
   private sessionRepo: SessionRepository;
   private gitOps: GitOperations;
+  private mcpConfigService: MCPConfigService;
+  private installationStrategy: InstallationStrategyService;
+  private hooksStrategy: HooksStrategyService;
 
   constructor(basePath: string = '.hansolo') {
     this.configManager = new ConfigurationManager(basePath);
     this.sessionRepo = new SessionRepository(basePath);
     this.gitOps = new GitOperations();
+    this.mcpConfigService = new MCPConfigService();
+    this.installationStrategy = new InstallationStrategyService();
+    this.hooksStrategy = new HooksStrategyService();
   }
 
   async execute(options: {
@@ -49,6 +59,14 @@ export class InitCommand {
         {
           name: 'Installing Git hooks',
           action: async () => await this.installHooks(),
+        },
+        {
+          name: 'Creating CLAUDE.md guidance',
+          action: async () => await this.createClaudeGuidance(),
+        },
+        {
+          name: 'Configuring MCP server',
+          action: async () => await this.configureMCPServer(),
         },
         {
           name: 'Creating templates',
@@ -112,8 +130,87 @@ export class InitCommand {
   }
 
   private async installHooks(): Promise<void> {
-    await this.configManager.installHooks();
-    this.output.dim('Git hooks installed');
+    const installType = this.installationStrategy.detectInstallationType();
+    const isGlobal = installType === 'global';
+
+    // Prompt for hooks configuration
+    const hooksConfig = await this.hooksStrategy.promptForHookConfiguration(isGlobal);
+
+    // Install hooks based on configuration
+    await this.hooksStrategy.installHooks(hooksConfig);
+
+    this.output.dim(`Git hooks installed (${hooksConfig.scope} scope)`);
+  }
+
+  private async createClaudeGuidance(): Promise<void> {
+    await this.configManager.installClaudeGuidance();
+    this.output.dim('CLAUDE.md guidance created');
+  }
+
+  private async configureMCPServer(): Promise<void> {
+    const installType = this.installationStrategy.detectInstallationType();
+
+    if (installType === 'npx') {
+      this.output.dim('MCP configuration skipped (npx execution)');
+      return;
+    }
+
+    const hasClaudeCode = await this.installationStrategy.hasClaudeCode();
+    if (!hasClaudeCode) {
+      this.output.dim('Claude Code not detected - skipping MCP configuration');
+      return;
+    }
+
+    // Check if already configured
+    const configured = await this.mcpConfigService.isMCPConfigured();
+    if (configured.user || configured.project) {
+      this.output.dim('MCP server already configured');
+      return;
+    }
+
+    // Prompt for MCP configuration
+    const { configureMCP } = await inquirer.prompt<{ configureMCP: boolean }>([
+      {
+        type: 'confirm',
+        name: 'configureMCP',
+        message: 'Configure han-solo MCP server for Claude Code?',
+        default: true,
+      },
+    ]);
+
+    if (!configureMCP) {
+      this.output.dim('MCP configuration skipped');
+      return;
+    }
+
+    // Determine scope based on installation type
+    let scope: 'user' | 'project' | 'both' = 'project';
+    if (installType === 'global') {
+      scope = 'user';
+    } else {
+      const { mcpScope } = await inquirer.prompt<{ mcpScope: 'project' | 'user' | 'both' }>([
+        {
+          type: 'list',
+          name: 'mcpScope',
+          message: 'Configure MCP server for:',
+          choices: [
+            { name: 'Team (project .mcp.json)', value: 'project' },
+            { name: 'Just me (user config)', value: 'user' },
+            { name: 'Both', value: 'both' },
+          ],
+          default: 'project',
+        },
+      ]);
+      scope = mcpScope;
+    }
+
+    // Configure MCP
+    await this.mcpConfigService.configureMCP({
+      installationType: installType,
+      scope,
+    });
+
+    this.output.dim(`MCP server configured (${scope} scope)`);
   }
 
   private async createTemplates(): Promise<void> {

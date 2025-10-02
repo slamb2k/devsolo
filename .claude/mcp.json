@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "hansolo": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/home/slamb2k/work/hansolo/dist/mcp/index.js"
+      ],
+      "env": {
+        "HANSOLO_BASE_PATH": "${HANSOLO_BASE_PATH:-.hansolo}"
+      }
+    }
+  }
+}

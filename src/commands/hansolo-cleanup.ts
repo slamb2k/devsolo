@@ -32,6 +32,11 @@ export class HansoloCleanupCommand implements CommandHandler {
       // Parse options
       const options = this.parseOptions(args);
 
+      // Sync main branch first (critical for post-PR cleanup)
+      if (!options.noSync) {
+        await this.syncMainBranch(options);
+      }
+
       // Start cleanup process
       this.progress.start('Analyzing cleanup targets...');
 
@@ -80,6 +85,7 @@ export class HansoloCleanupCommand implements CommandHandler {
       dryRun: false,
       force: false,
       days: 30,
+      noSync: false,
     };
 
     for (let i = 0; i < args.length; i++) {
@@ -102,6 +108,9 @@ export class HansoloCleanupCommand implements CommandHandler {
       case '--branches-only':
         options.branchesOnly = true;
         break;
+      case '--no-sync':
+        options.noSync = true;
+        break;
       case '--days':
         if (i + 1 < args.length) {
           const nextArg = args[++i];
@@ -114,6 +123,85 @@ export class HansoloCleanupCommand implements CommandHandler {
     }
 
     return options;
+  }
+
+  /**
+   * Sync main branch with remote before cleanup
+   * Critical for ensuring local main has squashed PR commits
+   */
+  private async syncMainBranch(options: CleanupOptions): Promise<void> {
+    try {
+      this.console.info('📥 Syncing main branch with remote...');
+
+      // Get current branch and status
+      const currentBranch = await this.gitOps.getCurrentBranch();
+      const status = await this.gitOps.getStatus();
+      const hasUncommittedChanges = !status.isClean;
+
+      let didStash = false;
+      let wasOnFeatureBranch = false;
+
+      // Stash uncommitted changes if any
+      if (hasUncommittedChanges) {
+        this.progress.start('Stashing uncommitted changes...');
+        await this.gitOps.stash('han-solo cleanup: auto-stash');
+        didStash = true;
+        this.progress.succeed('Changes stashed');
+      }
+
+      // Switch to main if not already there
+      if (currentBranch !== 'main' && currentBranch !== 'master') {
+        wasOnFeatureBranch = true;
+        this.progress.start('Switching to main branch...');
+        await this.gitOps.checkoutBranch('main');
+        this.progress.succeed('Switched to main');
+      }
+
+      // Fetch latest from remote
+      this.progress.start('Fetching latest from origin...');
+      await this.gitOps.fetch('origin', 'main');
+      this.progress.succeed('Fetched latest');
+
+      // Pull changes (fast-forward only to avoid conflicts)
+      this.progress.start('Pulling latest changes...');
+      try {
+        await this.gitOps.pull('origin', 'main');
+        this.progress.succeed('Main branch synced ✓');
+      } catch (error) {
+        this.progress.fail('Pull failed - may need manual rebase');
+        this.console.warn('Unable to fast-forward main. You may need to manually sync.');
+      }
+
+      // Return to original branch if we switched
+      if (wasOnFeatureBranch && !options.branchesOnly) {
+        this.progress.start(`Returning to ${currentBranch}...`);
+        try {
+          await this.gitOps.checkoutBranch(currentBranch);
+          this.progress.succeed(`Back on ${currentBranch}`);
+        } catch (error) {
+          this.console.warn(`Could not return to ${currentBranch} - branch may have been merged`);
+          this.console.info('Staying on main branch');
+        }
+      }
+
+      // Restore stashed changes
+      if (didStash) {
+        this.progress.start('Restoring stashed changes...');
+        try {
+          await this.gitOps.stashPop();
+          this.progress.succeed('Changes restored');
+        } catch (error) {
+          this.console.warn('Could not auto-restore stashed changes');
+          this.console.info('Run "git stash pop" manually to restore your changes');
+        }
+      }
+
+      this.console.success('✓ Main branch is now in sync with remote\n');
+
+    } catch (error) {
+      this.console.error('Failed to sync main branch', error as Error);
+      this.console.warn('Continuing with cleanup anyway...');
+    }
   }
 
   private async findCleanupCandidates(options: CleanupOptions): Promise<CleanupCandidates> {
@@ -333,6 +421,7 @@ interface CleanupOptions {
   dryRun: boolean;
   force: boolean;
   days: number;
+  noSync: boolean;
   all?: boolean;
   sessionsOnly?: boolean;
   branchesOnly?: boolean;

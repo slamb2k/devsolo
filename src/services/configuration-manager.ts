@@ -244,10 +244,18 @@ created: ${new Date().toISOString()}
     // Pre-commit hook
     const preCommitHook = `#!/bin/bash
 # han-solo pre-commit hook
-# Prevents direct commits to main/master branches
+# Enforces workflow when han-solo session is active
 
+# Check for active han-solo session
+if [ -f ".hansolo/session.json" ]; then
+  echo "❌ han-solo session active!"
+  echo "📝 Use 'hansolo ship' or '/hansolo:ship' to commit changes"
+  echo "   Or use 'hansolo abort' to exit the workflow"
+  exit 1
+fi
+
+# Prevent direct commits to main/master branches
 branch=$(git branch --show-current)
-
 if [[ "$branch" == "main" || "$branch" == "master" ]]; then
   echo "❌ Direct commits to $branch are not allowed!"
   echo "Use '/hansolo:launch' to create a feature branch"
@@ -263,6 +271,14 @@ exit 0
     const prePushHook = `#!/bin/bash
 # han-solo pre-push hook
 # Validates branch state before pushing
+
+# Check for active han-solo session
+if [ -f ".hansolo/session.json" ]; then
+  echo "❌ han-solo session active!"
+  echo "📝 Use 'hansolo ship --push' to push changes"
+  echo "   Or complete the workflow with 'hansolo ship'"
+  exit 1
+fi
 
 branch=$(git branch --show-current)
 
@@ -286,6 +302,118 @@ exit 0
       if (error.code !== 'EEXIST') {
         throw error;
       }
+    }
+  }
+
+  async installClaudeGuidance(): Promise<void> {
+    const MARKER_START = '<!-- BEGIN HAN-SOLO MANAGED SECTION - DO NOT EDIT -->';
+    const MARKER_END = '<!-- END HAN-SOLO MANAGED SECTION -->';
+
+    // Read existing CLAUDE.md if it exists
+    let existingContent = '';
+    try {
+      existingContent = await fs.readFile('CLAUDE.md', 'utf-8');
+    } catch (error) {
+      // File doesn't exist yet, that's fine
+    }
+
+    // Check if markers already exist
+    if (existingContent.includes(MARKER_START)) {
+      // Replace content between markers
+      const before = existingContent.substring(0, existingContent.indexOf(MARKER_START));
+      const after = existingContent.substring(existingContent.indexOf(MARKER_END) + MARKER_END.length);
+
+      const updatedContent = `${before}${MARKER_START}
+${this.getHanSoloSection()}
+${MARKER_END}${after}`;
+
+      await fs.writeFile('CLAUDE.md', updatedContent);
+    } else {
+      // Add marked section to existing content or create new file
+      const newContent = existingContent
+        ? `${existingContent}\n\n${MARKER_START}\n${this.getHanSoloSection()}\n${MARKER_END}`
+        : `# CLAUDE.md\n\nThis file provides guidance to Claude Code when working with this repository.\n\n${MARKER_START}\n${this.getHanSoloSection()}\n${MARKER_END}`;
+
+      await fs.writeFile('CLAUDE.md', newContent);
+    }
+  }
+
+  private getHanSoloSection(): string {
+    return `
+## 🚀 han-solo Git Workflow Management
+
+This section is automatically managed by han-solo. Last updated: ${new Date().toISOString()}
+
+### Workflow Detection
+
+Before performing git operations, check for active han-solo session:
+
+\`\`\`javascript
+// Check if han-solo is managing current work
+if (fs.existsSync('.hansolo/session.json')) {
+  // han-solo is active - MUST use MCP tools
+  return 'use-hansolo-mcp';
+} else {
+  // No active session - can use standard git
+  return 'use-standard-git';
+}
+\`\`\`
+
+### ⛔ When han-solo Session is Active
+
+If \`.hansolo/session.json\` exists, **NEVER** use these commands:
+- \`git commit\` → Use \`/hansolo:ship\` instead
+- \`git push\` → Use \`/hansolo:ship --push\` instead
+- \`gh pr create\` → Use \`/hansolo:ship --create-pr\` instead
+- \`git checkout -b\` → Use \`/hansolo:launch\` instead
+- \`git rebase\` → han-solo handles this automatically
+
+### ✅ When No Session Exists
+
+If no \`.hansolo/session.json\` file:
+- Safe to use standard git commands
+- Can optionally start han-solo workflow with \`/hansolo:launch\`
+- Direct git operations won't conflict with han-solo
+
+### Why This Enforcement?
+
+han-solo maintains a state machine tracking:
+- Linear history enforcement
+- Automatic rebasing and conflict resolution
+- PR readiness validation
+- Workflow audit trail
+
+Direct git operations bypass this state tracking and will cause workflow corruption.
+
+### Team Collaboration
+
+- **With han-solo**: Follow session-based rules above
+- **Without han-solo**: Use standard git workflow
+- **Mixed teams**: Both can work simultaneously using session detection
+`;
+  }
+
+  async removeClaudeGuidance(): Promise<void> {
+    try {
+      const content = await fs.readFile('CLAUDE.md', 'utf-8');
+      const MARKER_START = '<!-- BEGIN HAN-SOLO MANAGED SECTION - DO NOT EDIT -->';
+      const MARKER_END = '<!-- END HAN-SOLO MANAGED SECTION -->';
+
+      if (content.includes(MARKER_START)) {
+        const before = content.substring(0, content.indexOf(MARKER_START));
+        const after = content.substring(content.indexOf(MARKER_END) + MARKER_END.length);
+
+        const cleaned = `${before}${after}`.trim();
+
+        if (cleaned) {
+          await fs.writeFile('CLAUDE.md', cleaned);
+        } else {
+          // File would be empty, remove it
+          await fs.unlink('CLAUDE.md');
+        }
+      }
+    } catch {
+      // File doesn't exist, nothing to remove
     }
   }
 

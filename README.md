@@ -119,6 +119,37 @@ Cancel an active workflow session.
 ### `hansolo status`
 Show current workflow status and session information.
 
+### `hansolo cleanup`
+Clean up completed sessions, merged branches, and sync main with remote.
+
+**Critical:** Run this after PRs are merged on GitHub to ensure local main is synced and feature branches are removed.
+
+**Usage:**
+```bash
+hansolo cleanup
+```
+
+**Options:**
+- `--dry-run` - Show what would be cleaned up without making changes
+- `--force` / `-f` - Skip confirmation prompts
+- `--all` - Clean up everything including old audit logs
+- `--sessions-only` - Only clean up sessions, keep branches
+- `--branches-only` - Only clean up branches, keep sessions
+- `--days <N>` - Clean up sessions completed N+ days ago (default: 30)
+- `--no-sync` - Skip syncing main branch with remote
+
+**What it does:**
+1. **Syncs main branch**: Pulls latest from remote (includes squashed PR commits)
+2. **Removes merged branches**: Deletes local branches that have been merged
+3. **Archives sessions**: Cleans up completed/expired workflow sessions
+4. **Removes stale locks**: Clears lock files older than 24 hours
+5. **Cleans audit logs**: (with `--all`) Removes old audit entries
+
+**When to run:**
+- After merging a PR on GitHub
+- Periodically to keep repository tidy
+- Before starting new work to ensure clean state
+
 ## Workflow States
 
 han-solo uses a deterministic state machine to manage workflows:
@@ -135,12 +166,20 @@ Each state has specific allowed transitions and validations to ensure workflow i
 han-solo integrates with GitHub API for automated PR management.
 
 ### Setup
-Set your GitHub token as an environment variable:
+
+**Option 1: Use GitHub CLI (Recommended for local development)**
+```bash
+gh auth login
+```
+
+**Option 2: Set environment variable (For CI/CD)**
 ```bash
 export GITHUB_TOKEN=your_github_token
 # or
 export GH_TOKEN=your_github_token
 ```
+
+han-solo automatically detects and uses `gh` CLI authentication if available, so explicit token setup is often unnecessary for local development.
 
 ### Features
 - Automatic PR creation with generated descriptions

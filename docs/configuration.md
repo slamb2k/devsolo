@@ -43,7 +43,7 @@ defaults:
 platform:
   type: auto                    # auto | github | gitlab | bitbucket
   github:
-    token: ${GITHUB_TOKEN}      # Or set in environment
+    token: ${GITHUB_TOKEN}      # Optional: Falls back to gh CLI if not set
     enterprise: false
     host: api.github.com
   gitlab:

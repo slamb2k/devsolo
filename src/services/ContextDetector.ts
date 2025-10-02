@@ -40,12 +40,18 @@ export class ContextDetector {
     // Detect platform
     context.platform = process.platform;
 
+    // Detect Claude Code
+    context.hasClaudeCode = await this.detectClaudeCode();
+
     return context;
   }
 
   private detectInstallationType(): 'global' | 'local' | 'npx' {
     // Check if running via npx
-    if (process.env['npm_config_user_agent']?.includes('npx')) {
+    if (process.env['npm_config_user_agent']?.includes('npx') ||
+        process.env['npm_command'] === 'exec' ||
+        process.env['npm_lifecycle_event'] === 'npx' ||
+        process.env['_']?.includes('npx')) {
       return 'npx';
     }
 
@@ -187,5 +193,14 @@ export class ContextDetector {
 
     // Default to npm
     return 'npm';
+  }
+
+  private async detectClaudeCode(): Promise<boolean> {
+    try {
+      execSync('claude --version', { stdio: 'ignore' });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
