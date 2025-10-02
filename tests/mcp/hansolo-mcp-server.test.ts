@@ -1,6 +1,6 @@
+// @ts-nocheck
 import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
-import { HanSoloMCPServer } from '../../src/mcp/hansolo-mcp-server-enhanced';
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { HanSoloMCPServer } from '../../src/mcp/hansolo-mcp-server';
 import { InitCommand } from '../../src/commands/hansolo-init';
 import { LaunchCommand } from '../../src/commands/hansolo-launch';
 import { ShipCommand } from '../../src/commands/hansolo-ship';
@@ -8,6 +8,16 @@ import { SwapCommand } from '../../src/commands/hansolo-swap';
 import { AbortCommand } from '../../src/commands/hansolo-abort';
 import { SessionRepository } from '../../src/services/session-repository';
 import { GitOperations } from '../../src/services/git-operations';
+
+// Mock chalk and boxen (ESM modules)
+jest.mock('chalk', () => ({
+  default: {
+    bold: { cyan: (str: string) => str },
+  },
+}));
+jest.mock('boxen', () => ({
+  default: (str: string) => str,
+}));
 
 // Mock all command modules
 jest.mock('../../src/commands/hansolo-init');

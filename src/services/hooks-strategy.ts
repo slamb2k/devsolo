@@ -174,6 +174,24 @@ if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
   echo "📝 Use: hansolo launch"
   exit 1
 fi
+
+# Run linting (fail on errors only)
+echo "🔍 Running linter..."
+if ! npm run lint 2>&1 | grep -q "✖ [0-9]* problems ([1-9][0-9]* errors"; then
+  echo "✅ Lint check passed"
+else
+  echo "❌ Lint check failed with errors!"
+  exit 1
+fi
+
+# Run type checking
+echo "🔍 Running type check..."
+if npm run build > /dev/null 2>&1; then
+  echo "✅ Type check passed"
+else
+  echo "❌ Type check failed!"
+  exit 1
+fi
 `;
 
     await fs.mkdir('.husky', { recursive: true });
@@ -194,6 +212,15 @@ fi
 branch=$(git branch --show-current)
 if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
   echo "❌ No direct pushes to $branch"
+  exit 1
+fi
+
+# Run tests before pushing
+echo "🧪 Running tests..."
+if npm test > /dev/null 2>&1; then
+  echo "✅ All tests passed"
+else
+  echo "❌ Tests failed!"
   exit 1
 fi
 `;
@@ -228,7 +255,7 @@ fi
     // Create lefthook.yml
     const lefthookConfig = `# Lefthook configuration for han-solo
 pre-commit:
-  parallel: true
+  parallel: false
   commands:
     check-hansolo-session:
       run: |
@@ -242,6 +269,26 @@ pre-commit:
         branch=$(git branch --show-current)
         if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
           echo "❌ No direct commits to main! Use: hansolo launch"
+          exit 1
+        fi
+
+    lint:
+      run: |
+        echo "🔍 Running linter..."
+        if ! npm run lint 2>&1 | grep -q "✖ [0-9]* problems ([1-9][0-9]* errors"; then
+          echo "✅ Lint check passed"
+        else
+          echo "❌ Lint check failed with errors!"
+          exit 1
+        fi
+
+    typecheck:
+      run: |
+        echo "🔍 Running type check..."
+        if npm run build > /dev/null 2>&1; then
+          echo "✅ Type check passed"
+        else
+          echo "❌ Type check failed!"
           exit 1
         fi
 
@@ -259,6 +306,16 @@ pre-push:
         branch=$(git branch --show-current)
         if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
           echo "❌ No direct pushes to main!"
+          exit 1
+        fi
+
+    test:
+      run: |
+        echo "🧪 Running tests..."
+        if npm test > /dev/null 2>&1; then
+          echo "✅ All tests passed"
+        else
+          echo "❌ Tests failed!"
           exit 1
         fi
 
@@ -353,39 +410,81 @@ esac
     const gitHooksPath = '.git/hooks';
 
     // Pre-commit hook
-    const preCommitHook = `#!/bin/sh
-# Personal han-solo hook - not shared with team
+    const preCommitHook = `#!/bin/bash
+# han-solo pre-commit hook
+# Enforces workflow and runs quality checks
 
-# Check for han-solo session
+# Check for active han-solo session
 if [ -f ".hansolo/session.json" ]; then
-  echo "❌ han-solo session active! Use 'hansolo ship' to commit"
+  echo "❌ han-solo session active!"
+  echo "📝 Use 'hansolo ship' or '/hansolo:ship' to commit changes"
+  echo "   Or use 'hansolo abort' to exit the workflow"
   exit 1
 fi
 
-# Prevent direct commits to main
+# Prevent direct commits to main/master branches
 branch=$(git branch --show-current)
-if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
-  echo "❌ Direct commits to $branch not allowed"
+if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+  echo "❌ Direct commits to $branch are not allowed!"
+  echo "Use '/hansolo:launch' to create a feature branch"
   exit 1
 fi
+
+# Run linting (fail on errors only, not warnings)
+echo "🔍 Running linter..."
+if ! npm run lint 2>&1 | grep -q "✖ [0-9]* problems ([1-9][0-9]* errors"; then
+  echo "✅ Lint check passed"
+else
+  echo "❌ Lint check failed with errors!"
+  echo "Run 'npm run lint' to see errors"
+  exit 1
+fi
+
+# Run type checking
+echo "🔍 Running type check..."
+if npm run build > /dev/null 2>&1; then
+  echo "✅ Type check passed"
+else
+  echo "❌ Type check failed!"
+  echo "Run 'npm run build' to see errors"
+  exit 1
+fi
+
+exit 0
 `;
 
     // Pre-push hook
-    const prePushHook = `#!/bin/sh
-# Personal han-solo hook - not shared with team
+    const prePushHook = `#!/bin/bash
+# han-solo pre-push hook
+# Validates branch state and runs tests before pushing
 
-# Check for han-solo session
+# Check for active han-solo session
 if [ -f ".hansolo/session.json" ]; then
-  echo "❌ han-solo session active! Use 'hansolo ship --push' to push"
+  echo "❌ han-solo session active!"
+  echo "📝 Use 'hansolo ship --push' to push changes"
+  echo "   Or complete the workflow with 'hansolo ship'"
   exit 1
 fi
 
-# Prevent direct pushes to main
 branch=$(git branch --show-current)
-if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
-  echo "❌ Direct pushes to $branch not allowed"
+
+if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+  echo "❌ Direct pushes to $branch are not allowed!"
   exit 1
 fi
+
+# Run tests before pushing
+echo "🧪 Running tests..."
+if npm test > /dev/null 2>&1; then
+  echo "✅ All tests passed"
+else
+  echo "❌ Tests failed!"
+  echo "Run 'npm test' to see failures"
+  exit 1
+fi
+
+echo "✅ Push validation passed"
+exit 0
 `;
 
     await fs.mkdir(gitHooksPath, { recursive: true });
