@@ -421,18 +421,51 @@ hansolo abort [branch-name] [options]
 
 ### 9. `hansolo cleanup`
 
-**Description**: Clean up completed sessions and orphaned branches.
+**Description**: Clean up completed sessions, merged branches, and **sync main branch with remote**.
+
+**CRITICAL**: This command should be run after PRs are merged on GitHub to ensure your local main branch is synced and feature branches are properly cleaned up.
 
 #### CLI Usage
 ```bash
 hansolo cleanup [options]
   --dry-run            # Preview without changes
   --force, -f          # Force deletion
-  --all                # Clean everything
-  --sessions-only      # Only clean sessions
-  --branches-only      # Only clean branches
-  --days <n>           # Age threshold in days
+  --all                # Clean everything including audit logs
+  --sessions-only      # Only clean sessions, keep branches
+  --branches-only      # Only clean branches, keep sessions
+  --days <n>           # Clean sessions completed N+ days ago (default: 30)
+  --no-sync            # Skip syncing main branch (not recommended)
 ```
+
+#### What It Does
+
+1. **Syncs Main Branch** (NEW!)
+   - Stashes any uncommitted changes
+   - Switches to main branch
+   - Fetches and pulls latest from origin (includes squashed PR commits)
+   - Returns to original branch
+   - Restores stashed changes
+
+2. **Removes Merged Branches**
+   - Detects branches that have been merged to main
+   - Deletes local branches
+   - Optionally deletes remote branches
+
+3. **Archives Sessions**
+   - Marks completed sessions as archived
+   - Removes expired sessions
+   - Cleans up session older than threshold
+
+4. **Cleanup Operations**
+   - Removes stale lock files (>24 hours)
+   - Optionally cleans audit logs (with `--all`)
+
+#### When to Run
+
+- **After PR merge on GitHub**: Ensures main is synced
+- **Periodically**: Keep repository tidy
+- **Before new work**: Ensure clean starting state
+- **After long-running branches**: Clean up stale data
 
 #### MCP Access
 - **Tool Name**: `cleanup_operations`
@@ -443,7 +476,8 @@ hansolo cleanup [options]
     "deleteBranch": "boolean",
     "deleteRemote": "boolean",
     "archiveSession": "boolean",
-    "cleanupCompleted": "boolean"
+    "cleanupCompleted": "boolean",
+    "syncMain": "boolean (default: true)"
   }
   ```
 

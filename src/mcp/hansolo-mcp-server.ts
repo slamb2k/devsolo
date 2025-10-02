@@ -7,6 +7,8 @@ import {
   GetPromptRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
+import chalk from 'chalk';
+import boxen from 'boxen';
 import { InitCommand } from '../commands/hansolo-init';
 import { LaunchCommand } from '../commands/hansolo-launch';
 // SessionsCommand available but not directly used
@@ -56,6 +58,30 @@ const ShipSchema = z.object({
   force: z.boolean().optional(),
   yes: z.boolean().optional(),
 });
+
+// ASCII Art Banners for each command
+const BANNERS: Record<string, string> = {
+  hansolo_init: '🚀 Initializing han-solo',
+  hansolo_launch: '🚀 Launching New Feature Workflow',
+  hansolo_ship: '🚢 Shipping Workflow',
+  hansolo_swap: '🔄 Swapping Workflow',
+  hansolo_abort: '⛔ Aborting Workflow',
+  hansolo_sessions: '📋 Workflow Sessions',
+  hansolo_status: '📊 Workflow Status',
+};
+
+/**
+ * Create an ASCII art banner for a command
+ */
+function createBanner(title: string): string {
+  return '\n' + boxen(chalk.bold.cyan(title), {
+    padding: 1,
+    margin: 1,
+    borderStyle: 'double',
+    borderColor: 'cyan',
+    textAlignment: 'center',
+  }) + '\n';
+}
 
 
 export class HanSoloMCPServer {
@@ -386,11 +412,18 @@ export class HanSoloMCPServer {
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
 
-      // Suppress console output during command execution
+      // Save original console methods
       const originalConsoleLog = console.log;
       const originalConsoleError = console.error;
       const capturedOutput: string[] = [];
 
+      // Display banner FIRST (using original console, before override)
+      const banner = BANNERS[name];
+      if (banner) {
+        originalConsoleLog(createBanner(banner));
+      }
+
+      // NOW override console to capture command output
       console.log = (...args: any[]) => {
         capturedOutput.push(args.map(a => String(a)).join(' '));
       };
