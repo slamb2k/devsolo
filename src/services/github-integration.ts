@@ -21,6 +21,8 @@ export interface PullRequestInfo {
   mergeable_state?: string;
   title: string;
   body?: string;
+  head: string;
+  base: string;
 }
 
 export class GitHubIntegration {
@@ -175,6 +177,8 @@ export class GitHubIntegration {
         mergeable_state: response.data.mergeable_state ?? undefined,
         title: response.data.title,
         body: response.data.body ?? undefined,
+        head: response.data.head.ref,
+        base: response.data.base.ref,
       };
     } catch (error: any) {
       if (error.status === 422) {
@@ -212,6 +216,8 @@ export class GitHubIntegration {
         mergeable_state: response.data.mergeable_state ?? undefined,
         title: response.data.title,
         body: response.data.body ?? undefined,
+        head: response.data.head.ref,
+        base: response.data.base.ref,
       };
     } catch (error) {
       console.error('Failed to get pull request:', error);
@@ -247,6 +253,8 @@ export class GitHubIntegration {
             mergeable_state: pr.mergeable_state ?? undefined,
             title: pr.title,
             body: pr.body ?? undefined,
+            head: pr.head.ref,
+            base: pr.base.ref,
           };
         }
       }
@@ -386,6 +394,7 @@ export class GitHubIntegration {
     failed: boolean;
     pending: boolean;
     total: number;
+    details: Array<{ name: string; status: string; conclusion?: string }>;
   }> {
     if (!this.octokit || !this.owner || !this.repo) {
       const initialized = await this.initialize();
@@ -404,8 +413,15 @@ export class GitHubIntegration {
       let passed = 0;
       let failed = 0;
       let pending = 0;
+      const details = [];
 
       for (const check of response.data.check_runs) {
+        details.push({
+          name: check.name,
+          status: check.status,
+          conclusion: check.conclusion || undefined,
+        });
+
         if (check.status === 'completed') {
           if (check.conclusion === 'success') {
             passed++;
@@ -422,6 +438,7 @@ export class GitHubIntegration {
         failed: failed > 0,
         pending: pending > 0,
         total: response.data.check_runs.length,
+        details,
       };
     } catch (error) {
       console.error('Failed to get checks status:', error);
@@ -430,8 +447,55 @@ export class GitHubIntegration {
         failed: false,
         pending: false,
         total: 0,
+        details: [],
       };
     }
+  }
+
+  async waitForChecks(
+    prNumber: number,
+    options: {
+      timeout?: number;
+      pollInterval?: number;
+      onProgress?: (status: { passed: number; failed: number; pending: number }) => void;
+    } = {}
+  ): Promise<{ success: boolean; timedOut: boolean; failedChecks: string[] }> {
+    const timeout = options.timeout || 20 * 60 * 1000; // 20 minutes default
+    const pollInterval = options.pollInterval || 30 * 1000; // 30 seconds default
+    const startTime = Date.now();
+
+    // Get PR details to find branch name
+    const pr = await this.getPullRequest(prNumber);
+    if (!pr) {
+      return { success: false, timedOut: false, failedChecks: ['PR not found'] };
+    }
+
+    while (Date.now() - startTime < timeout) {
+      const status = await this.getChecksStatus(pr.head);
+
+      if (options.onProgress) {
+        const passed = status.details.filter(d => d.conclusion === 'success').length;
+        const failed = status.details.filter(d => d.conclusion === 'failure' || d.conclusion === 'cancelled').length;
+        const pending = status.details.filter(d => d.status !== 'completed').length;
+        options.onProgress({ passed, failed, pending });
+      }
+
+      if (status.passed) {
+        return { success: true, timedOut: false, failedChecks: [] };
+      }
+
+      if (status.failed) {
+        const failedChecks = status.details
+          .filter(d => d.conclusion === 'failure' || d.conclusion === 'cancelled')
+          .map(d => d.name);
+        return { success: false, timedOut: false, failedChecks };
+      }
+
+      // Wait before polling again
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
+    }
+
+    return { success: false, timedOut: true, failedChecks: ['Timeout waiting for checks'] };
   }
 
   async createRelease(tagName: string, options: {

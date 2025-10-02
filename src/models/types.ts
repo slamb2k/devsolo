@@ -68,6 +68,14 @@ export interface SessionMetadata {
   skipTests?: boolean;
   skipReview?: boolean;
   startedAt?: string;
+  pr?: {
+    number?: number;
+    url?: string;
+    title?: string;
+    body?: string;
+    base?: string;
+    head?: string;
+  };
 }
 
 export interface GitBranchStatus {
