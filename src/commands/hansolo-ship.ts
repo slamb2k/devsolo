@@ -507,7 +507,7 @@ export class ShipCommand {
       // Last resort: manual merge
       this.output.box(
         `Please merge PR #${prNumber} manually on GitHub.\n` +
-        `After merging, run "hansolo cleanup" to sync main and cleanup.`,
+        'After merging, run \'hansolo cleanup\' to sync main and cleanup.',
         'Manual Merge Required'
       );
 
