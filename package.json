@@ -5,23 +5,30 @@
   "main": "dist/index.js",
   "bin": {
     "hansolo": "./bin/hansolo.js",
-    "hansolo-mcp": "./bin/hansolo-mcp"
+    "hansolo-mcp": "./bin/hansolo-mcp",
+    "hansolo-mcp-enhanced": "./bin/hansolo-mcp-enhanced"
   },
   "scripts": {
     "build": "tsc",
+    "build:mcp": "tsc -p tsconfig.mcp.json",
     "clean": "rimraf dist coverage",
     "dev": "tsc --watch",
+    "dev:mcp": "tsc --watch -p tsconfig.mcp.json",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:unit": "jest --testPathPattern=unit",
     "test:integration": "jest --testPathPattern=integration",
+    "test:mcp": "jest --testPathPattern=mcp",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "typecheck": "tsc --noEmit",
+    "mcp:start": "node dist/mcp/hansolo-mcp-server-enhanced.js",
+    "mcp:start:legacy": "node dist/mcp/hansolo-mcp-server.js",
+    "mcp:test": "npm run build:mcp && npm run test:mcp",
     "postinstall": "node scripts/postinstall.js",
-    "prepack": "npm run clean && npm run build",
+    "prepack": "npm run clean && npm run build && npm run build:mcp",
     "prepublishOnly": "npm run test && npm run lint && npm run build",
     "package": "npm run build && npm pack",
     "docker:build": "docker build -t hansolo:latest .",
@@ -85,5 +92,17 @@
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "husky": "^9.0.0",
+    "lefthook": "^1.5.0"
+  },
+  "peerDependenciesMeta": {
+    "husky": {
+      "optional": true
+    },
+    "lefthook": {
+      "optional": true
+    }
   }
 }

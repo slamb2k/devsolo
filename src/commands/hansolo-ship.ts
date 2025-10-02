@@ -270,7 +270,7 @@ export class ShipCommand {
     } catch (error) {
       // Fallback to manual instructions
       this.output.warningMessage('Could not create PR via GitHub API');
-      this.output.dim('Set GITHUB_TOKEN environment variable to enable automatic PR creation');
+      this.output.dim(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
 
       this.output.box(
         `Title: ${prInfo.title}\n` +

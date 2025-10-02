@@ -3,6 +3,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { InitCommand } from '../commands/hansolo-init';
@@ -70,6 +72,7 @@ export class HanSoloMCPServer {
       {
         capabilities: {
           tools: {},
+          prompts: {},
         },
       }
     );
@@ -84,7 +87,7 @@ export class HanSoloMCPServer {
         tools: [
           {
             name: 'hansolo_init',
-            description: 'Initialize han-solo in your project',
+            description: '🚀 Initialize han-solo in your project',
             inputSchema: {
               type: 'object',
               properties: {
@@ -233,9 +236,172 @@ export class HanSoloMCPServer {
       };
     });
 
+    // List available prompts
+    this.server.setRequestHandler(ListPromptsRequestSchema, async () => {
+      return {
+        prompts: [
+          {
+            name: 'init',
+            description: '🚀 Initialize han-solo in your project',
+            arguments: [
+              {
+                name: 'scope',
+                description: 'Installation scope (project or user)',
+                required: false,
+              },
+              {
+                name: 'force',
+                description: 'Force reinitialization',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'launch',
+            description: '🌟 Start a new feature workflow',
+            arguments: [
+              {
+                name: 'branchName',
+                description: 'Name for the feature branch',
+                required: false,
+              },
+              {
+                name: 'description',
+                description: 'Description of the feature',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'swap',
+            description: '🔄 Switch between branches',
+            arguments: [
+              {
+                name: 'branchName',
+                description: 'Branch to swap to',
+                required: false,
+              },
+              {
+                name: 'stash',
+                description: 'Stash changes before swapping',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'ship',
+            description: '🚢 Ship your changes',
+            arguments: [
+              {
+                name: 'message',
+                description: 'Commit message',
+                required: false,
+              },
+              {
+                name: 'push',
+                description: 'Push to remote',
+                required: false,
+              },
+              {
+                name: 'createPR',
+                description: 'Create pull request',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'abort',
+            description: '❌ Abort workflow session',
+            arguments: [
+              {
+                name: 'branchName',
+                description: 'Branch to abort (current if not specified)',
+                required: false,
+              },
+              {
+                name: 'deleteBranch',
+                description: 'Delete the branch after aborting',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'status',
+            description: '📊 Show workflow status',
+            arguments: [],
+          },
+          {
+            name: 'sessions',
+            description: '📋 List workflow sessions',
+            arguments: [
+              {
+                name: 'all',
+                description: 'Show all sessions including completed',
+                required: false,
+              },
+              {
+                name: 'verbose',
+                description: 'Show detailed session information',
+                required: false,
+              },
+            ],
+          },
+        ],
+      };
+    });
+
+    // Handle prompt requests
+    this.server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+      const { name, arguments: args } = request.params;
+
+      // Build tool call arguments
+      const toolArgs: Record<string, any> = {};
+      if (args) {
+        Object.entries(args).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            toolArgs[key] = value;
+          }
+        });
+      }
+
+      // Build arguments string for display
+      const argsStr = Object.keys(toolArgs).length > 0
+        ? ` with ${Object.entries(toolArgs).map(([k, v]) => `${k}=${v}`).join(', ')}`
+        : '';
+
+      return {
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: `Run the han-solo ${name} command${argsStr}`,
+            },
+          },
+        ],
+      };
+    });
+
     // Handle tool calls
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
+
+      // Suppress console output during command execution
+      const originalConsoleLog = console.log;
+      const originalConsoleError = console.error;
+      const capturedOutput: string[] = [];
+
+      console.log = (...args: any[]) => {
+        capturedOutput.push(args.map(a => String(a)).join(' '));
+      };
+      console.error = (...args: any[]) => {
+        // Still allow our own MCP server logs through
+        if (args[0]?.includes?.('[MCP') || args[0]?.includes?.('han-solo MCP')) {
+          originalConsoleError(...args);
+        } else {
+          capturedOutput.push(args.map(a => String(a)).join(' '));
+        }
+      };
 
       try {
         switch (name) {
@@ -247,7 +413,7 @@ export class HanSoloMCPServer {
             content: [
               {
                 type: 'text',
-                text: 'han-solo initialized successfully',
+                text: capturedOutput.join('\n') || 'han-solo initialized successfully',
               },
             ],
           };
@@ -261,7 +427,7 @@ export class HanSoloMCPServer {
             content: [
               {
                 type: 'text',
-                text: `Launched new workflow on branch: ${params.branchName || 'auto-generated'}`,
+                text: capturedOutput.join('\n') || `Launched new workflow on branch: ${params.branchName || 'auto-generated'}`,
               },
             ],
           };
@@ -304,7 +470,7 @@ export class HanSoloMCPServer {
             content: [
               {
                 type: 'text',
-                text: `Swapped to branch: ${params.branchName}`,
+                text: capturedOutput.join('\n') || `Swapped to branch: ${params.branchName}`,
               },
             ],
           };
@@ -318,7 +484,7 @@ export class HanSoloMCPServer {
             content: [
               {
                 type: 'text',
-                text: `Aborted workflow on branch: ${params.branchName || 'current'}`,
+                text: capturedOutput.join('\n') || `Aborted workflow on branch: ${params.branchName || 'current'}`,
               },
             ],
           };
@@ -332,7 +498,7 @@ export class HanSoloMCPServer {
             content: [
               {
                 type: 'text',
-                text: 'Workflow shipped successfully',
+                text: capturedOutput.join('\n') || 'Workflow shipped successfully',
               },
             ],
           };
@@ -380,11 +546,15 @@ export class HanSoloMCPServer {
           content: [
             {
               type: 'text',
-              text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}\n\nCaptured output:\n${capturedOutput.join('\n')}`,
             },
           ],
           isError: true,
         };
+      } finally {
+        // Restore original console methods
+        console.log = originalConsoleLog;
+        console.error = originalConsoleError;
       }
     });
   }
@@ -392,15 +562,38 @@ export class HanSoloMCPServer {
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
+
+    // Keep stdin reading to prevent premature exit
+    process.stdin.resume();
+
+    // Prevent stdin 'end' from closing the process prematurely
+    process.stdin.on('end', () => {
+      console.error('stdin ended, but keeping server alive');
+    });
+
+    // Log to stderr (stdout is used for MCP protocol)
     console.error('han-solo MCP server running');
+
+    // Keep the async function from returning by waiting on a promise
+    // that resolves when the transport closes
+    return new Promise<void>((resolve) => {
+      const originalOnClose = transport.onclose;
+      transport.onclose = () => {
+        if (originalOnClose) {
+          originalOnClose.call(transport);
+        }
+        resolve();
+      };
+
+      // Handle signals gracefully
+      const shutdown = () => {
+        transport.close().then(() => resolve());
+      };
+      process.once('SIGINT', shutdown);
+      process.once('SIGTERM', shutdown);
+    });
   }
 }
 
-// Main entry point
-if (require.main === module) {
-  const server = new HanSoloMCPServer();
-  server.run().catch((error) => {
-    console.error('Server error:', error);
-    process.exit(1);
-  });
-}
+// Export for use as a library
+// Server is started by bin/hansolo-mcp when run as a command

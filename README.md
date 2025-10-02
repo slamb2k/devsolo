@@ -135,12 +135,20 @@ Each state has specific allowed transitions and validations to ensure workflow i
 han-solo integrates with GitHub API for automated PR management.
 
 ### Setup
-Set your GitHub token as an environment variable:
+
+**Option 1: Use GitHub CLI (Recommended for local development)**
+```bash
+gh auth login
+```
+
+**Option 2: Set environment variable (For CI/CD)**
 ```bash
 export GITHUB_TOKEN=your_github_token
 # or
 export GH_TOKEN=your_github_token
 ```
+
+han-solo automatically detects and uses `gh` CLI authentication if available, so explicit token setup is often unnecessary for local development.
 
 ### Features
 - Automatic PR creation with generated descriptions

@@ -3,9 +3,10 @@
 /**
  * Post-install script for hansolo-cli
  * Launches the interactive installer wizard after npm installation
+ * Configures MCP server for Claude Code if available
  */
 
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
@@ -40,8 +41,39 @@ function isUpgrade() {
   return fs.existsSync(globalConfig) || fs.existsSync(localConfig);
 }
 
+// Detect installation type
+function detectInstallationType() {
+  // Check for NPX
+  if (process.env.npm_command === 'exec' ||
+      process.env.npm_lifecycle_event === 'npx' ||
+      process.env._?.includes('npx')) {
+    return 'npx';
+  }
+
+  // Check for global
+  if (process.env.npm_config_global === 'true' ||
+      __dirname.includes('npm/node_modules') ||
+      __dirname.includes('.nvm/versions')) {
+    return 'global';
+  }
+
+  return 'local';
+}
+
+// Check if Claude Code is available
+function hasClaudeCode() {
+  try {
+    execSync('claude --version', { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Main execution
 async function main() {
+  const installType = detectInstallationType();
+  console.log(`\n🚀 han-solo installation detected: ${installType}\n`);
   // Build the path to the installer wizard
   const installerPath = path.join(__dirname, '..', 'dist', 'cli', 'InstallerWizard.js');
 
@@ -68,9 +100,13 @@ async function main() {
   // Launch the installer wizard
   console.log('\n🚀 Launching han-solo setup wizard...\n');
 
+  // Pass installation type to the wizard
+  const env = { ...process.env, HANSOLO_INSTALL_TYPE: installType };
+
   const installer = spawn('node', [installerPath], {
     stdio: 'inherit',
-    shell: false
+    shell: false,
+    env
   });
 
   installer.on('error', (error) => {
@@ -79,11 +115,20 @@ async function main() {
     process.exit(1);
   });
 
-  installer.on('close', (code) => {
+  installer.on('close', async (code) => {
     if (code !== 0) {
       console.log('\nSetup was not completed.');
       console.log('You can run the installer again with: hansolo configure');
+      process.exit(code);
     }
+
+    // After successful installation, offer MCP configuration
+    if (installType !== 'npx' && hasClaudeCode()) {
+      console.log('\n🔧 Claude Code detected!');
+      console.log('To configure MCP server, run: hansolo init');
+      console.log('This will set up the han-solo MCP server for use with Claude Code.\n');
+    }
+
     process.exit(code);
   });
 }

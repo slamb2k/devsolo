@@ -209,7 +209,10 @@ git push --force-with-lease
 
 **Solution**:
 ```bash
-# Set GitHub token
+# Option 1: Use GitHub CLI authentication (recommended for local dev)
+gh auth login
+
+# Option 2: Set GitHub token explicitly (for CI/CD)
 export GITHUB_TOKEN=ghp_your_token_here
 
 # Or configure in han-solo
@@ -219,6 +222,8 @@ hansolo config --global platform.github.token ghp_xxx
 curl -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/rate_limit
 ```
+
+**Note**: han-solo automatically uses `gh` CLI authentication if available, so `gh auth login` is often sufficient.
 
 #### Error: GitLab authentication failed
 

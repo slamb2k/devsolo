@@ -1,6 +1,7 @@
 import { Octokit } from '@octokit/rest';
 import { GitOperations } from './git-operations';
 import { ConfigurationManager } from './configuration-manager';
+import { execSync } from 'child_process';
 
 export interface PullRequestOptions {
   title: string;
@@ -34,20 +35,60 @@ export class GitHubIntegration {
     this.configManager = new ConfigurationManager(basePath);
   }
 
+  /**
+   * Attempt to get GitHub token from gh CLI
+   * @returns Token string if successful, null otherwise
+   */
+  private async getGhCliToken(): Promise<string | null> {
+    try {
+      const token = execSync('gh auth token', {
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe'], // Suppress stderr
+      }).trim();
+
+      if (token && token.length > 0) {
+        return token;
+      }
+      return null;
+    } catch (error) {
+      // gh CLI not installed or not authenticated
+      return null;
+    }
+  }
+
   async initialize(): Promise<boolean> {
     try {
       // Load configuration
       const config = await this.configManager.load();
       const githubConfig = config.gitPlatform;
 
-      // Get token from environment or config
-      const token = process.env['GITHUB_TOKEN'] ||
-                   process.env['GH_TOKEN'] ||
-                   githubConfig?.token;
+      // Get token from environment, config, or gh CLI (in order of preference)
+      let token = process.env['GITHUB_TOKEN'] ||
+                  process.env['GH_TOKEN'] ||
+                  githubConfig?.token;
+
+      let tokenSource = 'environment variable';
+
+      // If no explicit token, try gh CLI
+      if (!token) {
+        const ghToken = await this.getGhCliToken();
+        if (ghToken) {
+          token = ghToken;
+          tokenSource = 'gh CLI';
+        }
+      }
 
       if (!token) {
-        console.error('GitHub token not found. Set GITHUB_TOKEN or GH_TOKEN environment variable.');
+        console.error('GitHub token not found.');
+        console.error('Please either:');
+        console.error('  1. Set GITHUB_TOKEN or GH_TOKEN environment variable, or');
+        console.error('  2. Run "gh auth login" to authenticate with GitHub CLI');
         return false;
+      }
+
+      // Log token source for debugging
+      if (process.env['DEBUG']) {
+        console.error(`Using GitHub token from: ${tokenSource}`);
       }
 
       // Initialize Octokit

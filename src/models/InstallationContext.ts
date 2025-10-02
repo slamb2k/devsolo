@@ -14,4 +14,5 @@ export class InstallationContext {
   packageManager: 'npm' | 'yarn' | 'pnpm' = 'npm';
   nodeVersion: string = '';
   platform: NodeJS.Platform = 'linux';
+  hasClaudeCode: boolean = false;
 }
