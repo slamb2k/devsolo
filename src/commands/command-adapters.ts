@@ -1,11 +1,12 @@
 import { CommandHandler } from './types';
 import { InitCommand } from './hansolo-init';
-import { LaunchCommand } from './hansolo-launch';
-import { ShipCommand } from './hansolo-ship';
+// Import v2 adapter commands that provide v1 API compatibility
+import { LaunchCommand } from './adapters/launch-adapter';
+import { ShipCommand } from './adapters/ship-adapter';
+import { SessionsCommand } from './adapters/sessions-adapter';
+import { SwapCommand } from './adapters/swap-adapter';
+import { AbortCommand } from './adapters/abort-adapter';
 import { HotfixCommand } from './hansolo-hotfix';
-import { SessionsCommand } from './hansolo-sessions';
-import { SwapCommand } from './hansolo-swap';
-import { AbortCommand } from './hansolo-abort';
 
 // Adapter classes to wrap existing commands in CommandHandler interface
 

@@ -7,9 +7,10 @@ import {
   SessionsCommandAdapter,
   SwapCommandAdapter,
   AbortCommandAdapter,
-} from './adapters';
-import { HansoloStatusCommand } from './hansolo-status';
-import { HansoloCleanupCommand } from './hansolo-cleanup';
+} from './command-adapters';
+// Import v2 adapter commands
+import { HansoloStatusCommand } from './adapters/status-adapter';
+import { CleanupCommand } from './adapters/cleanup-adapter';
 import { HansoloValidateCommand } from './hansolo-validate';
 import { HansoloConfigCommand } from './hansolo-config';
 import { HansoloStatusLineCommand } from './hansolo-status-line';
@@ -43,8 +44,8 @@ export class CommandRegistry {
     this.register(new SwapCommandAdapter());
     this.register(new AbortCommandAdapter());
 
-    // Maintenance commands
-    this.register(new HansoloCleanupCommand());
+    // Maintenance commands - using v2 adapter
+    this.register(new CleanupCommand());
     this.register(new HansoloValidateCommand());
 
     // Configuration commands
