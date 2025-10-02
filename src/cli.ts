@@ -4,11 +4,14 @@ import { WorkflowSession } from './models/workflow-session';
 import { Configuration } from './models/configuration';
 import { LaunchWorkflowStateMachine } from './state-machines/launch-workflow';
 import { InitCommand } from './commands/hansolo-init';
-import { LaunchCommand } from './commands/hansolo-launch';
-import { SessionsCommand } from './commands/hansolo-sessions';
-import { SwapCommand } from './commands/hansolo-swap';
-import { AbortCommand } from './commands/hansolo-abort';
-import { ShipCommand } from './commands/hansolo-ship';
+// Import adapter commands for v2 compatibility
+import {
+  LaunchCommand,
+  SessionsCommand,
+  SwapCommand,
+  AbortCommand,
+  ShipCommand,
+} from './commands/adapters';
 import { HotfixCommand } from './commands/hansolo-hotfix';
 import { runInteractiveMode } from './commands/interactive';
 import { PerfCommand } from './commands/hansolo-perf';

@@ -10,12 +10,13 @@ import { z } from 'zod';
 import chalk from 'chalk';
 import boxen from 'boxen';
 import { InitCommand } from '../commands/hansolo-init';
-import { LaunchCommand } from '../commands/hansolo-launch';
-// SessionsCommand available but not directly used
-// import { SessionsCommand } from '../commands/hansolo-sessions';
-import { SwapCommand } from '../commands/hansolo-swap';
-import { AbortCommand } from '../commands/hansolo-abort';
-import { ShipCommand } from '../commands/hansolo-ship';
+// Import adapter commands for v2 compatibility
+import {
+  LaunchCommand,
+  SwapCommand,
+  AbortCommand,
+  ShipCommand,
+} from '../commands/adapters';
 import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
 

@@ -415,7 +415,7 @@ export class LaunchCommandV2 {
     // Git branch name rules
     return (
       name.length > 0 &&
-      !/[\s~^:?*\[\]\\]/.test(name) &&
+      !/[\s~^:?*[\]\\]/.test(name) &&
       !name.endsWith('.lock') &&
       !name.startsWith('.') &&
       !name.endsWith('/')
