@@ -145,8 +145,11 @@ export class SessionRepository {
     await this.appendAudit(auditEntry);
   }
 
-  async listSessions(includeExpired: boolean = false): Promise<WorkflowSession[]> {
+  async listSessions(options?: { all?: boolean } | boolean): Promise<WorkflowSession[]> {
     await this.initialize();
+
+    // Handle both old boolean and new options object
+    const includeExpired = typeof options === 'boolean' ? options : options?.all || false;
 
     const files = await fs.readdir(this.sessionPath);
     const sessions: WorkflowSession[] = [];
