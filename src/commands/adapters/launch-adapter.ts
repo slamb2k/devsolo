@@ -30,6 +30,8 @@ export class LaunchCommand {
     description?: string;
     branchName?: string;
     force?: boolean;
+    stashRef?: string;
+    popStash?: boolean;
   } = {}): Promise<void> {
     return this.v2Command.execute(options);
   }

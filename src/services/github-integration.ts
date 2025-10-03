@@ -45,7 +45,7 @@ export class GitHubIntegration {
     try {
       const token = execSync('gh auth token', {
         encoding: 'utf8',
-        stdio: ['pipe', 'pipe', 'pipe'], // Suppress stderr
+        stdio: ['ignore', 'pipe', 'ignore'], // stdin=ignore, stdout=pipe, stderr=ignore
       }).trim();
 
       if (token && token.length > 0) {
@@ -60,38 +60,36 @@ export class GitHubIntegration {
 
   async initialize(): Promise<boolean> {
     try {
+      console.error('[GITHUB INIT] Starting initialization');
       // Load configuration
       const config = await this.configManager.load();
       const githubConfig = config.gitPlatform;
 
+      console.error('[GITHUB INIT] Checking env vars...');
       // Get token from environment, config, or gh CLI (in order of preference)
       let token = process.env['GITHUB_TOKEN'] ||
                   process.env['GH_TOKEN'] ||
                   githubConfig?.token;
 
-      let tokenSource = 'environment variable';
+      console.error('[GITHUB INIT] Env token found:', !!token);
 
       // If no explicit token, try gh CLI
       if (!token) {
+        console.error('[GITHUB INIT] Trying gh CLI...');
         const ghToken = await this.getGhCliToken();
+        console.error('[GITHUB INIT] gh CLI token found:', !!ghToken);
         if (ghToken) {
           token = ghToken;
-          tokenSource = 'gh CLI';
         }
       }
 
       if (!token) {
-        console.error('GitHub token not found.');
-        console.error('Please either:');
-        console.error('  1. Set GITHUB_TOKEN or GH_TOKEN environment variable, or');
-        console.error('  2. Run "gh auth login" to authenticate with GitHub CLI');
+        console.error('[GITHUB INIT] No token found anywhere - returning false');
+        // Don't error here - just return false so pre-flight check can show warning
         return false;
       }
 
-      // Log token source for debugging
-      if (process.env['DEBUG']) {
-        console.error(`Using GitHub token from: ${tokenSource}`);
-      }
+      console.error('[GITHUB INIT] Token acquired, initializing Octokit');
 
       // Initialize Octokit
       this.octokit = new Octokit({

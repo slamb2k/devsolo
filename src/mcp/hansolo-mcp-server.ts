@@ -30,6 +30,8 @@ const LaunchSchema = z.object({
   branchName: z.string().optional(),
   description: z.string().optional(),
   force: z.boolean().optional(),
+  stashRef: z.string().optional(),
+  popStash: z.boolean().optional(),
 });
 
 const SessionsSchema = z.object({
@@ -62,13 +64,13 @@ const ShipSchema = z.object({
 
 // ASCII Art Banners for each command
 const BANNERS: Record<string, string> = {
-  hansolo_init: '🚀 Initializing han-solo',
-  hansolo_launch: '🚀 Launching New Feature Workflow',
-  hansolo_ship: '🚢 Shipping Workflow',
-  hansolo_swap: '🔄 Swapping Workflow',
-  hansolo_abort: '⛔ Aborting Workflow',
-  hansolo_sessions: '📋 Workflow Sessions',
-  hansolo_status: '📊 Workflow Status',
+  hansolo_init: '🚀 Initializing han-solo [VERSION 2.0 DEBUG BUILD]',
+  hansolo_launch: '🚀 Launching New Feature Workflow [VERSION 2.0 DEBUG BUILD]',
+  hansolo_ship: '🚢 Shipping Workflow [VERSION 2.0 DEBUG BUILD]',
+  hansolo_swap: '🔄 Swapping Workflow [VERSION 2.0 DEBUG BUILD]',
+  hansolo_abort: '⛔ Aborting Workflow [VERSION 2.0 DEBUG BUILD]',
+  hansolo_sessions: '📋 Workflow Sessions [VERSION 2.0 DEBUG BUILD]',
+  hansolo_status: '📊 Workflow Status [VERSION 2.0 DEBUG BUILD]',
 };
 
 /**
@@ -147,6 +149,14 @@ export class HanSoloMCPServer {
                 force: {
                   type: 'boolean',
                   description: 'Force launch even with uncommitted changes',
+                },
+                stashRef: {
+                  type: 'string',
+                  description: 'Git stash reference to restore after branch creation (e.g., stash@{0})',
+                },
+                popStash: {
+                  type: 'boolean',
+                  description: 'Whether to pop the stash (default: true if stashRef provided)',
                 },
               },
             },
@@ -513,26 +523,52 @@ export class HanSoloMCPServer {
         case 'hansolo_abort': {
           const params = AbortSchema.parse(args);
           const abortCommand = new AbortCommand(this.basePath);
-          await abortCommand.execute(params);
+          const result = await abortCommand.execute(params);
+
+          // Include stashRef in output if present
+          let outputText = capturedOutput.join('\n');
+          if (!outputText) {
+            outputText = `Aborted workflow on branch: ${result.branchAborted}`;
+            if (result.stashRef) {
+              outputText += `\nWork stashed: ${result.stashRef}`;
+            }
+          }
+
           return {
             content: [
               {
                 type: 'text',
-                text: capturedOutput.join('\n') || `Aborted workflow on branch: ${params.branchName || 'current'}`,
+                text: outputText,
               },
             ],
           };
         }
 
         case 'hansolo_ship': {
+          originalConsoleError('[MCP] hansolo_ship case hit');
           const params = ShipSchema.parse(args);
+          originalConsoleError('[MCP] Params parsed:', params);
           const shipCommand = new ShipCommand(this.basePath);
+          originalConsoleError('[MCP] ShipCommand created, about to execute');
+
+          // Add debug marker to captured output
+          capturedOutput.push('[MCP DEBUG] About to execute ship command');
+
           await shipCommand.execute(params);
+
+          capturedOutput.push('[MCP DEBUG] Ship command execute completed');
+          originalConsoleError('[MCP] ShipCommand execute returned');
+
+          // Always show captured output for debugging
+          const outputText = capturedOutput.join('\n');
+          originalConsoleError('[MCP DEBUG] Captured output length:', outputText.length);
+          originalConsoleError('[MCP DEBUG] Captured output:', outputText);
+
           return {
             content: [
               {
                 type: 'text',
-                text: capturedOutput.join('\n') || 'Workflow shipped successfully',
+                text: outputText || 'Workflow shipped successfully',
               },
             ],
           };

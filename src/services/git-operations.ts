@@ -451,6 +451,10 @@ export class GitOperations {
     await this.git.stash(['pop']);
   }
 
+  async stashPopSpecific(stashRef: string): Promise<void> {
+    await this.git.stash(['pop', stashRef]);
+  }
+
   async stashList(): Promise<string[]> {
     const result = await this.git.stash(['list']);
     return result.split('\n').filter(line => line.trim());

@@ -151,7 +151,7 @@ export class AbortCommandAdapter implements CommandHandler {
         options.clean = true;
       }
     }
-    return this.command.execute(options);
+    await this.command.execute(options);
   }
 
   validate(_args: string[]): boolean {

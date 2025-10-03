@@ -183,7 +183,8 @@ class LaunchPostFlightChecks extends PostFlightChecks {
   constructor(
     private session: WorkflowSession,
     private gitOps: GitOperations,
-    private branchName: string
+    private branchName: string,
+    private stashPopped: boolean = false
   ) {
     super();
     this.setupVerifications();
@@ -194,7 +195,9 @@ class LaunchPostFlightChecks extends PostFlightChecks {
     this.addVerification(async () => this.verifyBranchCreated());
     this.addVerification(async () => this.verifyBranchCheckedOut());
     this.addVerification(async () => this.verifySessionState());
-    this.addVerification(async () => this.verifyNoUncommittedChanges());
+    if (!this.stashPopped) {
+      this.addVerification(async () => this.verifyNoUncommittedChanges());
+    }
   }
 
   private async verifySessionCreated(): Promise<CheckResult> {
@@ -273,6 +276,8 @@ export class LaunchCommandV2 {
     branchName?: string;
     force?: boolean;
     description?: string;
+    stashRef?: string;
+    popStash?: boolean;
   } = {}): Promise<void> {
     try {
       // Check initialization
@@ -334,6 +339,14 @@ export class LaunchCommandV2 {
         },
       ];
 
+      // Add stash pop step if stashRef provided
+      if (options.stashRef && (options.popStash !== false)) {
+        steps.push({
+          name: `Restoring work from ${options.stashRef}`,
+          action: async () => await this.popStash(options.stashRef!),
+        });
+      }
+
       await this.progress.runSteps(steps);
 
       if (!session) {
@@ -344,7 +357,8 @@ export class LaunchCommandV2 {
       const postFlightChecks = new LaunchPostFlightChecks(
         session,
         this.gitOps,
-        branchName
+        branchName,
+        !!(options.stashRef && options.popStash !== false)
       );
 
       await postFlightChecks.runVerifications({
@@ -394,6 +408,11 @@ export class LaunchCommandV2 {
   private async setupEnvironment(_branchName: string): Promise<void> {
     // Future: Setup project-specific environment
     // For now, just a placeholder
+  }
+
+  private async popStash(stashRef: string): Promise<void> {
+    await this.gitOps.stashPopSpecific(stashRef);
+    this.output.dim(`Work restored from ${stashRef}`);
   }
 
   private generateBranchName(description?: string): string {

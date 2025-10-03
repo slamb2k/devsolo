@@ -312,6 +312,8 @@ export class ShipCommandV2 {
     force?: boolean;
   } = {}): Promise<void> {
     try {
+      console.error('[MCP SHIP] Execute called');
+
       // Check initialization
       if (!(await this.configManager.isInitialized())) {
         this.output.errorMessage('han-solo is not initialized');
@@ -319,15 +321,24 @@ export class ShipCommandV2 {
         return;
       }
 
+      console.error('[MCP SHIP] Config initialized');
+
       // Get current branch and session
       const currentBranch = await this.gitOps.getCurrentBranch();
       const session = await this.sessionRepo.getSessionByBranch(currentBranch);
+
+      console.error('[MCP SHIP] Session found:', !!session);
 
       if (!session) {
         this.output.errorMessage(`No workflow session found for branch '${currentBranch}'`);
         this.output.infoMessage('Use "hansolo launch" to start a new workflow');
         return;
       }
+
+      // Initialize GitHub integration (tries env vars, config, then gh CLI)
+      console.error('[MCP SHIP] About to initialize GitHub');
+      await this.githubIntegration.initialize();
+      console.error('[MCP SHIP] GitHub initialized');
 
       // Run pre-flight checks
       const preFlightChecks = new ShipPreFlightChecks(
@@ -338,16 +349,26 @@ export class ShipCommandV2 {
         this.prValidator
       );
 
-      const preFlightPassed = await preFlightChecks.runChecks({
-        command: 'ship',
-        session,
-        options,
-      });
+      let preFlightPassed;
+      try {
+        preFlightPassed = await preFlightChecks.runChecks({
+          command: 'ship',
+          session,
+          options,
+        });
+        this.output.errorMessage(`[DEBUG] Pre-flight returned: ${preFlightPassed} (type: ${typeof preFlightPassed})`);
+      } catch (error) {
+        this.output.errorMessage(`\n❌ Pre-flight checks threw error: ${error}`);
+        return;
+      }
 
+      this.output.errorMessage('[DEBUG] Checking if preFlightPassed is falsy...');
       if (!preFlightPassed) {
+        this.output.errorMessage('[DEBUG] preFlightPassed was FALSY!');
         this.output.errorMessage('\n❌ Pre-flight checks failed - aborting ship');
         return;
       }
+      this.output.errorMessage('[DEBUG] preFlightPassed was TRUTHY, continuing!');
 
       // Display ASCII art banner
       this.output.info(AsciiArt.ship());

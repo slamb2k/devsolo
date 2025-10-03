@@ -25,7 +25,7 @@ export class AbortCommand {
     force?: boolean;
     deleteBranch?: boolean;
     yes?: boolean;
-  } = {}): Promise<void> {
+  } = {}): Promise<{ stashRef?: string; branchAborted: string }> {
     return this.v2Command.execute(options);
   }
 
