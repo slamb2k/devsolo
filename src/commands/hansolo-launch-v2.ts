@@ -9,6 +9,8 @@ import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/vali
 import { AsciiArt } from '../ui/ascii-art';
 import { BranchNamingService } from '../services/branch-naming';
 import { GitHubIntegration } from '../services/github-integration';
+import { StashManager } from '../services/stash-manager';
+import { AbortCommandV2 } from './hansolo-abort-v2';
 
 /**
  * Pre-flight checks for launch command
@@ -28,7 +30,6 @@ class LaunchPreFlightChecks extends PreFlightChecks {
 
   private setupChecks(): void {
     this.addCheck(async () => this.checkOnMainBranch());
-    this.addCheck(async () => this.checkWorkingDirectoryClean());
     this.addCheck(async () => this.checkMainUpToDate());
     this.addCheck(async () => this.checkNoExistingSession());
     this.addCheck(async () => this.checkBranchNameAvailable());
@@ -54,27 +55,6 @@ class LaunchPreFlightChecks extends PreFlightChecks {
       name: 'On main/master branch',
       message: isMain ? currentBranch : `${currentBranch} (--force)`,
       level: 'info',
-    };
-  }
-
-  private async checkWorkingDirectoryClean(): Promise<CheckResult> {
-    const isClean = await this.gitOps.isClean();
-
-    if (!isClean && !this.force) {
-      return {
-        passed: false,
-        name: 'Working directory clean',
-        message: 'Uncommitted changes detected',
-        level: 'error',
-        suggestions: ['Commit or stash changes', 'Use --force to override'],
-      };
-    }
-
-    return {
-      passed: true,
-      name: 'Working directory clean',
-      message: isClean ? undefined : 'Has changes (--force)',
-      level: isClean ? 'info' : 'warning',
     };
   }
 
@@ -344,6 +324,8 @@ export class LaunchCommandV2 {
   private branchValidator: BranchValidator;
   private branchNaming: BranchNamingService;
   private githubIntegration: GitHubIntegration;
+  private stashManager: StashManager;
+  private abortCommand: AbortCommandV2;
 
   constructor(basePath: string = '.hansolo') {
     this.configManager = new ConfigurationManager(basePath);
@@ -352,6 +334,8 @@ export class LaunchCommandV2 {
     this.branchValidator = new BranchValidator(basePath);
     this.branchNaming = new BranchNamingService();
     this.githubIntegration = new GitHubIntegration(basePath);
+    this.stashManager = new StashManager(basePath);
+    this.abortCommand = new AbortCommandV2(basePath);
   }
 
   async execute(options: {
@@ -433,6 +417,36 @@ export class LaunchCommandV2 {
           branchName = this.branchNaming.generateFromTimestamp();
           this.output.infoMessage(`Generated branch name: ${branchName}`);
         }
+      }
+
+      // Handle uncommitted changes and session management (AFTER branch name generation)
+      const currentBranch = await this.gitOps.getCurrentBranch();
+      const activeSession = await this.sessionRepo.getSessionByBranch(currentBranch);
+      const hasChanges = await this.stashManager.hasUncommittedChanges();
+
+      let stashRef: string | undefined;
+
+      // Always stash uncommitted changes if present
+      if (hasChanges) {
+        this.output.info('📦 Stashing uncommitted changes...');
+        const stashResult = await this.stashManager.stashChanges('launch', currentBranch);
+        stashRef = stashResult.stashRef;
+        this.output.dim(`   Stashed as: ${stashResult.stashRef}`);
+      }
+
+      // Abort active session if it exists
+      if (activeSession && activeSession.isActive()) {
+        this.output.warningMessage(`⚠️  Current session on '${currentBranch}' will be aborted`);
+        this.output.dim('   Launching new workflow will terminate the current session');
+
+        await this.abortCommand.execute({ yes: true });
+        this.output.dim('   Session aborted');
+      }
+
+      // Pass stashRef to restore work on new branch
+      if (stashRef) {
+        options.stashRef = stashRef;
+        options.popStash = true;
       }
 
       // Run pre-flight checks
