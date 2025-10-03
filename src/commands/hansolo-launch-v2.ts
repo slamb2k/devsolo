@@ -7,6 +7,7 @@ import { WorkflowSession } from '../models/workflow-session';
 import { BranchValidator } from '../services/validation/branch-validator';
 import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
 import { AsciiArt } from '../ui/ascii-art';
+import { BranchNamingService } from '../services/branch-naming';
 
 /**
  * Pre-flight checks for launch command
@@ -264,12 +265,14 @@ export class LaunchCommandV2 {
   private sessionRepo: SessionRepository;
   private gitOps: GitOperations;
   private branchValidator: BranchValidator;
+  private branchNaming: BranchNamingService;
 
   constructor(basePath: string = '.hansolo') {
     this.configManager = new ConfigurationManager(basePath);
     this.sessionRepo = new SessionRepository(basePath);
     this.gitOps = new GitOperations();
     this.branchValidator = new BranchValidator(basePath);
+    this.branchNaming = new BranchNamingService();
   }
 
   async execute(options: {
@@ -287,14 +290,70 @@ export class LaunchCommandV2 {
         return;
       }
 
-      // Generate branch name if not provided
-      const branchName = options.branchName || this.generateBranchName(options.description);
+      // Determine branch name with intelligent fallback
+      let branchName: string;
 
-      // Validate branch name format
-      if (!this.isValidBranchName(branchName)) {
-        this.output.errorMessage(`Invalid branch name: ${branchName}`);
-        this.output.infoMessage('Branch names must follow Git naming conventions');
-        return;
+      if (options.branchName) {
+        // Branch name provided - validate it
+        const validation = this.branchNaming.validate(options.branchName);
+
+        if (!validation.isValid) {
+          this.output.warningMessage(
+            `⚠️  Branch name "${options.branchName}" doesn't follow standard conventions`
+          );
+          this.output.info(`   ${validation.message}`);
+
+          if (validation.suggestions && validation.suggestions.length > 0) {
+            this.output.info('\n💡 Suggested names:');
+            validation.suggestions.forEach((suggestion, index) => {
+              this.output.info(`   ${index + 1}. ${suggestion}`);
+            });
+            this.output.info('');
+          }
+
+          // In non-interactive mode (MCP), use first suggestion or continue with provided name
+          if (
+            validation.suggestions &&
+            validation.suggestions.length > 0 &&
+            validation.suggestions[0]
+          ) {
+            branchName = validation.suggestions[0];
+            this.output.infoMessage(`Using suggested name: ${branchName}`);
+          } else if (options.branchName) {
+            branchName = options.branchName;
+            this.output.warningMessage('Continuing with non-standard branch name');
+          } else {
+            // Fallback to timestamp if all else fails
+            branchName = this.branchNaming.generateFromTimestamp();
+            this.output.infoMessage(`Generated fallback branch name: ${branchName}`);
+          }
+        } else {
+          branchName = options.branchName;
+        }
+      } else if (options.description) {
+        // No branch name but description provided - generate from description
+        branchName = this.branchNaming.generateFromDescription(options.description);
+        this.output.infoMessage(`Generated branch name: ${branchName}`);
+      } else {
+        // No branch name or description - try to generate from git changes
+        const hasChanges = await this.gitOps.hasUncommittedChanges();
+
+        if (hasChanges && !options.stashRef) {
+          const fromChanges = await this.branchNaming.generateFromChanges();
+
+          if (fromChanges) {
+            branchName = fromChanges;
+            this.output.infoMessage(`Generated branch name from changes: ${branchName}`);
+          } else {
+            // Fallback to timestamp
+            branchName = this.branchNaming.generateFromTimestamp();
+            this.output.infoMessage(`Generated branch name: ${branchName}`);
+          }
+        } else {
+          // No changes - use timestamp
+          branchName = this.branchNaming.generateFromTimestamp();
+          this.output.infoMessage(`Generated branch name: ${branchName}`);
+        }
       }
 
       // Run pre-flight checks
@@ -413,31 +472,5 @@ export class LaunchCommandV2 {
   private async popStash(stashRef: string): Promise<void> {
     await this.gitOps.stashPopSpecific(stashRef);
     this.output.dim(`Work restored from ${stashRef}`);
-  }
-
-  private generateBranchName(description?: string): string {
-    if (!description) {
-      const timestamp = new Date().toISOString().split('T')[0];
-      return `feature/${timestamp}`;
-    }
-
-    // Convert description to kebab-case
-    const slug = description
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
-
-    return `feature/${slug}`;
-  }
-
-  private isValidBranchName(name: string): boolean {
-    // Git branch name rules
-    return (
-      name.length > 0 &&
-      !/[\s~^:?*[\]\\]/.test(name) &&
-      !name.endsWith('.lock') &&
-      !name.startsWith('.') &&
-      !name.endsWith('/')
-    );
   }
 }
