@@ -28,6 +28,7 @@ export abstract class PreFlightChecks {
    */
   async runChecks(_context: ValidationContext): Promise<boolean> {
     this.output.subheader('🔍 Pre-Flight Checks');
+    console.log('[DEBUG PRE-FLIGHT] runChecks called');
 
     const results: CheckResult[] = [];
 
@@ -41,6 +42,12 @@ export abstract class PreFlightChecks {
     const allPassed = results.every(r => r.passed);
     const errorCount = results.filter(r => !r.passed && r.level === 'error').length;
     const warningCount = results.filter(r => !r.passed && r.level === 'warning').length;
+
+    // Debug logging
+    console.error('[PRE-FLIGHT] allPassed:', allPassed);
+    console.error('[PRE-FLIGHT] errorCount:', errorCount);
+    console.error('[PRE-FLIGHT] warningCount:', warningCount);
+    console.error('[PRE-FLIGHT] results:', JSON.stringify(results, null, 2));
 
     this.output.info('');
     if (allPassed) {
@@ -60,7 +67,11 @@ export abstract class PreFlightChecks {
       this.output.warningMessage(`⚠ ${warningCount} warning(s), proceeding...`);
     }
 
-    return allPassed;
+    // Pass if all checks passed OR only warnings (no errors)
+    const returnValue = allPassed || errorCount === 0;
+    console.error('[PRE-FLIGHT] Returning:', returnValue);
+    console.log(`[DEBUG PRE-FLIGHT] Returning: ${returnValue} (allPassed=${allPassed}, errorCount=${errorCount})`);
+    return returnValue;
   }
 
   /**

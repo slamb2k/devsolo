@@ -30,6 +30,8 @@ const LaunchSchema = z.object({
   branchName: z.string().optional(),
   description: z.string().optional(),
   force: z.boolean().optional(),
+  stashRef: z.string().optional(),
+  popStash: z.boolean().optional(),
 });
 
 const SessionsSchema = z.object({
@@ -147,6 +149,14 @@ export class HanSoloMCPServer {
                 force: {
                   type: 'boolean',
                   description: 'Force launch even with uncommitted changes',
+                },
+                stashRef: {
+                  type: 'string',
+                  description: 'Git stash reference to restore after branch creation (e.g., stash@{0})',
+                },
+                popStash: {
+                  type: 'boolean',
+                  description: 'Whether to pop the stash (default: true if stashRef provided)',
                 },
               },
             },
@@ -513,26 +523,46 @@ export class HanSoloMCPServer {
         case 'hansolo_abort': {
           const params = AbortSchema.parse(args);
           const abortCommand = new AbortCommand(this.basePath);
-          await abortCommand.execute(params);
+          const result = await abortCommand.execute(params);
+
+          // Include stashRef in output if present
+          let outputText = capturedOutput.join('\n');
+          if (!outputText) {
+            outputText = `Aborted workflow on branch: ${result.branchAborted}`;
+            if (result.stashRef) {
+              outputText += `\nWork stashed: ${result.stashRef}`;
+            }
+          }
+
           return {
             content: [
               {
                 type: 'text',
-                text: capturedOutput.join('\n') || `Aborted workflow on branch: ${params.branchName || 'current'}`,
+                text: outputText,
               },
             ],
           };
         }
 
         case 'hansolo_ship': {
+          originalConsoleError('[MCP] hansolo_ship case hit');
           const params = ShipSchema.parse(args);
+          originalConsoleError('[MCP] Params parsed:', params);
           const shipCommand = new ShipCommand(this.basePath);
+          originalConsoleError('[MCP] ShipCommand created, about to execute');
           await shipCommand.execute(params);
+          originalConsoleError('[MCP] ShipCommand execute returned');
+
+          // Always show captured output for debugging
+          const outputText = capturedOutput.join('\n');
+          originalConsoleError('[MCP DEBUG] Captured output length:', outputText.length);
+          originalConsoleError('[MCP DEBUG] Captured output:', outputText);
+
           return {
             content: [
               {
                 type: 'text',
-                text: capturedOutput.join('\n') || 'Workflow shipped successfully',
+                text: outputText || 'Workflow shipped successfully',
               },
             ],
           };

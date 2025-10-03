@@ -131,13 +131,13 @@ export class AbortCommandV2 {
     force?: boolean;
     deleteBranch?: boolean;
     yes?: boolean;
-  } = {}): Promise<void> {
+  } = {}): Promise<{ stashRef?: string; branchAborted: string }> {
     try {
       // Check initialization
       if (!await this.configManager.isInitialized()) {
         this.output.errorMessage('han-solo is not initialized');
         this.output.infoMessage('Run "hansolo init" first');
-        return;
+        throw new Error('han-solo is not initialized');
       }
 
       // Determine branch name
@@ -157,7 +157,7 @@ export class AbortCommandV2 {
 
       if (!preFlightPassed) {
         this.output.errorMessage('\n❌ Pre-flight checks failed - aborting abort operation');
-        return;
+        throw new Error('Pre-flight checks failed');
       }
 
       // Display ASCII art banner
@@ -167,31 +167,44 @@ export class AbortCommandV2 {
       const session = await this.sessionRepo.getSessionByBranch(branchName);
       if (!session) {
         this.output.errorMessage(`No session found for branch '${branchName}'`);
-        return;
+        throw new Error(`No session found for branch '${branchName}'`);
       }
 
       // Check if session can be aborted
       if (!session.isActive() && !options.force) {
         this.output.errorMessage(`Session is not active (state: ${session.currentState})`);
         this.output.infoMessage('Use --force to abort anyway');
-        return;
+        throw new Error(`Session is not active (state: ${session.currentState})`);
       }
 
       // Check for uncommitted changes
       const currentBranch = await this.gitOps.getCurrentBranch();
       const isCurrentBranch = currentBranch === branchName;
+      let stashRef: string | undefined;
 
       if (isCurrentBranch) {
         const hasChanges = await this.gitOps.hasUncommittedChanges();
-        if (hasChanges && !options.force) {
-          this.output.warningMessage('⚠️  Uncommitted changes detected');
-          const shouldStash = await this.output.confirm('Stash changes before aborting?');
+        if (hasChanges) {
+          if (options.force) {
+            // Force flag explicitly discards - user knows what they're doing
+            this.output.warningMessage('⚠️  Discarding uncommitted changes (--force)');
+          } else if (options.yes) {
+            // Non-interactive: auto-stash to preserve work
+            this.output.infoMessage('📦 Auto-stashing uncommitted changes...');
+            const stashResult = await this.stashChanges(branchName);
+            stashRef = stashResult.stashRef;
+          } else {
+            // Interactive: prompt user for choice
+            this.output.warningMessage('⚠️  Uncommitted changes detected');
+            const shouldStash = await this.output.confirm('Stash changes before aborting?');
 
-          if (shouldStash) {
-            await this.stashChanges(branchName);
-          } else if (!await this.output.confirm('Discard uncommitted changes?')) {
-            this.output.infoMessage('Abort cancelled');
-            return;
+            if (shouldStash) {
+              const stashResult = await this.stashChanges(branchName);
+              stashRef = stashResult.stashRef;
+            } else if (!await this.output.confirm('Discard uncommitted changes?')) {
+              this.output.infoMessage('Abort cancelled');
+              return { branchAborted: branchName };
+            }
           }
         }
       }
@@ -210,7 +223,7 @@ export class AbortCommandV2 {
 
         if (!confirmed) {
           this.output.infoMessage('Abort cancelled');
-          return;
+          return { branchAborted: branchName };
         }
       }
 
@@ -238,7 +251,12 @@ export class AbortCommandV2 {
 
       this.output.info('');
       this.output.successMessage('✅ Workflow aborted successfully');
-      this.showAbortSummary(session, options.deleteBranch);
+      this.showAbortSummary(session, options.deleteBranch, stashRef);
+
+      return {
+        stashRef,
+        branchAborted: branchName
+      };
 
     } catch (error) {
       this.output.errorMessage(`Abort failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -246,9 +264,10 @@ export class AbortCommandV2 {
     }
   }
 
-  private async stashChanges(branchName: string): Promise<void> {
+  private async stashChanges(branchName: string): Promise<{ stashRef: string }> {
     const stashResult = await this.gitOps.stashChanges(`han-solo abort stash for ${branchName}`);
     this.output.successMessage(`Changes stashed: ${stashResult.stashRef}`);
+    return stashResult;
   }
 
   private async performAbort(
@@ -295,7 +314,7 @@ export class AbortCommandV2 {
     await this.progress.runSteps(steps);
   }
 
-  private showAbortSummary(session: WorkflowSession, branchDeleted?: boolean): void {
+  private showAbortSummary(session: WorkflowSession, branchDeleted?: boolean, stashRef?: string): void {
     this.output.info('');
     this.output.subheader('📊 Abort Summary');
     this.output.dim(`  Session ID: ${session.id}`);
@@ -304,7 +323,11 @@ export class AbortCommandV2 {
     if (branchDeleted) {
       this.output.dim('  Branch deleted: Yes');
     }
-    this.output.info('');
-    this.output.infoMessage('💡 You can start a new feature with /hansolo:launch');
+    if (stashRef) {
+      this.output.dim(`  Work stashed: ${stashRef}`);
+      this.output.infoMessage('💡 Pass stashRef to /hansolo:launch to restore your work');
+    } else {
+      this.output.infoMessage('💡 You can start a new feature with /hansolo:launch');
+    }
   }
 }

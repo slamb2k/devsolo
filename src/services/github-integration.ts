@@ -45,7 +45,7 @@ export class GitHubIntegration {
     try {
       const token = execSync('gh auth token', {
         encoding: 'utf8',
-        stdio: ['pipe', 'pipe', 'pipe'], // Suppress stderr
+        stdio: ['ignore', 'pipe', 'ignore'], // stdin=ignore, stdout=pipe, stderr=ignore
       }).trim();
 
       if (token && token.length > 0) {
@@ -69,28 +69,17 @@ export class GitHubIntegration {
                   process.env['GH_TOKEN'] ||
                   githubConfig?.token;
 
-      let tokenSource = 'environment variable';
-
       // If no explicit token, try gh CLI
       if (!token) {
         const ghToken = await this.getGhCliToken();
         if (ghToken) {
           token = ghToken;
-          tokenSource = 'gh CLI';
         }
       }
 
       if (!token) {
-        console.error('GitHub token not found.');
-        console.error('Please either:');
-        console.error('  1. Set GITHUB_TOKEN or GH_TOKEN environment variable, or');
-        console.error('  2. Run "gh auth login" to authenticate with GitHub CLI');
+        // Don't error here - just return false so pre-flight check can show warning
         return false;
-      }
-
-      // Log token source for debugging
-      if (process.env['DEBUG']) {
-        console.error(`Using GitHub token from: ${tokenSource}`);
       }
 
       // Initialize Octokit
