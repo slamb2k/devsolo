@@ -356,22 +356,19 @@ export class ShipCommandV2 {
           session,
           options,
         });
-        console.log('[Ship] Pre-flight passed:', preFlightPassed);
-        console.log('[Ship] Type of preFlightPassed:', typeof preFlightPassed);
-        console.log('[Ship] Boolean conversion:', !!preFlightPassed);
+        this.output.errorMessage(`[DEBUG] Pre-flight returned: ${preFlightPassed} (type: ${typeof preFlightPassed})`);
       } catch (error) {
-        console.error('[Ship] Pre-flight check threw error:', error);
         this.output.errorMessage(`\n❌ Pre-flight checks threw error: ${error}`);
         return;
       }
 
-      console.log('[Ship] About to check if preFlightPassed is falsy');
+      this.output.errorMessage('[DEBUG] Checking if preFlightPassed is falsy...');
       if (!preFlightPassed) {
-        console.log('[Ship] preFlightPassed was falsy, aborting');
+        this.output.errorMessage('[DEBUG] preFlightPassed was FALSY!');
         this.output.errorMessage('\n❌ Pre-flight checks failed - aborting ship');
         return;
       }
-      console.log('[Ship] preFlightPassed was truthy, continuing');
+      this.output.errorMessage('[DEBUG] preFlightPassed was TRUTHY, continuing!');
 
       // Display ASCII art banner
       this.output.info(AsciiArt.ship());

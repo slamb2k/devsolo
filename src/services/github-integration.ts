@@ -60,27 +60,36 @@ export class GitHubIntegration {
 
   async initialize(): Promise<boolean> {
     try {
+      console.error('[GITHUB INIT] Starting initialization');
       // Load configuration
       const config = await this.configManager.load();
       const githubConfig = config.gitPlatform;
 
+      console.error('[GITHUB INIT] Checking env vars...');
       // Get token from environment, config, or gh CLI (in order of preference)
       let token = process.env['GITHUB_TOKEN'] ||
                   process.env['GH_TOKEN'] ||
                   githubConfig?.token;
 
+      console.error('[GITHUB INIT] Env token found:', !!token);
+
       // If no explicit token, try gh CLI
       if (!token) {
+        console.error('[GITHUB INIT] Trying gh CLI...');
         const ghToken = await this.getGhCliToken();
+        console.error('[GITHUB INIT] gh CLI token found:', !!ghToken);
         if (ghToken) {
           token = ghToken;
         }
       }
 
       if (!token) {
+        console.error('[GITHUB INIT] No token found anywhere - returning false');
         // Don't error here - just return false so pre-flight check can show warning
         return false;
       }
+
+      console.error('[GITHUB INIT] Token acquired, initializing Octokit');
 
       // Initialize Octokit
       this.octokit = new Octokit({

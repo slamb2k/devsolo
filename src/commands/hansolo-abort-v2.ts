@@ -255,7 +255,7 @@ export class AbortCommandV2 {
 
       return {
         stashRef,
-        branchAborted: branchName
+        branchAborted: branchName,
       };
 
     } catch (error) {
