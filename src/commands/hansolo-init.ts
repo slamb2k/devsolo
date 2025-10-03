@@ -72,6 +72,10 @@ export class InitCommand {
           name: 'Creating templates',
           action: async () => await this.createTemplates(),
         },
+        {
+          name: 'Installing status line',
+          action: async () => await this.installStatusLine(),
+        },
       ];
 
       if (options.createRemote) {
@@ -216,6 +220,11 @@ export class InitCommand {
   private async createTemplates(): Promise<void> {
     await this.configManager.installTemplates();
     this.output.dim('Templates created');
+  }
+
+  private async installStatusLine(): Promise<void> {
+    await this.configManager.installStatusLine();
+    this.output.dim('Status line script installed');
   }
 
   private async setupRemote(platform: 'github' | 'gitlab'): Promise<void> {
