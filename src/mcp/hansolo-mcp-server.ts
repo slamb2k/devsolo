@@ -468,14 +468,16 @@ export class HanSoloMCPServer {
         ? ` with ${Object.entries(toolArgs).map(([k, v]) => `${k}=${v}`).join(', ')}`
         : '';
 
-      // Construct the prompt returned from the mcp server  
-      const commandMessage = `
-Display the following text:
+      // Construct the prompt returned from the mcp server
+      // Prepend hansolo_ to match BANNERS keys
+      const bannerKey = `hansolo_${name}`;
+      const banner = BANNERS[bannerKey] || '';
 
-${BANNERS[name]}
+      const commandMessage = `Display the following text immediately before you do anything else:
 
-Once it is displayed, run the han-solo ${name} command${argsStr}
-`;
+${banner}
+
+One that has been shown to the user, now run the han-solo ${name} command${argsStr}`
 
       return {
         messages: [
@@ -498,12 +500,6 @@ Once it is displayed, run the han-solo ${name} command${argsStr}
       const originalConsoleLog = console.log;
       const originalConsoleError = console.error;
       const capturedOutput: string[] = [];
-
-      // Add banner FIRST to capturedOutput so it's always displayed first
-      const banner = BANNERS[name];
-      if (banner) {
-        capturedOutput.push(banner);
-      }
 
       // NOW override console to capture command output
       console.log = (...args: any[]) => {
