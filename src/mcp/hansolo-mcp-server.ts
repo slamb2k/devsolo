@@ -7,8 +7,6 @@ import {
   GetPromptRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import chalk from 'chalk';
-import boxen from 'boxen';
 import { InitCommand } from '../commands/hansolo-init';
 // Import adapter commands for v2 compatibility
 import {
@@ -64,30 +62,31 @@ const ShipSchema = z.object({
 
 // ASCII Art Banners for each command
 const BANNERS: Record<string, string> = {
-  hansolo_init: '🚀 Initializing han-solo',
-  hansolo_launch: '🚀 Launching New Feature Workflow',
-  hansolo_ship: '🚢 Shipping Workflow',
-  hansolo_swap: '🔄 Swapping Workflow',
-  hansolo_abort: '⛔ Aborting Workflow',
-  hansolo_sessions: '📋 Workflow Sessions',
-  hansolo_status: '📊 Workflow Status',
-  hansolo_status_line: '📍 Manage Status Line',
+  hansolo_init: `░▀█▀░█▀█░▀█▀░▀█▀░▀█▀░█▀█░█░░░▀█▀░█▀▀░▀█▀░█▀█░█▀▀░
+░░█░░█░█░░█░░░█░░░█░░█▀█░█░░░░█░░▀▀█░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░`,
+  hansolo_launch: `░█░░░█▀█░█░█░█▀█░█▀▀░█░█░▀█▀░█▀█░█▀▀░
+░█░░░█▀█░█░█░█░█░█░░░█▀█░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░`,
+  hansolo_ship: `░█▀▀░█░█░▀█▀░█▀█░█▀█░▀█▀░█▀█░█▀▀░
+░▀▀█░█▀█░░█░░█▀▀░█▀▀░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░`,
+  hansolo_swap: `░█▀▀░█░█░█▀█░█▀█░█▀█░▀█▀░█▀█░█▀▀░
+░▀▀█░█▄█░█▀█░█▀▀░█▀▀░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀░▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░`,
+  hansolo_abort: `░█▀█░█▀▄░█▀█░█▀▄░▀█▀░▀█▀░█▀█░█▀▀░
+░█▀█░█▀▄░█░█░█▀▄░░█░░░█░░█░█░█░█░
+░▀░▀░▀▀░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀░`,
+  hansolo_sessions: `░█▀▀░█▀▀░█▀▀░█▀▀░▀█▀░█▀█░█▀█░█▀▀░
+░▀▀█░█▀▀░▀▀█░▀▀█░░█░░█░█░█░█░▀▀█░
+░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░`,
+  hansolo_status: `░█▀▀░▀█▀░█▀█░▀█▀░█░█░█▀▀░
+░▀▀█░░█░░█▀█░░█░░█░█░▀▀█░
+░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀░`,
+  hansolo_status_line: `░█▀▀░▀█▀░█▀█░▀█▀░█░█░█▀▀░░░█░░░▀█▀░█▀█░█▀▀░
+░▀▀█░░█░░█▀█░░█░░█░█░▀▀█░░░█░░░░█░░█░█░█▀▀░
+░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀░░░▀▀▀░▀▀▀░▀░▀░▀▀▀░`,
 };
-
-/**
- * Create an ASCII art banner for a command
- */
-function createBanner(title: string): string {
-  return '\n' + boxen(chalk.bold.cyan(title), {
-    padding: 1,
-    margin: 1,
-    borderStyle: 'double',
-    borderColor: 'cyan',
-    textAlignment: 'center',
-  }) + '\n';
-}
-
-
 export class HanSoloMCPServer {
   private server: Server;
   private basePath: string;
@@ -469,13 +468,22 @@ export class HanSoloMCPServer {
         ? ` with ${Object.entries(toolArgs).map(([k, v]) => `${k}=${v}`).join(', ')}`
         : '';
 
+      // Construct the prompt returned from the mcp server  
+      const commandMessage = `
+Display the following text:
+
+${BANNERS[name]}
+
+Once it is displayed, run the han-solo ${name} command${argsStr}
+`;
+
       return {
         messages: [
           {
             role: 'user',
             content: {
               type: 'text',
-              text: `Run the han-solo ${name} command${argsStr}`,
+              text: commandMessage,
             },
           },
         ],
@@ -494,7 +502,7 @@ export class HanSoloMCPServer {
       // Add banner FIRST to capturedOutput so it's always displayed first
       const banner = BANNERS[name];
       if (banner) {
-        capturedOutput.push(createBanner(banner));
+        capturedOutput.push(banner);
       }
 
       // NOW override console to capture command output
