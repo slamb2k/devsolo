@@ -121,15 +121,6 @@ export class HotfixCommand {
         },
       },
       {
-        name: 'Setting up hotfix environment',
-        action: async () => {
-          // Create hotfix marker file
-          const config = await this.configManager.load();
-          config.preferences.verboseLogging = true;
-          await this.configManager.save(config);
-        },
-      },
-      {
         name: 'Preparing validation hooks',
         action: async () => {
           if (options.skipTests) {

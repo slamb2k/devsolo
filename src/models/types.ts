@@ -118,12 +118,15 @@ export interface ComponentConfig {
   utilityScripts: boolean;
 }
 
+export type LogLevelConfig = 'debug' | 'info' | 'warn' | 'error' | 'none';
+
 export interface UserPreferences {
   defaultBranchPrefix: string;
   autoCleanup: boolean;
   confirmBeforePush: boolean;
   colorOutput: boolean;
-  verboseLogging: boolean;
+  logLevel?: LogLevelConfig;
+  logFile?: string;
   statusLineFormat?: {
     template?: string;
   };
