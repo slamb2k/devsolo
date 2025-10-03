@@ -80,11 +80,12 @@ export class GitOperations {
 
   async stashChanges(message?: string): Promise<{ stashRef: string }> {
     const stashMessage = message || `han-solo stash ${new Date().toISOString()}`;
-    const result = await this.git.stash(['push', '-m', stashMessage]);
+    await this.git.stash(['push', '-m', stashMessage]);
 
-    // Extract stash reference from output
-    const match = result.match(/stash@\{(\d+)\}/);
-    const stashRef = match ? `stash@{${match[1]}}` : 'stash@{0}';
+    // Get the SHA of the stash we just created (it's always stash@{0} immediately after creation)
+    // Using the SHA ensures the reference is stable even if more stashes are created
+    const sha = await this.git.raw(['rev-parse', 'stash@{0}']);
+    const stashRef = sha.trim();
 
     return { stashRef };
   }
@@ -452,7 +453,35 @@ export class GitOperations {
   }
 
   async stashPopSpecific(stashRef: string): Promise<void> {
-    await this.git.stash(['pop', stashRef]);
+    // If stashRef is a SHA, convert it to stash@{N} reference
+    const stashIndex = await this.findStashBySha(stashRef);
+    if (stashIndex !== null) {
+      await this.git.stash(['pop', `stash@{${stashIndex}}`]);
+    } else {
+      // Fallback: assume it's already a stash@{N} reference
+      await this.git.stash(['pop', stashRef]);
+    }
+  }
+
+  private async findStashBySha(sha: string): Promise<number | null> {
+    // Get all stashes with their SHAs
+    const stashListOutput = await this.git.stash(['list']);
+    const stashes = stashListOutput.split('\n').filter(line => line.trim());
+
+    for (let i = 0; i < stashes.length; i++) {
+      // Get SHA for this stash
+      try {
+        const stashSha = await this.git.raw(['rev-parse', `stash@{${i}}`]);
+        if (stashSha.trim() === sha) {
+          return i;
+        }
+      } catch {
+        // Stash doesn't exist, continue
+        continue;
+      }
+    }
+
+    return null;
   }
 
   async stashList(): Promise<string[]> {
