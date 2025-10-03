@@ -71,6 +71,7 @@ const BANNERS: Record<string, string> = {
   hansolo_abort: '⛔ Aborting Workflow',
   hansolo_sessions: '📋 Workflow Sessions',
   hansolo_status: '📊 Workflow Status',
+  hansolo_status_line: '📍 Manage Status Line',
 };
 
 /**
@@ -267,6 +268,37 @@ export class HanSoloMCPServer {
             inputSchema: {
               type: 'object',
               properties: {},
+            },
+          },
+          {
+            name: 'hansolo_status_line',
+            description: 'Manage Claude Code status line display',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                action: {
+                  type: 'string',
+                  enum: ['enable', 'disable', 'update', 'show'],
+                  description: 'Action to perform on status line',
+                },
+                format: {
+                  type: 'string',
+                  description: 'Custom format string (e.g., "{icon} {branch} {state}")',
+                },
+                showSessionInfo: {
+                  type: 'boolean',
+                  description: 'Show session ID in status line',
+                },
+                showBranchInfo: {
+                  type: 'boolean',
+                  description: 'Show branch name in status line',
+                },
+                showStateInfo: {
+                  type: 'boolean',
+                  description: 'Show workflow state in status line',
+                },
+              },
+              required: ['action'],
             },
           },
         ],
@@ -591,6 +623,41 @@ export class HanSoloMCPServer {
                   text: 'No active workflow session on current branch',
                 },
               ],
+            };
+          }
+        }
+
+        case 'hansolo_status_line': {
+          const { ManageStatusLineTool } = await import('../mcp-server/tools/manage-status-line');
+          const statusLineTool = new ManageStatusLineTool();
+          const result = await statusLineTool.execute(args as any);
+
+          if (result.success) {
+            let message = result.message || '';
+            if (result.enabled && result.currentFormat) {
+              message += `\nFormat: ${result.currentFormat}`;
+            }
+            if (result.preview) {
+              message += `\nPreview: ${result.preview}`;
+            }
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: message || 'Status line operation completed',
+                },
+              ],
+            };
+          } else {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Error: ${result.error || 'Unknown error'}`,
+                },
+              ],
+              isError: true,
             };
           }
         }
