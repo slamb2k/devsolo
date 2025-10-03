@@ -2,7 +2,7 @@ import { SessionRepository } from '../../services/session-repository';
 import { ConfigurationManager } from '../../services/configuration-manager';
 
 export interface ManageStatusLineInput {
-  action: 'enable' | 'disable' | 'update';
+  action: 'enable' | 'disable' | 'update' | 'show';
   format?: string;
   showSessionInfo?: boolean;
   showBranchInfo?: boolean;
@@ -74,6 +74,9 @@ export class ManageStatusLineTool {
 
       case 'update':
         return await this.updateStatusLine(input);
+
+      case 'show':
+        return await this.showStatusLine();
 
       default:
         return {
@@ -155,6 +158,28 @@ export class ManageStatusLineTool {
       currentFormat: updatedConfig.format,
       preview,
       message: 'Status line updated',
+    };
+  }
+
+  private async showStatusLine(): Promise<ManageStatusLineOutput> {
+    const currentConfig = this.configManager.get('statusLine') || {};
+
+    if (!currentConfig.enabled) {
+      return {
+        success: true,
+        enabled: false,
+        message: 'Status line is not enabled. Use action "enable" to enable it.',
+      };
+    }
+
+    const preview = await this.generatePreview(currentConfig);
+
+    return {
+      success: true,
+      enabled: true,
+      currentFormat: currentConfig.format || this.getDefaultFormat(),
+      preview,
+      message: 'Current status line configuration',
     };
   }
 
