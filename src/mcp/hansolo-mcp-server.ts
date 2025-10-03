@@ -538,7 +538,7 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
 
           // If no branchName or description provided, ask for description to generate better branch name
           let description = params.description;
-          let branchName = params.branchName;
+          const branchName = params.branchName;
 
           if (!branchName && !description) {
             try {
