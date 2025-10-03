@@ -9,6 +9,7 @@ import { BranchValidator } from '../services/validation/branch-validator';
 import { PRValidator } from '../services/validation/pr-validator';
 import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
 import { AsciiArt } from '../ui/ascii-art';
+import { getLogger } from '../services/logger';
 
 /**
  * Pre-flight checks for ship command
@@ -311,36 +312,41 @@ export class ShipCommandV2 {
     yes?: boolean;
     force?: boolean;
   } = {}): Promise<void> {
+    const logger = getLogger();
+
     try {
-      console.error('[MCP SHIP] Execute called');
+      logger.debug('Ship command started', 'ship');
 
       // Check initialization
       if (!(await this.configManager.isInitialized())) {
+        logger.warn('han-solo not initialized', 'ship');
         this.output.errorMessage('han-solo is not initialized');
         this.output.infoMessage('Run "hansolo init" first');
         return;
       }
 
-      console.error('[MCP SHIP] Config initialized');
-
       // Get current branch and session
       const currentBranch = await this.gitOps.getCurrentBranch();
+      logger.debug(`Current branch: ${currentBranch}`, 'ship');
+
       const session = await this.sessionRepo.getSessionByBranch(currentBranch);
 
-      console.error('[MCP SHIP] Session found:', !!session);
-
       if (!session) {
+        logger.warn(`No session found for branch: ${currentBranch}`, 'ship');
         this.output.errorMessage(`No workflow session found for branch '${currentBranch}'`);
         this.output.infoMessage('Use "hansolo launch" to start a new workflow');
         return;
       }
 
+      logger.info(`Shipping session ${session.id} on branch ${currentBranch}`, 'ship');
+
       // Initialize GitHub integration (tries env vars, config, then gh CLI)
-      console.error('[MCP SHIP] About to initialize GitHub');
-      await this.githubIntegration.initialize();
-      console.error('[MCP SHIP] GitHub initialized');
+      logger.debug('Initializing GitHub integration', 'ship');
+      const githubInitialized = await this.githubIntegration.initialize();
+      logger.debug(`GitHub integration initialized: ${githubInitialized}`, 'ship');
 
       // Run pre-flight checks
+      logger.debug('Running pre-flight checks', 'ship');
       const preFlightChecks = new ShipPreFlightChecks(
         session,
         this.gitOps,
@@ -349,34 +355,30 @@ export class ShipCommandV2 {
         this.prValidator
       );
 
-      let preFlightPassed;
-      try {
-        preFlightPassed = await preFlightChecks.runChecks({
-          command: 'ship',
-          session,
-          options,
-        });
-        this.output.errorMessage(`[DEBUG] Pre-flight returned: ${preFlightPassed} (type: ${typeof preFlightPassed})`);
-      } catch (error) {
-        this.output.errorMessage(`\n❌ Pre-flight checks threw error: ${error}`);
-        return;
-      }
+      const preFlightPassed = await preFlightChecks.runChecks({
+        command: 'ship',
+        session,
+        options,
+      });
 
-      this.output.errorMessage('[DEBUG] Checking if preFlightPassed is falsy...');
       if (!preFlightPassed) {
-        this.output.errorMessage('[DEBUG] preFlightPassed was FALSY!');
+        logger.error('Pre-flight checks failed', 'ship');
         this.output.errorMessage('\n❌ Pre-flight checks failed - aborting ship');
         return;
       }
-      this.output.errorMessage('[DEBUG] preFlightPassed was TRUTHY, continuing!');
+
+      logger.info('Pre-flight checks passed', 'ship');
 
       // Display ASCII art banner
       this.output.info(AsciiArt.ship());
 
       // Execute complete workflow
+      logger.info('Starting workflow execution', 'ship');
       await this.executeCompleteWorkflow(session, options);
+      logger.info('Workflow execution completed', 'ship');
 
       // Run post-flight verifications
+      logger.debug('Running post-flight verifications', 'ship');
       const postFlightChecks = new ShipPostFlightChecks(
         session,
         this.gitOps,
@@ -391,7 +393,13 @@ export class ShipCommandV2 {
 
       this.output.info('');
       this.output.successMessage('🎉 Feature shipped! Ready for next feature.');
+      logger.info('Ship command completed successfully', 'ship');
     } catch (error) {
+      logger.error(
+        `Ship command failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        'ship',
+        error instanceof Error ? error : undefined
+      );
       this.output.errorMessage(
         `Ship failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );

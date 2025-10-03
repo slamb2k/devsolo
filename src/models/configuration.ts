@@ -28,7 +28,7 @@ export class Configuration {
       autoCleanup: true,
       confirmBeforePush: true,
       colorOutput: true,
-      verboseLogging: false,
+      logLevel: 'warn',
     };
 
     this.gitPlatform = options?.gitPlatform;

@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as yaml from 'yaml';
 import { Configuration } from '../models/configuration';
+import { Logger, LogLevel } from './logger';
 
 export class ConfigurationManager {
   private configPath: string;
@@ -19,15 +20,48 @@ export class ConfigurationManager {
       const data = await fs.readFile(this.configPath, 'utf-8');
       const parsed = yaml.parse(data);
       this.config = Configuration.fromJSON(parsed);
+
+      // Configure logger based on preferences
+      this.configureLogger(this.config);
+
       return this.config;
     } catch (error: any) {
       if (error.code === 'ENOENT') {
         // Config doesn't exist yet, return default
         this.config = Configuration.getDefault();
+        this.configureLogger(this.config);
         return this.config;
       }
       throw error;
     }
+  }
+
+  /**
+   * Configure global logger based on config preferences
+   */
+  private configureLogger(config: Configuration): void {
+    const logger = Logger.getInstance();
+
+    // Map config log level to logger log level
+    const logLevelMap: Record<string, LogLevel> = {
+      debug: LogLevel.DEBUG,
+      info: LogLevel.INFO,
+      warn: LogLevel.WARN,
+      error: LogLevel.ERROR,
+      none: LogLevel.NONE,
+    };
+
+    const level = config.preferences.logLevel
+      ? logLevelMap[config.preferences.logLevel] ?? LogLevel.WARN
+      : LogLevel.WARN;
+
+    // Configure logger
+    logger.configure({
+      level,
+      logFile: config.preferences.logFile,
+      includeTimestamp: true,
+      includeLevel: true,
+    });
   }
 
   async save(config?: Configuration): Promise<void> {

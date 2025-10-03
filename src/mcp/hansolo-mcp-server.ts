@@ -64,13 +64,13 @@ const ShipSchema = z.object({
 
 // ASCII Art Banners for each command
 const BANNERS: Record<string, string> = {
-  hansolo_init: '🚀 Initializing han-solo [VERSION 2.0 DEBUG BUILD]',
-  hansolo_launch: '🚀 Launching New Feature Workflow [VERSION 2.0 DEBUG BUILD]',
-  hansolo_ship: '🚢 Shipping Workflow [VERSION 2.0 DEBUG BUILD]',
-  hansolo_swap: '🔄 Swapping Workflow [VERSION 2.0 DEBUG BUILD]',
-  hansolo_abort: '⛔ Aborting Workflow [VERSION 2.0 DEBUG BUILD]',
-  hansolo_sessions: '📋 Workflow Sessions [VERSION 2.0 DEBUG BUILD]',
-  hansolo_status: '📊 Workflow Status [VERSION 2.0 DEBUG BUILD]',
+  hansolo_init: '🚀 Initializing han-solo',
+  hansolo_launch: '🚀 Launching New Feature Workflow',
+  hansolo_ship: '🚢 Shipping Workflow',
+  hansolo_swap: '🔄 Swapping Workflow',
+  hansolo_abort: '⛔ Aborting Workflow',
+  hansolo_sessions: '📋 Workflow Sessions',
+  hansolo_status: '📊 Workflow Status',
 };
 
 /**
@@ -545,24 +545,11 @@ export class HanSoloMCPServer {
         }
 
         case 'hansolo_ship': {
-          originalConsoleError('[MCP] hansolo_ship case hit');
           const params = ShipSchema.parse(args);
-          originalConsoleError('[MCP] Params parsed:', params);
           const shipCommand = new ShipCommand(this.basePath);
-          originalConsoleError('[MCP] ShipCommand created, about to execute');
-
-          // Add debug marker to captured output
-          capturedOutput.push('[MCP DEBUG] About to execute ship command');
-
           await shipCommand.execute(params);
 
-          capturedOutput.push('[MCP DEBUG] Ship command execute completed');
-          originalConsoleError('[MCP] ShipCommand execute returned');
-
-          // Always show captured output for debugging
           const outputText = capturedOutput.join('\n');
-          originalConsoleError('[MCP DEBUG] Captured output length:', outputText.length);
-          originalConsoleError('[MCP DEBUG] Captured output:', outputText);
 
           return {
             content: [
