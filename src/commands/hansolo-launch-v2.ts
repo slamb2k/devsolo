@@ -8,6 +8,7 @@ import { BranchValidator } from '../services/validation/branch-validator';
 import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
 import { AsciiArt } from '../ui/ascii-art';
 import { BranchNamingService } from '../services/branch-naming';
+import { GitHubIntegration } from '../services/github-integration';
 
 /**
  * Pre-flight checks for launch command
@@ -18,6 +19,7 @@ class LaunchPreFlightChecks extends PreFlightChecks {
     private sessionRepo: SessionRepository,
     private branchValidator: BranchValidator,
     private branchName: string,
+    private githubIntegration: GitHubIntegration,
     private force?: boolean
   ) {
     super();
@@ -30,6 +32,7 @@ class LaunchPreFlightChecks extends PreFlightChecks {
     this.addCheck(async () => this.checkMainUpToDate());
     this.addCheck(async () => this.checkNoExistingSession());
     this.addCheck(async () => this.checkBranchNameAvailable());
+    this.addCheck(async () => this.checkBranchHasNoClosedPR());
   }
 
   private async checkOnMainBranch(): Promise<CheckResult> {
@@ -175,6 +178,80 @@ class LaunchPreFlightChecks extends PreFlightChecks {
       level: 'info',
     };
   }
+
+  private async checkBranchHasNoClosedPR(): Promise<CheckResult> {
+    try {
+      // Initialize GitHub integration
+      const initialized = await this.githubIntegration.initialize();
+      if (!initialized) {
+        // GitHub not configured - skip this check
+        return {
+          passed: true,
+          name: 'No closed/merged PR',
+          message: 'GitHub not configured (skipped)',
+          level: 'info',
+        };
+      }
+
+      // Check if branch has an existing PR
+      const pr = await this.githubIntegration.getPullRequestForBranch(this.branchName);
+
+      if (pr && (pr.merged || pr.state === 'closed')) {
+        // Generate suggestion for incremented branch name
+        const suggestion = this.generateIncrementedBranchName(this.branchName);
+
+        return {
+          passed: this.force ? true : false,
+          name: 'No closed/merged PR',
+          message: `Branch "${this.branchName}" has a ${pr.merged ? 'merged' : 'closed'} PR (#${pr.number})`,
+          level: this.force ? 'warning' : 'error',
+          suggestions: this.force
+            ? []
+            : [
+              'Use a different branch name to ensure clean workflow',
+              `Try: ${suggestion}`,
+              'Or use --force to override (not recommended)',
+            ],
+        };
+      }
+
+      return {
+        passed: true,
+        name: 'No closed/merged PR',
+        level: 'info',
+      };
+    } catch (error) {
+      // If GitHub check fails, don't block the workflow
+      return {
+        passed: true,
+        name: 'No closed/merged PR',
+        message: 'Check skipped (GitHub unavailable)',
+        level: 'info',
+      };
+    }
+  }
+
+  private generateIncrementedBranchName(branchName: string): string {
+    // Extract type and description
+    const match = branchName.match(/^([^/]+)\/(.+)$/);
+    if (!match?.[1] || !match?.[2]) {
+      return `${branchName}-v2`;
+    }
+
+    const type = match[1];
+    const description = match[2];
+
+    // Check if already has version suffix
+    const versionMatch = description.match(/^(.+)-v(\d+)$/);
+    if (versionMatch?.[1] && versionMatch?.[2]) {
+      const baseDesc = versionMatch[1];
+      const version = versionMatch[2];
+      const nextVersion = parseInt(version, 10) + 1;
+      return `${type}/${baseDesc}-v${nextVersion}`;
+    }
+
+    return `${type}/${description}-v2`;
+  }
 }
 
 /**
@@ -266,6 +343,7 @@ export class LaunchCommandV2 {
   private gitOps: GitOperations;
   private branchValidator: BranchValidator;
   private branchNaming: BranchNamingService;
+  private githubIntegration: GitHubIntegration;
 
   constructor(basePath: string = '.hansolo') {
     this.configManager = new ConfigurationManager(basePath);
@@ -273,6 +351,7 @@ export class LaunchCommandV2 {
     this.gitOps = new GitOperations();
     this.branchValidator = new BranchValidator(basePath);
     this.branchNaming = new BranchNamingService();
+    this.githubIntegration = new GitHubIntegration(basePath);
   }
 
   async execute(options: {
@@ -362,6 +441,7 @@ export class LaunchCommandV2 {
         this.sessionRepo,
         this.branchValidator,
         branchName,
+        this.githubIntegration,
         options.force
       );
 
