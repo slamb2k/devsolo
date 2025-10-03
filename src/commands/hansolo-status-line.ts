@@ -157,7 +157,7 @@ export class HansoloStatusLineCommand implements CommandHandler {
   private async generateStatusLine(customFormat?: string): Promise<string> {
     const config = await this.sessionRepo.loadConfiguration();
     const format = customFormat || config.preferences?.statusLineFormat?.template ||
-                  '{icon} {branch} {session} {state} {time}';
+                  '{icon} {branch} {state} {context} {actions} {age} {changes} {time}';
 
     const branch = await this.gitOps.getCurrentBranch().catch(() => 'no-branch');
     const session = await this.sessionRepo.getSessionByBranch(branch).catch(() => null);
@@ -167,10 +167,18 @@ export class HansoloStatusLineCommand implements CommandHandler {
       '{branch}': this.formatBranch(branch),
       '{session}': this.formatSession(session),
       '{state}': this.formatState(session?.currentState),
-      '{time}': new Date().toLocaleTimeString(),
+      '{time}': chalk.dim(new Date().toLocaleTimeString()),
       '{workflow}': session?.workflowType || '',
       '{ahead}': await this.getAheadBehind(),
       '{dirty}': await this.getDirtyIndicator(),
+      '{context}': await this.getContextWindowUsage(),
+      '{age}': this.formatSessionAge(session),
+      '{stash}': await this.getStashIndicator(),
+      '{changes}': await this.getChangesIndicator(),
+      '{actions}': await this.getActionableIndicators(session, branch),
+      '{conflicts}': await this.getConflictIndicator(),
+      '{ci}': await this.getCIStatus(branch),
+      '{pr}': await this.getPRStatus(branch),
     };
 
     let statusLine = format;
@@ -354,6 +362,233 @@ end
     }
   }
 
+  private async getContextWindowUsage(): Promise<string> {
+    try {
+      // Check if we're in a Claude Code context by looking for environment variables
+      const claudeContext = process.env['CLAUDE_CONTEXT_TOKENS'];
+      const claudeLimit = process.env['CLAUDE_CONTEXT_LIMIT'];
+
+      if (claudeContext && claudeLimit) {
+        const used = parseInt(claudeContext);
+        const limit = parseInt(claudeLimit);
+        const percentage = (used / limit) * 100;
+
+        return this.formatContextBar(used, limit, percentage);
+      }
+
+      return '';
+    } catch {
+      return '';
+    }
+  }
+
+  private formatContextBar(used: number, limit: number, percentage: number): string {
+    const barLength = 10;
+    const filled = Math.round((percentage / 100) * barLength);
+    const empty = barLength - filled;
+
+    // Choose color based on usage
+    let color = chalk.green;
+    let icon = '📊';
+    if (percentage > 80) {
+      color = chalk.red;
+      icon = '🔴';
+    } else if (percentage > 60) {
+      color = chalk.yellow;
+      icon = '🟡';
+    } else if (percentage > 40) {
+      color = chalk.blue;
+      icon = '🔵';
+    } else {
+      icon = '🟢';
+    }
+
+    const bar = color('█'.repeat(filled)) + chalk.dim('░'.repeat(empty));
+    const usedK = (used / 1000).toFixed(1);
+    const limitK = (limit / 1000).toFixed(0);
+
+    return `${icon} ${bar} ${color(`${usedK}k`)}${chalk.dim('/')}${chalk.dim(`${limitK}k`)}`;
+  }
+
+  private formatSessionAge(session: any): string {
+    if (!session?.createdAt) {
+      return '';
+    }
+
+    const age = session.getAge?.() || this.calculateAge(session.createdAt);
+    const ageIcon = '⏱️';
+
+    return `${ageIcon} ${chalk.cyan(age)}`;
+  }
+
+  private calculateAge(createdAt: string): string {
+    const now = new Date();
+    const created = new Date(createdAt);
+    const diffMs = now.getTime() - created.getTime();
+
+    const minutes = Math.floor(diffMs / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) {
+      return `${days}d`;
+    }
+    if (hours > 0) {
+      return `${hours}h`;
+    }
+    return `${minutes}m`;
+  }
+
+  private async getStashIndicator(): Promise<string> {
+    try {
+      const { execSync } = await import('child_process');
+      const stashCount = execSync('git stash list | wc -l', { encoding: 'utf-8' }).trim();
+      const count = parseInt(stashCount);
+
+      if (count === 0) {
+        return '';
+      }
+
+      return `${chalk.magenta('📦')} ${chalk.magenta(count.toString())}`;
+    } catch {
+      return '';
+    }
+  }
+
+  private async getChangesIndicator(): Promise<string> {
+    try {
+      const status = await this.gitOps.getStatus();
+      if (status.isClean()) {
+        return chalk.green('✨');
+      }
+
+      const modified = status.modified.length + status.staged.length;
+      const untracked = status.not_added.length;
+      const deleted = status.deleted.length;
+
+      const parts = [];
+      if (modified > 0) {
+        parts.push(`${chalk.yellow('~')}${chalk.yellow(modified.toString())}`);
+      }
+      if (untracked > 0) {
+        parts.push(`${chalk.green('+')}${chalk.green(untracked.toString())}`);
+      }
+      if (deleted > 0) {
+        parts.push(`${chalk.red('-')}${chalk.red(deleted.toString())}`);
+      }
+
+      return `${chalk.yellow('📝')} ${parts.join(' ')}`;
+    } catch {
+      return '';
+    }
+  }
+
+  private async getActionableIndicators(session: any, branch: string): Promise<string> {
+    const actions: string[] = [];
+
+    // Check if needs rebase
+    try {
+      const { execSync } = await import('child_process');
+      const behind = execSync('git rev-list --count HEAD..@{upstream} 2>/dev/null || echo 0', { encoding: 'utf-8' }).trim();
+      if (parseInt(behind) > 0) {
+        actions.push(`${chalk.yellow('⚡')} ${chalk.yellow('rebase')}`);
+      }
+    } catch {
+      // ignore
+    }
+
+    // Check if has uncommitted changes and session active
+    if (session?.isActive()) {
+      const status = await this.gitOps.getStatus().catch(() => null);
+      if (status && !status.isClean()) {
+        actions.push(`${chalk.cyan('💾')} ${chalk.cyan('commit')}`);
+      }
+    }
+
+    // Check if branch is ready to ship
+    if (session?.currentState === 'BRANCH_READY' || session?.currentState === 'CHANGES_COMMITTED') {
+      actions.push(`${chalk.green('🚢')} ${chalk.green('ship')}`);
+    }
+
+    // Check if on main with no session (should launch)
+    if ((branch === 'main' || branch === 'master') && !session) {
+      actions.push(`${chalk.blue('🚀')} ${chalk.blue('launch')}`);
+    }
+
+    return actions.join(' ');
+  }
+
+  private async getConflictIndicator(): Promise<string> {
+    try {
+      const { execSync } = await import('child_process');
+      const conflicts = execSync('git diff --name-only --diff-filter=U 2>/dev/null | wc -l', { encoding: 'utf-8' }).trim();
+      const count = parseInt(conflicts);
+
+      if (count > 0) {
+        return `${chalk.red('⚠️')} ${chalk.red(`${count} conflicts`)}`;
+      }
+
+      return '';
+    } catch {
+      return '';
+    }
+  }
+
+  private async getCIStatus(branch: string): Promise<string> {
+    try {
+      // Check for GitHub Actions workflow status
+      const { execSync } = await import('child_process');
+      const result = execSync(`gh run list --branch ${branch} --limit 1 --json status,conclusion 2>/dev/null || echo "[]"`, { encoding: 'utf-8' }).trim();
+
+      if (result && result !== '[]') {
+        const runs = JSON.parse(result);
+        if (runs.length > 0) {
+          const run = runs[0];
+          if (run.status === 'in_progress') {
+            return `${chalk.blue('🔄')} ${chalk.blue('CI running')}`;
+          }
+          if (run.conclusion === 'success') {
+            return `${chalk.green('✅')} ${chalk.green('CI passed')}`;
+          }
+          if (run.conclusion === 'failure') {
+            return `${chalk.red('❌')} ${chalk.red('CI failed')}`;
+          }
+        }
+      }
+
+      return '';
+    } catch {
+      return '';
+    }
+  }
+
+  private async getPRStatus(branch: string): Promise<string> {
+    try {
+      const { execSync } = await import('child_process');
+      const result = execSync(`gh pr list --head ${branch} --json number,state,reviewDecision 2>/dev/null || echo "[]"`, { encoding: 'utf-8' }).trim();
+
+      if (result && result !== '[]') {
+        const prs = JSON.parse(result);
+        if (prs.length > 0) {
+          const pr = prs[0];
+          if (pr.state === 'OPEN') {
+            if (pr.reviewDecision === 'APPROVED') {
+              return `${chalk.green('✓')} ${chalk.green(`PR #${pr.number} approved`)}`;
+            } else if (pr.reviewDecision === 'CHANGES_REQUESTED') {
+              return `${chalk.yellow('↻')} ${chalk.yellow(`PR #${pr.number} changes req`)}`;
+            } else {
+              return `${chalk.blue('👀')} ${chalk.blue(`PR #${pr.number} review pending`)}`;
+            }
+          }
+        }
+      }
+
+      return '';
+    } catch {
+      return '';
+    }
+  }
+
   private async showFormatOptions(): Promise<void> {
     const options = [
       ['{icon}', 'Workflow type icon'],
@@ -364,6 +599,14 @@ end
       ['{workflow}', 'Workflow type name'],
       ['{ahead}', 'Commits ahead/behind'],
       ['{dirty}', 'Working tree status'],
+      ['{context}', 'Context window usage bar'],
+      ['{age}', 'Session age/duration'],
+      ['{stash}', 'Git stash count'],
+      ['{changes}', 'Detailed changes indicator'],
+      ['{actions}', 'Actionable next steps'],
+      ['{conflicts}', 'Merge conflict indicator'],
+      ['{ci}', 'CI/CD status'],
+      ['{pr}', 'Pull request status'],
     ];
 
     const content = options.map(([token, desc]) =>
@@ -373,9 +616,11 @@ end
     this.box.printBox('Available Format Tokens', content);
 
     this.console.info('\nExample formats:');
-    this.console.log('  Basic:    "{icon} {branch} {state}"');
-    this.console.log('  Detailed: "{icon} {branch} [{session}] {state} {ahead} {dirty}"');
-    this.console.log('  Minimal:  "{branch} {dirty}"');
+    this.console.log('  Basic:     "{icon} {branch} {state}"');
+    this.console.log('  Detailed:  "{icon} {branch} {state} {context} {actions} {changes}"');
+    this.console.log('  Full:      "{icon} {branch} {state} {context} {age} {actions} {pr} {ci} {conflicts} {changes} {time}"');
+    this.console.log('  Minimal:   "{branch} {actions}"');
+    this.console.log('  Dev Focus: "{context} {branch} {changes} {actions}"');
 
     this.console.info('\nUsage: /hansolo:status-line format <template>');
   }
