@@ -78,7 +78,7 @@ export class StatusCommandV2 {
       }
 
       // Display ASCII art banner
-      this.output.info(AsciiArt.status());
+      console.log(AsciiArt.status());
 
       // Get current branch and session
       const currentBranch = await this.gitOps.getCurrentBranch();

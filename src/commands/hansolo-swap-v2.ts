@@ -159,7 +159,7 @@ export class SwapCommandV2 {
       }
 
       // Display ASCII art banner
-      this.output.info(AsciiArt.swap());
+      console.log(AsciiArt.swap());
 
       // Handle uncommitted changes
       let changesStashed = false;

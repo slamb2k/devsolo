@@ -470,7 +470,7 @@ export class LaunchCommandV2 {
       }
 
       // Display ASCII art banner
-      this.output.info(AsciiArt.launch());
+      console.log(AsciiArt.launch());
 
       // Execute launch workflow
       let session: WorkflowSession | undefined;

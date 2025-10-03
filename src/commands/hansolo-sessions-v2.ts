@@ -64,7 +64,7 @@ export class SessionsCommandV2 {
       }
 
       // Display ASCII art banner
-      this.output.info(AsciiArt.sessions());
+      console.log(AsciiArt.sessions());
 
       // Cleanup if requested
       if (options.cleanup) {
