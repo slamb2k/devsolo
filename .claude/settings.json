@@ -1,0 +1,7 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "/home/slamb2k/work/hansolo/.claude/statusline.sh",
+    "padding": 0
+  }
+}

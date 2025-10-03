@@ -4,6 +4,7 @@ import { WorkflowSession } from '../models/workflow-session';
 import { AuditEntry } from '../models/audit-entry';
 import { Configuration } from '../models/configuration';
 import { ConfigurationManager } from './configuration-manager';
+import { GitOperations } from './git-operations';
 import { StateName, TransitionTrigger } from '../models/types';
 
 export class SessionRepository {
@@ -238,6 +239,34 @@ export class SessionRepository {
       if (session.isExpired()) {
         await this.deleteSession(session.id);
         cleaned++;
+      }
+    }
+
+    return cleaned;
+  }
+
+  async cleanupCompletedSessions(): Promise<number> {
+    const sessions = await this.listSessions(true);
+    const gitOps = new GitOperations();
+    let cleaned = 0;
+
+    for (const session of sessions) {
+      // Clean up completed/aborted sessions
+      if (session.currentState === 'COMPLETE' || session.currentState === 'ABORTED') {
+        await this.deleteSession(session.id);
+        cleaned++;
+        continue;
+      }
+
+      // Clean up orphaned sessions (branch doesn't exist)
+      try {
+        const branchExists = await gitOps.branchExists(session.branchName);
+        if (!branchExists) {
+          await this.deleteSession(session.id);
+          cleaned++;
+        }
+      } catch {
+        // If we can't check, skip this session
       }
     }
 

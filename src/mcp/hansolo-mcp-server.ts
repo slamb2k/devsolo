@@ -491,10 +491,10 @@ export class HanSoloMCPServer {
       const originalConsoleError = console.error;
       const capturedOutput: string[] = [];
 
-      // Display banner FIRST (using original console, before override)
+      // Add banner FIRST to capturedOutput so it's always displayed first
       const banner = BANNERS[name];
       if (banner) {
-        originalConsoleLog(createBanner(banner));
+        capturedOutput.push(createBanner(banner));
       }
 
       // NOW override console to capture command output
@@ -544,23 +544,42 @@ export class HanSoloMCPServer {
           const params = SessionsSchema.parse(args);
           // SessionsCommand is available but we'll use SessionRepository directly
           const sessionRepo = new SessionRepository(this.basePath);
+
+          // Perform cleanup if requested
+          let cleanedCount = 0;
+          if (params.cleanup) {
+            cleanedCount = await sessionRepo.cleanupCompletedSessions();
+          }
+
           const sessions = await sessionRepo.listSessions(params.all);
+
+          const response: any = {
+            totalSessions: sessions.length,
+            activeSessions: sessions.filter(s => s.isActive()).length,
+            sessions: sessions.map(s => ({
+              id: s.id,
+              branch: s.branchName,
+              state: s.currentState,
+              type: s.workflowType,
+              age: s.getAge(),
+            })),
+          };
+
+          if (params.cleanup) {
+            response.cleaned = cleanedCount;
+            response.message = `Cleaned up ${cleanedCount} session(s) (completed/aborted/orphaned)`;
+          }
+
+          // Prepend banner to output
+          const outputText = capturedOutput.length > 0
+            ? capturedOutput.join('\n') + '\n\n' + JSON.stringify(response, null, 2)
+            : JSON.stringify(response, null, 2);
 
           return {
             content: [
               {
                 type: 'text',
-                text: JSON.stringify({
-                  totalSessions: sessions.length,
-                  activeSessions: sessions.filter(s => s.isActive()).length,
-                  sessions: sessions.map(s => ({
-                    id: s.id,
-                    branch: s.branchName,
-                    state: s.currentState,
-                    type: s.workflowType,
-                    age: s.getAge(),
-                  })),
-                }, null, 2),
+                text: outputText,
               },
             ],
           };
@@ -630,32 +649,33 @@ export class HanSoloMCPServer {
           const currentBranch = await gitOps.getCurrentBranch();
           const session = await sessionRepo.getSessionByBranch(currentBranch);
 
+          let statusOutput = '';
           if (session) {
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify({
-                    sessionId: session.id,
-                    branch: session.branchName,
-                    state: session.currentState,
-                    type: session.workflowType,
-                    age: session.getAge(),
-                    isActive: session.isActive(),
-                  }, null, 2),
-                },
-              ],
-            };
+            statusOutput = JSON.stringify({
+              sessionId: session.id,
+              branch: session.branchName,
+              state: session.currentState,
+              type: session.workflowType,
+              age: session.getAge(),
+              isActive: session.isActive(),
+            }, null, 2);
           } else {
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: 'No active workflow session on current branch',
-                },
-              ],
-            };
+            statusOutput = 'No active workflow session on current branch';
           }
+
+          // Prepend banner to output
+          const outputText = capturedOutput.length > 0
+            ? capturedOutput.join('\n') + '\n\n' + statusOutput
+            : statusOutput;
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: outputText,
+              },
+            ],
+          };
         }
 
         case 'hansolo_status_line': {
@@ -663,34 +683,39 @@ export class HanSoloMCPServer {
           const statusLineTool = new ManageStatusLineTool();
           const result = await statusLineTool.execute(args as any);
 
+          let message = '';
+          let isError = false;
+
           if (result.success) {
-            let message = result.message || '';
+            message = result.message || '';
             if (result.enabled && result.currentFormat) {
               message += `\nFormat: ${result.currentFormat}`;
             }
             if (result.preview) {
               message += `\nPreview: ${result.preview}`;
             }
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: message || 'Status line operation completed',
-                },
-              ],
-            };
+            if (!message) {
+              message = 'Status line operation completed';
+            }
           } else {
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: `Error: ${result.error || 'Unknown error'}`,
-                },
-              ],
-              isError: true,
-            };
+            message = `Error: ${result.error || 'Unknown error'}`;
+            isError = true;
           }
+
+          // Prepend banner to output
+          const outputText = capturedOutput.length > 0
+            ? capturedOutput.join('\n') + '\n\n' + message
+            : message;
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: outputText,
+              },
+            ],
+            isError,
+          };
         }
 
         default:
