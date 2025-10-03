@@ -370,7 +370,7 @@ export class ShipCommandV2 {
       logger.info('Pre-flight checks passed', 'ship');
 
       // Display ASCII art banner
-      this.output.info(AsciiArt.ship());
+      console.log(AsciiArt.ship());
 
       // Execute complete workflow
       logger.info('Starting workflow execution', 'ship');

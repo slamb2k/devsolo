@@ -161,7 +161,7 @@ export class AbortCommandV2 {
       }
 
       // Display ASCII art banner
-      this.output.info(AsciiArt.abort());
+      console.log(AsciiArt.abort());
 
       // Get session
       const session = await this.sessionRepo.getSessionByBranch(branchName);
