@@ -33,7 +33,7 @@ export class StashManager {
 
     return {
       stashRef: result.stashRef,
-      message
+      message,
     };
   }
 
