@@ -122,9 +122,11 @@ export class AbortCommand {
     });
 
     return new Promise(resolve => {
-      rl.question(`${message} (y/n): `, answer => {
+      rl.question(`${message} (Y/n): `, answer => {
         rl.close();
-        resolve(answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes');
+        const trimmed = answer.trim().toLowerCase();
+        // Default to yes if no answer provided, or if answer starts with 'y'
+        resolve(trimmed === '' || trimmed === 'y' || trimmed === 'yes');
       });
     });
   }
