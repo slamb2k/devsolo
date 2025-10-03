@@ -757,6 +757,7 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
           const result = await abortCommand.execute({
             ...params,
             branchName,
+            yes: true, // Skip confirmations in MCP mode
           });
 
           // Include stashRef in output if present

@@ -11,17 +11,21 @@ export class WelcomeBanner {
     console.clear();
     console.log();
 
-    // ASCII Art Banner
-    const banner = `
-    ██╗  ██╗ █████╗ ███╗   ██╗    ███████╗ ██████╗ ██╗      ██████╗
-    ██║  ██║██╔══██╗████╗  ██║    ██╔════╝██╔═══██╗██║     ██╔═══██╗
-    ███████║███████║██╔██╗ ██║    ███████╗██║   ██║██║     ██║   ██║
-    ██╔══██║██╔══██║██║╚██╗██║    ╚════██║██║   ██║██║     ██║   ██║
-    ██║  ██║██║  ██║██║ ╚████║    ███████║╚██████╔╝███████╗╚██████╔╝
-    ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝    ╚══════╝ ╚═════╝ ╚══════╝ ╚═════╝
-    `;
-
-    console.log(chalk.cyan(banner));
+    // ASCII Art Banner - Colorful!
+    console.log();
+    console.log(chalk.gray('           ,-----.'));
+    console.log(chalk.gray('         ,') + chalk.yellow('\'_/_|_\\_') + chalk.gray('`.'));
+    console.log(chalk.gray('        /') + chalk.yellow('<<::8') + chalk.red('[O]') + chalk.yellow('::>') + chalk.gray('\\'));
+    console.log(chalk.gray('       _|-----------|_           ') + chalk.cyan.bold('██╗  ██╗ █████╗ ███╗   ██╗') + chalk.magenta.bold('    ███████╗ ██████╗ ██╗      ██████╗'));
+    console.log(chalk.blue('   :::|  | ====-=- |  |:::       ') + chalk.cyan.bold('██║  ██║██╔══██╗████╗  ██║') + chalk.magenta.bold('    ██╔════╝██╔═══██╗██║     ██╔═══██╗'));
+    console.log(chalk.blue('   :::|  | -=-==== |  |:::       ') + chalk.cyan.bold('███████║███████║██╔██╗ ██║') + chalk.magenta.bold('    ███████╗██║   ██║██║     ██║   ██║'));
+    console.log(chalk.blue('   :::\\  | ::::|()||  /:::       ') + chalk.cyan.bold('██╔══██║██╔══██║██║╚██╗██║') + chalk.magenta.bold('    ╚════██║██║   ██║██║     ██║   ██║'));
+    console.log(chalk.blue('   ::::| | ....|()|| |::::       ') + chalk.cyan.bold('██║  ██║██║  ██║██║ ╚████║') + chalk.magenta.bold('    ███████║╚██████╔╝███████╗╚██████╔╝'));
+    console.log(chalk.gray('       | |_________| |           ') + chalk.gray('╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝') + chalk.gray('    ╚══════╝ ╚═════╝ ╚══════╝ ╚═════╝'));
+    console.log(chalk.gray('       | |\\_______/| |'));
+    console.log(chalk.gray('      /   \\ /   \\ /   \\') + chalk.yellow.bold('                          Turn the ship around...'));
+    console.log(chalk.gray('      `---\' `---\' `---\''));
+    console.log();
     console.log(chalk.gray('─'.repeat(70)));
     console.log();
     console.log(chalk.white.bold('  Welcome to han-solo Installation Wizard'));
@@ -41,6 +45,23 @@ export class WelcomeBanner {
   displayCompact(): void {
     console.log();
     console.log(chalk.cyan.bold('han-solo') + chalk.gray(' - Git workflow automation'));
+    console.log();
+  }
+
+  displayBannerOnly(): void {
+    console.log();
+    console.log(chalk.gray('           ,-----.'));
+    console.log(chalk.gray('         ,') + chalk.yellow('\'_/_|_\\_') + chalk.gray('`.'));
+    console.log(chalk.gray('        /') + chalk.yellow('<<::8') + chalk.red('[O]') + chalk.yellow('::>') + chalk.gray('\\'));
+    console.log(chalk.gray('       _|-----------|_           ') + chalk.cyan.bold('██╗  ██╗ █████╗ ███╗   ██╗') + chalk.magenta.bold('    ███████╗ ██████╗ ██╗      ██████╗'));
+    console.log(chalk.blue('   :::|  | ====-=- |  |:::       ') + chalk.cyan.bold('██║  ██║██╔══██╗████╗  ██║') + chalk.magenta.bold('    ██╔════╝██╔═══██╗██║     ██╔═══██╗'));
+    console.log(chalk.blue('   :::|  | -=-==== |  |:::       ') + chalk.cyan.bold('███████║███████║██╔██╗ ██║') + chalk.magenta.bold('    ███████╗██║   ██║██║     ██║   ██║'));
+    console.log(chalk.blue('   :::\\  | ::::|()||  /:::       ') + chalk.cyan.bold('██╔══██║██╔══██║██║╚██╗██║') + chalk.magenta.bold('    ╚════██║██║   ██║██║     ██║   ██║'));
+    console.log(chalk.blue('   ::::| | ....|()|| |::::       ') + chalk.cyan.bold('██║  ██║██║  ██║██║ ╚████║') + chalk.magenta.bold('    ███████║╚██████╔╝███████╗╚██████╔╝'));
+    console.log(chalk.gray('       | |_________| |           ') + chalk.gray('╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝') + chalk.gray('    ╚══════╝ ╚═════╝ ╚══════╝ ╚═════╝'));
+    console.log(chalk.gray('       | |\\_______/| |'));
+    console.log(chalk.gray('      /   \\ /   \\ /   \\') + chalk.yellow.bold('                          Turn the ship around...'));
+    console.log(chalk.gray('      `---\' `---\' `---\''));
     console.log();
   }
 }

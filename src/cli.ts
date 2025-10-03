@@ -15,21 +15,15 @@ import {
 import { HotfixCommand } from './commands/hansolo-hotfix';
 import { runInteractiveMode } from './commands/interactive';
 import { PerfCommand } from './commands/hansolo-perf';
+import { WelcomeBanner } from './cli/components/WelcomeBanner';
+import { ThemeManager } from './cli/components/ThemeManager';
 
-const HANSOLO_ASCII = `
-╔═══════════════════════════════════════════╗
-║                                           ║
-║  ██╗  ██╗ █████╗ ███╗   ██╗    ███████╗  ║
-║  ██║  ██║██╔══██╗████╗  ██║    ██╔════╝  ║
-║  ███████║███████║██╔██╗ ██║    ███████╗  ║
-║  ██╔══██║██╔══██║██║╚██╗██║    ╚════██║  ║
-║  ██║  ██║██║  ██║██║ ╚████║    ███████║  ║
-║  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝    ╚══════╝  ║
-║                                           ║
-║       Git Workflow Automation Tool        ║
-║           Enforce Linear History          ║
-╚═══════════════════════════════════════════╝
-`;
+// Helper to show banner
+function showBanner(): void {
+  const themeManager = new ThemeManager();
+  const banner = new WelcomeBanner(themeManager);
+  banner.displayBannerOnly();
+}
 
 export async function main(): Promise<void> {
   const args = process.argv.slice(2);
@@ -129,7 +123,7 @@ export async function main(): Promise<void> {
 }
 
 function showHelp(): void {
-  console.log(HANSOLO_ASCII);
+  showBanner();
   console.log('\nUsage: hansolo <command> [options]');
   console.log('\nCommands:');
   console.log('  init         Initialize han-solo in your project');
@@ -156,7 +150,7 @@ function showVersion(): void {
 }
 
 function runDemo(): void {
-  console.log(HANSOLO_ASCII);
+  showBanner();
   console.log('\n🚀 Running han-solo demonstration...\n');
 
   // Create a demo configuration
