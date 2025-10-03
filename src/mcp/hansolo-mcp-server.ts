@@ -102,6 +102,7 @@ export class HanSoloMCPServer {
         capabilities: {
           tools: {},
           prompts: {},
+          elicitation: {},
         },
       }
     );
@@ -420,8 +421,8 @@ export class HanSoloMCPServer {
             arguments: [
               {
                 name: 'action',
-                description: 'Action: enable, disable, update, or show',
-                required: true,
+                description: 'Action: enable, disable, update, or show (default: show)',
+                required: false,
               },
               {
                 name: 'format',
@@ -481,6 +482,7 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
 
 
       return {
+        description: `Execute han-solo ${name} command`,
         messages: [
           {
             role: 'user',
@@ -533,13 +535,47 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
 
         case 'hansolo_launch': {
           const params = LaunchSchema.parse(args);
+
+          // If no branchName or description provided, ask for description to generate better branch name
+          let description = params.description;
+          let branchName = params.branchName;
+
+          if (!branchName && !description) {
+            try {
+              const elicitResult = await this.server.elicitInput({
+                message: 'Describe your feature/fix (or press Enter to auto-generate branch name):',
+                requestedSchema: {
+                  type: 'object',
+                  properties: {
+                    description: {
+                      type: 'string',
+                      title: 'Feature description',
+                      description: 'Brief description of the feature or fix (used to generate branch name)',
+                    },
+                  },
+                },
+              });
+
+              if (elicitResult.action === 'accept' && elicitResult.content?.['description']) {
+                description = elicitResult.content['description'] as string;
+              }
+            } catch (error) {
+              // Elicitation not supported - will auto-generate
+              console.error('[MCP] Elicitation not supported, auto-generating branch name');
+            }
+          }
+
           const launchCommand = new LaunchCommand(this.basePath);
-          await launchCommand.execute(params);
+          await launchCommand.execute({
+            ...params,
+            description,
+            branchName,
+          });
           return {
             content: [
               {
                 type: 'text',
-                text: capturedOutput.join('\n') || `Launched new workflow on branch: ${params.branchName || 'auto-generated'}`,
+                text: capturedOutput.join('\n') || `Launched new workflow on branch: ${branchName || description || 'auto-generated'}`,
               },
             ],
           };
@@ -592,8 +628,68 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
 
         case 'hansolo_swap': {
           const params = SwapSchema.parse(args);
+
+          // If no branchName provided, try elicitation or fail gracefully
+          let branchName = params.branchName;
+          if (!branchName) {
+            const sessionRepo = new SessionRepository(this.basePath);
+            const sessions = await sessionRepo.listSessions(false);
+            const activeSessions = sessions.filter(s => s.isActive());
+
+            if (activeSessions.length === 0) {
+              return {
+                content: [{
+                  type: 'text',
+                  text: 'No active sessions available to swap to. Use /hansolo:launch to start a new workflow.',
+                }],
+              };
+            }
+
+            try {
+              // Build enum options from active sessions
+              const sessionOptions = activeSessions.map(s => s.branchName);
+              const defaultBranch = sessionOptions[0];
+
+              const elicitResult = await this.server.elicitInput({
+                message: `Select which branch to swap to (${activeSessions.length} active session${activeSessions.length > 1 ? 's' : ''} available):`,
+                requestedSchema: {
+                  type: 'object',
+                  properties: {
+                    branchName: {
+                      type: 'string',
+                      title: 'Branch to swap to',
+                      description: `Active sessions: ${sessionOptions.join(', ')}`,
+                      default: defaultBranch,
+                    },
+                  },
+                  required: ['branchName'],
+                },
+              });
+
+              if (elicitResult.action !== 'accept' || !elicitResult.content?.['branchName']) {
+                return {
+                  content: [{
+                    type: 'text',
+                    text: 'Swap cancelled by user',
+                  }],
+                };
+              }
+
+              branchName = elicitResult.content['branchName'] as string;
+            } catch (error) {
+              // Elicitation not supported - return error
+              console.error('[MCP] Elicitation not supported');
+              return {
+                content: [{
+                  type: 'text',
+                  text: `Branch name is required for swap. Available sessions: ${activeSessions.map(s => s.branchName).join(', ')}`,
+                }],
+              };
+            }
+          }
+
           const swapCommand = new SwapCommand(this.basePath);
-          await swapCommand.execute(params.branchName, {
+          await swapCommand.execute(branchName, {
             force: params.force,
             stash: params.stash,
           });
@@ -601,7 +697,7 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
             content: [
               {
                 type: 'text',
-                text: capturedOutput.join('\n') || `Swapped to branch: ${params.branchName}`,
+                text: capturedOutput.join('\n') || `Swapped to branch: ${branchName}`,
               },
             ],
           };
@@ -609,8 +705,59 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
 
         case 'hansolo_abort': {
           const params = AbortSchema.parse(args);
+
+          // If no branchName provided and multiple active sessions, ask which one
+          let branchName = params.branchName;
+          if (!branchName) {
+            const sessionRepo = new SessionRepository(this.basePath);
+            const sessions = await sessionRepo.listSessions(false);
+            const activeSessions = sessions.filter(s => s.isActive());
+
+            if (activeSessions.length > 1) {
+              try {
+                const sessionOptions = activeSessions.map(s => s.branchName);
+                const gitOps = new GitOperations();
+                const currentBranch = await gitOps.getCurrentBranch();
+                const defaultBranch = sessionOptions.includes(currentBranch) ? currentBranch : sessionOptions[0];
+
+                const elicitResult = await this.server.elicitInput({
+                  message: `Select which session to abort (${activeSessions.length} active sessions):`,
+                  requestedSchema: {
+                    type: 'object',
+                    properties: {
+                      branchName: {
+                        type: 'string',
+                        title: 'Branch to abort',
+                        description: `Active sessions: ${sessionOptions.join(', ')}`,
+                        default: defaultBranch,
+                      },
+                    },
+                    required: ['branchName'],
+                  },
+                });
+
+                if (elicitResult.action !== 'accept' || !elicitResult.content?.['branchName']) {
+                  return {
+                    content: [{
+                      type: 'text',
+                      text: 'Abort cancelled by user',
+                    }],
+                  };
+                }
+
+                branchName = elicitResult.content['branchName'] as string;
+              } catch (error) {
+                // Elicitation not supported - just use current branch or error
+                console.error('[MCP] Elicitation not supported, defaulting to current branch');
+              }
+            }
+          }
+
           const abortCommand = new AbortCommand(this.basePath);
-          const result = await abortCommand.execute(params);
+          const result = await abortCommand.execute({
+            ...params,
+            branchName,
+          });
 
           // Include stashRef in output if present
           let outputText = capturedOutput.join('\n');
@@ -633,8 +780,50 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
 
         case 'hansolo_ship': {
           const params = ShipSchema.parse(args);
+
+          // Optionally ask for commit message if not provided
+          let commitMessage = params.message;
+          if (!commitMessage) {
+            try {
+              // Get current session info for default message
+              const gitOps = new GitOperations();
+              const sessionRepo = new SessionRepository(this.basePath);
+              const currentBranch = await gitOps.getCurrentBranch();
+              const session = await sessionRepo.getSessionByBranch(currentBranch);
+
+              const defaultMessage = session
+                ? `feat: ${session.branchName}\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>`
+                : '';
+
+              const elicitResult = await this.server.elicitInput({
+                message: 'Enter a commit message (or press Enter to use default):',
+                requestedSchema: {
+                  type: 'object',
+                  properties: {
+                    message: {
+                      type: 'string',
+                      title: 'Commit message',
+                      description: 'Commit message for this workflow',
+                      default: defaultMessage,
+                    },
+                  },
+                },
+              });
+
+              if (elicitResult.action === 'accept' && elicitResult.content?.['message']) {
+                commitMessage = elicitResult.content['message'] as string;
+              }
+            } catch (error) {
+              // Elicitation not supported by client - continue with default
+              console.error('[MCP] Elicitation not supported, using default commit message');
+            }
+          }
+
           const shipCommand = new ShipCommand(this.basePath);
-          await shipCommand.execute(params);
+          await shipCommand.execute({
+            ...params,
+            message: commitMessage,
+          });
 
           const outputText = capturedOutput.join('\n');
 
