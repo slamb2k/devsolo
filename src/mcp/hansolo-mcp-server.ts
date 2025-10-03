@@ -477,7 +477,8 @@ export class HanSoloMCPServer {
 
 ${banner}
 
-One that has been shown to the user, now run the han-solo ${name} command${argsStr}`
+One that has been shown to the user, now run the han-solo ${name} command${argsStr}`;
+
 
       return {
         messages: [
