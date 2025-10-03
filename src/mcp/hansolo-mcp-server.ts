@@ -415,6 +415,37 @@ export class HanSoloMCPServer {
               },
             ],
           },
+          {
+            name: 'status-line',
+            description: '📍 Manage status line display',
+            arguments: [
+              {
+                name: 'action',
+                description: 'Action: enable, disable, update, or show',
+                required: true,
+              },
+              {
+                name: 'format',
+                description: 'Custom format string (e.g., "{icon} {branch} {state}")',
+                required: false,
+              },
+              {
+                name: 'showSessionInfo',
+                description: 'Show session ID in status line',
+                required: false,
+              },
+              {
+                name: 'showBranchInfo',
+                description: 'Show branch name in status line',
+                required: false,
+              },
+              {
+                name: 'showStateInfo',
+                description: 'Show workflow state in status line',
+                required: false,
+              },
+            ],
+          },
         ],
       };
     });
