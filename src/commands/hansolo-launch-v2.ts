@@ -193,8 +193,8 @@ class LaunchPreFlightChecks extends PreFlightChecks {
         };
       }
 
-      // Check if branch has an existing PR
-      const pr = await this.githubIntegration.getPullRequestForBranch(this.branchName);
+      // Check if branch has an existing PR (search all states including closed/merged)
+      const pr = await this.githubIntegration.getPullRequestForBranch(this.branchName, 'all');
 
       if (pr && (pr.merged || pr.state === 'closed')) {
         // Generate suggestion for incremented branch name

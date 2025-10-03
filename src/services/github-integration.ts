@@ -214,7 +214,10 @@ export class GitHubIntegration {
     }
   }
 
-  async getPullRequestForBranch(branchName: string): Promise<PullRequestInfo | null> {
+  async getPullRequestForBranch(
+    branchName: string,
+    state: 'open' | 'closed' | 'all' = 'open'
+  ): Promise<PullRequestInfo | null> {
     if (!this.octokit || !this.owner || !this.repo) {
       const initialized = await this.initialize();
       if (!initialized) {
@@ -227,7 +230,7 @@ export class GitHubIntegration {
         owner: this.owner!,
         repo: this.repo!,
         head: `${this.owner}:${branchName}`,
-        state: 'open',
+        state,
       });
 
       if (response.data.length > 0) {
