@@ -21,6 +21,7 @@ import { HotfixCommand } from '../commands/hansolo-hotfix';
 const InitSchema = z.object({
   scope: z.enum(['project', 'user']).optional(),
   force: z.boolean().optional(),
+  skipBanner: z.boolean().optional(),
 });
 
 const LaunchSchema = z.object({
@@ -29,18 +30,21 @@ const LaunchSchema = z.object({
   force: z.boolean().optional(),
   stashRef: z.string().optional(),
   popStash: z.boolean().optional(),
+  skipBanner: z.boolean().optional(),
 });
 
 const SessionsSchema = z.object({
   all: z.boolean().optional(),
   verbose: z.boolean().optional(),
   cleanup: z.boolean().optional(),
+  skipBanner: z.boolean().optional(),
 });
 
 const SwapSchema = z.object({
   branchName: z.string().optional(),
   force: z.boolean().optional(),
   stash: z.boolean().optional(),
+  skipBanner: z.boolean().optional(),
 });
 
 const AbortSchema = z.object({
@@ -48,6 +52,7 @@ const AbortSchema = z.object({
   force: z.boolean().optional(),
   deleteBranch: z.boolean().optional(),
   yes: z.boolean().optional(),
+  skipBanner: z.boolean().optional(),
 });
 
 const ShipSchema = z.object({
@@ -57,6 +62,7 @@ const ShipSchema = z.object({
   merge: z.boolean().optional(),
   force: z.boolean().optional(),
   yes: z.boolean().optional(),
+  skipBanner: z.boolean().optional(),
 });
 
 const HotfixSchema = z.object({
@@ -67,6 +73,7 @@ const HotfixSchema = z.object({
   autoMerge: z.boolean().optional(),
   force: z.boolean().optional(),
   yes: z.boolean().optional(),
+  skipBanner: z.boolean().optional(),
 });
 
 export class HanSoloMCPServer {
@@ -500,9 +507,10 @@ export class HanSoloMCPServer {
         });
       }
 
-      // Build arguments string for display
-      const argsStr = Object.keys(toolArgs).length > 0
-        ? ` with ${Object.entries(toolArgs).map(([k, v]) => `${k}=${v}`).join(', ')}`
+      // Build arguments string for display (exclude internal parameters)
+      const displayArgs = Object.entries(toolArgs).filter(([k]) => k !== 'skipBanner');
+      const argsStr = displayArgs.length > 0
+        ? ` with ${displayArgs.map(([k, v]) => `${k}=${v}`).join(', ')}`
         : '';
 
       // Construct the prompt returned from the mcp server
@@ -512,7 +520,7 @@ export class HanSoloMCPServer {
 
 ${banner}
 
-Once that has been shown to the user, now run the han-solo ${name} command${argsStr}`;
+Once that has been shown to the user, now run the han-solo ${name} command${argsStr} and pass skipBanner=true`;
 
 
       return {
@@ -532,6 +540,20 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
     // Handle tool calls
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
+
+      // Preprocess args to convert string booleans to actual booleans
+      const processedArgs: any = {};
+      if (args) {
+        Object.entries(args).forEach(([key, value]) => {
+          if (value === 'true') {
+            processedArgs[key] = true;
+          } else if (value === 'false') {
+            processedArgs[key] = false;
+          } else {
+            processedArgs[key] = value;
+          }
+        });
+      }
 
       // Save original console methods
       const originalConsoleLog = console.log;
@@ -554,8 +576,10 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
       try {
         switch (name) {
         case 'hansolo_init': {
-          capturedOutput.push(getBanner('init'));
-          const params = InitSchema.parse(args);
+          const params = InitSchema.parse(processedArgs);
+          if (!params.skipBanner) {
+            capturedOutput.push(getBanner('init'));
+          }
           const initCommand = new InitCommand(this.basePath);
           await initCommand.execute(params);
           return {
@@ -569,8 +593,10 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_launch': {
-          capturedOutput.push(getBanner('launch'));
-          const params = LaunchSchema.parse(args);
+          const params = LaunchSchema.parse(processedArgs);
+          if (!params.skipBanner) {
+            capturedOutput.push(getBanner('launch'));
+          }
 
           // If no branchName or description provided, ask for description to generate better branch name
           let description = params.description;
@@ -614,8 +640,10 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_sessions': {
-          capturedOutput.push(getBanner('sessions'));
-          const params = SessionsSchema.parse(args);
+          const params = SessionsSchema.parse(processedArgs);
+          if (!params.skipBanner) {
+            capturedOutput.push(getBanner('sessions'));
+          }
           // SessionsCommand is available but we'll use SessionRepository directly
           const sessionRepo = new SessionRepository(this.basePath);
 
@@ -660,8 +688,10 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_swap': {
-          capturedOutput.push(getBanner('swap'));
-          const params = SwapSchema.parse(args);
+          const params = SwapSchema.parse(processedArgs);
+          if (!params.skipBanner) {
+            capturedOutput.push(getBanner('swap'));
+          }
 
           // If no branchName provided, try elicitation or fail gracefully
           let branchName = params.branchName;
@@ -735,8 +765,10 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_abort': {
-          capturedOutput.push(getBanner('abort'));
-          const params = AbortSchema.parse(args);
+          const params = AbortSchema.parse(processedArgs);
+          if (!params.skipBanner) {
+            capturedOutput.push(getBanner('abort'));
+          }
 
           // If no branchName provided and multiple active sessions, ask which one
           let branchName = params.branchName;
@@ -801,8 +833,10 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_ship': {
-          capturedOutput.push(getBanner('ship'));
-          const params = ShipSchema.parse(args);
+          const params = ShipSchema.parse(processedArgs);
+          if (!params.skipBanner) {
+            capturedOutput.push(getBanner('ship'));
+          }
 
           // Optionally ask for commit message if not provided
           let commitMessage = params.message;
@@ -858,7 +892,9 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_status': {
-          capturedOutput.push(getBanner('status'));
+          if (!processedArgs?.['skipBanner']) {
+            capturedOutput.push(getBanner('status'));
+          }
           const gitOps = new GitOperations();
           const sessionRepo = new SessionRepository(this.basePath);
           const currentBranch = await gitOps.getCurrentBranch();
@@ -894,10 +930,12 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_status_line': {
-          capturedOutput.push(getBanner('status-line'));
+          if (!processedArgs?.['skipBanner']) {
+            capturedOutput.push(getBanner('status-line'));
+          }
           const { ManageStatusLineTool } = await import('../mcp-server/tools/manage-status-line');
           const statusLineTool = new ManageStatusLineTool();
-          const result = await statusLineTool.execute(args as any);
+          const result = await statusLineTool.execute(processedArgs as any);
 
           let message = '';
           let isError = false;
@@ -935,8 +973,10 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_hotfix': {
-          capturedOutput.push(getBanner('hotfix'));
-          const params = HotfixSchema.parse(args);
+          const params = HotfixSchema.parse(processedArgs);
+          if (!params.skipBanner) {
+            capturedOutput.push(getBanner('hotfix'));
+          }
           const hotfixCommand = new HotfixCommand(this.basePath);
           await hotfixCommand.execute(params);
           return {
