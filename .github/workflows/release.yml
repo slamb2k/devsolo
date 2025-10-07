@@ -62,9 +62,11 @@ jobs:
       - name: Generate changelog
         id: changelog
         run: |
-          npx conventional-changelog -p angular -i CHANGELOG.md -s -r 0
           echo "changes<<EOF" >> $GITHUB_OUTPUT
-          cat CHANGELOG.md >> $GITHUB_OUTPUT
+          echo "## Changes in this release" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 2>/dev/null || echo "")..HEAD 2>/dev/null || git log --pretty=format:"- %s (%h)" -10 >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
