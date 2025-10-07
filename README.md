@@ -10,7 +10,8 @@ han-solo is a powerful CLI tool designed to streamline Git workflows while maint
 - **🛡️ Pre/Post-Flight Checks**: Comprehensive validation before and after every operation
 - **🚫 Branch Reuse Prevention**: Blocks reusing branch names after merge
 - **✓ PR Conflict Detection**: Ensures single PR per branch lifecycle
-- **📊 ASCII Art Banners**: Professional visual feedback for all commands
+- **📊 Colorful ASCII Art**: Professional, color-coded visual feedback for all commands
+- **📉 Context Window Display**: Real-time token usage tracking with visual progress bars
 - **📈 Linear History Enforcement**: Ensures all merges result in clean, linear commit history
 - **🔄 Session Management**: Track multiple concurrent workflows with isolated sessions
 - **⚙️ State Machine Control**: Deterministic workflow states prevent invalid operations
@@ -18,6 +19,7 @@ han-solo is a powerful CLI tool designed to streamline Git workflows while maint
 - **🤖 MCP Server**: Native Claude Code integration for AI-assisted workflows
 - **🎨 Rich Terminal UI**: Progress indicators, status displays, and clear reporting
 - **🔒 Safety First**: Built-in safeguards prevent accidental commits to main
+- **📍 Smart Status Line**: Always-visible workflow status in Claude Code
 
 ## Installation
 
@@ -33,29 +35,48 @@ npm install --save-dev @hansolo/cli
 
 ## Quick Start
 
+> **New to han-solo?** Check out the [Quick Start Guide](QUICKSTART.md) for a detailed walkthrough, or follow the steps below to get started immediately.
+
 ### 1. Initialize han-solo in your project
 ```bash
+cd your-project
 hansolo init
 ```
 
-This creates a `.hansolo` directory with configuration and session storage.
+This creates a `.hansolo` directory with configuration and session storage. If Claude Code is detected, it automatically sets up MCP integration.
 
-### 2. Start a new feature workflow
+### 2. (Optional) Set up GitHub authentication
 ```bash
-hansolo launch "my-awesome-feature"
+# Option A: GitHub CLI (easiest)
+gh auth login
+
+# Option B: Personal access token
+export GITHUB_TOKEN=ghp_your_token_here
 ```
 
-### 3. Make your changes
+### 3. Start a new feature workflow
+```bash
+hansolo launch
+```
+
+This creates a new feature branch and starts tracking your workflow.
+
+### 4. Make your changes
 Work on your feature as normal. han-solo tracks your session automatically.
 
-### 4. Ship your changes (One Command! 🚀)
+```bash
+# Check status anytime
+hansolo status
+```
+
+### 5. Ship your changes (One Command! 🚀)
 ```bash
 hansolo ship
 ```
 
 That's it! This single command:
-- ✅ Commits your changes
-- ✅ Pushes to remote
+- ✅ Commits your changes (runs lint/typecheck hooks)
+- ✅ Pushes to remote (runs test hooks)
 - ✅ Creates or updates PR
 - ✅ Waits for CI checks
 - ✅ Auto-merges when ready
@@ -63,7 +84,16 @@ That's it! This single command:
 - ✅ Deletes feature branches
 - ✅ Completes session
 
-Ready for your next feature!
+**Ready for your next feature!** 🎉
+
+---
+
+**Using Claude Code?** After `hansolo init`, enable the status line for always-visible workflow status:
+```
+/hansolo:status-line enable
+```
+
+For detailed examples and advanced workflows, see the [Usage Guide](USAGE.md).
 
 ## Core Commands
 
@@ -318,19 +348,72 @@ han-solo automatically detects and uses `gh` CLI authentication if available, so
 
 han-solo includes an MCP server for seamless Claude Code integration.
 
-### Running the MCP Server
-```bash
-hansolo-mcp
-```
+### Quick Setup with Claude Code
+
+1. **Initialize han-solo** in your project:
+   ```bash
+   hansolo init
+   ```
+   This automatically configures the MCP server in Claude Code.
+
+2. **Enable the Status Line** (optional but recommended):
+   ```bash
+   /hansolo:status-line enable
+   ```
+
+3. **Start using han-solo via Claude Code**:
+   ```
+   /hansolo:launch
+   /hansolo:ship
+   /hansolo:status
+   ```
 
 ### Available MCP Tools
-- `hansolo_init` - Initialize han-solo
-- `hansolo_launch` - Start new workflow
-- `hansolo_sessions` - List sessions
-- `hansolo_swap` - Switch sessions
-- `hansolo_abort` - Cancel workflow
-- `hansolo_ship` - Complete workflow
-- `hansolo_status` - Show status
+
+All han-solo commands are available through Claude Code's slash command interface:
+
+| Command | Description |
+|---------|-------------|
+| `/hansolo:init` | Initialize han-solo in your project |
+| `/hansolo:launch` | Start a new feature workflow |
+| `/hansolo:ship` | Complete and merge your feature |
+| `/hansolo:status` | Show current workflow status |
+| `/hansolo:sessions` | List all active sessions |
+| `/hansolo:swap` | Switch between sessions |
+| `/hansolo:abort` | Cancel current workflow |
+| `/hansolo:status-line` | Manage Claude Code status line |
+
+### Status Line Integration
+
+The status line provides at-a-glance workflow information directly in Claude Code:
+
+```
+[han-solo] ✏️ 0c2a20a7 | feature/my-feature | BRANCH_READY | 45000/200000 ██░░░░░░░░ 22%
+```
+
+**Status Line Components:**
+- **Session ID**: Short identifier for current session
+- **Branch Name**: Current feature branch
+- **State**: Workflow state (BRANCH_READY, PUSHED, etc.)
+- **Token Usage**: Context window usage with visual progress bar
+  - Green: < 50% (plenty of room)
+  - Yellow: 50-80% (getting full)
+  - Red: > 80% (approaching limit)
+
+**Managing the Status Line:**
+```bash
+# Enable status line
+/hansolo:status-line enable
+
+# Disable status line
+/hansolo:status-line disable
+
+# Show current status
+/hansolo:status-line show
+
+# Update configuration
+/hansolo:status-line update --show-branch-info true
+```
 
 ## Session Management
 
@@ -442,11 +525,25 @@ npm run test:coverage
 
 ## Documentation
 
-- **[Installation Guide](INSTALL.md)** - Detailed installation instructions
+### Getting Started
+- **[Quick Start Guide](QUICKSTART.md)** - Get up and running in 5 minutes
+- **[Installation Guide](INSTALL.md)** - Detailed installation instructions for all platforms
+- **[Usage Guide](USAGE.md)** - Practical examples and real-world scenarios
+
+### Reference
+- **[Command Reference](docs/command-reference.md)** - Complete command documentation
+- **[Configuration Guide](docs/configuration.md)** - Configuration options and best practices
+- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
 - **[API Documentation](docs/API.md)** - Complete API reference
+
+### Advanced
+- **[Pre-Flight Checks](docs/PRE-FLIGHT-CHECKS.md)** - Understanding validation checks
+- **[Migration Guide (V2)](docs/MIGRATION-V2.md)** - Upgrading from V1 to V2
+- **[MCP Integration](docs/MCP-INTEGRATION.md)** - Claude Code integration details
+
+### Project
 - **[Contributing Guide](CONTRIBUTING.md)** - How to contribute to han-solo
 - **[Changelog](CHANGELOG.md)** - Version history and changes
-- **[Examples](examples/)** - Usage examples and workflows
 - **[Man Page](man/hansolo.1)** - Unix manual page
 
 ## Shell Completions
