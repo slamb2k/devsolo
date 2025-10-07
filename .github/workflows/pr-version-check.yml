@@ -1,0 +1,155 @@
+name: PR Version Check
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  version-check:
+    name: Check and Bump Version
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get current version
+        id: current-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Get base branch latest commit
+        id: base-commit
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          echo "sha=$(git rev-parse origin/${{ github.event.pull_request.base.ref }})" >> $GITHUB_OUTPUT
+
+      - name: Analyze commits for version bump
+        id: analyze
+        run: |
+          # Get commits in this PR
+          COMMITS=$(git log --pretty=format:"%s" ${{ steps.base-commit.outputs.sha }}..HEAD)
+
+          # Determine bump type based on conventional commits
+          BUMP_TYPE="patch"
+
+          if echo "$COMMITS" | grep -qE "^(feat|fix|perf|refactor)!:|BREAKING CHANGE:"; then
+            BUMP_TYPE="major"
+          elif echo "$COMMITS" | grep -qE "^feat(\(.+\))?:"; then
+            BUMP_TYPE="minor"
+          fi
+
+          echo "type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Calculate new version
+        id: new-version
+        run: |
+          CURRENT="${{ steps.current-version.outputs.version }}"
+          BUMP_TYPE="${{ steps.analyze.outputs.type }}"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+          case $BUMP_TYPE in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if version needs update
+        id: needs-update
+        run: |
+          CURRENT="${{ steps.current-version.outputs.version }}"
+          NEW="${{ steps.new-version.outputs.version }}"
+
+          if [ "$CURRENT" = "$NEW" ]; then
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+          else
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update package.json version
+        if: steps.needs-update.outputs.needs_update == 'true'
+        run: |
+          npm version ${{ steps.new-version.outputs.version }} --no-git-tag-version
+
+      - name: Commit version bump
+        if: steps.needs-update.outputs.needs_update == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git commit -m "chore(release): bump version to ${{ steps.new-version.outputs.version }} [skip ci]"
+          git push
+
+      - name: Comment on PR
+        if: steps.needs-update.outputs.needs_update == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const bumpType = '${{ steps.analyze.outputs.type }}';
+            const oldVersion = '${{ steps.current-version.outputs.version }}';
+            const newVersion = '${{ steps.new-version.outputs.version }}';
+
+            const body = `## 🔄 Version Bumped
+
+            **Change:** \`${oldVersion}\` → \`${newVersion}\` (\`${bumpType}\`)
+
+            The version has been automatically updated based on your conventional commits.
+
+            ### Commits analyzed:
+            \`\`\`
+            ${{ steps.analyze.outputs.commits }}
+            \`\`\`
+
+            ### Version bump rules:
+            - \`feat!\` or \`BREAKING CHANGE:\` → **major**
+            - \`feat:\` → **minor**
+            - \`fix:\` or other → **patch**
+
+            If you need to adjust the version, update \`package.json\` manually.`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Add success status
+        if: steps.needs-update.outputs.needs_update == 'true'
+        run: echo "✅ Version bumped to ${{ steps.new-version.outputs.version }}"
+
+      - name: Version already up to date
+        if: steps.needs-update.outputs.needs_update == 'false'
+        run: echo "ℹ️ Version is already at ${{ steps.current-version.outputs.version }}"
