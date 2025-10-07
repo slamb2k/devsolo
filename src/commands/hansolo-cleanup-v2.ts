@@ -4,7 +4,7 @@ import { GitOperations } from '../services/git-operations';
 import { ConsoleOutput } from '../ui/console-output';
 import { WorkflowProgress } from '../ui/progress-indicators';
 import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
-import { AsciiArt } from '../ui/ascii-art';
+import { getBanner } from '../ui/banners';
 import chalk from 'chalk';
 
 /**
@@ -166,7 +166,7 @@ export class HansoloCleanupCommandV2 implements CommandHandler {
       }
 
       // Display ASCII art banner
-      this.console.info(AsciiArt.cleanup());
+      this.console.info(getBanner('cleanup'));
 
       // Sync main branch first
       if (!options.noSync) {

@@ -17,6 +17,8 @@ import {
 } from '../commands/adapters';
 import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
+import { getBanner } from '../ui/banners';
+import { HotfixCommand } from '../commands/hansolo-hotfix';
 
 // Tool parameter schemas
 const InitSchema = z.object({
@@ -60,33 +62,16 @@ const ShipSchema = z.object({
   yes: z.boolean().optional(),
 });
 
-// ASCII Art Banners for each command
-const BANNERS: Record<string, string> = {
-  hansolo_init: `░▀█▀░█▀█░▀█▀░▀█▀░▀█▀░█▀█░█░░░▀█▀░█▀▀░▀█▀░█▀█░█▀▀░
-░░█░░█░█░░█░░░█░░░█░░█▀█░█░░░░█░░▀▀█░░█░░█░█░█░█░
-░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_launch: `░█░░░█▀█░█░█░█▀█░█▀▀░█░█░▀█▀░█▀█░█▀▀░
-░█░░░█▀█░█░█░█░█░█░░░█▀█░░█░░█░█░█░█░
-░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_ship: `░█▀▀░█░█░▀█▀░█▀█░█▀█░▀█▀░█▀█░█▀▀░
-░▀▀█░█▀█░░█░░█▀▀░█▀▀░░█░░█░█░█░█░
-░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_swap: `░█▀▀░█░█░█▀█░█▀█░█▀█░▀█▀░█▀█░█▀▀░
-░▀▀█░█▄█░█▀█░█▀▀░█▀▀░░█░░█░█░█░█░
-░▀▀▀░▀░▀░▀░▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_abort: `░█▀█░█▀▄░█▀█░█▀▄░▀█▀░▀█▀░█▀█░█▀▀░
-░█▀█░█▀▄░█░█░█▀▄░░█░░░█░░█░█░█░█░
-░▀░▀░▀▀░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_sessions: `░█▀▀░█▀▀░█▀▀░█▀▀░▀█▀░█▀█░█▀█░█▀▀░
-░▀▀█░█▀▀░▀▀█░▀▀█░░█░░█░█░█░█░▀▀█░
-░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_status: `░█▀▀░▀█▀░█▀█░▀█▀░█░█░█▀▀░
-░▀▀█░░█░░█▀█░░█░░█░█░▀▀█░
-░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀░`,
-  hansolo_status_line: `░█▀▀░▀█▀░█▀█░▀█▀░█░█░█▀▀░░░█░░░▀█▀░█▀█░█▀▀░
-░▀▀█░░█░░█▀█░░█░░█░█░▀▀█░░░█░░░░█░░█░█░█▀▀░
-░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀░░░▀▀▀░▀▀▀░▀░▀░▀▀▀░`,
-};
+const HotfixSchema = z.object({
+  issue: z.string().optional(),
+  severity: z.enum(['critical', 'high', 'medium']).optional(),
+  skipTests: z.boolean().optional(),
+  skipReview: z.boolean().optional(),
+  autoMerge: z.boolean().optional(),
+  force: z.boolean().optional(),
+  yes: z.boolean().optional(),
+});
+
 export class HanSoloMCPServer {
   private server: Server;
   private basePath: string;
@@ -263,6 +248,44 @@ export class HanSoloMCPServer {
             },
           },
           {
+            name: 'hansolo_hotfix',
+            description: 'Create emergency hotfix workflow',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                issue: {
+                  type: 'string',
+                  description: 'Issue number or description',
+                },
+                severity: {
+                  type: 'string',
+                  enum: ['critical', 'high', 'medium'],
+                  description: 'Severity level of the hotfix',
+                },
+                skipTests: {
+                  type: 'boolean',
+                  description: 'Skip running tests',
+                },
+                skipReview: {
+                  type: 'boolean',
+                  description: 'Skip code review',
+                },
+                autoMerge: {
+                  type: 'boolean',
+                  description: 'Automatically merge when checks pass',
+                },
+                force: {
+                  type: 'boolean',
+                  description: 'Force operations',
+                },
+                yes: {
+                  type: 'boolean',
+                  description: 'Skip confirmations',
+                },
+              },
+            },
+          },
+          {
             name: 'hansolo_status',
             description: 'Show current workflow status',
             inputSchema: {
@@ -395,6 +418,22 @@ export class HanSoloMCPServer {
             ],
           },
           {
+            name: 'hotfix',
+            description: '🔥 Create emergency hotfix',
+            arguments: [
+              {
+                name: 'issue',
+                description: 'Issue number or description',
+                required: false,
+              },
+              {
+                name: 'severity',
+                description: 'Severity level: critical, high, or medium',
+                required: false,
+              },
+            ],
+          },
+          {
             name: 'status',
             description: '📊 Show workflow status',
             arguments: [],
@@ -470,15 +509,13 @@ export class HanSoloMCPServer {
         : '';
 
       // Construct the prompt returned from the mcp server
-      // Prepend hansolo_ to match BANNERS keys
-      const bannerKey = `hansolo_${name}`;
-      const banner = BANNERS[bannerKey] || '';
+      const banner = getBanner(name);
 
       const commandMessage = `Display the following text immediately before you do anything else:
 
 ${banner}
 
-One that has been shown to the user, now run the han-solo ${name} command${argsStr}`;
+Once that has been shown to the user, now run the han-solo ${name} command${argsStr}`;
 
 
       return {
@@ -520,6 +557,7 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
       try {
         switch (name) {
         case 'hansolo_init': {
+          console.log(getBanner('init'));
           const params = InitSchema.parse(args);
           const initCommand = new InitCommand(this.basePath);
           await initCommand.execute(params);
@@ -534,6 +572,7 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
         }
 
         case 'hansolo_launch': {
+          console.log(getBanner('launch'));
           const params = LaunchSchema.parse(args);
 
           // If no branchName or description provided, ask for description to generate better branch name
@@ -582,6 +621,7 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
         }
 
         case 'hansolo_sessions': {
+          console.log(getBanner('sessions'));
           const params = SessionsSchema.parse(args);
           // SessionsCommand is available but we'll use SessionRepository directly
           const sessionRepo = new SessionRepository(this.basePath);
@@ -627,6 +667,7 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
         }
 
         case 'hansolo_swap': {
+          console.log(getBanner('swap'));
           const params = SwapSchema.parse(args);
 
           // If no branchName provided, try elicitation or fail gracefully
@@ -704,6 +745,7 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
         }
 
         case 'hansolo_abort': {
+          console.log(getBanner('abort'));
           const params = AbortSchema.parse(args);
 
           // If no branchName provided and multiple active sessions, ask which one
@@ -780,6 +822,7 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
         }
 
         case 'hansolo_ship': {
+          console.log(getBanner('ship'));
           const params = ShipSchema.parse(args);
 
           // Optionally ask for commit message if not provided
@@ -839,6 +882,7 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
         }
 
         case 'hansolo_status': {
+          console.log(getBanner('status'));
           const gitOps = new GitOperations();
           const sessionRepo = new SessionRepository(this.basePath);
           const currentBranch = await gitOps.getCurrentBranch();
@@ -874,6 +918,7 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
         }
 
         case 'hansolo_status_line': {
+          console.log(getBanner('status-line'));
           const { ManageStatusLineTool } = await import('../mcp-server/tools/manage-status-line');
           const statusLineTool = new ManageStatusLineTool();
           const result = await statusLineTool.execute(args as any);
@@ -910,6 +955,21 @@ One that has been shown to the user, now run the han-solo ${name} command${argsS
               },
             ],
             isError,
+          };
+        }
+
+        case 'hansolo_hotfix': {
+          console.log(getBanner('hotfix'));
+          const params = HotfixSchema.parse(args);
+          const hotfixCommand = new HotfixCommand(this.basePath);
+          await hotfixCommand.execute(params);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: capturedOutput.join('\n') || 'Hotfix workflow started',
+              },
+            ],
           };
         }
 
