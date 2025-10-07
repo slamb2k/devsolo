@@ -24,6 +24,8 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "typecheck": "tsc --noEmit",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
+    "changelog:full": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
     "mcp:start": "node dist/mcp/hansolo-mcp-server-enhanced.js",
     "mcp:start:legacy": "node dist/mcp/hansolo-mcp-server.js",
     "mcp:test": "npm run build:mcp && npm run test:mcp",
