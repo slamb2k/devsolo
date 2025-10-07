@@ -8,7 +8,6 @@ import { GitHubIntegration } from '../services/github-integration';
 import { BranchValidator } from '../services/validation/branch-validator';
 import { PRValidator } from '../services/validation/pr-validator';
 import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
-import { getBanner } from '../ui/banners';
 import { getLogger } from '../services/logger';
 
 /**
@@ -368,9 +367,6 @@ export class ShipCommandV2 {
       }
 
       logger.info('Pre-flight checks passed', 'ship');
-
-      // Display ASCII art banner
-      console.log(getBanner('ship'));
 
       // Execute complete workflow
       logger.info('Starting workflow execution', 'ship');

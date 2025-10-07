@@ -5,7 +5,6 @@ import { GitOperations } from '../services/git-operations';
 import { ConfigurationManager } from '../services/configuration-manager';
 import { WorkflowSession } from '../models/workflow-session';
 import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
-import { getBanner } from '../ui/banners';
 
 /**
  * Pre-flight checks for abort command
@@ -159,9 +158,6 @@ export class AbortCommandV2 {
         this.output.errorMessage('\n❌ Pre-flight checks failed - aborting abort operation');
         throw new Error('Pre-flight checks failed');
       }
-
-      // Display ASCII art banner
-      console.log(getBanner('abort'));
 
       // Get session
       const session = await this.sessionRepo.getSessionByBranch(branchName);
