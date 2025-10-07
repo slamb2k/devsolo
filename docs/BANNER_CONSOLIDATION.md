@@ -93,12 +93,7 @@ Replace `console.log(AsciiArt.xxx())` with `console.log(getBanner('xxx'))`:
 
 ## Phase 6: Clean Up and Investigate
 
-### 6.1 Investigate resume vs swap
-- Compare implementations to determine if resume is redundant
-- If redundant: Remove from CLI
-- If unique: Add to MCP with hansolo_resume banner
-
-### 6.2 Deprecate AsciiArt Box-Style Banners
+### 6.1 Deprecate AsciiArt Box-Style Banners
 - Remove or mark as deprecated: launch(), ship(), abort(), swap(), sessions(), status(), cleanup(), hotfix()
 - Keep init(), validate(), config() if still needed elsewhere
 - Or delete entire class if no longer used
@@ -129,5 +124,4 @@ Replace `console.log(AsciiArt.xxx())` with `console.log(getBanner('xxx'))`:
 - `src/commands/hansolo-cleanup-v2.ts` (replace banner)
 
 **Investigate/Potentially Remove:**
-- CLI resume command (if redundant with swap)
 - `src/ui/ascii-art.ts` (deprecate or remove box-style methods)

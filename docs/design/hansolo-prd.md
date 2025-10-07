@@ -789,8 +789,6 @@ reviews:
 sessions:
   max_concurrent: 10
   timeout_days: 7
-  auto_resume: true
-  resume_on_merge: true    # Auto-resume when PR merges
 ```
 
 ### 10.2 Git Configuration (.gitconfig)

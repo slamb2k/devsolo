@@ -39,8 +39,6 @@ class LaunchCommand {
     force?: boolean;
     description?: string;
   }): Promise<void>
-
-  resume(branchName?: string): Promise<void>
 }
 ```
 
@@ -115,11 +113,6 @@ class AbortCommand {
     branchName?: string;
     force?: boolean;
     deleteBranch?: boolean;
-    yes?: boolean;
-  }): Promise<void>
-
-  abortAll(options?: {
-    force?: boolean;
     yes?: boolean;
   }): Promise<void>
 }
@@ -574,7 +567,6 @@ type TransitionTrigger =
 
 type AuditAction =
   | 'session_created'
-  | 'session_resumed'
   | 'state_transition'
   | 'git_operation'
   | 'api_call'

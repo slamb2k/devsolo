@@ -84,7 +84,7 @@ export class HotfixCommandAdapter implements CommandHandler {
   async execute(args: string[]): Promise<void> {
     const options: any = {};
     if (args[0]) {
-      options.branchName = args[0];
+      options.issue = args[0];
     }
     return this.command.execute(options);
   }
@@ -125,7 +125,7 @@ export class SwapCommandAdapter implements CommandHandler {
   async execute(args: string[]): Promise<void> {
     const options: any = {};
     if (args[0]) {
-      options.target = args[0];
+      options.branchName = args[0];
     }
     return this.command.execute(options);
   }
@@ -147,7 +147,7 @@ export class AbortCommandAdapter implements CommandHandler {
         options.force = true;
       }
       if (arg === '--clean') {
-        options.clean = true;
+        options.deleteBranch = true;
       }
     }
     await this.command.execute(options);
@@ -157,6 +157,7 @@ export class AbortCommandAdapter implements CommandHandler {
     return true;
   }
 }
+
 // Re-export commands that implement CommandHandler for registry
 export { StatusCommand as HansoloStatusCommand } from './hansolo-status';
 export { CleanupCommand } from './hansolo-cleanup';

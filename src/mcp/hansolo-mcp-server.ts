@@ -602,11 +602,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
           }
 
           const launchCommand = new LaunchCommand(this.basePath);
-          await launchCommand.execute({
-            ...params,
-            description,
-            branchName,
-          });
+          await launchCommand.execute({...params, description, branchName});
           return {
             content: [
               {
@@ -727,11 +723,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
           }
 
           const swapCommand = new SwapCommand(this.basePath);
-          await swapCommand.execute({
-            branchName,
-            force: params.force,
-            stash: params.stash,
-          });
+          await swapCommand.execute({branchName, force: params.force, stash: params.stash});
           return {
             content: [
               {
@@ -794,20 +786,9 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
           }
 
           const abortCommand = new AbortCommand(this.basePath);
-          const result = await abortCommand.execute({
-            ...params,
-            branchName,
-            yes: true, // Skip confirmations in MCP mode
-          });
+          const result = await abortCommand.execute({...params, branchName, yes: true});
 
-          // Include stashRef in output if present
-          let outputText = capturedOutput.join('\n');
-          if (!outputText) {
-            outputText = `Aborted workflow on branch: ${result.branchAborted}`;
-            if (result.stashRef) {
-              outputText += `\nWork stashed: ${result.stashRef}`;
-            }
-          }
+          const outputText = capturedOutput.join('\n') || `Aborted workflow on branch: ${result.branchAborted}${result.stashRef ? '\nWork stashed: ' + result.stashRef : ''}`;
 
           return {
             content: [
@@ -862,10 +843,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
           }
 
           const shipCommand = new ShipCommand(this.basePath);
-          await shipCommand.execute({
-            ...params,
-            message: commitMessage,
-          });
+          await shipCommand.execute({message: commitMessage, yes: params.yes, force: params.force});
 
           const outputText = capturedOutput.join('\n');
 

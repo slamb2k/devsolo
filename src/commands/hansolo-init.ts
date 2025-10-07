@@ -27,11 +27,7 @@ export class InitCommand {
     this.hooksStrategy = new HooksStrategyService();
   }
 
-  async execute(options: {
-    force?: boolean;
-    gitPlatform?: 'github' | 'gitlab';
-    createRemote?: boolean;
-  } = {}): Promise<void> {
+  async execute(options: {force?: boolean; gitPlatform?: 'github' | 'gitlab'; createRemote?: boolean;} = {}): Promise<void> {
     this.output.printLogo();
     this.output.header('Initializing han-solo');
 
