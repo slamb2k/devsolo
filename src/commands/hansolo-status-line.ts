@@ -5,7 +5,7 @@ import { ConsoleOutput } from '../ui/console-output';
 import { BoxFormatter } from '../ui/box-formatter';
 import chalk from 'chalk';
 
-export class HansoloStatusLineCommand implements CommandHandler {
+export class StatusLineCommand implements CommandHandler {
   name = 'hansolo:status-line';
   description = 'Manage terminal status line display';
 

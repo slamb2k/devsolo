@@ -1,18 +1,43 @@
 import { ConsoleOutput } from '../ui/console-output';
 import { SessionRepository } from '../services/session-repository';
-import { GitOperations } from '../services/git-operations';
 import { ConfigurationManager } from '../services/configuration-manager';
-import { WorkflowSession } from '../models/workflow-session';
+import { PreFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
+import chalk from 'chalk';
+
+/**
+ * Pre-flight checks for sessions command
+ */
+class SessionsPreFlightChecks extends PreFlightChecks {
+  constructor(
+    private configManager: ConfigurationManager
+  ) {
+    super();
+    this.setupChecks();
+  }
+
+  private setupChecks(): void {
+    this.addCheck(async () => this.checkHansoloInitialized());
+  }
+
+  private async checkHansoloInitialized(): Promise<CheckResult> {
+    const isInitialized = await this.configManager.isInitialized();
+
+    return {
+      passed: isInitialized,
+      name: 'Han-solo initialized',
+      level: isInitialized ? 'info' : 'error',
+      suggestions: !isInitialized ? ['Run "hansolo init" first'] : undefined,
+    };
+  }
+}
 
 export class SessionsCommand {
   private output = new ConsoleOutput();
   private sessionRepo: SessionRepository;
-  private gitOps: GitOperations;
   private configManager: ConfigurationManager;
 
   constructor(basePath: string = '.hansolo') {
     this.sessionRepo = new SessionRepository(basePath);
-    this.gitOps = new GitOperations();
     this.configManager = new ConfigurationManager(basePath);
   }
 
@@ -21,169 +46,89 @@ export class SessionsCommand {
     verbose?: boolean;
     cleanup?: boolean;
   } = {}): Promise<void> {
-    this.output.header('📋 Workflow Sessions');
-
     try {
-      // Check initialization
-      if (!await this.configManager.isInitialized()) {
-        this.output.errorMessage('han-solo is not initialized');
-        this.output.infoMessage('Run "hansolo init" first');
+      // Run pre-flight checks
+      const preFlightChecks = new SessionsPreFlightChecks(
+        this.configManager
+      );
+
+      const preFlightPassed = await preFlightChecks.runChecks({
+        command: 'sessions',
+        options,
+      });
+
+      if (!preFlightPassed) {
+        this.output.errorMessage('\n❌ Cannot list sessions');
         return;
       }
 
-      // Get current branch for comparison
-      const currentBranch = await this.gitOps.getCurrentBranch();
-
-      // Clean up expired sessions if requested
+      // Cleanup if requested
       if (options.cleanup) {
         const cleaned = await this.sessionRepo.cleanupExpiredSessions();
-        if (cleaned > 0) {
-          this.output.successMessage(`Cleaned up ${cleaned} expired session(s)`);
-        }
+        this.output.successMessage(`Cleaned up ${cleaned} expired session(s)`);
+        this.output.info('');
       }
 
       // Get sessions
-      const sessions = await this.sessionRepo.listSessions(options.all);
+      const sessions = await this.sessionRepo.listSessions({ all: options.all });
 
       if (sessions.length === 0) {
-        this.output.dim('No active sessions found');
-        this.output.infoMessage('Use "hansolo launch" to start a new workflow');
+        this.output.info('No active sessions found');
+        this.output.infoMessage('💡 Start a new session with /hansolo:launch');
         return;
       }
 
-      // Group sessions by status
-      const activeSessions = sessions.filter(s => s.isActive());
-      const completedSessions = sessions.filter(s => !s.isActive() && s.currentState === 'COMPLETE');
-      const abortedSessions = sessions.filter(s => s.currentState === 'ABORTED');
+      // Show sessions
+      this.output.subheader(`📋 Sessions (${sessions.length} total)`);
+      this.output.info('');
 
-      // Display summary
-      this.output.subheader('Summary');
-      const summaryData = [
-        ['Total Sessions', sessions.length.toString()],
-        ['Active', activeSessions.length.toString()],
-        ['Completed', completedSessions.length.toString()],
-        ['Aborted', abortedSessions.length.toString()],
-      ];
-      this.output.table(['Status', 'Count'], summaryData);
+      for (const session of sessions) {
+        const isActive = session.isActive();
+        const isExpired = session.isExpired();
 
-      // Display active sessions
-      if (activeSessions.length > 0) {
-        this.output.subheader('Active Sessions');
+        const statusIcon = isActive ? chalk.green('●') : chalk.gray('○');
+        const branchName = chalk.cyan(session.branchName);
+        const state = isActive ? chalk.yellow(session.currentState) : chalk.dim(session.currentState);
+
+        this.output.info(`${statusIcon} ${branchName} - ${state}`);
 
         if (options.verbose) {
-          // Detailed view
-          for (const session of activeSessions) {
-            await this.displayDetailedSession(session, currentBranch);
+          this.output.dim(`  ID: ${session.id}`);
+          this.output.dim(`  Type: ${session.workflowType}`);
+          this.output.dim(`  Updated: ${new Date(session.updatedAt).toLocaleString()}`);
+
+          if (isExpired) {
+            this.output.dim(`  ${chalk.red('⚠️  Expired')}`);
           }
-        } else {
-          // Table view
-          await this.displaySessionTable(activeSessions, currentBranch);
+
+          if (session.metadata.pr?.number) {
+            this.output.dim(`  PR: #${session.metadata.pr.number}`);
+          }
+
+          this.output.info('');
         }
       }
 
-      // Display completed sessions if --all flag is used
-      if (options.all && completedSessions.length > 0) {
-        this.output.subheader('Completed Sessions');
-        await this.displaySessionTable(completedSessions, currentBranch);
+      if (!options.verbose) {
+        this.output.info('');
+        this.output.dim('💡 Use --verbose for more details');
       }
 
-      // Display aborted sessions if --all flag is used
-      if (options.all && abortedSessions.length > 0) {
-        this.output.subheader('Aborted Sessions');
-        await this.displaySessionTable(abortedSessions, currentBranch);
-      }
+      // Show summary
+      const activeSessions = sessions.filter(s => s.isActive());
+      const completedSessions = sessions.filter(s => s.currentState === 'COMPLETE');
+      const abortedSessions = sessions.filter(s => s.currentState === 'ABORTED');
 
-      // Show tips
-      this.output.newline();
-      this.output.dim('Tips:');
-      this.output.dim('• Use "hansolo swap <branch>" to switch between sessions');
-      this.output.dim('• Use "hansolo resume" to continue current branch workflow');
-      this.output.dim('• Use "hansolo abort" to cancel an active session');
+      this.output.info('');
+      this.output.subheader('📊 Summary');
+      this.output.info(`  Active: ${chalk.green(activeSessions.length)}`);
+      this.output.info(`  Completed: ${chalk.blue(completedSessions.length)}`);
+      this.output.info(`  Aborted: ${chalk.red(abortedSessions.length)}`);
+      this.output.info('');
 
     } catch (error) {
-      this.output.errorMessage(`Failed to list sessions: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.output.errorMessage(`Sessions failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
-  }
-
-  private async displaySessionTable(sessions: WorkflowSession[], currentBranch: string): Promise<void> {
-    const headers = ['ID', 'Branch', 'Type', 'State', 'Age', 'Current'];
-
-    const rows = await Promise.all(sessions.map(async session => {
-      const isCurrent = session.branchName === currentBranch;
-
-      return [
-        session.id.substring(0, 8),
-        this.output.formatBranch(session.branchName),
-        session.workflowType,
-        this.output.formatState(session.currentState),
-        session.getAge(),
-        isCurrent ? '✅' : '',
-      ];
-    }));
-
-    this.output.table(headers, rows);
-  }
-
-  private async displayDetailedSession(session: WorkflowSession, currentBranch: string): Promise<void> {
-    const isCurrent = session.branchName === currentBranch;
-    const branchStatus = await this.getBranchStatus(session.branchName);
-
-    this.output.box(
-      `Session: ${session.id}\n` +
-      `Branch: ${session.branchName} ${isCurrent ? '(current)' : ''}\n` +
-      `Type: ${session.workflowType}\n` +
-      `State: ${session.currentState}\n` +
-      `Created: ${new Date(session.createdAt).toLocaleString()}\n` +
-      `Updated: ${new Date(session.updatedAt).toLocaleString()}\n` +
-      `Age: ${session.getAge()}\n` +
-      `Expires: ${session.getTimeRemaining()}\n` +
-      '\nGit Status:\n' +
-      `  Ahead: ${branchStatus.ahead}\n` +
-      `  Behind: ${branchStatus.behind}\n` +
-      `  Clean: ${branchStatus.isClean ? '✅' : '❌'}\n` +
-      `  Remote: ${branchStatus.hasRemote ? '✅' : '❌'}\n` +
-      `\nState History: ${session.stateHistory.length} transition(s)\n` +
-      session.stateHistory.map(t =>
-        `  • ${t.from} → ${t.to} (${new Date(t.timestamp).toLocaleTimeString()})`
-      ).join('\n'),
-      session.branchName
-    );
-  }
-
-  private async getBranchStatus(branchName: string): Promise<{
-    ahead: number;
-    behind: number;
-    isClean: boolean;
-    hasRemote: boolean;
-  }> {
-    try {
-      return await this.gitOps.getBranchStatus(branchName);
-    } catch {
-      // Branch might not exist anymore
-      return {
-        ahead: 0,
-        behind: 0,
-        isClean: true,
-        hasRemote: false,
-      };
-    }
-  }
-
-  async getActiveCount(): Promise<number> {
-    const sessions = await this.sessionRepo.listSessions(false);
-    return sessions.filter(s => s.isActive()).length;
-  }
-
-  async getCurrentSession(): Promise<WorkflowSession | null> {
-    const currentBranch = await this.gitOps.getCurrentBranch();
-    return await this.sessionRepo.getSessionByBranch(currentBranch);
-  }
-
-  async listBranchesWithSessions(): Promise<string[]> {
-    const sessions = await this.sessionRepo.listSessions(false);
-    return sessions
-      .filter(s => s.isActive())
-      .map(s => s.branchName);
   }
 }

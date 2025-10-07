@@ -8,7 +8,7 @@ import { TableFormatter } from '../ui/table-formatter';
 import { BoxFormatter } from '../ui/box-formatter';
 import chalk from 'chalk';
 
-export class HansoloValidateCommand implements CommandHandler {
+export class ValidateCommand implements CommandHandler {
   name = 'hansolo:validate';
   description = 'Validate environment and configuration';
 

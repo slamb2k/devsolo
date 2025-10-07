@@ -4,7 +4,113 @@ import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
 import { ConfigurationManager } from '../services/configuration-manager';
 import { WorkflowSession } from '../models/workflow-session';
-import readline from 'readline';
+import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
+
+/**
+ * Pre-flight checks for abort command
+ */
+class AbortPreFlightChecks extends PreFlightChecks {
+  constructor(
+    private gitOps: GitOperations,
+    private sessionRepo: SessionRepository,
+    private branchName: string
+  ) {
+    super();
+    this.setupChecks();
+  }
+
+  private setupChecks(): void {
+    this.addCheck(async () => this.checkSessionExists());
+    this.addCheck(async () => this.checkGitRepository());
+  }
+
+  private async checkSessionExists(): Promise<CheckResult> {
+    const session = await this.sessionRepo.getSessionByBranch(this.branchName);
+
+    return {
+      passed: !!session,
+      name: 'Session exists',
+      message: session ? `Session ID: ${session.id.substring(0, 8)}...` : 'No session found',
+      level: session ? 'info' : 'error',
+      suggestions: !session ? ['Check branch name or use /hansolo:sessions to list active sessions'] : undefined,
+    };
+  }
+
+  private async checkGitRepository(): Promise<CheckResult> {
+    const isGit = await this.gitOps.isInitialized();
+
+    return {
+      passed: isGit,
+      name: 'Git repository',
+      level: isGit ? 'info' : 'error',
+    };
+  }
+}
+
+/**
+ * Post-flight checks for abort command
+ */
+class AbortPostFlightChecks extends PostFlightChecks {
+  constructor(
+    private session: WorkflowSession,
+    private gitOps: GitOperations,
+    private branchDeleted: boolean
+  ) {
+    super();
+    this.setupVerifications();
+  }
+
+  private setupVerifications(): void {
+    this.addVerification(async () => this.verifySessionAborted());
+    this.addVerification(async () => this.verifyOnMainBranch());
+    if (this.branchDeleted) {
+      this.addVerification(async () => this.verifyBranchDeleted());
+    }
+    this.addVerification(async () => this.verifyNoUncommittedChanges());
+  }
+
+  private async verifySessionAborted(): Promise<CheckResult> {
+    return {
+      passed: this.session.currentState === 'ABORTED',
+      name: 'Session marked as aborted',
+      message: this.session.currentState,
+      level: 'info',
+    };
+  }
+
+  private async verifyOnMainBranch(): Promise<CheckResult> {
+    const currentBranch = await this.gitOps.getCurrentBranch();
+    const isMain = currentBranch === 'main' || currentBranch === 'master';
+
+    return {
+      passed: isMain,
+      name: 'On main branch',
+      message: currentBranch,
+      level: isMain ? 'info' : 'warning',
+    };
+  }
+
+  private async verifyBranchDeleted(): Promise<CheckResult> {
+    const exists = await this.gitOps.branchExists(this.session.branchName);
+
+    return {
+      passed: !exists,
+      name: 'Feature branch deleted',
+      message: exists ? 'Branch still exists' : this.session.branchName,
+      level: exists ? 'warning' : 'info',
+    };
+  }
+
+  private async verifyNoUncommittedChanges(): Promise<CheckResult> {
+    const hasChanges = await this.gitOps.hasUncommittedChanges();
+
+    return {
+      passed: !hasChanges,
+      name: 'No uncommitted changes',
+      level: hasChanges ? 'warning' : 'info',
+    };
+  }
+}
 
 export class AbortCommand {
   private output = new ConsoleOutput();
@@ -24,86 +130,129 @@ export class AbortCommand {
     force?: boolean;
     deleteBranch?: boolean;
     yes?: boolean;
-  } = {}): Promise<void> {
-    this.output.header('❌ Aborting Workflow');
-
+  } = {}): Promise<{ stashRef?: string; branchAborted: string }> {
     try {
       // Check initialization
       if (!await this.configManager.isInitialized()) {
         this.output.errorMessage('han-solo is not initialized');
         this.output.infoMessage('Run "hansolo init" first');
-        return;
+        throw new Error('han-solo is not initialized');
       }
 
-      // Find session to abort
-      let session: WorkflowSession | null = null;
-      let branchName: string;
+      // Determine branch name
+      const branchName = options.branchName || await this.gitOps.getCurrentBranch();
 
-      if (options.branchName) {
-        branchName = options.branchName;
-        session = await this.sessionRepo.getSessionByBranch(branchName);
-      } else {
-        branchName = await this.gitOps.getCurrentBranch();
-        session = await this.sessionRepo.getSessionByBranch(branchName);
+      // Run pre-flight checks
+      const preFlightChecks = new AbortPreFlightChecks(
+        this.gitOps,
+        this.sessionRepo,
+        branchName
+      );
+
+      const preFlightPassed = await preFlightChecks.runChecks({
+        command: 'abort',
+        options,
+      });
+
+      if (!preFlightPassed) {
+        this.output.errorMessage('\n❌ Pre-flight checks failed - aborting abort operation');
+        throw new Error('Pre-flight checks failed');
       }
 
+      // Get session
+      const session = await this.sessionRepo.getSessionByBranch(branchName);
       if (!session) {
         this.output.errorMessage(`No session found for branch '${branchName}'`);
-        return;
+        throw new Error(`No session found for branch '${branchName}'`);
       }
 
       // Check if session can be aborted
       if (!session.isActive() && !options.force) {
         this.output.errorMessage(`Session is not active (state: ${session.currentState})`);
         this.output.infoMessage('Use --force to abort anyway');
-        return;
+        throw new Error(`Session is not active (state: ${session.currentState})`);
       }
 
       // Check for uncommitted changes
       const currentBranch = await this.gitOps.getCurrentBranch();
       const isCurrentBranch = currentBranch === branchName;
+      let stashRef: string | undefined;
 
       if (isCurrentBranch) {
         const hasChanges = await this.gitOps.hasUncommittedChanges();
-        if (hasChanges && !options.force) {
-          this.output.warningMessage('Uncommitted changes detected');
-          const shouldStash = await this.confirmAction('Stash changes before aborting?', !options.yes);
+        if (hasChanges) {
+          if (options.force) {
+            // Force flag explicitly discards - user knows what they're doing
+            this.output.warningMessage('⚠️  Discarding uncommitted changes (--force)');
+          } else if (options.yes) {
+            // Non-interactive: auto-stash to preserve work
+            this.output.infoMessage('📦 Auto-stashing uncommitted changes...');
+            const stashResult = await this.stashChanges(branchName);
+            stashRef = stashResult.stashRef;
+          } else {
+            // Interactive: prompt user for choice
+            this.output.warningMessage('⚠️  Uncommitted changes detected');
+            const shouldStash = await this.output.confirm('Stash changes before aborting?');
 
-          if (shouldStash) {
-            await this.stashChanges(branchName);
-          } else if (!await this.confirmAction('Discard uncommitted changes?', !options.yes)) {
-            this.output.infoMessage('Abort cancelled');
-            return;
+            if (shouldStash) {
+              const stashResult = await this.stashChanges(branchName);
+              stashRef = stashResult.stashRef;
+            } else if (!await this.output.confirm('Discard uncommitted changes?')) {
+              this.output.infoMessage('Abort cancelled');
+              return { branchAborted: branchName };
+            }
           }
         }
       }
 
       // Confirm abort action
       if (!options.yes) {
-        this.output.warningMessage('This will abort the workflow and mark the session as cancelled');
+        this.output.warningMessage('\n⚠️  This will abort the workflow and mark the session as cancelled');
 
         if (options.deleteBranch) {
-          this.output.warningMessage(`This will also DELETE the branch '${branchName}'`);
+          this.output.warningMessage(`⚠️  This will also DELETE the branch '${branchName}'`);
         }
 
-        const confirmed = await this.confirmAction(
-          `Are you sure you want to abort the workflow on '${branchName}'?`,
-          true
+        const confirmed = await this.output.confirm(
+          `\nAre you sure you want to abort the workflow on '${branchName}'?`
         );
 
         if (!confirmed) {
           this.output.infoMessage('Abort cancelled');
-          return;
+          return { branchAborted: branchName };
         }
       }
 
       // Perform abort
+      let branchDeleted = false;
       await this.performAbort(session, branchName, isCurrentBranch, options.deleteBranch);
 
-      this.output.successMessage('Workflow aborted successfully');
+      if (options.deleteBranch) {
+        branchDeleted = true;
+      }
 
-      // Show summary
-      this.showAbortSummary(session, options.deleteBranch);
+      // Run post-flight verifications
+      const postFlightChecks = new AbortPostFlightChecks(
+        session,
+        this.gitOps,
+        branchDeleted
+      );
+
+      this.output.info('');
+      await postFlightChecks.runVerifications({
+        command: 'abort',
+        session,
+        options,
+      });
+
+      this.output.info('');
+      this.output.successMessage('✅ Workflow aborted successfully');
+      this.showAbortSummary(session, options.deleteBranch, stashRef);
+
+      return {
+        stashRef,
+        branchAborted: branchName,
+      };
 
     } catch (error) {
       this.output.errorMessage(`Abort failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -111,29 +260,10 @@ export class AbortCommand {
     }
   }
 
-  private async confirmAction(message: string, ask: boolean = true): Promise<boolean> {
-    if (!ask) {
-      return true;
-    }
-
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    return new Promise(resolve => {
-      rl.question(`${message} (Y/n): `, answer => {
-        rl.close();
-        const trimmed = answer.trim().toLowerCase();
-        // Default to yes if no answer provided, or if answer starts with 'y'
-        resolve(trimmed === '' || trimmed === 'y' || trimmed === 'yes');
-      });
-    });
-  }
-
-  private async stashChanges(branchName: string): Promise<void> {
+  private async stashChanges(branchName: string): Promise<{ stashRef: string }> {
     const stashResult = await this.gitOps.stashChanges(`han-solo abort stash for ${branchName}`);
     this.output.successMessage(`Changes stashed: ${stashResult.stashRef}`);
+    return stashResult;
   }
 
   private async performAbort(
@@ -156,7 +286,7 @@ export class AbortCommand {
       },
     });
 
-    // Switch to main if on the branch being aborted
+    // Switch to main if needed
     if (isCurrentBranch) {
       steps.push({
         name: 'Switching to main branch',
@@ -169,93 +299,31 @@ export class AbortCommand {
     // Delete branch if requested
     if (deleteBranch) {
       steps.push({
-        name: `Deleting branch '${branchName}'`,
+        name: `Deleting branch ${branchName}`,
         action: async () => {
-          try {
-            await this.gitOps.deleteBranch(branchName, true);
-            this.output.dim(`Branch '${branchName}' deleted`);
-          } catch (error) {
-            this.output.warningMessage(
-              `Could not delete branch: ${error instanceof Error ? error.message : 'Unknown error'}`
-            );
-          }
+          await this.gitOps.deleteBranch(branchName, true);
         },
       });
     }
 
-    // Release session lock
-    steps.push({
-      name: 'Releasing session lock',
-      action: async () => {
-        await this.sessionRepo.releaseLock(session.id);
-      },
-    });
-
+    this.output.info('');
     await this.progress.runSteps(steps);
   }
 
-  private showAbortSummary(session: WorkflowSession, branchDeleted?: boolean): void {
-    this.output.subheader('Abort Summary');
-
-    const summaryData = [
-      ['Session ID', session.id.substring(0, 8)],
-      ['Branch', session.branchName],
-      ['Previous State', session.stateHistory[session.stateHistory.length - 1]?.from || 'N/A'],
-      ['Final State', 'ABORTED'],
-      ['Session Age', session.getAge()],
-      ['Branch Deleted', branchDeleted ? '✅' : '❌'],
-    ];
-
-    this.output.table(['Property', 'Value'], summaryData);
-
-    this.output.newline();
-    this.output.dim('Tips:');
-    this.output.dim('• Use "hansolo sessions --all" to see aborted sessions');
-    this.output.dim('• Use "hansolo launch" to start a new workflow');
-
-    if (!branchDeleted) {
-      this.output.dim(`• Branch '${session.branchName}' still exists locally`);
-      this.output.dim(`• Use "git branch -D ${session.branchName}" to delete it`);
+  private showAbortSummary(session: WorkflowSession, branchDeleted?: boolean, stashRef?: string): void {
+    this.output.info('');
+    this.output.subheader('📊 Abort Summary');
+    this.output.dim(`  Session ID: ${session.id}`);
+    this.output.dim(`  Branch: ${session.branchName}`);
+    this.output.dim(`  State: ${session.currentState}`);
+    if (branchDeleted) {
+      this.output.dim('  Branch deleted: Yes');
     }
-  }
-
-  async abortAll(options: { force?: boolean; yes?: boolean } = {}): Promise<void> {
-    this.output.header('❌ Aborting All Workflows');
-
-    const sessions = await this.sessionRepo.listSessions(false);
-    const activeSessions = sessions.filter(s => s.isActive());
-
-    if (activeSessions.length === 0) {
-      this.output.dim('No active sessions to abort');
-      return;
+    if (stashRef) {
+      this.output.dim(`  Work stashed: ${stashRef}`);
+      this.output.infoMessage('💡 Pass stashRef to /hansolo:launch to restore your work');
+    } else {
+      this.output.infoMessage('💡 You can start a new feature with /hansolo:launch');
     }
-
-    this.output.warningMessage(`This will abort ${activeSessions.length} active workflow(s)`);
-
-    if (!options.yes) {
-      const confirmed = await this.confirmAction('Are you sure you want to abort ALL workflows?', true);
-      if (!confirmed) {
-        this.output.infoMessage('Abort cancelled');
-        return;
-      }
-    }
-
-    let aborted = 0;
-    for (const session of activeSessions) {
-      try {
-        await this.execute({
-          branchName: session.branchName,
-          force: options.force,
-          yes: true,
-        });
-        aborted++;
-      } catch (error) {
-        this.output.errorMessage(
-          `Failed to abort '${session.branchName}': ${error instanceof Error ? error.message : 'Unknown error'}`
-        );
-      }
-    }
-
-    this.output.successMessage(`Aborted ${aborted} workflow(s)`);
   }
 }
