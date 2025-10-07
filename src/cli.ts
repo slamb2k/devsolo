@@ -17,6 +17,7 @@ import { runInteractiveMode } from './commands/interactive';
 import { PerfCommand } from './commands/hansolo-perf';
 import { WelcomeBanner } from './cli/components/WelcomeBanner';
 import { ThemeManager } from './cli/components/ThemeManager';
+import { getBanner } from './ui/banners';
 
 // Helper to show banner
 function showBanner(): void {
@@ -194,6 +195,7 @@ function runDemo(): void {
 }
 
 async function runInit(): Promise<void> {
+  console.log(getBanner('init'));
   const initCommand = new InitCommand();
   await initCommand.execute();
 }
@@ -205,11 +207,13 @@ async function runConfigure(): Promise<void> {
 }
 
 async function runStatus(): Promise<void> {
+  console.log(getBanner('status'));
   const initCommand = new InitCommand();
   await initCommand.showStatus();
 }
 
 async function runLaunch(args: string[]): Promise<void> {
+  console.log(getBanner('launch'));
   const launchCommand = new LaunchCommand();
 
   // Parse arguments
@@ -228,6 +232,7 @@ async function runLaunch(args: string[]): Promise<void> {
 }
 
 async function runSessions(args: string[]): Promise<void> {
+  console.log(getBanner('sessions'));
   const sessionsCommand = new SessionsCommand();
 
   // Parse arguments
@@ -246,12 +251,14 @@ async function runSessions(args: string[]): Promise<void> {
 }
 
 async function runResume(args: string[]): Promise<void> {
+  console.log(getBanner('launch'));
   const launchCommand = new LaunchCommand();
   const branchName = args[0];
   await launchCommand.resume(branchName);
 }
 
 async function runSwap(args: string[]): Promise<void> {
+  console.log(getBanner('swap'));
   const swapCommand = new SwapCommand();
   const branchName = args[0];
 
@@ -269,6 +276,7 @@ async function runSwap(args: string[]): Promise<void> {
 }
 
 async function runAbort(args: string[]): Promise<void> {
+  console.log(getBanner('abort'));
   const abortCommand = new AbortCommand();
 
   // Parse options
@@ -298,6 +306,7 @@ async function runAbort(args: string[]): Promise<void> {
 }
 
 async function runShip(args: string[]): Promise<void> {
+  console.log(getBanner('ship'));
   const shipCommand = new ShipCommand();
 
   // Parse options
@@ -322,6 +331,7 @@ async function runShip(args: string[]): Promise<void> {
 }
 
 async function runHotfix(args: string[]): Promise<void> {
+  console.log(getBanner('hotfix'));
   const hotfixCommand = new HotfixCommand();
 
   // Check for subcommands

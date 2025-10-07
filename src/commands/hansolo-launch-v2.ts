@@ -6,7 +6,7 @@ import { GitOperations } from '../services/git-operations';
 import { WorkflowSession } from '../models/workflow-session';
 import { BranchValidator } from '../services/validation/branch-validator';
 import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
-import { AsciiArt } from '../ui/ascii-art';
+import { getBanner } from '../ui/banners';
 import { BranchNamingService } from '../services/branch-naming';
 import { GitHubIntegration } from '../services/github-integration';
 import { StashManager } from '../services/stash-manager';
@@ -470,7 +470,7 @@ export class LaunchCommandV2 {
       }
 
       // Display ASCII art banner
-      console.log(AsciiArt.launch());
+      console.log(getBanner('launch'));
 
       // Execute launch workflow
       let session: WorkflowSession | undefined;

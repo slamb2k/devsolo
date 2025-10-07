@@ -3,7 +3,7 @@ import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
 import { ConfigurationManager } from '../services/configuration-manager';
 import { PreFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
-import { AsciiArt } from '../ui/ascii-art';
+import { getBanner } from '../ui/banners';
 import chalk from 'chalk';
 
 /**
@@ -78,7 +78,7 @@ export class StatusCommandV2 {
       }
 
       // Display ASCII art banner
-      console.log(AsciiArt.status());
+      console.log(getBanner('status'));
 
       // Get current branch and session
       const currentBranch = await this.gitOps.getCurrentBranch();
