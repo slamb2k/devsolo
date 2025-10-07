@@ -5,6 +5,7 @@ on:
     secrets:
       NPM_TOKEN:
         required: true
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
