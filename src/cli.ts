@@ -4,14 +4,11 @@ import { WorkflowSession } from './models/workflow-session';
 import { Configuration } from './models/configuration';
 import { LaunchWorkflowStateMachine } from './state-machines/launch-workflow';
 import { InitCommand } from './commands/hansolo-init';
-// Import adapter commands for v2 compatibility
-import {
-  LaunchCommand,
-  SessionsCommand,
-  SwapCommand,
-  AbortCommand,
-  ShipCommand,
-} from './commands/adapters';
+import { LaunchCommand } from './commands/hansolo-launch';
+import { SessionsCommand } from './commands/hansolo-sessions';
+import { SwapCommand } from './commands/hansolo-swap';
+import { AbortCommand } from './commands/hansolo-abort';
+import { ShipCommand } from './commands/hansolo-ship';
 import { HotfixCommand } from './commands/hansolo-hotfix';
 import { runInteractiveMode } from './commands/interactive';
 import { PerfCommand } from './commands/hansolo-perf';
@@ -79,12 +76,6 @@ export async function main(): Promise<void> {
   // Sessions command
   if (command === 'sessions') {
     await runSessions(args.slice(1));
-    return;
-  }
-
-  // Resume command
-  if (command === 'resume') {
-    await runResume(args.slice(1));
     return;
   }
 
@@ -250,20 +241,13 @@ async function runSessions(args: string[]): Promise<void> {
   await sessionsCommand.execute(options);
 }
 
-async function runResume(args: string[]): Promise<void> {
-  console.log(getBanner('launch'));
-  const launchCommand = new LaunchCommand();
-  const branchName = args[0];
-  await launchCommand.resume(branchName);
-}
-
 async function runSwap(args: string[]): Promise<void> {
   console.log(getBanner('swap'));
   const swapCommand = new SwapCommand();
   const branchName = args[0];
 
   // Parse options
-  const options: any = {};
+  const options: any = { branchName };
   for (let i = 1; i < args.length; i++) {
     if (args[i] === '--force' || args[i] === '-f') {
       options.force = true;
@@ -272,7 +256,7 @@ async function runSwap(args: string[]): Promise<void> {
     }
   }
 
-  await swapCommand.execute(branchName, options);
+  await swapCommand.execute(options);
 }
 
 async function runAbort(args: string[]): Promise<void> {
@@ -281,6 +265,7 @@ async function runAbort(args: string[]): Promise<void> {
 
   // Parse options
   const options: any = {};
+  let abortAll = false;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--force' || args[i] === '-f') {
       options.force = true;
@@ -289,17 +274,67 @@ async function runAbort(args: string[]): Promise<void> {
     } else if (args[i] === '--yes' || args[i] === '-y') {
       options.yes = true;
     } else if (args[i] === '--all') {
-      // Abort all workflows
-      const force = options.force !== undefined ? options.force : false;
-      const yes = options.yes !== undefined ? options.yes : false;
-      await abortCommand.abortAll({ force, yes });
-      return;
+      abortAll = true;
     } else {
       const arg = args[i];
       if (arg && !arg.startsWith('--')) {
         options.branchName = arg;
       }
     }
+  }
+
+  // Handle abort all - inline logic
+  if (abortAll) {
+    const SessionRepository = (await import('./services/session-repository')).SessionRepository;
+    const sessionRepo = new SessionRepository();
+    const sessions = await sessionRepo.listSessions(false);
+    const activeSessions = sessions.filter(s => s.isActive());
+
+    if (activeSessions.length === 0) {
+      console.log('No active sessions to abort');
+      return;
+    }
+
+    console.log(`⚠️  This will abort ${activeSessions.length} active workflow(s)`);
+
+    if (!options.yes) {
+      const readline = await import('readline');
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+
+      const confirmed = await new Promise<boolean>(resolve => {
+        rl.question('Are you sure you want to abort ALL workflows? (y/n): ', answer => {
+          rl.close();
+          resolve(answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes');
+        });
+      });
+
+      if (!confirmed) {
+        console.log('Abort cancelled');
+        return;
+      }
+    }
+
+    let aborted = 0;
+    for (const session of activeSessions) {
+      try {
+        await abortCommand.execute({
+          branchName: session.branchName,
+          force: options.force,
+          yes: true,
+        });
+        aborted++;
+      } catch (error) {
+        console.error(
+          `Failed to abort '${session.branchName}': ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+      }
+    }
+
+    console.log(`✅ Aborted ${aborted} workflow(s)`);
+    return;
   }
 
   await abortCommand.execute(options);

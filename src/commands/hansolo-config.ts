@@ -9,7 +9,7 @@ import chalk from 'chalk';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-export class HansoloConfigCommand implements CommandHandler {
+export class ConfigCommand implements CommandHandler {
   name = 'hansolo:config';
   description = 'Manage han-solo configuration';
 

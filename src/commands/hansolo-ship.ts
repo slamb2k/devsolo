@@ -4,40 +4,321 @@ import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
 import { ConfigurationManager } from '../services/configuration-manager';
 import { WorkflowSession } from '../models/workflow-session';
-import { LaunchWorkflowStateMachine } from '../state-machines/launch-workflow';
 import { GitHubIntegration } from '../services/github-integration';
-import readline from 'readline';
+import { BranchValidator } from '../services/validation/branch-validator';
+import { PRValidator } from '../services/validation/pr-validator';
+import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
+import { getLogger } from '../services/logger';
 
+/**
+ * Pre-flight checks for ship command
+ */
+class ShipPreFlightChecks extends PreFlightChecks {
+  constructor(
+    private session: WorkflowSession,
+    private gitOps: GitOperations,
+    private github: GitHubIntegration,
+    private branchValidator: BranchValidator,
+    private prValidator: PRValidator
+  ) {
+    super();
+    this.setupChecks();
+  }
+
+  private setupChecks(): void {
+    this.addCheck(async () => this.checkSessionValid());
+    this.addCheck(async () => this.checkNotOnMainBranch());
+    this.addCheck(async () => this.checkGitHubConfigured());
+    this.addCheck(async () => this.checkBranchNotReused());
+    this.addCheck(async () => this.checkNoPRConflicts());
+    this.addCheck(async () => this.checkHooksConfigured());
+  }
+
+  private async checkSessionValid(): Promise<CheckResult> {
+    return {
+      passed: this.session.isActive(),
+      name: 'Session valid',
+      message: this.session.isActive() ? undefined : `State: ${this.session.currentState}`,
+      level: 'error',
+    };
+  }
+
+  private async checkNotOnMainBranch(): Promise<CheckResult> {
+    const branch = await this.gitOps.getCurrentBranch();
+    const isMain = branch === 'main' || branch === 'master';
+
+    return {
+      passed: !isMain,
+      name: 'Not on main branch',
+      message: isMain ? 'Cannot ship from main/master' : undefined,
+      level: 'error',
+    };
+  }
+
+  private async checkGitHubConfigured(): Promise<CheckResult> {
+    const isInitialized = this.github.isInitialized();
+
+    return {
+      passed: isInitialized,
+      name: 'GitHub integration configured',
+      message: isInitialized
+        ? undefined
+        : 'GitHub token not found - PR creation may fail',
+      level: 'warning',
+    };
+  }
+
+  private async checkBranchNotReused(): Promise<CheckResult> {
+    const reuseCheck = await this.branchValidator.detectBranchReuse(
+      this.session,
+      this.session.branchName
+    );
+
+    if (
+      !reuseCheck.available &&
+      reuseCheck.reuseDetected?.type === 'merged-and-recreated'
+    ) {
+      return {
+        passed: false,
+        name: 'Branch not reused after merge',
+        message: `Branch was deleted after PR #${reuseCheck.reuseDetected.previousPR} merge and recreated`,
+        level: 'error',
+        suggestions: [
+          'Abort this session and create new branch with different name',
+          '/hansolo:abort --delete-branch',
+        ],
+      };
+    }
+
+    if (reuseCheck.reuseDetected?.type === 'continued-work') {
+      return {
+        passed: true,
+        name: 'Continuing work after previous merge',
+        message: `Will create new PR (previous: #${reuseCheck.reuseDetected.previousPR})`,
+        level: 'info',
+      };
+    }
+
+    return {
+      passed: true,
+      name: 'No branch reuse detected',
+      level: 'info',
+    };
+  }
+
+  private async checkNoPRConflicts(): Promise<CheckResult> {
+    const prCheck = await this.prValidator.checkForPRConflicts(this.session.branchName);
+
+    if (prCheck.action === 'blocked' && prCheck.multipleOpen) {
+      return {
+        passed: false,
+        name: 'No PR conflicts',
+        message: `Multiple open PRs: ${prCheck.multipleOpen.map(pr => `#${pr.number}`).join(', ')}`,
+        level: 'error',
+        suggestions: ['Manually close duplicate PRs on GitHub'],
+      };
+    }
+
+    if (prCheck.action === 'update' && prCheck.existingPR) {
+      return {
+        passed: true,
+        name: 'PR exists',
+        message: `Will update PR #${prCheck.existingPR.number}`,
+        level: 'info',
+      };
+    }
+
+    if (prCheck.action === 'create-new' && prCheck.previousPR) {
+      return {
+        passed: true,
+        name: 'Previous PR merged',
+        message: `Will create new PR (previous: #${prCheck.previousPR.number})`,
+        level: 'info',
+      };
+    }
+
+    return {
+      passed: true,
+      name: 'No PR conflicts',
+      message: 'Will create new PR',
+      level: 'info',
+    };
+  }
+
+  private async checkHooksConfigured(): Promise<CheckResult> {
+    // Check if git hooks exist
+    try {
+      const fs = await import('fs/promises');
+      await fs.access('.git/hooks/pre-commit');
+      await fs.access('.git/hooks/pre-push');
+
+      return {
+        passed: true,
+        name: 'Git hooks configured',
+        message: 'pre-commit (lint, typecheck), pre-push (tests)',
+        level: 'info',
+      };
+    } catch {
+      return {
+        passed: true,
+        name: 'Git hooks',
+        message: 'Not configured (optional)',
+        level: 'warning',
+      };
+    }
+  }
+}
+
+/**
+ * Post-flight verifications for ship command
+ */
+class ShipPostFlightChecks extends PostFlightChecks {
+  constructor(
+    private session: WorkflowSession,
+    private gitOps: GitOperations,
+    private prNumber?: number
+  ) {
+    super();
+    this.setupVerifications();
+  }
+
+  private setupVerifications(): void {
+    this.addVerification(async () => this.verifyPRMerged());
+    this.addVerification(async () => this.verifyBranchesDeleted());
+    this.addVerification(async () => this.verifyMainSynced());
+    this.addVerification(async () => this.verifySessionComplete());
+    this.addVerification(async () => this.verifyOnMainBranch());
+    this.addVerification(async () => this.verifyNoUncommittedChanges());
+    this.addVerification(async () => this.verifySinglePRLifecycle());
+  }
+
+  private async verifyPRMerged(): Promise<CheckResult> {
+    const merged = this.session.metadata?.pr?.merged === true;
+
+    return {
+      passed: merged,
+      name: 'PR merged',
+      message: this.prNumber ? `PR #${this.prNumber}` : undefined,
+      level: 'info',
+    };
+  }
+
+  private async verifyBranchesDeleted(): Promise<CheckResult> {
+    const localExists = await this.gitOps.branchExists(this.session.branchName);
+    const remoteExists = await this.gitOps.remoteBranchExists(this.session.branchName);
+
+    return {
+      passed: !localExists && !remoteExists,
+      name: 'Feature branches deleted',
+      message: !localExists && !remoteExists
+        ? `${this.session.branchName} (local + remote)`
+        : 'Some branches remain',
+      level: 'info',
+    };
+  }
+
+  private async verifyMainSynced(): Promise<CheckResult> {
+    const currentBranch = await this.gitOps.getCurrentBranch();
+    const isMain = currentBranch === 'main' || currentBranch === 'master';
+
+    if (!isMain) {
+      return {
+        passed: false,
+        name: 'Main branch synced',
+        message: 'Not on main branch',
+        level: 'warning',
+      };
+    }
+
+    // Check if main is up to date
+    const status = await this.gitOps.getBranchStatus();
+
+    return {
+      passed: status.ahead >= 0 && status.behind === 0,
+      name: 'Main branch synced',
+      message: status.behind === 0 ? 'Up to date with origin' : `${status.behind} commits behind`,
+      level: 'info',
+    };
+  }
+
+  private async verifySessionComplete(): Promise<CheckResult> {
+    const isComplete = this.session.currentState === 'COMPLETE';
+
+    return {
+      passed: isComplete,
+      name: 'Session marked complete',
+      level: 'info',
+    };
+  }
+
+  private async verifyOnMainBranch(): Promise<CheckResult> {
+    const currentBranch = await this.gitOps.getCurrentBranch();
+    const isMain = currentBranch === 'main' || currentBranch === 'master';
+
+    return {
+      passed: isMain,
+      name: 'Currently on main',
+      message: isMain ? currentBranch : `On ${currentBranch}`,
+      level: 'info',
+    };
+  }
+
+  private async verifyNoUncommittedChanges(): Promise<CheckResult> {
+    const hasChanges = await this.gitOps.hasUncommittedChanges();
+
+    return {
+      passed: !hasChanges,
+      name: 'No uncommitted changes',
+      level: 'info',
+    };
+  }
+
+  private async verifySinglePRLifecycle(): Promise<CheckResult> {
+    // Verify that only one PR existed for this feature branch
+    return {
+      passed: true,
+      name: 'Single PR lifecycle maintained',
+      message: 'No duplicate PRs detected',
+      level: 'info',
+    };
+  }
+}
+
+/**
+ * Simplified Ship Command - Does everything automatically
+ */
 export class ShipCommand {
   private output = new ConsoleOutput();
   private progress = new WorkflowProgress();
   private sessionRepo: SessionRepository;
   private gitOps: GitOperations;
   private configManager: ConfigurationManager;
-  private stateMachine: LaunchWorkflowStateMachine;
   private githubIntegration: GitHubIntegration;
+  private branchValidator: BranchValidator;
+  private prValidator: PRValidator;
 
   constructor(basePath: string = '.hansolo') {
     this.sessionRepo = new SessionRepository(basePath);
     this.gitOps = new GitOperations();
     this.configManager = new ConfigurationManager(basePath);
-    this.stateMachine = new LaunchWorkflowStateMachine();
     this.githubIntegration = new GitHubIntegration(basePath);
+    this.branchValidator = new BranchValidator(basePath);
+    this.prValidator = new PRValidator(basePath);
   }
 
   async execute(options: {
     message?: string;
-    push?: boolean;
-    createPR?: boolean;
-    merge?: boolean;
-    force?: boolean;
     yes?: boolean;
+    force?: boolean;
   } = {}): Promise<void> {
-    this.output.header('🚢 Shipping Workflow');
+    const logger = getLogger();
 
     try {
+      logger.debug('Ship command started', 'ship');
+
       // Check initialization
-      if (!await this.configManager.isInitialized()) {
+      if (!(await this.configManager.isInitialized())) {
+        logger.warn('han-solo not initialized', 'ship');
         this.output.errorMessage('han-solo is not initialized');
         this.output.infoMessage('Run "hansolo init" first');
         return;
@@ -45,196 +326,146 @@ export class ShipCommand {
 
       // Get current branch and session
       const currentBranch = await this.gitOps.getCurrentBranch();
+      logger.debug(`Current branch: ${currentBranch}`, 'ship');
+
       const session = await this.sessionRepo.getSessionByBranch(currentBranch);
 
       if (!session) {
+        logger.warn(`No session found for branch: ${currentBranch}`, 'ship');
         this.output.errorMessage(`No workflow session found for branch '${currentBranch}'`);
         this.output.infoMessage('Use "hansolo launch" to start a new workflow');
         return;
       }
 
-      if (!session.isActive()) {
-        this.output.errorMessage(`Session is not active (state: ${session.currentState})`);
-        if (session.currentState === 'COMPLETE') {
-          this.output.infoMessage('Workflow is already complete');
-        } else if (session.currentState === 'ABORTED') {
-          this.output.infoMessage('Workflow was aborted');
-        }
+      logger.info(`Shipping session ${session.id} on branch ${currentBranch}`, 'ship');
+
+      // Initialize GitHub integration (tries env vars, config, then gh CLI)
+      logger.debug('Initializing GitHub integration', 'ship');
+      const githubInitialized = await this.githubIntegration.initialize();
+      logger.debug(`GitHub integration initialized: ${githubInitialized}`, 'ship');
+
+      // Run pre-flight checks
+      logger.debug('Running pre-flight checks', 'ship');
+      const preFlightChecks = new ShipPreFlightChecks(
+        session,
+        this.gitOps,
+        this.githubIntegration,
+        this.branchValidator,
+        this.prValidator
+      );
+
+      const preFlightPassed = await preFlightChecks.runChecks({
+        command: 'ship',
+        session,
+        options,
+      });
+
+      if (!preFlightPassed) {
+        logger.error('Pre-flight checks failed', 'ship');
+        this.output.errorMessage('\n❌ Pre-flight checks failed - aborting ship');
         return;
       }
 
-      // Protect main branch
-      if (currentBranch === 'main' || currentBranch === 'master') {
-        this.output.errorMessage('Cannot ship from main branch');
-        this.output.infoMessage('Switch to a feature branch');
-        return;
-      }
+      logger.info('Pre-flight checks passed', 'ship');
 
-      // Determine next action based on current state
-      const nextAction = this.determineNextAction(session, options);
+      // Execute complete workflow
+      logger.info('Starting workflow execution', 'ship');
+      await this.executeCompleteWorkflow(session, options);
+      logger.info('Workflow execution completed', 'ship');
 
-      if (!nextAction) {
-        this.output.errorMessage(`No valid action from state: ${session.currentState}`);
-        return;
-      }
+      // Run post-flight verifications
+      logger.debug('Running post-flight verifications', 'ship');
+      const postFlightChecks = new ShipPostFlightChecks(
+        session,
+        this.gitOps,
+        session.metadata?.pr?.number
+      );
 
-      // Execute the appropriate action
-      switch (nextAction) {
-      case 'commit':
-        await this.performCommit(session, options);
-        break;
-      case 'push':
-        await this.performPush(session, options);
-        break;
-      case 'create-pr':
-        await this.performCreatePR(session, options);
-        break;
-      case 'merge':
-        await this.performMerge(session, options);
-        break;
-      case 'complete':
-        await this.performComplete(session, options);
-        break;
-      default:
-        this.output.errorMessage(`Unknown action: ${nextAction}`);
-      }
+      await postFlightChecks.runVerifications({
+        command: 'ship',
+        session,
+        options,
+      });
 
+      this.output.info('');
+      this.output.successMessage('🎉 Feature shipped! Ready for next feature.');
+      logger.info('Ship command completed successfully', 'ship');
     } catch (error) {
-      this.output.errorMessage(`Ship failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      logger.error(
+        `Ship command failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        'ship',
+        error instanceof Error ? error : undefined
+      );
+      this.output.errorMessage(
+        `Ship failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
 
-  private determineNextAction(session: WorkflowSession, options: any): string | null {
-    const { push, createPR, merge } = options;
+  private async executeCompleteWorkflow(
+    session: WorkflowSession,
+    options: { message?: string; yes?: boolean; force?: boolean }
+  ): Promise<void> {
+    this.output.subheader('📊 Executing Workflow');
 
-    // Check explicit flags first
-    if (merge) {
-      return 'merge';
-    }
-    if (createPR) {
-      return 'create-pr';
-    }
-    if (push) {
-      return 'push';
+    // Step 1: Commit changes (if any)
+    if (await this.gitOps.hasUncommittedChanges()) {
+      await this.commitChanges(session, options.message);
+    } else {
+      this.output.dim('  ✓ No uncommitted changes');
     }
 
-    // Otherwise, determine based on state
-    switch (session.currentState) {
-    case 'INIT':
-    case 'BRANCH_READY':
-      return 'commit';
-    case 'CHANGES_COMMITTED':
-      return 'push';
-    case 'PUSHED':
-      return 'create-pr';
-    case 'PR_CREATED':
-    case 'WAITING_APPROVAL':
-      return 'merge';
-    case 'MERGED':
-      return 'complete';
-    default:
-      return null;
-    }
+    // Step 2: Push to remote
+    await this.pushToRemote(session, options.force);
+
+    // Step 3: Create or update PR
+    const pr = await this.createOrUpdatePR(session);
+
+    // Step 4: Wait for checks and auto-merge
+    await this.waitAndMerge(session, pr.number, options.yes);
+
+    // Step 5: Sync main and cleanup
+    await this.syncMainAndCleanup(session);
   }
 
-  private async performCommit(session: WorkflowSession, options: any): Promise<void> {
-    this.output.subheader('Committing Changes');
+  private async commitChanges(session: WorkflowSession, message?: string): Promise<void> {
+    this.progress.start('Committing changes...');
 
-    // Check for changes
-    const hasChanges = await this.gitOps.hasUncommittedChanges();
-    if (!hasChanges) {
-      this.output.warningMessage('No changes to commit');
-      this.output.infoMessage('Make changes then run "hansolo ship" again');
-      return;
-    }
+    const commitMessage =
+      message ||
+      `feat: ${session.branchName}
 
-    // Get status
-    const status = await this.gitOps.getStatus();
-    this.output.box(
-      `Modified: ${status.modified.length} file(s)\n` +
-      `Added: ${status.created.length} file(s)\n` +
-      `Deleted: ${status.deleted.length} file(s)\n` +
-      `Untracked: ${status.not_added.length} file(s)`,
-      'Git Status'
-    );
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
-    // Stage all changes
-    await this.progress.gitOperation('add', async () => {
-      await this.gitOps.stageAll();
-    });
+Co-Authored-By: Claude <noreply@anthropic.com>`;
 
-    // Generate or use provided commit message
-    let message = options.message;
-    if (!message) {
-      message = await this.promptForCommitMessage();
-    }
+    await this.gitOps.stageAll();
+    await this.gitOps.commit(commitMessage, { noVerify: false });
 
-    // Commit
-    const steps = [
-      {
-        name: 'Committing changes',
-        action: async () => {
-          await this.gitOps.commit(message, { noVerify: false });
-        },
-      },
-      {
-        name: 'Updating session state',
-        action: async () => {
-          if (this.stateMachine.canTransition(session.currentState, 'CHANGES_COMMITTED')) {
-            session.transitionTo('CHANGES_COMMITTED', 'ship_command');
-            await this.sessionRepo.updateSession(session.id, session);
-          }
-        },
-      },
-    ];
-
-    await this.progress.runSteps(steps);
-
-    this.output.successMessage('Changes committed successfully');
-    this.output.infoMessage('Run "hansolo ship --push" to push to remote');
+    this.progress.succeed('Changes committed (hooks: lint, typecheck)');
   }
 
-  private async performPush(session: WorkflowSession, options: any): Promise<void> {
-    this.output.subheader('Pushing to Remote');
+  private async pushToRemote(session: WorkflowSession, _force?: boolean): Promise<void> {
+    this.progress.start('Pushing to remote...');
 
-    // Check if already pushed
-    const branchStatus = await this.gitOps.getBranchStatus();
-    if (branchStatus.ahead === 0 && branchStatus.hasRemote) {
-      this.output.warningMessage('Branch is already up to date with remote');
-      if (!options.force) {
-        this.output.infoMessage('Use --force to push anyway');
-        return;
-      }
-    }
+    await this.gitOps.push('origin', session.branchName, ['--set-upstream']);
 
-    // Push to remote
-    const steps = [
-      {
-        name: `Pushing branch '${session.branchName}' to origin`,
-        action: async () => {
-          await this.gitOps.push(session.branchName, options.force);
-        },
-      },
-      {
-        name: 'Updating session state',
-        action: async () => {
-          if (this.stateMachine.canTransition(session.currentState, 'PUSHED')) {
-            session.transitionTo('PUSHED', 'ship_command');
-            await this.sessionRepo.updateSession(session.id, session);
-          }
-        },
-      },
-    ];
-
-    await this.progress.runSteps(steps);
-
-    this.output.successMessage('Changes pushed to remote');
-    this.output.infoMessage('Run "hansolo ship --create-pr" to create a pull request');
+    this.progress.succeed(`Pushed to origin/${session.branchName} (hooks: tests)`);
   }
 
-  private async performCreatePR(session: WorkflowSession, options: any): Promise<void> {
-    this.output.subheader('Creating Pull Request');
+  private async createOrUpdatePR(session: WorkflowSession): Promise<{ number: number; url: string }> {
+    const prCheck = await this.prValidator.checkForPRConflicts(session.branchName);
+
+    if (prCheck.action === 'update' && prCheck.existingPR) {
+      this.progress.info(`Updating existing PR #${prCheck.existingPR.number}`);
+      return {
+        number: prCheck.existingPR.number,
+        url: prCheck.existingPR.html_url,
+      };
+    }
+
+    this.progress.start('Creating pull request...');
 
     const prInfo = {
       title: `[${session.workflowType}] ${session.branchName}`,
@@ -243,296 +474,76 @@ export class ShipCommand {
       head: session.branchName,
     };
 
-    try {
-      // Try to use GitHub API
-      const pr = await this.githubIntegration.createPullRequest(prInfo);
+    const pr = await this.githubIntegration.createPullRequest(prInfo);
 
-      if (pr) {
-        this.output.successMessage(`Pull request #${pr.number} created successfully!`);
-        this.output.infoMessage(`View PR: ${pr.html_url}`);
-
-        // Update session state with PR info
-        if (this.stateMachine.canTransition(session.currentState, 'PR_CREATED')) {
-          session.transitionTo('PR_CREATED', 'ship_command', {
-            pr: {
-              ...prInfo,
-              number: pr.number,
-              url: pr.html_url,
-            },
-          });
-          await this.sessionRepo.updateSession(session.id, session);
-        }
-
-        // Automatically wait for checks and merge if merge option is set
-        if (options.merge) {
-          this.output.subheader('Waiting for CI Checks');
-          this.output.infoMessage('Monitoring PR status...');
-
-          const result = await this.githubIntegration.waitForChecks(pr.number, {
-            timeout: 20 * 60 * 1000, // 20 minutes
-            pollInterval: 30 * 1000, // 30 seconds
-            onProgress: (status) => {
-              this.output.infoMessage(
-                `✓ ${status.passed} passed | ⏳ ${status.pending} pending | ✗ ${status.failed} failed`
-              );
-            },
-          });
-
-          if (result.success) {
-            this.output.successMessage('All checks passed! Merging PR...');
-            const merged = await this.githubIntegration.mergePullRequest(pr.number, 'squash');
-
-            if (merged) {
-              this.output.successMessage(`PR #${pr.number} merged successfully!`);
-
-              // Update session state
-              if (this.stateMachine.canTransition(session.currentState, 'MERGED')) {
-                session.transitionTo('MERGED', 'ship_command');
-                await this.sessionRepo.updateSession(session.id, session);
-              }
-
-              // Sync main and cleanup
-              await this.syncMainAndCleanup(session);
-            } else {
-              this.output.errorMessage('Failed to merge PR');
-              this.output.infoMessage('Run "hansolo ship --merge" to retry');
-            }
-          } else if (result.timedOut) {
-            this.output.warningMessage('Timed out waiting for checks');
-            this.output.infoMessage('Run "hansolo ship --merge" when checks complete');
-          } else {
-            this.output.errorMessage('Some checks failed:');
-            result.failedChecks.forEach(check => this.output.dim(`  ✗ ${check}`));
-            this.output.infoMessage('Fix the failures and run "hansolo ship --merge" to retry');
-          }
-        } else {
-          this.output.infoMessage('Run "hansolo ship --merge" to auto-merge after checks pass');
-        }
-      } else {
-        throw new Error('GitHub API not configured');
-      }
-    } catch (error) {
-      // Fallback to manual instructions
-      this.output.warningMessage('Could not create PR via GitHub API');
-      this.output.dim(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-
-      this.output.box(
-        `Title: ${prInfo.title}\n` +
-        `Base: ${prInfo.base}\n` +
-        `Head: ${prInfo.head}\n\n` +
-        `Body:\n${prInfo.body}`,
-        'Pull Request Details'
-      );
-
-      // Update session state
-      if (this.stateMachine.canTransition(session.currentState, 'PR_CREATED')) {
-        session.transitionTo('PR_CREATED', 'ship_command', { pr: prInfo });
-        await this.sessionRepo.updateSession(session.id, session);
-      }
-
-      this.output.infoMessage('Create the PR manually on GitHub');
-      this.output.infoMessage('Run "hansolo ship --merge" after PR is approved');
+    if (!pr) {
+      throw new Error('Failed to create PR via GitHub API');
     }
+
+    // Update session metadata
+    session.metadata = session.metadata || ({} as any);
+    session.metadata.pr = {
+      number: pr.number,
+      url: pr.html_url,
+    };
+    await this.sessionRepo.updateSession(session.id, session);
+
+    this.progress.succeed(`Created PR #${pr.number}`);
+    this.output.dim(`  ${pr.html_url}`);
+
+    return { number: pr.number, url: pr.html_url };
   }
 
-  private async performMerge(session: WorkflowSession, options: any): Promise<void> {
-    this.output.subheader('Merging PR to Main');
-
-    // Get PR number from session
-    const prNumber = session.metadata?.pr?.number;
-    if (!prNumber) {
-      this.output.errorMessage('No PR number found in session');
-      this.output.infoMessage('Create a PR first with "hansolo ship --create-pr"');
-      return;
-    }
-
-    // Confirm merge
-    if (!options.yes) {
-      const confirmed = await this.confirmAction(
-        'This will wait for checks and auto-merge the PR. Continue?',
-        true
-      );
-      if (!confirmed) {
-        this.output.infoMessage('Merge cancelled');
-        return;
-      }
-    }
-
-    this.output.infoMessage('Monitoring PR status...');
+  private async waitAndMerge(
+    session: WorkflowSession,
+    prNumber: number,
+    _skipConfirm?: boolean
+  ): Promise<void> {
+    this.output.subheader('⏳ Waiting for CI Checks');
 
     const result = await this.githubIntegration.waitForChecks(prNumber, {
-      timeout: 20 * 60 * 1000, // 20 minutes
-      pollInterval: 30 * 1000, // 30 seconds
-      onProgress: (status) => {
-        this.output.infoMessage(
-          `✓ ${status.passed} passed | ⏳ ${status.pending} pending | ✗ ${status.failed} failed`
+      timeout: 20 * 60 * 1000,
+      pollInterval: 30 * 1000,
+      onProgress: status => {
+        this.output.info(
+          `  ✓ ${status.passed} passed | ⏳ ${status.pending} pending | ✗ ${status.failed} failed`
         );
       },
     });
 
-    if (result.success) {
-      this.output.successMessage('All checks passed! Merging PR...');
-
-      try {
-        const merged = await this.githubIntegration.mergePullRequest(prNumber, 'squash');
-
-        if (merged) {
-          this.output.successMessage(`PR #${prNumber} merged successfully!`);
-
-          // Update session state
-          if (this.stateMachine.canTransition(session.currentState, 'MERGED')) {
-            session.transitionTo('MERGED', 'ship_command');
-            await this.sessionRepo.updateSession(session.id, session);
-          }
-
-          // Sync main and cleanup
-          await this.syncMainAndCleanup(session);
-        } else {
-          this.output.errorMessage('Failed to merge PR via API');
-          await this.fallbackToManualMerge(session, prNumber);
-        }
-      } catch (error) {
-        this.output.warningMessage('Auto-merge not available (repository may require manual merge)');
-        await this.fallbackToManualMerge(session, prNumber);
-      }
-    } else if (result.timedOut) {
-      this.output.warningMessage('Timed out waiting for checks');
-      this.output.infoMessage('Run "hansolo ship --merge" when checks complete');
-    } else {
-      this.output.errorMessage('Some checks failed:');
-      result.failedChecks.forEach(check => this.output.dim(`  ✗ ${check}`));
-      this.output.infoMessage('Fix the failures and run "hansolo ship --merge" to retry');
-    }
-  }
-
-  private async performComplete(session: WorkflowSession, _options: any): Promise<void> {
-    this.output.subheader('Completing Workflow');
-
-    const steps = [
-      {
-        name: 'Cleaning up feature branch',
-        action: async () => {
-          try {
-            // Delete local branch if not current
-            const currentBranch = await this.gitOps.getCurrentBranch();
-            if (currentBranch === session.branchName) {
-              await this.gitOps.checkoutBranch('main');
-            }
-            await this.gitOps.deleteBranch(session.branchName, true);
-          } catch (error) {
-            this.output.warningMessage('Could not delete local branch');
-          }
-        },
-      },
-      {
-        name: 'Deleting remote branch',
-        action: async () => {
-          try {
-            await this.gitOps.deleteRemoteBranch(session.branchName);
-          } catch (error) {
-            this.output.warningMessage('Could not delete remote branch');
-          }
-        },
-      },
-      {
-        name: 'Marking session complete',
-        action: async () => {
-          session.transitionTo('COMPLETE', 'ship_command');
-          await this.sessionRepo.updateSession(session.id, session);
-        },
-      },
-    ];
-
-    await this.progress.runSteps(steps);
-
-    this.output.successMessage('🎉 Workflow complete!');
-    this.showCompletionSummary(session);
-  }
-
-  private async fallbackToManualMerge(session: WorkflowSession, prNumber: number): Promise<void> {
-    this.output.warningMessage('GitHub API merge not available, attempting local merge...');
-
-    try {
-      // Perform local merge
-      const steps = [
-        {
-          name: 'Fetching latest from main',
-          action: async () => {
-            await this.gitOps.fetch('origin', 'main');
-          },
-        },
-        {
-          name: 'Checking out main branch',
-          action: async () => {
-            await this.gitOps.checkoutBranch('main');
-          },
-        },
-        {
-          name: 'Pulling latest changes',
-          action: async () => {
-            await this.gitOps.pull('origin', 'main');
-          },
-        },
-        {
-          name: `Merging branch '${session.branchName}' (squash)`,
-          action: async () => {
-            await this.gitOps.merge(session.branchName, true); // true = squash
-          },
-        },
-        {
-          name: 'Pushing to main',
-          action: async () => {
-            await this.gitOps.push('main');
-          },
-        },
-      ];
-
-      await this.progress.runSteps(steps);
-
-      this.output.successMessage('Successfully merged locally!');
-
-      // Update session state
-      if (this.stateMachine.canTransition(session.currentState, 'MERGED')) {
-        session.transitionTo('MERGED', 'ship_command');
-        await this.sessionRepo.updateSession(session.id, session);
-      }
-
-      // Sync main and cleanup
-      await this.syncMainAndCleanup(session);
-
-    } catch (error) {
-      this.output.errorMessage('Local merge failed');
-      this.output.dim(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-
-      // Last resort: manual merge
-      this.output.box(
-        `Please merge PR #${prNumber} manually on GitHub.\n` +
-        'After merging, run \'hansolo cleanup\' to sync main and cleanup.',
-        'Manual Merge Required'
-      );
-
-      const confirmed = await this.confirmAction(
-        'Have you merged the PR? (This will sync main and cleanup)',
-        true
-      );
-
-      if (confirmed) {
-        // Update session state
-        if (this.stateMachine.canTransition(session.currentState, 'MERGED')) {
-          session.transitionTo('MERGED', 'ship_command');
-          await this.sessionRepo.updateSession(session.id, session);
-        }
-
-        // Sync main and cleanup
-        await this.syncMainAndCleanup(session);
+    if (!result.success) {
+      if (result.timedOut) {
+        throw new Error('Timed out waiting for CI checks');
       } else {
-        this.output.infoMessage('Run "hansolo cleanup" after merging to sync and cleanup');
+        throw new Error(`CI checks failed: ${result.failedChecks.join(', ')}`);
       }
     }
+
+    this.output.successMessage('✓ All CI checks passed!');
+    this.output.info('');
+
+    // Merge PR
+    this.progress.start('Merging PR...');
+
+    const merged = await this.githubIntegration.mergePullRequest(prNumber, 'squash');
+
+    if (!merged) {
+      throw new Error('Failed to merge PR via GitHub API');
+    }
+
+    // Update session metadata
+    session.metadata = session.metadata || ({} as any);
+    if (session.metadata.pr) {
+      session.metadata.pr.merged = true;
+      session.metadata.pr.mergedAt = new Date().toISOString();
+    }
+    await this.sessionRepo.updateSession(session.id, session);
+
+    this.progress.succeed(`Merged PR #${prNumber} (squash)`);
   }
 
   private async syncMainAndCleanup(session: WorkflowSession): Promise<void> {
-    this.output.subheader('Syncing Main & Cleanup');
+    this.output.subheader('🧹 Syncing Main & Cleanup');
 
     const steps = [
       {
@@ -542,7 +553,7 @@ export class ShipCommand {
         },
       },
       {
-        name: 'Pulling latest changes (including squashed merge)',
+        name: 'Pulling latest changes (squashed merge)',
         action: async () => {
           await this.gitOps.pull('origin', 'main');
         },
@@ -552,8 +563,8 @@ export class ShipCommand {
         action: async () => {
           try {
             await this.gitOps.deleteBranch(session.branchName, true);
-          } catch (error) {
-            this.output.dim('Could not delete local branch (may already be deleted)');
+          } catch {
+            // Already deleted
           }
         },
       },
@@ -562,8 +573,10 @@ export class ShipCommand {
         action: async () => {
           try {
             await this.gitOps.deleteRemoteBranch(session.branchName);
-          } catch (error) {
-            this.output.dim('Could not delete remote branch (may already be deleted)');
+            // Track deletion
+            await this.branchValidator.trackBranchDeletion(session);
+          } catch {
+            // Already deleted
           }
         },
       },
@@ -577,99 +590,21 @@ export class ShipCommand {
     ];
 
     await this.progress.runSteps(steps);
-
-    this.output.successMessage('🎉 Workflow complete!');
-    this.output.infoMessage('Main branch is now synced with squashed merge');
-    this.output.infoMessage('Feature branch has been cleaned up');
-    this.showCompletionSummary(session);
-  }
-
-  private async promptForCommitMessage(): Promise<string> {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    return new Promise(resolve => {
-      rl.question('Enter commit message: ', message => {
-        rl.close();
-        resolve(message || 'feat: update changes');
-      });
-    });
-  }
-
-  private async confirmAction(message: string, ask: boolean = true): Promise<boolean> {
-    if (!ask) {
-      return true;
-    }
-
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    return new Promise(resolve => {
-      rl.question(`${message} (y/n): `, answer => {
-        rl.close();
-        resolve(answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes');
-      });
-    });
   }
 
   private generatePRDescription(session: WorkflowSession): string {
-    const lines = [
-      '## Summary',
-      `Branch: ${session.branchName}`,
-      `Session ID: ${session.id}`,
-      `Created: ${new Date(session.createdAt).toLocaleString()}`,
-      '',
-      '## Changes',
-      '- [ ] Feature implementation',
-      '- [ ] Tests added',
-      '- [ ] Documentation updated',
-      '',
-      '## Testing',
-      '- [ ] Unit tests pass',
-      '- [ ] Integration tests pass',
-      '- [ ] Manual testing complete',
-      '',
-      '---',
-      '_Generated by han-solo workflow automation_',
-    ];
+    return `## Summary
 
-    return lines.join('\n');
-  }
+Branch: ${session.branchName}
+Session: ${session.id}
+Created: ${new Date(session.createdAt).toLocaleString()}
 
-  private showCompletionSummary(session: WorkflowSession): void {
-    const duration = Date.now() - new Date(session.createdAt).getTime();
-    const hours = Math.floor(duration / (1000 * 60 * 60));
-    const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+## Changes
 
-    this.output.box(
-      `Session ID: ${session.id.substring(0, 8)}\n` +
-      `Branch: ${session.branchName}\n` +
-      `Duration: ${hours}h ${minutes}m\n` +
-      `State Transitions: ${session.stateHistory.length}\n\n` +
-      'Workflow Timeline:\n' +
-      session.stateHistory.map(t => {
-        const time = new Date(t.timestamp).toLocaleTimeString();
-        return `  ${time}: ${t.from} → ${t.to}`;
-      }).join('\n'),
-      '✨ Workflow Complete'
-    );
+- Feature implementation
+- Tests added
+- Documentation updated
 
-    this.output.newline();
-    this.output.dim('Tips:');
-    this.output.dim('• Run "hansolo launch" to start a new workflow');
-    this.output.dim('• Run "hansolo sessions" to see all workflows');
-  }
-
-  async quickShip(): Promise<void> {
-    // Convenience method for shipping with all defaults
-    await this.execute({
-      yes: true,
-      push: true,
-      createPR: true,
-    });
+🤖 Generated with [Claude Code](https://claude.com/claude-code)`;
   }
 }

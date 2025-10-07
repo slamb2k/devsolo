@@ -1,11 +1,10 @@
 import { CommandHandler } from './types';
 import { InitCommand } from './hansolo-init';
-// Import v2 adapter commands that provide v1 API compatibility
-import { LaunchCommand } from './adapters/launch-adapter';
-import { ShipCommand } from './adapters/ship-adapter';
-import { SessionsCommand } from './adapters/sessions-adapter';
-import { SwapCommand } from './adapters/swap-adapter';
-import { AbortCommand } from './adapters/abort-adapter';
+import { LaunchCommand } from './hansolo-launch';
+import { ShipCommand } from './hansolo-ship';
+import { SessionsCommand } from './hansolo-sessions';
+import { SwapCommand } from './hansolo-swap';
+import { AbortCommand } from './hansolo-abort';
 import { HotfixCommand } from './hansolo-hotfix';
 
 // Adapter classes to wrap existing commands in CommandHandler interface
@@ -158,3 +157,6 @@ export class AbortCommandAdapter implements CommandHandler {
     return true;
   }
 }
+// Re-export commands that implement CommandHandler for registry
+export { StatusCommand as HansoloStatusCommand } from './hansolo-status';
+export { CleanupCommand } from './hansolo-cleanup';

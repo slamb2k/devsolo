@@ -4,90 +4,479 @@ import { ConfigurationManager } from '../services/configuration-manager';
 import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
 import { WorkflowSession } from '../models/workflow-session';
-import { LaunchWorkflowStateMachine } from '../state-machines/launch-workflow';
-// import { TemplateManager } from '../templates/workflow-templates'; // For future use
+import { BranchValidator } from '../services/validation/branch-validator';
+import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
+import { BranchNamingService } from '../services/branch-naming';
+import { GitHubIntegration } from '../services/github-integration';
+import { StashManager } from '../services/stash-manager';
+import { AbortCommand } from './hansolo-abort';
 
+/**
+ * Pre-flight checks for launch command
+ */
+class LaunchPreFlightChecks extends PreFlightChecks {
+  constructor(
+    private gitOps: GitOperations,
+    private sessionRepo: SessionRepository,
+    private branchValidator: BranchValidator,
+    private branchName: string,
+    private githubIntegration: GitHubIntegration,
+    private force?: boolean
+  ) {
+    super();
+    this.setupChecks();
+  }
+
+  private setupChecks(): void {
+    this.addCheck(async () => this.checkOnMainBranch());
+    this.addCheck(async () => this.checkMainUpToDate());
+    this.addCheck(async () => this.checkNoExistingSession());
+    this.addCheck(async () => this.checkBranchNameAvailable());
+    this.addCheck(async () => this.checkBranchHasNoClosedPR());
+  }
+
+  private async checkOnMainBranch(): Promise<CheckResult> {
+    const currentBranch = await this.gitOps.getCurrentBranch();
+    const isMain = currentBranch === 'main' || currentBranch === 'master';
+
+    if (!isMain && !this.force) {
+      return {
+        passed: false,
+        name: 'On main/master branch',
+        message: `Currently on ${currentBranch}`,
+        level: 'error',
+        suggestions: ['Switch to main branch', 'Use --force to override'],
+      };
+    }
+
+    return {
+      passed: true,
+      name: 'On main/master branch',
+      message: isMain ? currentBranch : `${currentBranch} (--force)`,
+      level: 'info',
+    };
+  }
+
+  private async checkMainUpToDate(): Promise<CheckResult> {
+    try {
+      const status = await this.gitOps.getBranchStatus();
+
+      if (status.behind > 0) {
+        return {
+          passed: false,
+          name: 'Main up to date with origin',
+          message: `${status.behind} commits behind`,
+          level: 'warning',
+          suggestions: ['Run: git pull origin main'],
+        };
+      }
+
+      return {
+        passed: true,
+        name: 'Main up to date with origin',
+        level: 'info',
+      };
+    } catch {
+      return {
+        passed: true,
+        name: 'Main up to date with origin',
+        message: 'Could not check (no remote)',
+        level: 'warning',
+      };
+    }
+  }
+
+  private async checkNoExistingSession(): Promise<CheckResult> {
+    const currentBranch = await this.gitOps.getCurrentBranch();
+    const existingSession = await this.sessionRepo.getSessionByBranch(currentBranch);
+
+    if (existingSession && existingSession.isActive()) {
+      return {
+        passed: false,
+        name: 'No existing session',
+        message: `Active session on ${currentBranch}`,
+        level: 'error',
+        suggestions: ['Use /hansolo:status to see active sessions'],
+      };
+    }
+
+    return {
+      passed: true,
+      name: 'No existing session',
+      level: 'info',
+    };
+  }
+
+  private async checkBranchNameAvailable(): Promise<CheckResult> {
+    const validation = await this.branchValidator.checkBranchNameAvailability(
+      this.branchName
+    );
+
+    if (!validation.available) {
+      const suggestions = validation.suggestions || [];
+
+      // Check if it's a previous merged branch
+      if (validation.previousSession?.metadata?.pr?.merged) {
+        return {
+          passed: false,
+          name: 'Branch name available',
+          message: `Previously used for PR #${validation.previousSession.metadata.pr.number}`,
+          level: 'error',
+          suggestions: [
+            'Branch names cannot be reused after merge',
+            ...suggestions.map(s => `Suggestion: ${s}`),
+          ],
+        };
+      }
+
+      // Check if it's an active session
+      if (validation.previousSession?.isActive()) {
+        return {
+          passed: false,
+          name: 'Branch name available',
+          message: validation.reason || 'Session already exists',
+          level: 'error',
+          suggestions: suggestions,
+        };
+      }
+
+      // Other conflicts
+      return {
+        passed: false,
+        name: 'Branch name available',
+        message: validation.reason,
+        level: 'error',
+        suggestions: suggestions,
+      };
+    }
+
+    return {
+      passed: true,
+      name: 'Branch name available',
+      message: this.branchName,
+      level: 'info',
+    };
+  }
+
+  private async checkBranchHasNoClosedPR(): Promise<CheckResult> {
+    try {
+      // Initialize GitHub integration
+      const initialized = await this.githubIntegration.initialize();
+      if (!initialized) {
+        // GitHub not configured - skip this check
+        return {
+          passed: true,
+          name: 'No closed/merged PR',
+          message: 'GitHub not configured (skipped)',
+          level: 'info',
+        };
+      }
+
+      // Check if branch has an existing PR (search all states including closed/merged)
+      const pr = await this.githubIntegration.getPullRequestForBranch(this.branchName, 'all');
+
+      if (pr && (pr.merged || pr.state === 'closed')) {
+        // Generate suggestion for incremented branch name
+        const suggestion = this.generateIncrementedBranchName(this.branchName);
+
+        return {
+          passed: this.force ? true : false,
+          name: 'No closed/merged PR',
+          message: `Branch "${this.branchName}" has a ${pr.merged ? 'merged' : 'closed'} PR (#${pr.number})`,
+          level: this.force ? 'warning' : 'error',
+          suggestions: this.force
+            ? []
+            : [
+              'Use a different branch name to ensure clean workflow',
+              `Try: ${suggestion}`,
+              'Or use --force to override (not recommended)',
+            ],
+        };
+      }
+
+      return {
+        passed: true,
+        name: 'No closed/merged PR',
+        level: 'info',
+      };
+    } catch (error) {
+      // If GitHub check fails, don't block the workflow
+      return {
+        passed: true,
+        name: 'No closed/merged PR',
+        message: 'Check skipped (GitHub unavailable)',
+        level: 'info',
+      };
+    }
+  }
+
+  private generateIncrementedBranchName(branchName: string): string {
+    // Extract type and description
+    const match = branchName.match(/^([^/]+)\/(.+)$/);
+    if (!match?.[1] || !match?.[2]) {
+      return `${branchName}-v2`;
+    }
+
+    const type = match[1];
+    const description = match[2];
+
+    // Check if already has version suffix
+    const versionMatch = description.match(/^(.+)-v(\d+)$/);
+    if (versionMatch?.[1] && versionMatch?.[2]) {
+      const baseDesc = versionMatch[1];
+      const version = versionMatch[2];
+      const nextVersion = parseInt(version, 10) + 1;
+      return `${type}/${baseDesc}-v${nextVersion}`;
+    }
+
+    return `${type}/${description}-v2`;
+  }
+}
+
+/**
+ * Post-flight checks for launch command
+ */
+class LaunchPostFlightChecks extends PostFlightChecks {
+  constructor(
+    private session: WorkflowSession,
+    private gitOps: GitOperations,
+    private branchName: string,
+    private stashPopped: boolean = false
+  ) {
+    super();
+    this.setupVerifications();
+  }
+
+  private setupVerifications(): void {
+    this.addVerification(async () => this.verifySessionCreated());
+    this.addVerification(async () => this.verifyBranchCreated());
+    this.addVerification(async () => this.verifyBranchCheckedOut());
+    this.addVerification(async () => this.verifySessionState());
+    if (!this.stashPopped) {
+      this.addVerification(async () => this.verifyNoUncommittedChanges());
+    }
+  }
+
+  private async verifySessionCreated(): Promise<CheckResult> {
+    return {
+      passed: !!this.session,
+      name: 'Session created',
+      message: this.session ? `ID: ${this.session.id.substring(0, 8)}...` : undefined,
+      level: 'info',
+    };
+  }
+
+  private async verifyBranchCreated(): Promise<CheckResult> {
+    const exists = await this.gitOps.branchExists(this.branchName);
+
+    return {
+      passed: exists,
+      name: 'Feature branch created',
+      message: this.branchName,
+      level: 'info',
+    };
+  }
+
+  private async verifyBranchCheckedOut(): Promise<CheckResult> {
+    const currentBranch = await this.gitOps.getCurrentBranch();
+    const isCorrect = currentBranch === this.branchName;
+
+    return {
+      passed: isCorrect,
+      name: 'Branch checked out',
+      message: currentBranch,
+      level: 'info',
+    };
+  }
+
+  private async verifySessionState(): Promise<CheckResult> {
+    const isCorrect = this.session.currentState === 'BRANCH_READY';
+
+    return {
+      passed: isCorrect,
+      name: 'Session state',
+      message: this.session.currentState,
+      level: 'info',
+    };
+  }
+
+  private async verifyNoUncommittedChanges(): Promise<CheckResult> {
+    const hasChanges = await this.gitOps.hasUncommittedChanges();
+
+    return {
+      passed: !hasChanges,
+      name: 'No uncommitted changes',
+      level: 'info',
+    };
+  }
+}
+
+/**
+ * Enhanced Launch Command with Pre/Post-Flight Checks
+ */
 export class LaunchCommand {
   private output = new ConsoleOutput();
   private progress = new WorkflowProgress();
   private configManager: ConfigurationManager;
   private sessionRepo: SessionRepository;
   private gitOps: GitOperations;
-  private stateMachine: LaunchWorkflowStateMachine;
-  // private templateManager: TemplateManager; // For future template support
+  private branchValidator: BranchValidator;
+  private branchNaming: BranchNamingService;
+  private githubIntegration: GitHubIntegration;
+  private stashManager: StashManager;
+  private abortCommand: AbortCommand;
 
   constructor(basePath: string = '.hansolo') {
     this.configManager = new ConfigurationManager(basePath);
     this.sessionRepo = new SessionRepository(basePath);
     this.gitOps = new GitOperations();
-    this.stateMachine = new LaunchWorkflowStateMachine();
-    // this.templateManager = new TemplateManager(); // For future template support
+    this.branchValidator = new BranchValidator(basePath);
+    this.branchNaming = new BranchNamingService();
+    this.githubIntegration = new GitHubIntegration(basePath);
+    this.stashManager = new StashManager(basePath);
+    this.abortCommand = new AbortCommand(basePath);
   }
 
   async execute(options: {
     branchName?: string;
     force?: boolean;
     description?: string;
-    template?: string;
+    stashRef?: string;
+    popStash?: boolean;
   } = {}): Promise<void> {
-    this.output.header('🚀 Launching New Feature Workflow');
-
     try {
       // Check initialization
-      if (!await this.configManager.isInitialized()) {
+      if (!(await this.configManager.isInitialized())) {
         this.output.errorMessage('han-solo is not initialized');
         this.output.infoMessage('Run "hansolo init" first');
         return;
       }
 
-      // Check for clean working directory
-      if (!await this.gitOps.isClean() && !options.force) {
-        this.output.errorMessage('Working directory has uncommitted changes');
-        this.output.infoMessage('Commit or stash your changes first, or use --force');
-        return;
-      }
+      // Determine branch name with intelligent fallback
+      let branchName: string;
 
-      // Check current branch
-      const currentBranch = await this.gitOps.getCurrentBranch();
-      if (currentBranch !== 'main' && currentBranch !== 'master') {
-        this.output.warningMessage(`Currently on branch '${currentBranch}'`);
-        if (!options.force) {
-          this.output.infoMessage('Switch to main branch or use --force');
-          return;
+      if (options.branchName) {
+        // Branch name provided - validate it
+        const validation = this.branchNaming.validate(options.branchName);
+
+        if (!validation.isValid) {
+          this.output.warningMessage(
+            `⚠️  Branch name "${options.branchName}" doesn't follow standard conventions`
+          );
+          this.output.info(`   ${validation.message}`);
+
+          if (validation.suggestions && validation.suggestions.length > 0) {
+            this.output.info('\n💡 Suggested names:');
+            validation.suggestions.forEach((suggestion, index) => {
+              this.output.info(`   ${index + 1}. ${suggestion}`);
+            });
+            this.output.info('');
+          }
+
+          // In non-interactive mode (MCP), use first suggestion or continue with provided name
+          if (
+            validation.suggestions &&
+            validation.suggestions.length > 0 &&
+            validation.suggestions[0]
+          ) {
+            branchName = validation.suggestions[0];
+            this.output.infoMessage(`Using suggested name: ${branchName}`);
+          } else if (options.branchName) {
+            branchName = options.branchName;
+            this.output.warningMessage('Continuing with non-standard branch name');
+          } else {
+            // Fallback to timestamp if all else fails
+            branchName = this.branchNaming.generateFromTimestamp();
+            this.output.infoMessage(`Generated fallback branch name: ${branchName}`);
+          }
+        } else {
+          branchName = options.branchName;
+        }
+      } else if (options.description) {
+        // No branch name but description provided - generate from description
+        branchName = this.branchNaming.generateFromDescription(options.description);
+        this.output.infoMessage(`Generated branch name: ${branchName}`);
+      } else {
+        // No branch name or description - try to generate from git changes
+        const hasChanges = await this.gitOps.hasUncommittedChanges();
+
+        if (hasChanges && !options.stashRef) {
+          const fromChanges = await this.branchNaming.generateFromChanges();
+
+          if (fromChanges) {
+            branchName = fromChanges;
+            this.output.infoMessage(`Generated branch name from changes: ${branchName}`);
+          } else {
+            // Fallback to timestamp
+            branchName = this.branchNaming.generateFromTimestamp();
+            this.output.infoMessage(`Generated branch name: ${branchName}`);
+          }
+        } else {
+          // No changes - use timestamp
+          branchName = this.branchNaming.generateFromTimestamp();
+          this.output.infoMessage(`Generated branch name: ${branchName}`);
         }
       }
 
-      // Check for existing session on current branch
-      const existingSession = await this.sessionRepo.getSessionByBranch(currentBranch);
-      if (existingSession && existingSession.isActive()) {
-        this.output.errorMessage(`Active session already exists on branch '${currentBranch}'`);
-        this.output.infoMessage('Use "hansolo status" to see active sessions');
+      // Handle uncommitted changes and session management (AFTER branch name generation)
+      const currentBranch = await this.gitOps.getCurrentBranch();
+      const activeSession = await this.sessionRepo.getSessionByBranch(currentBranch);
+      const hasChanges = await this.stashManager.hasUncommittedChanges();
+
+      let stashRef: string | undefined;
+
+      // Always stash uncommitted changes if present
+      if (hasChanges) {
+        this.output.info('📦 Stashing uncommitted changes...');
+        const stashResult = await this.stashManager.stashChanges('launch', currentBranch);
+        stashRef = stashResult.stashRef;
+        this.output.dim(`   Stashed as: ${stashResult.stashRef}`);
+      }
+
+      // Abort active session if it exists
+      if (activeSession && activeSession.isActive()) {
+        this.output.warningMessage(`⚠️  Current session on '${currentBranch}' will be aborted`);
+        this.output.dim('   Launching new workflow will terminate the current session');
+
+        await this.abortCommand.execute({ yes: true });
+        this.output.dim('   Session aborted');
+      }
+
+      // Pass stashRef to restore work on new branch
+      if (stashRef) {
+        options.stashRef = stashRef;
+        options.popStash = true;
+      }
+
+      // Run pre-flight checks
+      const preFlightChecks = new LaunchPreFlightChecks(
+        this.gitOps,
+        this.sessionRepo,
+        this.branchValidator,
+        branchName,
+        this.githubIntegration,
+        options.force
+      );
+
+      const preFlightPassed = await preFlightChecks.runChecks({
+        command: 'launch',
+        options,
+      });
+
+      if (!preFlightPassed) {
+        this.output.errorMessage('\n❌ Pre-flight checks failed - aborting launch');
         return;
       }
 
-      // Generate branch name if not provided
-      const branchName = options.branchName || this.generateBranchName(options.description);
+      // Execute launch workflow
+      let session: WorkflowSession | undefined;
 
-      // Validate branch name
-      if (!this.isValidBranchName(branchName)) {
-        this.output.errorMessage(`Invalid branch name: ${branchName}`);
-        this.output.infoMessage('Branch names must follow Git naming conventions');
-        return;
-      }
-
-      // Check if branch already exists
-      const branches = await this.gitOps.listBranches();
-      if (branches.includes(branchName)) {
-        this.output.errorMessage(`Branch '${branchName}' already exists`);
-        this.output.infoMessage('Choose a different branch name');
-        return;
-      }
-
-      // Execute launch workflow steps
       const steps = [
         {
           name: 'Creating workflow session',
-          action: async () => await this.createSession(branchName),
+          action: async () => {
+            session = await this.createSession(branchName, options.description);
+          },
         },
         {
           name: 'Creating feature branch',
@@ -97,185 +486,81 @@ export class LaunchCommand {
           name: 'Setting up workflow environment',
           action: async () => await this.setupEnvironment(branchName),
         },
-        {
-          name: 'Initializing state machine',
-          action: async () => await this.initializeStateMachine(branchName),
-        },
       ];
 
-      const results = await this.progress.runSteps<WorkflowSession | void>(steps as any);
-      const session = results[0] as WorkflowSession;
+      // Add stash pop step if stashRef provided
+      if (options.stashRef && (options.popStash !== false)) {
+        steps.push({
+          name: `Restoring work from ${options.stashRef}`,
+          action: async () => await this.popStash(options.stashRef!),
+        });
+      }
 
-      this.output.newline();
-      this.output.successMessage('Feature workflow launched successfully!');
+      await this.progress.runSteps(steps);
 
-      // Display session info
-      this.output.box(
-        `Session ID: ${session.id.substring(0, 8)}\n` +
-        `Branch: ${session.branchName}\n` +
-        `State: ${this.output.formatState(session.currentState)}\n` +
-        `Type: ${session.workflowType}\n\n` +
-        'Next steps:\n' +
-        '1. Make your changes\n' +
-        '2. Run "hansolo ship" to complete the workflow',
-        '✨ Workflow Ready'
+      if (!session) {
+        throw new Error('Failed to create session');
+      }
+
+      // Run post-flight verifications
+      const postFlightChecks = new LaunchPostFlightChecks(
+        session,
+        this.gitOps,
+        branchName,
+        !!(options.stashRef && options.popStash !== false)
       );
 
-      // Show status
-      await this.showStatus(session);
+      await postFlightChecks.runVerifications({
+        command: 'launch',
+        session,
+        options,
+      });
 
+      this.output.info('');
+      this.output.successMessage(`✅ Workflow launched on branch: ${branchName}`);
+      this.output.infoMessage('\nNext steps:');
+      this.output.dim('  1. Make your changes');
+      this.output.dim('  2. Run /hansolo:ship to complete the workflow');
     } catch (error) {
-      this.output.errorMessage(`Launch failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.output.errorMessage(
+        `Launch failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
 
-  private generateBranchName(description?: string): string {
-    const timestamp = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-    const prefix = 'feature';
-
-    if (description) {
-      // Convert description to branch-friendly format
-      const sanitized = description
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 30);
-      return `${prefix}/${timestamp}-${sanitized}`;
-    }
-
-    return `${prefix}/${timestamp}-new-feature`;
-  }
-
-  private isValidBranchName(name: string): boolean {
-    // Cannot be protected branches
-    const protectedBranches = ['main', 'master', 'develop'];
-    if (protectedBranches.includes(name)) {
-      return false;
-    }
-
-    // Must follow Git naming rules
-    const validBranchRegex = /^[^/][\w\-./]+$/;
-    if (!validBranchRegex.test(name)) {
-      return false;
-    }
-
-    // Cannot have spaces
-    if (name.includes(' ')) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private async createSession(branchName: string): Promise<WorkflowSession> {
+  private async createSession(
+    branchName: string,
+    _description?: string
+  ): Promise<WorkflowSession> {
     const session = new WorkflowSession({
-      workflowType: 'launch',
       branchName,
+      workflowType: 'launch',
       metadata: {
         projectPath: process.cwd(),
-        userName: await this.gitOps.getConfig('user.name') || 'unknown',
-        userEmail: await this.gitOps.getConfig('user.email') || 'unknown',
+        startedAt: new Date().toISOString(),
       },
     });
 
     await this.sessionRepo.createSession(session);
+    session.transitionTo('BRANCH_READY', 'user_action');
+    await this.sessionRepo.updateSession(session.id, session);
+
     return session;
   }
 
   private async createBranch(branchName: string): Promise<void> {
-    await this.gitOps.createBranch(branchName, 'main');
-    this.output.dim(`Created and checked out branch: ${branchName}`);
+    await this.gitOps.createBranch(branchName);
+    await this.gitOps.checkoutBranch(branchName);
   }
 
   private async setupEnvironment(_branchName: string): Promise<void> {
-    // Set up any branch-specific configuration
-    await this.configManager.load();
-
-    // You could add branch-specific settings here
-    this.output.dim('Workflow environment configured');
+    // Future: Setup project-specific environment
+    // For now, just a placeholder
   }
 
-  private async initializeStateMachine(branchName: string): Promise<void> {
-    const session = await this.sessionRepo.getSessionByBranch(branchName);
-    if (!session) {
-      throw new Error('Session not found after creation');
-    }
-
-    // Transition to BRANCH_READY state
-    await this.stateMachine.transition('INIT', 'BRANCH_READY');
-    session.transitionTo('BRANCH_READY');
-    await this.sessionRepo.updateSession(session.id, session);
-
-    this.output.dim('State machine initialized: BRANCH_READY');
-  }
-
-  private async showStatus(session: WorkflowSession): Promise<void> {
-    this.output.subheader('Current Status');
-
-    const gitStatus = await this.gitOps.getBranchStatus();
-    const statusData = [
-      ['Session ID', session.id.substring(0, 8)],
-      ['Branch', session.branchName],
-      ['State', session.currentState],
-      ['Clean', gitStatus.isClean ? '✅' : '❌'],
-      ['Ahead', gitStatus.ahead.toString()],
-      ['Behind', gitStatus.behind.toString()],
-    ];
-
-    this.output.table(['Property', 'Value'], statusData);
-
-    // Show next actions
-    const nextActions = this.stateMachine.getAllowedActions(session.currentState);
-    if (nextActions.length > 0) {
-      this.output.subheader('Available Actions');
-      this.output.list(nextActions.map(action => `hansolo ${action}`));
-    }
-  }
-
-  async resume(branchName?: string): Promise<void> {
-    this.output.header('📂 Resuming Workflow');
-
-    try {
-      // Find session
-      let session: WorkflowSession | null = null;
-
-      if (branchName) {
-        session = await this.sessionRepo.getSessionByBranch(branchName);
-      } else {
-        const currentBranch = await this.gitOps.getCurrentBranch();
-        session = await this.sessionRepo.getSessionByBranch(currentBranch);
-      }
-
-      if (!session) {
-        this.output.errorMessage('No workflow session found');
-        this.output.infoMessage('Use "hansolo launch" to start a new workflow');
-        return;
-      }
-
-      if (!session.canResume()) {
-        if (session.isExpired()) {
-          this.output.errorMessage('Session has expired');
-        } else {
-          this.output.errorMessage('Session is not resumable');
-        }
-        return;
-      }
-
-      // Switch to branch if needed
-      const currentBranch = await this.gitOps.getCurrentBranch();
-      if (currentBranch !== session.branchName) {
-        await this.progress.gitOperation('checkout', async () => {
-          await this.gitOps.checkoutBranch(session.branchName);
-        });
-      }
-
-      this.output.successMessage(`Resumed workflow on branch: ${session.branchName}`);
-      await this.showStatus(session);
-
-    } catch (error) {
-      this.output.errorMessage(`Resume failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      throw error;
-    }
+  private async popStash(stashRef: string): Promise<void> {
+    await this.gitOps.stashPopSpecific(stashRef);
+    this.output.dim(`Work restored from ${stashRef}`);
   }
 }

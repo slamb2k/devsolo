@@ -1,219 +1,161 @@
-import { CommandHandler } from './types';
+import { ConsoleOutput } from '../ui/console-output';
 import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
-import { ConsoleOutput } from '../ui/console-output';
-import { TableFormatter } from '../ui/table-formatter';
-import { BoxFormatter } from '../ui/box-formatter';
-import { WorkflowSession } from '../models/workflow-session';
+import { ConfigurationManager } from '../services/configuration-manager';
+import { PreFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
+import { CommandHandler } from './types';
 import chalk from 'chalk';
 
-export class HansoloStatusCommand implements CommandHandler {
+/**
+ * Pre-flight checks for status command
+ */
+class StatusPreFlightChecks extends PreFlightChecks {
+  constructor(
+    private gitOps: GitOperations,
+    private configManager: ConfigurationManager
+  ) {
+    super();
+    this.setupChecks();
+  }
+
+  private setupChecks(): void {
+    this.addCheck(async () => this.checkGitRepository());
+    this.addCheck(async () => this.checkHansoloInitialized());
+  }
+
+  private async checkGitRepository(): Promise<CheckResult> {
+    const isGit = await this.gitOps.isInitialized();
+
+    return {
+      passed: isGit,
+      name: 'Git repository',
+      level: isGit ? 'info' : 'error',
+    };
+  }
+
+  private async checkHansoloInitialized(): Promise<CheckResult> {
+    const isInitialized = await this.configManager.isInitialized();
+
+    return {
+      passed: isInitialized,
+      name: 'Han-solo initialized',
+      level: isInitialized ? 'info' : 'error',
+      suggestions: !isInitialized ? ['Run "hansolo init" first'] : undefined,
+    };
+  }
+}
+
+export class StatusCommand implements CommandHandler {
   name = 'hansolo:status';
   description = 'Show comprehensive workflow status';
 
+  private output = new ConsoleOutput();
   private sessionRepo: SessionRepository;
   private gitOps: GitOperations;
-  private console: ConsoleOutput;
-  private table: TableFormatter;
-  private box: BoxFormatter;
+  private configManager: ConfigurationManager;
 
-  constructor() {
-    this.sessionRepo = new SessionRepository();
+  constructor(basePath: string = '.hansolo') {
+    this.sessionRepo = new SessionRepository(basePath);
     this.gitOps = new GitOperations();
-    this.console = new ConsoleOutput();
-    this.table = new TableFormatter();
-    this.box = new BoxFormatter();
+    this.configManager = new ConfigurationManager(basePath);
   }
 
-  async execute(_args: string[]): Promise<void> {
+  async execute(args: string[] = []): Promise<void> {
+    // Parse args for verbose flag
+    const options = {
+      verbose: args.includes('--verbose') || args.includes('-v'),
+    };
     try {
-      // Show banner
-      this.console.printBanner('📊 han-solo Status');
+      // Run pre-flight checks
+      const preFlightChecks = new StatusPreFlightChecks(
+        this.gitOps,
+        this.configManager
+      );
+
+      const preFlightPassed = await preFlightChecks.runChecks({
+        command: 'status',
+        options,
+      });
+
+      if (!preFlightPassed) {
+        this.output.errorMessage('\n❌ Cannot show status');
+        return;
+      }
 
       // Get current branch and session
       const currentBranch = await this.gitOps.getCurrentBranch();
-      const currentSession = await this.sessionRepo.getSessionByBranch(currentBranch);
+      const session = await this.sessionRepo.getSessionByBranch(currentBranch);
 
-      // Show current session status
-      if (currentSession) {
-        await this.showActiveSession(currentSession);
+      // Show current status
+      this.output.subheader('📍 Current Branch');
+      this.output.info(`  Branch: ${chalk.cyan(currentBranch)}`);
+
+      if (session) {
+        this.output.info(`  Session: ${chalk.green('Active')}`);
+        this.output.info(`  State: ${chalk.yellow(session.currentState)}`);
+        this.output.info(`  Type: ${session.workflowType}`);
+
+        if (session.metadata.pr?.number) {
+          this.output.info(`  PR: #${session.metadata.pr.number}`);
+        }
       } else {
-        this.console.info(`No active session on branch: ${currentBranch}`);
+        this.output.info(`  Session: ${chalk.dim('No active session')}`);
       }
 
-      // Show Git repository status
-      await this.showGitStatus();
+      // Git status
+      this.output.info('');
+      this.output.subheader('📊 Git Status');
 
-      // Show all sessions summary
-      await this.showSessionsSummary();
+      const status = await this.gitOps.getStatus();
+      const branchStatus = await this.gitOps.getBranchStatus();
 
-      // Show system health
-      await this.showSystemHealth();
+      this.output.info(`  Clean: ${status.isClean() ? chalk.green('✓') : chalk.red('✗')}`);
+
+      if (!status.isClean()) {
+        if (status.modified.length > 0) {
+          this.output.info(`  Modified: ${status.modified.length} file(s)`);
+        }
+        if (status.created.length > 0) {
+          this.output.info(`  Created: ${status.created.length} file(s)`);
+        }
+        if (status.deleted.length > 0) {
+          this.output.info(`  Deleted: ${status.deleted.length} file(s)`);
+        }
+      }
+
+      if (branchStatus.hasRemote) {
+        this.output.info(`  Ahead: ${branchStatus.ahead} commit(s)`);
+        this.output.info(`  Behind: ${branchStatus.behind} commit(s)`);
+      }
+
+      // Show verbose details if requested
+      if (options.verbose && session) {
+        this.output.info('');
+        this.output.subheader('📋 Session Details');
+        this.output.info(`  ID: ${session.id}`);
+        this.output.info(`  Created: ${new Date(session.createdAt).toLocaleString()}`);
+        this.output.info(`  Updated: ${new Date(session.updatedAt).toLocaleString()}`);
+        this.output.info(`  Expires: ${new Date(session.expiresAt).toLocaleString()}`);
+
+        if (session.stateHistory.length > 0) {
+          this.output.info('');
+          this.output.dim('  State History:');
+          session.stateHistory.slice(-5).forEach(transition => {
+            this.output.dim(`    ${transition.from} → ${transition.to} (${transition.trigger})`);
+          });
+        }
+      }
+
+      this.output.info('');
 
     } catch (error) {
-      this.console.error('Failed to get status', error as Error);
+      this.output.errorMessage(`Status failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   }
 
-  private async showActiveSession(session: WorkflowSession): Promise<void> {
-    const sessionInfo = [
-      ['ID', session.id.substring(0, 8)],
-      ['Branch', session.branchName],
-      ['Type', session.workflowType],
-      ['State', this.formatState(session.currentState)],
-      ['Created', new Date(session.createdAt).toLocaleString()],
-      ['Expires', new Date(session.expiresAt).toLocaleString()],
-    ];
-
-    const content = this.table.formatTable(
-      ['Property', 'Value'],
-      sessionInfo
-    );
-
-    this.box.printBox('Active Session', content);
-
-    // Show state history
-    if (session.stateHistory.length > 0) {
-      this.console.info('\nState History:');
-      session.stateHistory.slice(-5).forEach(transition => {
-        this.console.log(
-          `  ${chalk.gray(new Date(transition.timestamp).toLocaleTimeString())} ` +
-          `${transition.from} → ${chalk.green(transition.to)}`
-        );
-      });
-    }
-  }
-
-  private async showGitStatus(): Promise<void> {
-    const status = await this.gitOps.getStatus();
-    const branch = await this.gitOps.getCurrentBranch();
-    const ahead = await this.gitOps.getAheadBehindCount();
-    const hasRemote = await this.gitOps.hasRemote();
-
-    const gitInfo = [
-      ['Current Branch', branch],
-      ['Tracking', hasRemote ? 'Remote configured' : 'Local only'],
-      ['Ahead/Behind', `↑${ahead.ahead} ↓${ahead.behind}`],
-      ['Working Tree', status.isClean() ? '✅ Clean' : '⚠️ Modified'],
-      ['Staged Files', status.staged.length.toString()],
-      ['Modified Files', status.modified.length.toString()],
-      ['Untracked Files', status.not_added.length.toString()],
-    ];
-
-    const content = this.table.formatTable(
-      ['Property', 'Value'],
-      gitInfo
-    );
-
-    this.box.printBox('Git Repository Status', content);
-
-    // Show file details if working tree is dirty
-    if (!status.isClean()) {
-      if (status.staged.length > 0) {
-        this.console.info('\nStaged files:');
-        status.staged.forEach(file => this.console.log(`  ${chalk.green('+')} ${file}`));
-      }
-      if (status.modified.length > 0) {
-        this.console.info('\nModified files:');
-        status.modified.forEach(file => this.console.log(`  ${chalk.yellow('M')} ${file}`));
-      }
-      if (status.not_added.length > 0) {
-        this.console.info('\nUntracked files:');
-        status.not_added.forEach((file: string) => this.console.log(`  ${chalk.gray('?')} ${file}`));
-      }
-    }
-  }
-
-  private async showSessionsSummary(): Promise<void> {
-    const sessions = await this.sessionRepo.listSessions();
-
-    if (sessions.length === 0) {
-      return;
-    }
-
-    const sessionsByType = {
-      launch: sessions.filter(s => s.workflowType === 'launch'),
-      ship: sessions.filter(s => s.workflowType === 'ship'),
-      hotfix: sessions.filter(s => s.workflowType === 'hotfix'),
-    };
-
-    const summaryData = [
-      ['Total Sessions', sessions.length.toString()],
-      ['Launch Workflows', sessionsByType.launch.length.toString()],
-      ['Ship Workflows', sessionsByType.ship.length.toString()],
-      ['Hotfix Workflows', sessionsByType.hotfix.length.toString()],
-    ];
-
-    const content = this.table.formatTable(
-      ['Metric', 'Count'],
-      summaryData
-    );
-
-    this.box.printBox('Sessions Summary', content);
-  }
-
-  private async showSystemHealth(): Promise<void> {
-    const config = await this.sessionRepo.loadConfiguration();
-    const hooksInstalled = await this.checkHooksInstalled();
-    const templatesAvailable = await this.checkTemplatesAvailable();
-
-    const healthData = [
-      ['Initialized', config.initialized ? '✅ Yes' : '❌ No'],
-      ['Config Version', config.version],
-      ['Git Hooks', hooksInstalled ? '✅ Installed' : '⚠️ Not installed'],
-      ['Templates', templatesAvailable ? '✅ Available' : '⚠️ Not found'],
-      ['MCP Server', config.components.mpcServer ? '✅ Enabled' : '❌ Disabled'],
-      ['Status Lines', config.components.statusLines ? '✅ Enabled' : '❌ Disabled'],
-    ];
-
-    const content = this.table.formatTable(
-      ['Component', 'Status'],
-      healthData
-    );
-
-    this.box.printBox('System Health', content);
-  }
-
-  private formatState(state: string): string {
-    const stateColors: Record<string, string> = {
-      'INIT': chalk.blue(state),
-      'BRANCH_READY': chalk.cyan(state),
-      'CHANGES_COMMITTED': chalk.yellow(state),
-      'PUSHED': chalk.magenta(state),
-      'PR_CREATED': chalk.green(state),
-      'WAITING_APPROVAL': chalk.yellow(state),
-      'REBASING': chalk.blue(state),
-      'MERGING': chalk.magenta(state),
-      'COMPLETE': chalk.green(state),
-      'ABORTED': chalk.red(state),
-    };
-
-    return stateColors[state] || state;
-  }
-
-  private async checkHooksInstalled(): Promise<boolean> {
-    try {
-      const fs = await import('fs/promises');
-      await fs.access('.hansolo/hooks/pre-commit');
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  private async checkTemplatesAvailable(): Promise<boolean> {
-    try {
-      const fs = await import('fs/promises');
-      await fs.access('templates/commit-message.txt');
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
   validate(_args: string[]): boolean {
-    // No arguments required for status command
+    // Status command has no arguments to validate
     return true;
   }
 }
