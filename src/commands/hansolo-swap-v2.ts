@@ -4,7 +4,6 @@ import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
 import { ConfigurationManager } from '../services/configuration-manager';
 import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
-import { getBanner } from '../ui/banners';
 
 /**
  * Pre-flight checks for swap command
@@ -157,9 +156,6 @@ export class SwapCommandV2 {
         this.output.errorMessage('\n❌ Pre-flight checks failed - aborting swap');
         return;
       }
-
-      // Display ASCII art banner
-      console.log(getBanner('swap'));
 
       // Handle uncommitted changes
       let changesStashed = false;

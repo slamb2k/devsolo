@@ -3,7 +3,6 @@ import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
 import { ConfigurationManager } from '../services/configuration-manager';
 import { PreFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
-import { getBanner } from '../ui/banners';
 import chalk from 'chalk';
 
 /**
@@ -76,9 +75,6 @@ export class StatusCommandV2 {
         this.output.errorMessage('\n❌ Cannot show status');
         return;
       }
-
-      // Display ASCII art banner
-      console.log(getBanner('status'));
 
       // Get current branch and session
       const currentBranch = await this.gitOps.getCurrentBranch();

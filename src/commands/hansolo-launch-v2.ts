@@ -6,7 +6,6 @@ import { GitOperations } from '../services/git-operations';
 import { WorkflowSession } from '../models/workflow-session';
 import { BranchValidator } from '../services/validation/branch-validator';
 import { PreFlightChecks, PostFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
-import { getBanner } from '../ui/banners';
 import { BranchNamingService } from '../services/branch-naming';
 import { GitHubIntegration } from '../services/github-integration';
 import { StashManager } from '../services/stash-manager';
@@ -468,9 +467,6 @@ export class LaunchCommandV2 {
         this.output.errorMessage('\n❌ Pre-flight checks failed - aborting launch');
         return;
       }
-
-      // Display ASCII art banner
-      console.log(getBanner('launch'));
 
       // Execute launch workflow
       let session: WorkflowSession | undefined;

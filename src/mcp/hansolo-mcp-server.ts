@@ -557,7 +557,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
       try {
         switch (name) {
         case 'hansolo_init': {
-          console.log(getBanner('init'));
+          originalConsoleLog(getBanner('init'));
           const params = InitSchema.parse(args);
           const initCommand = new InitCommand(this.basePath);
           await initCommand.execute(params);
@@ -572,7 +572,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_launch': {
-          console.log(getBanner('launch'));
+          originalConsoleLog(getBanner('launch'));
           const params = LaunchSchema.parse(args);
 
           // If no branchName or description provided, ask for description to generate better branch name
@@ -621,7 +621,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_sessions': {
-          console.log(getBanner('sessions'));
+          originalConsoleLog(getBanner('sessions'));
           const params = SessionsSchema.parse(args);
           // SessionsCommand is available but we'll use SessionRepository directly
           const sessionRepo = new SessionRepository(this.basePath);
@@ -667,7 +667,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_swap': {
-          console.log(getBanner('swap'));
+          originalConsoleLog(getBanner('swap'));
           const params = SwapSchema.parse(args);
 
           // If no branchName provided, try elicitation or fail gracefully
@@ -745,7 +745,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_abort': {
-          console.log(getBanner('abort'));
+          originalConsoleLog(getBanner('abort'));
           const params = AbortSchema.parse(args);
 
           // If no branchName provided and multiple active sessions, ask which one
@@ -822,7 +822,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_ship': {
-          console.log(getBanner('ship'));
+          originalConsoleLog(getBanner('ship'));
           const params = ShipSchema.parse(args);
 
           // Optionally ask for commit message if not provided
@@ -882,7 +882,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_status': {
-          console.log(getBanner('status'));
+          originalConsoleLog(getBanner('status'));
           const gitOps = new GitOperations();
           const sessionRepo = new SessionRepository(this.basePath);
           const currentBranch = await gitOps.getCurrentBranch();
@@ -918,7 +918,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_status_line': {
-          console.log(getBanner('status-line'));
+          originalConsoleLog(getBanner('status-line'));
           const { ManageStatusLineTool } = await import('../mcp-server/tools/manage-status-line');
           const statusLineTool = new ManageStatusLineTool();
           const result = await statusLineTool.execute(args as any);
@@ -959,7 +959,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_hotfix': {
-          console.log(getBanner('hotfix'));
+          originalConsoleLog(getBanner('hotfix'));
           const params = HotfixSchema.parse(args);
           const hotfixCommand = new HotfixCommand(this.basePath);
           await hotfixCommand.execute(params);

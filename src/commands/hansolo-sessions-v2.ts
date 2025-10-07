@@ -2,7 +2,6 @@ import { ConsoleOutput } from '../ui/console-output';
 import { SessionRepository } from '../services/session-repository';
 import { ConfigurationManager } from '../services/configuration-manager';
 import { PreFlightChecks, CheckResult } from '../services/validation/pre-flight-checks';
-import { getBanner } from '../ui/banners';
 import chalk from 'chalk';
 
 /**
@@ -62,9 +61,6 @@ export class SessionsCommandV2 {
         this.output.errorMessage('\n❌ Cannot list sessions');
         return;
       }
-
-      // Display ASCII art banner
-      console.log(getBanner('sessions'));
 
       // Cleanup if requested
       if (options.cleanup) {
