@@ -133,3 +133,13 @@ jobs:
 
       - name: Run npm audit
         run: npm audit --audit-level=moderate || true
+
+  release:
+    name: Release
+    needs: [lint, test, build, integration, security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
+    uses: ./.github/workflows/release.yml
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
