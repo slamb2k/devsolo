@@ -507,12 +507,10 @@ export class HanSoloMCPServer {
         });
       }
 
-      // Add skipBanner=true for prompts since we display the banner in the prompt
-      toolArgs['skipBanner'] = true;
-
-      // Build arguments string for display
-      const argsStr = Object.keys(toolArgs).length > 0
-        ? ` with ${Object.entries(toolArgs).map(([k, v]) => `${k}=${v}`).join(', ')}`
+      // Build arguments string for display (exclude internal parameters)
+      const displayArgs = Object.entries(toolArgs).filter(([k]) => k !== 'skipBanner');
+      const argsStr = displayArgs.length > 0
+        ? ` with ${displayArgs.map(([k, v]) => `${k}=${v}`).join(', ')}`
         : '';
 
       // Construct the prompt returned from the mcp server
@@ -522,7 +520,7 @@ export class HanSoloMCPServer {
 
 ${banner}
 
-Once that has been shown to the user, now run the han-solo ${name} command${argsStr}`;
+Once that has been shown to the user, now run the han-solo ${name} command${argsStr} and pass skipBanner=true`;
 
 
       return {
@@ -542,6 +540,20 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
     // Handle tool calls
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
+
+      // Preprocess args to convert string booleans to actual booleans
+      const processedArgs: any = {};
+      if (args) {
+        Object.entries(args).forEach(([key, value]) => {
+          if (value === 'true') {
+            processedArgs[key] = true;
+          } else if (value === 'false') {
+            processedArgs[key] = false;
+          } else {
+            processedArgs[key] = value;
+          }
+        });
+      }
 
       // Save original console methods
       const originalConsoleLog = console.log;
@@ -564,7 +576,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
       try {
         switch (name) {
         case 'hansolo_init': {
-          const params = InitSchema.parse(args);
+          const params = InitSchema.parse(processedArgs);
           if (!params.skipBanner) {
             capturedOutput.push(getBanner('init'));
           }
@@ -581,7 +593,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_launch': {
-          const params = LaunchSchema.parse(args);
+          const params = LaunchSchema.parse(processedArgs);
           if (!params.skipBanner) {
             capturedOutput.push(getBanner('launch'));
           }
@@ -628,7 +640,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_sessions': {
-          const params = SessionsSchema.parse(args);
+          const params = SessionsSchema.parse(processedArgs);
           if (!params.skipBanner) {
             capturedOutput.push(getBanner('sessions'));
           }
@@ -676,7 +688,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_swap': {
-          const params = SwapSchema.parse(args);
+          const params = SwapSchema.parse(processedArgs);
           if (!params.skipBanner) {
             capturedOutput.push(getBanner('swap'));
           }
@@ -753,7 +765,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_abort': {
-          const params = AbortSchema.parse(args);
+          const params = AbortSchema.parse(processedArgs);
           if (!params.skipBanner) {
             capturedOutput.push(getBanner('abort'));
           }
@@ -821,7 +833,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_ship': {
-          const params = ShipSchema.parse(args);
+          const params = ShipSchema.parse(processedArgs);
           if (!params.skipBanner) {
             capturedOutput.push(getBanner('ship'));
           }
@@ -880,7 +892,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_status': {
-          if (!args?.['skipBanner']) {
+          if (!processedArgs?.['skipBanner']) {
             capturedOutput.push(getBanner('status'));
           }
           const gitOps = new GitOperations();
@@ -918,12 +930,12 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_status_line': {
-          if (!args?.['skipBanner']) {
+          if (!processedArgs?.['skipBanner']) {
             capturedOutput.push(getBanner('status-line'));
           }
           const { ManageStatusLineTool } = await import('../mcp-server/tools/manage-status-line');
           const statusLineTool = new ManageStatusLineTool();
-          const result = await statusLineTool.execute(args as any);
+          const result = await statusLineTool.execute(processedArgs as any);
 
           let message = '';
           let isError = false;
@@ -961,7 +973,7 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
         }
 
         case 'hansolo_hotfix': {
-          const params = HotfixSchema.parse(args);
+          const params = HotfixSchema.parse(processedArgs);
           if (!params.skipBanner) {
             capturedOutput.push(getBanner('hotfix'));
           }
