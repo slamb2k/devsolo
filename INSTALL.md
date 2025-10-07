@@ -222,6 +222,13 @@ cd /path/to/your/project
 hansolo init
 ```
 
+This will:
+- Create `.hansolo` directory with configuration
+- Install Git hooks (pre-commit, pre-push)
+- Set up session storage
+- Install status line script for Claude Code
+- Configure MCP server (if Claude Code is detected)
+
 ### 2. Configure Git User
 
 ```bash
@@ -229,19 +236,72 @@ git config --global user.name "Your Name"
 git config --global user.email "your.email@example.com"
 ```
 
-### 3. Set Up GitHub Token (Optional)
+### 3. Set Up GitHub Authentication
 
+**Option A: GitHub CLI (Recommended for local development)**
 ```bash
-export GITHUB_TOKEN="your_personal_access_token"
-# Add to ~/.bashrc or ~/.zshrc for persistence
+# Install GitHub CLI
+brew install gh  # macOS
+# or
+sudo apt install gh  # Linux
+
+# Authenticate
+gh auth login
 ```
 
-### 4. Create Configuration File (Optional)
+**Option B: Personal Access Token (For CI/CD)**
+```bash
+# Create token at: https://github.com/settings/tokens
+# Required scopes: repo, workflow
+
+export GITHUB_TOKEN="ghp_your_token_here"
+
+# Add to ~/.bashrc or ~/.zshrc for persistence
+echo 'export GITHUB_TOKEN="ghp_your_token_here"' >> ~/.bashrc
+```
+
+### 4. Claude Code Integration (Optional but Recommended)
+
+If you have Claude Code installed, han-solo integrates seamlessly.
+
+**Automatic Setup (via hansolo init):**
+```bash
+hansolo init
+# Automatically detects Claude Code and configures MCP server
+```
+
+**Manual MCP Configuration:**
+```bash
+# For project-level (team shares configuration)
+hansolo init --scope project
+
+# For user-level (just you)
+hansolo init --scope user
+```
+
+**Enable Status Line:**
+```bash
+# After initialization, enable the status line in Claude Code
+# This shows workflow status directly in Claude Code's interface
+/hansolo:status-line enable
+```
+
+**Verify Integration:**
+```bash
+# In Claude Code, try:
+/hansolo:status
+
+# Or from terminal:
+hansolo status
+```
+
+### 5. Create Configuration File (Optional)
 
 ```bash
 # Copy example configuration
-cp .hansolo.example.yaml .hansolo.yaml
+cp .hansolo/config.yaml .hansolo/config.custom.yaml
 # Edit to customize
+vim .hansolo/config.custom.yaml
 ```
 
 ## Verification
