@@ -125,12 +125,7 @@ export class AbortCommand {
     this.configManager = new ConfigurationManager(basePath);
   }
 
-  async execute(options: {
-    branchName?: string;
-    force?: boolean;
-    deleteBranch?: boolean;
-    yes?: boolean;
-  } = {}): Promise<{ stashRef?: string; branchAborted: string }> {
+  async execute(options: {branchName?: string; force?: boolean; deleteBranch?: boolean; yes?: boolean;} = {}): Promise<{stashRef?: string; branchAborted: string}> {
     try {
       // Check initialization
       if (!await this.configManager.isInitialized()) {
@@ -170,7 +165,7 @@ export class AbortCommand {
       if (!session.isActive() && !options.force) {
         this.output.errorMessage(`Session is not active (state: ${session.currentState})`);
         this.output.infoMessage('Use --force to abort anyway');
-        throw new Error(`Session is not active (state: ${session.currentState})`);
+        return { branchAborted: branchName };
       }
 
       // Check for uncommitted changes
@@ -199,7 +194,7 @@ export class AbortCommand {
               stashRef = stashResult.stashRef;
             } else if (!await this.output.confirm('Discard uncommitted changes?')) {
               this.output.infoMessage('Abort cancelled');
-              return { branchAborted: branchName };
+              return { branchAborted: branchName, stashRef };
             }
           }
         }
@@ -219,7 +214,7 @@ export class AbortCommand {
 
         if (!confirmed) {
           this.output.infoMessage('Abort cancelled');
-          return { branchAborted: branchName };
+          return { branchAborted: branchName, stashRef };
         }
       }
 
@@ -249,10 +244,7 @@ export class AbortCommand {
       this.output.successMessage('✅ Workflow aborted successfully');
       this.showAbortSummary(session, options.deleteBranch, stashRef);
 
-      return {
-        stashRef,
-        branchAborted: branchName,
-      };
+      return { branchAborted: branchName, stashRef };
 
     } catch (error) {
       this.output.errorMessage(`Abort failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

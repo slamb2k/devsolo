@@ -337,13 +337,7 @@ export class LaunchCommand {
     this.abortCommand = new AbortCommand(basePath);
   }
 
-  async execute(options: {
-    branchName?: string;
-    force?: boolean;
-    description?: string;
-    stashRef?: string;
-    popStash?: boolean;
-  } = {}): Promise<void> {
+  async execute(options: {branchName?: string; force?: boolean; description?: string; stashRef?: string; popStash?: boolean;} = {}): Promise<void> {
     try {
       // Check initialization
       if (!(await this.configManager.isInitialized())) {

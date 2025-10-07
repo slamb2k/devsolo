@@ -306,11 +306,7 @@ export class ShipCommand {
     this.prValidator = new PRValidator(basePath);
   }
 
-  async execute(options: {
-    message?: string;
-    yes?: boolean;
-    force?: boolean;
-  } = {}): Promise<void> {
+  async execute(options: {message?: string; yes?: boolean; force?: boolean;} = {}): Promise<void> {
     const logger = getLogger();
 
     try {

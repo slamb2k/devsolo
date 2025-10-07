@@ -41,11 +41,7 @@ export class SessionsCommand {
     this.configManager = new ConfigurationManager(basePath);
   }
 
-  async execute(options: {
-    all?: boolean;
-    verbose?: boolean;
-    cleanup?: boolean;
-  } = {}): Promise<void> {
+  async execute(options: {all?: boolean; verbose?: boolean; cleanup?: boolean;} = {}): Promise<void> {
     try {
       // Run pre-flight checks
       const preFlightChecks = new SessionsPreFlightChecks(

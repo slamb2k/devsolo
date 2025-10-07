@@ -118,11 +118,7 @@ export class SwapCommand {
     this.configManager = new ConfigurationManager(basePath);
   }
 
-  async execute(options: {
-    branchName?: string;
-    force?: boolean;
-    stash?: boolean;
-  } = {}): Promise<void> {
+  async execute(options: {branchName?: string; force?: boolean; stash?: boolean;} = {}): Promise<void> {
     try {
       // Check initialization
       if (!await this.configManager.isInitialized()) {
