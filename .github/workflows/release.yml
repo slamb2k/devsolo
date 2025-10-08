@@ -39,44 +39,79 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Get version from package.json
-        id: package-version
+      - name: Get current version
+        id: current-version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Check if version changed
-        id: version-changed
+      - name: Get last release tag
+        id: last-tag
         run: |
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          LAST_VERSION=${LAST_TAG#v}
-          CURRENT_VERSION="${{ steps.package-version.outputs.version }}"
+          echo "tag=$LAST_TAG" >> $GITHUB_OUTPUT
+          echo "sha=$(git rev-list -n 1 $LAST_TAG 2>/dev/null || git rev-list --max-parents=0 HEAD)" >> $GITHUB_OUTPUT
 
-          if [ "$LAST_VERSION" = "$CURRENT_VERSION" ]; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Version unchanged ($CURRENT_VERSION) - skipping release"
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "✓ Version changed: $LAST_VERSION → $CURRENT_VERSION"
-          fi
-
-      - name: Determine version tag
-        id: version-tag
+      - name: Analyze commits for version bump
+        id: analyze
         run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=v${{ steps.package-version.outputs.version }}" >> $GITHUB_OUTPUT
+          # Get commits since last tag
+          COMMITS=$(git log --pretty=format:"%s" ${{ steps.last-tag.outputs.sha }}..HEAD)
+
+          # Determine bump type based on conventional commits
+          BUMP_TYPE="patch"
+
+          if echo "$COMMITS" | grep -qE "^(feat|fix|perf|refactor)!:|BREAKING CHANGE:"; then
+            BUMP_TYPE="major"
+          elif echo "$COMMITS" | grep -qE "^feat(\(.+\))?:"; then
+            BUMP_TYPE="minor"
           fi
 
-      - name: Create git tag
-        if: steps.version-changed.outputs.changed == 'true' && github.ref_type != 'tag'
+          echo "type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "Determined bump type: $BUMP_TYPE"
+
+      - name: Calculate new version
+        id: new-version
+        run: |
+          CURRENT="${{ steps.current-version.outputs.version }}"
+          BUMP_TYPE="${{ steps.analyze.outputs.type }}"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+          case $BUMP_TYPE in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "✓ Version bump: $CURRENT → $NEW_VERSION ($BUMP_TYPE)"
+
+      - name: Update package.json version
+        run: npm version ${{ steps.new-version.outputs.version }} --no-git-tag-version
+
+      - name: Commit version bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "${{ steps.version-tag.outputs.tag }}" -m "Release ${{ steps.version-tag.outputs.tag }}"
-          git push origin "${{ steps.version-tag.outputs.tag }}"
+          git add package.json package-lock.json
+          git commit -m "chore(release): bump version to ${{ steps.new-version.outputs.version }} [skip ci]"
+          git push
+
+      - name: Create git tag
+        run: |
+          git tag -a "v${{ steps.new-version.outputs.version }}" -m "Release v${{ steps.new-version.outputs.version }}"
+          git push origin "v${{ steps.new-version.outputs.version }}"
 
       - name: Generate professional changelog
-        if: steps.version-changed.outputs.changed == 'true'
         id: changelog
         run: |
           # Generate changelog using conventional-changelog
@@ -95,19 +130,17 @@ jobs:
           fi
 
       - name: Create GitHub Release
-        if: steps.version-changed.outputs.changed == 'true'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.version-tag.outputs.tag }}
-          release_name: Release ${{ steps.version-tag.outputs.tag }}
+          tag_name: v${{ steps.new-version.outputs.version }}
+          release_name: Release v${{ steps.new-version.outputs.version }}
           body: ${{ steps.changelog.outputs.changes }}
           draft: false
           prerelease: false
 
       - name: Publish to npm
-        if: steps.version-changed.outputs.changed == 'true'
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
