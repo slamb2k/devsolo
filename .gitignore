@@ -37,12 +37,23 @@ Thumbs.db
 !.hansolo/templates/
 !.hansolo/hooks/
 !.hansolo/commands/
+.hansolo/debug.log
+.hansolo/locks/*.lock
+.hansolo/sessions/
+.hansolo/audit/
 
 # Temporary files
 tmp/
 temp/
 *.tmp
 *.temp
+test-stash*.txt
+
+# Compiled files in source (should only be in dist/)
+src/**/*.js
+src/**/*.d.ts
+src/**/*.js.map
+src/**/*.d.ts.map
 
 # Logs
 logs/
