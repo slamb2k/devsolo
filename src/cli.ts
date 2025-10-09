@@ -8,6 +8,7 @@ import { LaunchCommand } from './commands/hansolo-launch';
 import { SessionsCommand } from './commands/hansolo-sessions';
 import { SwapCommand } from './commands/hansolo-swap';
 import { AbortCommand } from './commands/hansolo-abort';
+import { CommitCommand } from './commands/hansolo-commit';
 import { ShipCommand } from './commands/hansolo-ship';
 import { HotfixCommand } from './commands/hansolo-hotfix';
 import { runInteractiveMode } from './commands/interactive';
@@ -91,6 +92,12 @@ export async function main(): Promise<void> {
     return;
   }
 
+  // Commit command
+  if (command === 'commit') {
+    await runCommit(args.slice(1));
+    return;
+  }
+
   // Ship command
   if (command === 'ship') {
     await runShip(args.slice(1));
@@ -121,7 +128,8 @@ function showHelp(): void {
   console.log('  init         Initialize han-solo in your project');
   console.log('  configure    Configure han-solo settings');
   console.log('  launch       Start a new feature workflow');
-  console.log('  ship         Complete workflow and merge to main');
+  console.log('  commit       Commit staged changes');
+  console.log('  ship         Push, create PR, merge, and cleanup');
   console.log('  hotfix       Create emergency hotfix');
   console.log('  status       Show current workflow status');
   console.log('  sessions     List all active sessions');
@@ -340,6 +348,21 @@ async function runAbort(args: string[]): Promise<void> {
   await abortCommand.execute(options);
 }
 
+async function runCommit(args: string[]): Promise<void> {
+  console.log(getBanner('commit'));
+  const commitCommand = new CommitCommand();
+
+  // Parse options
+  const options: any = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--message' || args[i] === '-m') {
+      options.message = args[++i];
+    }
+  }
+
+  await commitCommand.execute(options);
+}
+
 async function runShip(args: string[]): Promise<void> {
   console.log(getBanner('ship'));
   const shipCommand = new ShipCommand();
@@ -347,8 +370,8 @@ async function runShip(args: string[]): Promise<void> {
   // Parse options
   const options: any = {};
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--message' || args[i] === '-m') {
-      options.message = args[++i];
+    if (args[i] === '--pr-description' || args[i] === '-d') {
+      options.prDescription = args[++i];
     } else if (args[i] === '--push') {
       options.push = true;
     } else if (args[i] === '--create-pr') {

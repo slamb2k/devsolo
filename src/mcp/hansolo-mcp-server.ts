@@ -13,6 +13,7 @@ import { InitCommand } from '../commands/hansolo-init';
 import { LaunchCommand } from '../commands/hansolo-launch';
 import { SwapCommand } from '../commands/hansolo-swap';
 import { AbortCommand } from '../commands/hansolo-abort';
+import { CommitCommand } from '../commands/hansolo-commit';
 import { ShipCommand } from '../commands/hansolo-ship';
 import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
@@ -57,8 +58,12 @@ const AbortSchema = z.object({
   mcpPrompt: z.boolean().optional(),
 });
 
-const ShipSchema = z.object({
+const CommitSchema = z.object({
   message: z.string().optional(),
+  mcpPrompt: z.boolean().optional(),
+});
+
+const ShipSchema = z.object({
   prDescription: z.string().optional(),
   push: z.boolean().optional(),
   createPR: z.boolean().optional(),
@@ -222,14 +227,27 @@ export class HanSoloMCPServer {
             },
           },
           {
-            name: 'hansolo_ship',
-            description: 'Complete workflow and merge to main',
+            name: 'hansolo_commit',
+            description: 'Commit staged changes with optional message',
             inputSchema: {
               type: 'object',
               properties: {
                 message: {
                   type: 'string',
-                  description: 'Commit message',
+                  description: 'Commit message (footer added automatically)',
+                },
+              },
+            },
+          },
+          {
+            name: 'hansolo_ship',
+            description: 'Push, create PR, merge, and cleanup (requires all changes committed)',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                prDescription: {
+                  type: 'string',
+                  description: 'Pull request description (footer added automatically)',
                 },
                 push: {
                   type: 'boolean',
@@ -960,54 +978,40 @@ Also include:
           };
         }
 
+        case 'hansolo_commit': {
+          const params = CommitSchema.parse(processedArgs);
+          if (!params.mcpPrompt) {
+            capturedOutput.push(getBanner('commit'));
+          }
+
+          const commitCommand = new CommitCommand(this.basePath);
+          await commitCommand.execute({
+            message: params.message,
+            mcpPrompt: params.mcpPrompt,
+          });
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: capturedOutput.join('\n') || 'Changes committed successfully',
+              },
+            ],
+          };
+        }
+
         case 'hansolo_ship': {
           const params = ShipSchema.parse(processedArgs);
           if (!params.mcpPrompt) {
             capturedOutput.push(getBanner('ship'));
           }
 
-          // If no message or PR description provided, ask Claude to analyze first
-          if (!params.message || !params.prDescription) {
-            return {
-              content: [{
-                type: 'text',
-                text: `Before shipping, please analyze the staged changes:
-
-1. **Review staged changes**: Run 'git diff --cached --stat' to see which files changed
-2. **Examine the changes**: Run 'git diff --cached' to see the actual code changes (skip if too large)
-3. **Generate content**: Based on your analysis, create:
-
-   **Commit Message** (for --message parameter):
-   - First line: Brief summary (max 50 chars), format: "type: description"
-   - Blank line
-   - Detailed explanation of what changed and why (2-3 sentences)
-   - Blank line
-   - Any important implementation details
-   - (Footer will be added automatically)
-
-   **PR Description** (for --prDescription parameter):
-   - Clear summary of the feature/fix
-   - Why this change was needed
-   - How it works (high-level)
-   - Testing considerations or notes for reviewers
-
-4. **Call ship again** with both parameters:
-
-IMPORTANT: Include these parameters:
-<parameter name="mcpPrompt">true</parameter>
-<parameter name="message">Your commit message here (without footer)</parameter>
-<parameter name="prDescription">Your PR description here (without footer)</parameter>
-<parameter name="yes">true</parameter>`,
-              }],
-            };
-          }
-
           const shipCommand = new ShipCommand(this.basePath);
           await shipCommand.execute({
-            message: params.message,
             prDescription: params.prDescription,
             yes: params.yes,
             force: params.force,
+            mcpPrompt: params.mcpPrompt,
           });
 
           const outputText = capturedOutput.join('\n');
