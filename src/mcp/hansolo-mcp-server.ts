@@ -16,7 +16,6 @@ import { AbortCommand } from '../commands/hansolo-abort';
 import { ShipCommand } from '../commands/hansolo-ship';
 import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
-import { ConfigurationManager } from '../services/configuration-manager';
 import { getBanner } from '../ui/banners';
 import { HotfixCommand } from '../commands/hansolo-hotfix';
 
@@ -60,6 +59,7 @@ const AbortSchema = z.object({
 
 const ShipSchema = z.object({
   message: z.string().optional(),
+  prDescription: z.string().optional(),
   push: z.boolean().optional(),
   createPR: z.boolean().optional(),
   merge: z.boolean().optional(),
@@ -633,6 +633,7 @@ export class HanSoloMCPServer {
       // Construct the prompt returned from the mcp server
       const banner = getBanner(name);
 
+      // Generate standard command message for all commands
       const commandMessage = `Display the following text immediately before you do anything else:
 
 ${banner}
@@ -641,7 +642,6 @@ Once that has been shown to the user, now run the han-solo ${name} command${args
 
 IMPORTANT: You must include this parameter in your tool call:
 <parameter name="mcpPrompt">true</parameter>`;
-
 
       return {
         description: `Execute han-solo ${name} command`,
@@ -958,55 +958,49 @@ IMPORTANT: You must include this parameter in your tool call:
             capturedOutput.push(getBanner('ship'));
           }
 
-          // Optionally ask for commit message if not provided
-          let commitMessage = params.message;
-          if (!commitMessage) {
-            try {
-              // Get current session info for default message
-              const gitOps = new GitOperations();
-              const sessionRepo = new SessionRepository(this.basePath);
-              const currentBranch = await gitOps.getCurrentBranch();
-              const session = await sessionRepo.getSessionByBranch(currentBranch);
+          // If no message or PR description provided, ask Claude to analyze first
+          if (!params.message || !params.prDescription) {
+            return {
+              content: [{
+                type: 'text',
+                text: `Before shipping, please analyze the staged changes:
 
-              // Load config to get commit template
-              const configManager = new ConfigurationManager(this.basePath);
-              const config = await configManager.load();
-              const footer = config.preferences.commitTemplate?.footer || '';
+1. **Review staged changes**: Run 'git diff --cached --stat' to see which files changed
+2. **Examine the changes**: Run 'git diff --cached' to see the actual code changes (skip if too large)
+3. **Generate content**: Based on your analysis, create:
 
-              let defaultMessage = '';
-              if (session) {
-                defaultMessage = `feat: ${session.branchName}`;
-                if (footer) {
-                  defaultMessage += `\n\n${footer}`;
-                }
-              }
+   **Commit Message** (for --message parameter):
+   - First line: Brief summary (max 50 chars), format: "type: description"
+   - Blank line
+   - Detailed explanation of what changed and why (2-3 sentences)
+   - Blank line
+   - Any important implementation details
+   - (Footer will be added automatically)
 
-              const elicitResult = await this.server.elicitInput({
-                message: 'Enter a commit message (or press Enter to use default):',
-                requestedSchema: {
-                  type: 'object',
-                  properties: {
-                    message: {
-                      type: 'string',
-                      title: 'Commit message',
-                      description: 'Commit message for this workflow',
-                      default: defaultMessage,
-                    },
-                  },
-                },
-              });
+   **PR Description** (for --prDescription parameter):
+   - Clear summary of the feature/fix
+   - Why this change was needed
+   - How it works (high-level)
+   - Testing considerations or notes for reviewers
 
-              if (elicitResult.action === 'accept' && elicitResult.content?.['message']) {
-                commitMessage = elicitResult.content['message'] as string;
-              }
-            } catch (error) {
-              // Elicitation not supported by client - continue with default
-              console.error('[MCP] Elicitation not supported, using default commit message');
-            }
+4. **Call ship again** with both parameters:
+
+IMPORTANT: Include these parameters:
+<parameter name="mcpPrompt">true</parameter>
+<parameter name="message">Your commit message here (without footer)</parameter>
+<parameter name="prDescription">Your PR description here (without footer)</parameter>
+<parameter name="yes">true</parameter>`,
+              }],
+            };
           }
 
           const shipCommand = new ShipCommand(this.basePath);
-          await shipCommand.execute({message: commitMessage, yes: params.yes, force: params.force});
+          await shipCommand.execute({
+            message: params.message,
+            prDescription: params.prDescription,
+            yes: params.yes,
+            force: params.force,
+          });
 
           const outputText = capturedOutput.join('\n');
 
