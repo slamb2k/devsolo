@@ -5,6 +5,7 @@ This folder contains implementation plans, task lists, and roadmaps for upcoming
 ## Contents
 
 - **codebase-cleanup-phase1-plan.md** - Phase 1 (Quick Wins) implementation plan for codebase optimization: removing build artifacts, unused dependencies, and runtime files
+- **phase2-architecture-cleanup-plan.md** - Phase 2 (Architecture Cleanup) implementation plan: remove dead MCP server code (2,600 lines), fix test suite (re-enable 50% of skipped tests), and refactor large command files (700+ lines → <300 lines)
 
 ## What Goes Here
 
