@@ -483,8 +483,8 @@ export class ShipCommand {
       // Add footer with guaranteed blank line separation
       if (footer) {
         // Ensure there's always a blank line before footer
-        if (!commitMessage.endsWith('\n\n')) {
-          commitMessage += '\n\n';
+        if (!commitMessage.endsWith('\n\n---\n')) {
+          commitMessage += '\n\n---\n';
         }
         commitMessage += footer;
       }
