@@ -307,7 +307,7 @@ export class ShipCommand {
     this.prValidator = new PRValidator(basePath);
   }
 
-  async execute(options: {message?: string; prDescription?: string; yes?: boolean; force?: boolean;} = {}): Promise<void> {
+  async execute(options: {prDescription?: string; yes?: boolean; force?: boolean; mcpPrompt?: boolean} = {}): Promise<void> {
     const logger = getLogger();
 
     try {
@@ -338,6 +338,22 @@ export class ShipCommand {
       }
 
       logger.info(`Shipping session ${session.id} on branch ${currentBranch}`, 'ship');
+
+      // Check if PR description is needed
+      // Only require PR description if we'll be creating a PR (not if updating existing)
+      const prCheck = await this.prValidator.checkForPRConflicts(currentBranch);
+      if (prCheck.action === 'create' && !options.prDescription) {
+        const errorMsg = this.buildPRDescriptionPrompt(session);
+
+        if (options.mcpPrompt) {
+          throw new Error(errorMsg);
+        }
+
+        this.output.errorMessage('PR description required');
+        this.output.info('\nPlease provide a PR description:');
+        this.output.info(errorMsg);
+        return;
+      }
 
       // Initialize GitHub integration (tries env vars, config, then gh CLI)
       logger.debug('Initializing GitHub integration', 'ship');
@@ -405,13 +421,18 @@ export class ShipCommand {
 
   private async executeCompleteWorkflow(
     session: WorkflowSession,
-    options: { message?: string; yes?: boolean; force?: boolean }
+    options: { yes?: boolean; force?: boolean; basePath?: string }
   ): Promise<void> {
     this.output.subheader('📊 Executing Workflow');
 
-    // Step 1: Commit changes (if any)
+    // Step 1: Commit changes (if any) using CommitCommand
     if (await this.gitOps.hasUncommittedChanges()) {
-      await this.commitChanges(session, options.message);
+      this.output.errorMessage('⚠️  Uncommitted changes detected');
+      this.output.infoMessage('Please commit your changes first using:');
+      this.output.infoMessage('  hansolo commit --message "your commit message"');
+      this.output.infoMessage('\nOr from Claude Code MCP:');
+      this.output.infoMessage('  /hansolo:commit');
+      throw new Error('Uncommitted changes must be committed before shipping');
     } else {
       this.output.dim('  ✓ No uncommitted changes');
     }
@@ -429,80 +450,6 @@ export class ShipCommand {
     await this.syncMainAndCleanup(session);
   }
 
-  private async commitChanges(session: WorkflowSession, message?: string): Promise<void> {
-    this.progress.start('Committing changes...');
-
-    // Stage all changes first
-    await this.gitOps.stageAll();
-
-    // Load config to get commit template
-    const config = await this.configManager.load();
-    const bodyTemplate = config.preferences.commitTemplate?.body;
-    const footer = config.preferences.commitTemplate?.footer || '';
-
-    let commitMessage = message;
-    if (!commitMessage) {
-      // Get description from session metadata
-      const description = (session.metadata?.context as any)?.description ||
-                         session.branchName.replace(/^[^/]+\//, '').replace(/-/g, ' ');
-
-      // Get staged changes summary
-      const changesSummary = await this.gitOps.getStagedChangesSummary();
-
-      // Determine commit type based on branch name or default to feat
-      const commitType = session.branchName.startsWith('fix/') ? 'fix' :
-        session.branchName.startsWith('docs/') ? 'docs' :
-          session.branchName.startsWith('refactor/') ? 'refactor' :
-            session.branchName.startsWith('test/') ? 'test' :
-              session.branchName.startsWith('chore/') ? 'chore' : 'feat';
-
-      // Build subject line (max 50 chars for best practice)
-      const subject = description.length > 50 ? description.substring(0, 47) + '...' : description;
-
-      // Build commit message
-      commitMessage = `${commitType}: ${subject}`;
-
-      // Add body if template exists
-      if (bodyTemplate && changesSummary.filesChanged > 0) {
-        const filesText = changesSummary.files
-          .slice(0, 10) // Limit to first 10 files
-          .map(f => `- ${f.path} (${f.changes})`)
-          .join('\n');
-
-        const statsText = `${changesSummary.filesChanged} file(s) changed, ${changesSummary.insertions} insertion(s), ${changesSummary.deletions} deletion(s)`;
-
-        const body = bodyTemplate
-          .replace(/\{\{description\}\}/g, description)
-          .replace(/\{\{files\}\}/g, filesText || 'No files to display')
-          .replace(/\{\{stats\}\}/g, statsText)
-          .trim(); // Trim to remove any trailing whitespace
-
-        commitMessage += `\n\n${body}`;
-      }
-
-      // Add footer with guaranteed blank line separation
-      if (footer) {
-        // Ensure there's always a blank line before footer
-        if (!commitMessage.endsWith('\n\n---\n')) {
-          commitMessage += '\n\n---\n';
-        }
-        commitMessage += footer;
-      }
-    }
-
-    // Always add footer to custom messages too
-    if (message && footer) {
-      // Ensure there's always a blank line before footer
-      if (!commitMessage.endsWith('\n\n---\n')) {
-        commitMessage += '\n\n---\n';
-      }
-      commitMessage += footer;
-    }
-
-    await this.gitOps.commit(commitMessage, { noVerify: false });
-
-    this.progress.succeed('Changes committed (hooks: lint, typecheck)');
-  }
 
   private async pushToRemote(session: WorkflowSession, _force?: boolean): Promise<void> {
     this.progress.start('Pushing to remote...');
@@ -648,6 +595,41 @@ export class ShipCommand {
     ];
 
     await this.progress.runSteps(steps);
+  }
+
+  /**
+   * Build a helpful prompt for Claude Code to generate a PR description
+   */
+  private buildPRDescriptionPrompt(session: WorkflowSession): string {
+    return `
+To create a pull request, please analyze the commits and generate a PR description.
+
+1. Run 'git log main..HEAD --oneline' to see commits that will be included
+2. Run 'git diff main...HEAD --stat' to see the overall changes
+3. Optionally run 'git diff main...HEAD' to see detailed changes (skip if too large)
+4. Generate a PR description that includes:
+
+   ## Summary
+   Brief overview of what this PR does (2-3 sentences)
+
+   ## Changes
+   - Bullet points of key changes
+   - Organized by type (features, fixes, refactors, etc.)
+
+   ## Testing
+   How this was tested / what reviewers should test
+
+   (Footer will be added automatically)
+
+5. Call ship again with the prDescription parameter:
+
+   hansolo ship --prDescription "your generated PR description here (without footer)"
+
+Session context:
+- Branch: ${session.branchName}
+- Workflow: ${session.workflowType}
+- Description: ${(session.metadata?.context as any)?.description || 'No description'}
+`.trim();
   }
 
   private async generatePRDescription(session: WorkflowSession): Promise<string> {

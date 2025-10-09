@@ -26,8 +26,22 @@ hansolo launch
 vim src/new-feature.ts
 vim tests/new-feature.test.ts
 
-# 3. Ship it (commits, pushes, creates PR, merges, cleans up)
-hansolo ship
+# 3. Commit your changes
+hansolo commit --message "feat: add new feature
+
+Implemented new feature with comprehensive tests.
+Updated documentation to reflect changes."
+
+# 4. Ship it (pushes, creates PR, merges, cleans up)
+hansolo ship --pr-description "## Summary
+Adds new feature functionality
+
+## Changes
+- New feature implementation
+- Comprehensive test coverage
+
+## Testing
+All tests passing"
 ```
 
 **Timeline**: ~2 minutes from launch to merged PR (excluding CI time)
@@ -41,11 +55,22 @@ When you want a specific branch name:
 hansolo launch --branch feature/user-authentication
 
 # Work on the feature
-git add .
-git commit -m "Add user auth endpoints"
+vim src/auth-endpoints.ts
+
+# Commit changes
+hansolo commit --message "feat: implement user authentication
+
+Added OAuth2 endpoints and JWT token validation.
+Includes middleware for protected routes."
 
 # Ship it
-hansolo ship --message "feat: implement user authentication"
+hansolo ship --pr-description "## Summary
+Implements user authentication system
+
+## Changes
+- OAuth2 endpoints
+- JWT token validation
+- Protected route middleware"
 ```
 
 ### Quick Hotfix
@@ -58,6 +83,9 @@ hansolo launch --branch hotfix/critical-security-bug
 
 # Fix the bug
 vim src/security-fix.ts
+
+# Commit the fix
+hansolo commit --message "fix: patch critical security vulnerability"
 
 # Ship immediately (bypasses waiting for approvals if configured)
 hansolo ship --force
@@ -77,6 +105,9 @@ hansolo launch --branch feature/api-integration
 # Work...
 vim src/api-client.ts
 
+# Commit
+hansolo commit --message "feat: add API client integration"
+
 # Ship
 hansolo ship
 ```
@@ -88,6 +119,9 @@ hansolo launch --branch feature/ui-redesign
 
 # Work...
 vim src/components/Header.tsx
+
+# Commit
+hansolo commit --message "feat: redesign header component"
 
 # Ship (han-solo handles any rebasing automatically)
 hansolo ship
@@ -104,14 +138,16 @@ hansolo ship
 Integrate han-solo with your team's review process:
 
 ```bash
-# 1. Ship to create PR (but don't auto-merge)
+# 1. Commit and ship to create PR (but don't auto-merge)
+hansolo commit --message "feat: initial implementation"
 hansolo ship
 
 # This creates the PR and waits for CI
 # Reviewers can now review on GitHub
 
-# 2. If changes needed, make them and ship again
+# 2. If changes needed, make them, commit, and ship again
 vim src/requested-changes.ts
+hansolo commit --message "fix: address review comments"
 hansolo ship  # Updates existing PR
 
 # 3. Once approved, ship merges automatically
@@ -233,14 +269,14 @@ Work on multiple features and switch between them:
 # Start feature 1
 hansolo launch --branch feature/database-migration
 # Work...
-git add .
-git commit -m "Add migration scripts"
+vim src/migrations/001_initial.sql
+hansolo commit --message "feat: add migration scripts"
 
 # Need to work on something else - launch feature 2
 hansolo launch --branch feature/api-docs
 # Work...
-git add .
-git commit -m "Add API documentation"
+vim docs/api.md
+hansolo commit --message "docs: add API documentation"
 
 # Switch back to feature 1
 hansolo swap feature/database-migration
@@ -262,20 +298,26 @@ For features that take days or weeks:
 ```bash
 # Day 1: Start feature
 hansolo launch --branch feature/major-refactor
-git add .
-git commit -m "WIP: Initial refactoring"
+vim src/refactor-1.ts
+hansolo commit --message "WIP: Initial refactoring"
 git push  # Save work
 
 # Day 2: Continue
 git pull  # Get latest if working from different machine
 # More work...
-git add .
-git commit -m "WIP: Refactor services"
+vim src/refactor-2.ts
+hansolo commit --message "WIP: Refactor services"
 git push
 
 # Day 5: Ready to ship
 # han-solo rebases on latest main automatically
-hansolo ship
+hansolo ship --pr-description "## Summary
+Major refactoring of core services
+
+## Changes
+- Refactored service layer
+- Improved error handling
+- Better test coverage"
 ```
 
 ### Handling Merge Conflicts
@@ -382,7 +424,7 @@ hansolo cleanup
 hansolo cleanup --days 7  # Clean up sessions older than 7 days
 ```
 
-### 5. Use Ship for Everything
+### 5. Use Commit and Ship for Everything
 
 ❌ **Bad:**
 ```bash
@@ -397,23 +439,44 @@ git push
 
 ✅ **Good:**
 ```bash
+hansolo commit --message "feat: my feature"
 hansolo ship
-# Does all of the above automatically!
+# Commit handles staging and committing
+# Ship handles push, PR, merge, cleanup automatically!
 ```
 
-### 6. Leverage Claude Code Integration
+### 6. Commit Incrementally, Ship When Ready
+
+✅ **Good:**
+```bash
+# Make some changes
+hansolo commit --message "feat: add user model"
+
+# Make more changes
+hansolo commit --message "feat: add user controller"
+
+# Make final changes
+hansolo commit --message "feat: add user routes"
+
+# Now ship all commits together
+hansolo ship
+```
+
+### 7. Leverage Claude Code Integration
 
 If using Claude Code:
 
 ```bash
 # Enable status line for constant visibility
-/hansolo:status-line enable
+/mcp__hansolo__status_line enable
 
-# Use slash commands for convenience
-/hansolo:launch
-/hansolo:ship
+# Use MCP tools for convenience
+/mcp__hansolo__launch
+/mcp__hansolo__commit
+/mcp__hansolo__ship
 
-# Let Claude help manage your workflow
+# Let Claude Code generate commit messages and PR descriptions
+# Just call the commands without parameters!
 ```
 
 ## Common Scenarios
@@ -462,6 +525,9 @@ Your CI checks failed after shipping:
 # Fix the issue
 vim src/broken-test.ts
 
+# Commit the fix
+hansolo commit --message "fix: broken test"
+
 # Ship again (updates the same PR)
 hansolo ship
 ```
@@ -474,12 +540,14 @@ Mid-feature, you need to update packages:
 # Update dependencies
 npm update
 
-# Commit the changes
-git add package-lock.json
-git commit -m "chore: update dependencies"
+# Commit the dependency changes
+hansolo commit --message "chore: update dependencies"
 
 # Continue with your feature
 vim src/my-feature.ts
+
+# Commit feature changes
+hansolo commit --message "feat: implement feature"
 
 # Ship everything together
 hansolo ship
@@ -590,9 +658,16 @@ hs
 han-solo is designed to make Git workflows effortless. The key is:
 
 1. **Always launch** before starting work
-2. **Always ship** to complete work
-3. **Always cleanup** after merging
-4. **Let han-solo handle** the Git complexity
+2. **Commit incrementally** as you make changes
+3. **Ship when ready** to push, PR, merge, and cleanup
+4. **Always cleanup** after merging
+5. **Let han-solo handle** the Git complexity
+
+The separation of commit (version control) and ship (delivery pipeline) gives you flexibility to:
+- Commit multiple times during development
+- Review your commits before shipping
+- Ship only when you're ready to create a PR
+- Let Claude Code help generate commit messages and PR descriptions
 
 For more help:
 - [Quick Start Guide](QUICKSTART.md)
