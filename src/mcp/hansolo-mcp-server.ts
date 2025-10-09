@@ -572,11 +572,16 @@ export class HanSoloMCPServer {
         });
       }
 
-      // Build arguments string for display (exclude internal parameters)
+      // Build arguments string for display (exclude internal parameters, but we'll add skipBanner explicitly)
       const displayArgs = Object.entries(toolArgs).filter(([k]) => k !== 'skipBanner');
-      const argsStr = displayArgs.length > 0
-        ? ` with ${displayArgs.map(([k, v]) => `${k}=${v}`).join(', ')}`
+      const userArgsStr = displayArgs.length > 0
+        ? displayArgs.map(([k, v]) => `${k}=${v}`).join(', ')
         : '';
+
+      // Build complete args string with skipBanner=true always included
+      const argsStr = userArgsStr
+        ? ` with ${userArgsStr} and skipBanner=true`
+        : ' with skipBanner=true';
 
       // Construct the prompt returned from the mcp server
       const banner = getBanner(name);
@@ -585,7 +590,10 @@ export class HanSoloMCPServer {
 
 ${banner}
 
-Once that has been shown to the user, now run the han-solo ${name} command${argsStr} and pass skipBanner=true`;
+Once that has been shown to the user, now run the han-solo ${name} command${argsStr}
+
+IMPORTANT: You must include this parameter in your tool call:
+<parameter name="skipBanner">true</parameter>`;
 
 
       return {

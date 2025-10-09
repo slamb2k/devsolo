@@ -9,6 +9,7 @@ This folder contains superseded, completed, or historical documentation that is 
 - **adapter-layer-implementation.md** - Adapter layer implementation (removed in v2)
 - **banner-consolidation.md** - Banner consolidation implementation plan (completed)
 - **cleanup-opportunities.md** - V2 cleanup tracking (completed)
+- **migrate-doc-prime-to-mcp.md** - Migration of /doc and /prime commands to MCP (completed PR #57)
 
 ### Migration Guides (Historical)
 - **migration-to-enhanced-mcp.md** - Migration guide from legacy to enhanced MCP server
