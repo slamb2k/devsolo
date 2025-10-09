@@ -208,13 +208,13 @@ pattern-<name>-guide.md
 
 ## Maintenance Guidelines
 
-### Using the /doc Command
+### Using the /hansolo:doc Command
 
-The `/doc` slash command helps maintain documentation consistency:
+The `/hansolo:doc` MCP command helps maintain documentation consistency (available when han-solo MCP server is connected):
 
 **Audit Mode** (no arguments):
 ```bash
-/doc
+/hansolo:doc
 ```
 - Scans all documentation for issues
 - Checks naming conventions (lowercase-with-hyphens.md)
@@ -226,13 +226,24 @@ The `/doc` slash command helps maintain documentation consistency:
 
 **Create Mode** (with content):
 ```bash
-/doc <name> <content>
+/hansolo:doc <name> <content>
 ```
 - Creates new documentation
 - Determines correct placement automatically
 - Applies naming conventions
 - Updates README.md files
 - Archives superseded documents
+
+### Using the /hansolo:prime Command
+
+The `/hansolo:prime` command quickly gives Claude Code context about your codebase:
+
+```bash
+/hansolo:prime
+```
+- Reads README.md and docs/README.md
+- Provides overview of project structure and documentation organization
+- Helps Claude Code understand the codebase before making changes
 
 ### Adding New Documentation Manually
 

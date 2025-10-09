@@ -15,12 +15,14 @@ When your MCP server is connected, the prompts appear as slash commands followin
 For the han-solo MCP server, the commands will appear as:
 
 - `/mcp__hansolo__init` - Initialize han-solo
-- `/mcp__hansolo__launch` - Start a new feature workflow  
+- `/mcp__hansolo__launch` - Start a new feature workflow
 - `/mcp__hansolo__sessions` - List workflow sessions
 - `/mcp__hansolo__swap` - Switch between branches
 - `/mcp__hansolo__ship` - Ship your changes
 - `/mcp__hansolo__abort` - Abort workflow session
 - `/mcp__hansolo__status` - Show workflow status
+- `/mcp__hansolo__doc` - Manage documentation structure and conventions
+- `/mcp__hansolo__prime` - Prime Claude Code with codebase context
 
 ## Setting Up han-solo Commands
 
@@ -211,6 +213,24 @@ This switches to main and stashes current changes.
 /mcp__hansolo__sessions true true
 ```
 Shows all sessions (including completed) with verbose output.
+
+### Managing Documentation (Audit Mode)
+```
+/mcp__hansolo__doc
+```
+Scans all documentation for naming and placement issues, checks README entries, and offers to fix issues automatically.
+
+### Creating Documentation
+```
+/mcp__hansolo__doc my-guide "# My Guide\n\nThis is a new guide..."
+```
+Creates new documentation with automatic placement based on content analysis and naming conventions.
+
+### Priming Claude Code
+```
+/mcp__hansolo__prime
+```
+Reads README.md and docs/README.md to quickly give Claude Code context about the codebase structure.
 
 ## Benefits
 

@@ -7,6 +7,8 @@ import {
   GetPromptRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
+import * as fs from 'fs';
+import * as path from 'path';
 import { InitCommand } from '../commands/hansolo-init';
 import { LaunchCommand } from '../commands/hansolo-launch';
 import { SwapCommand } from '../commands/hansolo-swap';
@@ -489,6 +491,27 @@ export class HanSoloMCPServer {
               },
             ],
           },
+          {
+            name: 'doc',
+            description: '📚 Manage documentation structure and conventions',
+            arguments: [
+              {
+                name: 'name',
+                description: 'Document name (for create mode)',
+                required: false,
+              },
+              {
+                name: 'content',
+                description: 'Document content (for create mode)',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'prime',
+            description: '🎯 Prime Claude Code with codebase context',
+            arguments: [],
+          },
         ],
       };
     });
@@ -497,6 +520,48 @@ export class HanSoloMCPServer {
     this.server.setRequestHandler(GetPromptRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
 
+      // Helper function to read command markdown files
+      const readCommandMarkdown = async (commandName: string): Promise<string> => {
+        const commandPath = path.join(process.cwd(), '.hansolo', 'commands', `${commandName}.md`);
+        if (!fs.existsSync(commandPath)) {
+          throw new Error(`Command file not found: ${commandPath}`);
+        }
+        return await fs.promises.readFile(commandPath, 'utf-8');
+      };
+
+      // Handle doc and prime commands from markdown files
+      if (name === 'doc' || name === 'prime') {
+        let markdown = await readCommandMarkdown(name);
+
+        // Substitute $ARGUMENTS with all arguments
+        if (args) {
+          const allArgs = Object.values(args).filter(v => v !== undefined && v !== '').join(' ');
+          markdown = markdown.replace(/\$ARGUMENTS/g, allArgs);
+
+          // Substitute $ARGUMENT1 with first argument
+          const firstArg = Object.values(args)[0] || '';
+          markdown = markdown.replace(/\$ARGUMENT1/g, String(firstArg));
+        } else {
+          // No arguments provided - empty string
+          markdown = markdown.replace(/\$ARGUMENTS/g, '');
+          markdown = markdown.replace(/\$ARGUMENT1/g, '');
+        }
+
+        return {
+          description: `Execute ${name} command`,
+          messages: [
+            {
+              role: 'user',
+              content: {
+                type: 'text',
+                text: markdown,
+              },
+            },
+          ],
+        };
+      }
+
+      // Handle standard han-solo commands
       // Build tool call arguments
       const toolArgs: Record<string, any> = {};
       if (args) {

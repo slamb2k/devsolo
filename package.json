@@ -62,6 +62,7 @@
     "bin",
     "templates",
     "scripts",
+    ".hansolo/commands",
     "README.md",
     "LICENSE"
   ],
