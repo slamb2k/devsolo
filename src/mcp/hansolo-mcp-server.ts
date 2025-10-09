@@ -1078,7 +1078,9 @@ IMPORTANT: Include these parameters:
 
           // Convert params to string array format expected by command
           const args: string[] = [];
-          if (params.action) args.push(params.action);
+          if (params.action) {
+            args.push(params.action);
+          }
           if (params.format) {
             args.push('--format');
             args.push(params.format);
