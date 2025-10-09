@@ -689,7 +689,7 @@ if [ -n "$SESSION_ID" ]; then
       state_color="$YELLOW"
       ;;
     "BRANCH_READY")
-      EMOJI="✏️"
+      EMOJI="📝"
       state_color="$BLUE"
       ;;
     "CHANGES_COMMITTED"|"PUSHED")

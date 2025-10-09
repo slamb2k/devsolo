@@ -388,7 +388,7 @@ All han-solo commands are available through Claude Code's slash command interfac
 The status line provides at-a-glance workflow information directly in Claude Code:
 
 ```
-[han-solo] ✏️ 0c2a20a7 | feature/my-feature | BRANCH_READY | 45000/200000 ██░░░░░░░░ 22%
+[han-solo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY | 45000/200000 ██░░░░░░░░ 22%
 ```
 
 **Status Line Components:**
