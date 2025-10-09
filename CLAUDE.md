@@ -2,6 +2,30 @@
 
 This file provides guidance to Claude Code when working with this repository.
 
+## ⚠️ CRITICAL RULES - READ FIRST
+
+### 🚫 NEVER Create Documentation Outside docs/
+
+**BEFORE writing ANY .md file, you MUST:**
+
+1. ✅ **Check**: Is this documentation? → **MUST** go in `docs/` folder
+2. ✅ **Determine location** using decision tree in `docs/README.md`
+3. ✅ **Use correct naming**: `lowercase-with-hyphens.md`
+4. ✅ **Update README.md** in the target folder
+
+**FORBIDDEN locations for documentation:**
+- ❌ Root directory (e.g., `CLEANUP-SUMMARY.md`, `PLAN.md`)
+- ❌ `specs/` (this is for product specs only, NOT implementation plans)
+- ❌ Any directory outside `docs/`
+
+**Correct locations:**
+- ✅ Implementation plans → `docs/dev/plans/`
+- ✅ Bug reports, reviews, summaries → `docs/dev/reports/`
+- ✅ User guides → `docs/guides/`
+- ✅ Product specs → `docs/specs/`
+
+**If you create a file in the wrong location, you WILL be asked to fix it.**
+
 <!-- BEGIN HAN-SOLO MANAGED SECTION - DO NOT EDIT -->
 
 ## 🚀 han-solo Git Workflow Management
