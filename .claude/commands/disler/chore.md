@@ -17,8 +17,8 @@ Create a new plan in specs/*.md to resolve the `Chore` using the exact specified
 
 Focus on the following files:
 - `README.md` - Contains the project overview and instructions.
-- `app/**` - Contains the codebase client/server.
-- `scripts/**` - Contains the scripts to start and stop the server + client.
+- `src/**` - Contains the codebase client/server.
+- `scripts/**` - Contains utility scripts such as install, start/stop, etc.
 
 Ignore all other files in the codebase.
 

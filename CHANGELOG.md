@@ -7,25 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- Emergency hotfix workflow with expedited deployment
-- Comprehensive documentation (README, LICENSE, API docs)
-- Configuration examples (YAML and JSON formats)
-- GitHub Actions CI/CD pipelines
-- Docker support with multi-stage build
-- Contributing guidelines
-- MCP server integration for Claude Code
-- GitHub API integration for automatic PR creation
-
 ### Changed
-- Improved TypeScript strict mode compliance
-- Enhanced test infrastructure
-- Updated session management with locking mechanism
+- **BREAKING**: Migrated to pure MCP architecture - all functionality now exposed via MCP tools
+- **BREAKING**: Removed CLI commands in favor of natural language interface through Claude Code
+- **BREAKING**: Installation now via MCP server configuration instead of npm package
+- Redesigned all tools for prompt-based parameter collection
+- Updated documentation to reflect MCP-first approach
+- Restructured project for MCP server pattern
 
-### Fixed
-- TypeScript compilation errors in state machines
-- Test suite mock implementations
-- Branch name validation in WorkflowSession
+### Added
+- 11 MCP tools for complete workflow management:
+  - `hansolo_init`: Project initialization
+  - `hansolo_launch`: Feature branch creation
+  - `hansolo_ship`: Complete shipping workflow
+  - `hansolo_hotfix`: Emergency fixes
+  - `hansolo_status`: Workflow status
+  - `hansolo_sessions`: Session management
+  - `hansolo_swap`: Session switching
+  - `hansolo_abort`: Workflow cancellation
+  - `hansolo_commit`: Direct commits
+  - `hansolo_status_line`: Terminal awareness configuration
+- Natural language interface via Claude Code
+- Prompt-based parameter collection for user-friendly interactions
+- Comprehensive user guides and MCP tools reference documentation
+- Migration guide from CLI to MCP approach
+- MCP architecture documentation
+
+### Deprecated
+- CLI commands (hansolo launch, hansolo ship, etc.) - use MCP tools instead
+- npm installation workflow - use MCP server configuration
+- Slash commands - use natural language with Claude Code
+
+### Removed
+- Old CLI entry points
+- Interactive CLI prompts (replaced with MCP prompts)
+- npm installer scripts
 
 ## [1.0.0] - 2024-01-20
 

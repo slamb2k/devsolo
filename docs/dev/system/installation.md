@@ -1,22 +1,38 @@
-# Installing hansolo Dev Version
+# Installing han-solo Dev Version
 
-This guide explains how to install the development version of hansolo for use in other projects as both a CLI tool and MCP server.
+**Audience**: Developers working on han-solo itself
+
+**Purpose**: System-level installation guide for development and testing
+
+**User Installation**: See [docs/guides/installation.md](../../guides/installation.md) for end-user installation
+
+---
+
+This guide explains how to install the development version of han-solo v2.0.0 (pure MCP) for testing and development.
 
 ## Prerequisites
 
 - Node.js v20.0.0 or higher
 - npm or yarn
 - Git
+- Claude Code (for testing MCP integration)
+
+## Architecture Note
+
+han-solo v2.0.0 is **pure MCP-only** with no standalone CLI. All functionality is exposed through MCP tools that Claude Code calls. The development setup focuses on:
+- Building the MCP server
+- Testing MCP tools
+- Developing new tools/features
 
 ## Installation Methods
 
-### Method 1: Global Link (Recommended for Development)
+### Method 1: Local Development (Recommended)
 
-This method creates a symbolic link to your development version. Changes in the source are immediately reflected.
+For active development with immediate reflection of changes:
 
 ```bash
-# 1. Clone and navigate to hansolo directory
-cd /home/slamb2k/work/hansolo
+# 1. Clone and navigate to han-solo directory
+cd /path/to/hansolo
 
 # 2. Install dependencies
 npm install
@@ -24,314 +40,446 @@ npm install
 # 3. Build the project
 npm run build
 
-# 4. Create global link
-npm link --force
+# 4. Build MCP server
+npm run build:mcp
 
-# 5. Verify installation
-which hansolo        # Should show: ~/.nvm/versions/node/vXX.X.X/bin/hansolo
-which hansolo-mcp    # Should show: ~/.nvm/versions/node/vXX.X.X/bin/hansolo-mcp
+# 5. Verify MCP server exists
+ls -la bin/hansolo-mcp
+# Should show: bin/hansolo-mcp (executable)
 ```
 
-#### Using in Another Project
+### Method 2: Global Link (Testing in Other Projects)
+
+Create a symbolic link for testing in other projects:
 
 ```bash
-# In your other project directory
-cd /path/to/your/project
+# In han-solo directory
+npm link
 
-# Link to the dev version
-npm link hansolo-cli
+# Verify link
+which hansolo-mcp
+# Should show global bin path
 
-# Or add manually to package.json
-{
-  "dependencies": {
-    "hansolo-cli": "file:../hansolo"
-  }
-}
+# In another project
+npm link hansolo-mcp
 ```
 
-### Method 2: Local File Installation
+### Method 3: Pack and Install (Production-like)
 
-Install directly from the local filesystem:
-
-```bash
-# In your target project
-npm install ../hansolo
-
-# Or with absolute path
-npm install /home/slamb2k/work/hansolo
-```
-
-### Method 3: Git Repository Installation
+Test as if installed from npm:
 
 ```bash
-# Install from local git repository
-npm install git+file:///home/slamb2k/work/hansolo
-
-# Or if you've pushed to GitHub
-npm install git+https://github.com/yourusername/hansolo.git
-```
-
-### Method 4: Pack and Install (Production-like)
-
-This creates a tarball similar to what would be published to npm:
-
-```bash
-# In hansolo directory
+# In han-solo directory
 npm pack
-# Creates: hansolo-cli-1.0.0.tgz
+# Creates: hansolo-mcp-2.0.0.tgz
 
-# In target project
-npm install /path/to/hansolo-cli-1.0.0.tgz
+# Install in test project
+cd /path/to/test/project
+npm install /path/to/hansolo-mcp-2.0.0.tgz
 ```
 
-## Setting Up MCP Server
+## Setting Up MCP Server for Development
 
-### For Claude Desktop
+### For Claude Code Testing
 
-1. **Configure Claude Desktop settings**:
+Configure Claude Code to use your development MCP server:
 
-Create or edit `~/.claude/settings.json`:
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+**Linux**: `~/.config/Claude/claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
-    "hansolo": {
-      "command": "hansolo-mcp",
-      "args": [],
+    "hansolo-dev": {
+      "command": "node",
+      "args": ["/absolute/path/to/hansolo/bin/hansolo-mcp"],
+      "cwd": "${workspaceFolder}",
       "env": {
-        "HANSOLO_DEBUG": "false"
+        "NODE_ENV": "development",
+        "HANSOLO_DEBUG": "true"
       }
     }
   }
 }
 ```
 
-2. **Alternative: Project-specific MCP configuration**:
+**Important**: Use absolute path to your development copy.
 
-In your project, create `.mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "hansolo": {
-      "command": "/home/slamb2k/.nvm/versions/node/v22.19.0/bin/hansolo-mcp",
-      "args": [],
-      "env": {
-        "HANSOLO_DEBUG": "false",
-        "NODE_PATH": "/home/slamb2k/work/hansolo/node_modules"
-      }
-    }
-  }
-}
-```
-
-### Starting MCP Server Manually
+### Starting MCP Server Manually (For Debugging)
 
 ```bash
-# Start in foreground
-hansolo-mcp
+# Start in foreground (see all output)
+node bin/hansolo-mcp
 
-# Start with debug output
-HANSOLO_DEBUG=1 hansolo-mcp
+# Start with debug logging
+HANSOLO_DEBUG=1 node bin/hansolo-mcp
 
-# Start on custom port
-HANSOLO_MCP_PORT=8081 hansolo-mcp
+# Start with Node inspector (for debugging)
+node --inspect bin/hansolo-mcp
 
-# Start as background service
-nohup hansolo-mcp > ~/.hansolo/mcp.log 2>&1 &
+# Start with breakpoints
+node --inspect-brk bin/hansolo-mcp
+```
+
+The MCP server communicates via stdio (not HTTP), so manual testing requires an MCP client like Claude Code.
+
+## Development Workflow
+
+### Typical Development Cycle
+
+```bash
+# 1. Make changes to source files
+vim src/mcp/tools/my-tool.ts
+
+# 2. Build the project
+npm run build
+
+# 3. Build MCP server
+npm run build:mcp
+
+# 4. Restart Claude Code to reload MCP server
+
+# 5. Test in Claude Code
+```
+
+### Watch Mode (Auto-rebuild)
+
+For active development:
+
+```bash
+# Terminal 1: Watch and rebuild on changes
+npm run dev
+
+# Terminal 2: Watch and rebuild MCP server on changes
+npm run dev:mcp
+
+# Restart Claude Code when ready to test
+```
+
+### Testing MCP Tools
+
+```bash
+# Run unit tests
+npm test
+
+# Run integration tests
+npm run test:integration
+
+# Run specific tool tests
+npm test -- commit-tool
+
+# Run with coverage
+npm run test:coverage
 ```
 
 ## Verifying Installation
 
-### CLI Verification
+### Check Build Artifacts
 
 ```bash
-# Check CLI version
-hansolo --version
+# Check main build
+ls -la dist/
+# Should contain compiled TypeScript
 
-# Initialize in a test project
-mkdir test-project && cd test-project
+# Check MCP server build
+ls -la bin/hansolo-mcp
+# Should be executable
+
+# Check MCP server is valid Node script
+head -n 1 bin/hansolo-mcp
+# Should show: #!/usr/bin/env node
+```
+
+### Test MCP Server Loads
+
+```bash
+# Run MCP server with test input
+echo '{"jsonrpc":"2.0","method":"initialize","params":{},"id":1}' | node bin/hansolo-mcp
+# Should respond with JSON-RPC response
+```
+
+### Test in Claude Code
+
+1. Configure Claude Code (see above)
+2. Restart Claude Code
+3. Ask Claude: `"Show me han-solo status"`
+4. Claude should call `hansolo_status` tool
+
+## Using in Test Projects
+
+### Initialize Test Project
+
+```bash
+# Create test project
+mkdir test-hansolo && cd test-hansolo
 git init
-hansolo init
+git remote add origin https://github.com/yourname/test-repo.git
 
-# Check status
-hansolo status
+# In Claude Code, ask:
+# "Initialize han-solo in this project"
+
+# Verify .hansolo directory created
+ls -la .hansolo/
 ```
 
-### MCP Server Verification
+### Test Full Workflow
 
 ```bash
-# Test MCP server
-hansolo-mcp &
-sleep 2
-curl http://localhost:8080/health
+# In Claude Code:
+# "Start a new feature for testing"
+# "Commit with message 'test: verify workflow'"
+# "Ship this feature"
 
-# Kill test server
-killall hansolo-mcp
+# Verify in Git
+git log
+git remote -v
 ```
 
-## Using in Your Project
+## Development Environment Variables
 
-### As CLI Tool
+Configure han-solo behavior during development:
 
 ```bash
-# Initialize hansolo in your project
-cd /path/to/your/project
-hansolo init
-
-# Start a workflow
-hansolo launch --branch feature/my-feature
-
-# Ship changes
-hansolo ship --push --create-pr
+export NODE_ENV=development        # Development mode
+export HANSOLO_DEBUG=1            # Enable debug output
+export HANSOLO_LOG_LEVEL=debug    # Detailed logging
+export HANSOLO_TEST_MODE=1        # Enable test mode features
+export GITHUB_TOKEN=ghp_xxx       # GitHub API token (or use 'gh auth login')
 ```
 
-### As MCP Server (with Claude)
+## Debugging
 
-In Claude Desktop, use commands like:
+### Debug MCP Server
+
+```bash
+# Start with Node inspector
+node --inspect-brk bin/hansolo-mcp
+
+# In Chrome: chrome://inspect
+# Click "inspect" under Remote Target
+# Set breakpoints in DevTools
 ```
-/hansolo:init
-/hansolo:launch
-/hansolo:ship
-/hansolo:status
-```
 
-### Programmatic Usage
+### Debug Tool Execution
 
-```javascript
-// In your Node.js project
-const { InitCommand } = require('hansolo-cli/dist/commands/hansolo-init');
-const { LaunchCommand } = require('hansolo-cli/dist/commands/hansolo-launch');
+Add console.log or use debugger statements:
 
-async function useHansolo() {
-  // Initialize
-  const init = new InitCommand();
-  await init.execute();
-
-  // Launch workflow
-  const launch = new LaunchCommand();
-  await launch.execute({
-    branchName: 'feature/automated',
-    description: 'Automated feature'
-  });
+```typescript
+// In src/mcp/tools/commit-tool.ts
+async execute(input: CommitToolInput): Promise<SessionToolResult> {
+  console.log('CommitTool.execute called with:', input);
+  debugger; // Breakpoint here
+  // ...
 }
 ```
 
-## Development Workflow
-
-When developing hansolo:
+### View MCP Communication
 
 ```bash
-# Make changes in hansolo source
-cd /home/slamb2k/work/hansolo
-# Edit files...
-
-# Rebuild
-npm run build
-
-# Changes are immediately available in linked projects
-# No need to reinstall!
+# Enable MCP protocol logging
+HANSOLO_DEBUG_MCP=1 node bin/hansolo-mcp
 ```
 
-### Watch Mode
+This logs all JSON-RPC messages between Claude Code and han-solo.
 
-For active development:
-```bash
-# Auto-rebuild on changes
-npm run dev
+### Check Tool Registration
+
+```typescript
+// In bin/hansolo-mcp or src/mcp/server.ts
+console.log('Registered tools:', Array.from(server.tools.keys()));
 ```
 
 ## Troubleshooting
 
-### Issue: Command not found
+### Issue: MCP Server Not Found
 
 ```bash
-# Ensure npm bin is in PATH
-export PATH="$(npm bin -g):$PATH"
+# Check file exists
+ls -la /path/to/hansolo/bin/hansolo-mcp
 
-# Or add to ~/.zshrc or ~/.bashrc
-echo 'export PATH="$(npm bin -g):$PATH"' >> ~/.zshrc
-source ~/.zshrc
+# Check executable bit
+chmod +x /path/to/hansolo/bin/hansolo-mcp
+
+# Check shebang
+head -n 1 /path/to/hansolo/bin/hansolo-mcp
+# Should be: #!/usr/bin/env node
 ```
 
-### Issue: Permission denied
+### Issue: Claude Code Can't Load MCP Server
+
+1. Check `claude_desktop_config.json` has absolute path
+2. Check Node is in PATH: `which node`
+3. Restart Claude Code completely (not just close window)
+4. Check Claude Code logs for errors
+
+### Issue: Changes Not Reflected
 
 ```bash
-# Fix permissions
-chmod +x /home/slamb2k/work/hansolo/bin/hansolo.js
-chmod +x /home/slamb2k/work/hansolo/bin/hansolo-mcp
-```
-
-### Issue: Module not found
-
-```bash
-# Rebuild and relink
-cd /home/slamb2k/work/hansolo
-npm install
+# Rebuild everything
 npm run build
-npm link --force
+npm run build:mcp
+
+# Restart Claude Code (required to reload MCP server)
 ```
 
-### Issue: MCP server won't start
+### Issue: Tool Not Available
 
 ```bash
-# Check if port is in use
-lsof -i :8080
+# Check tool is registered
+grep -r "hansolo_mytool" src/mcp/
 
-# Use different port
-HANSOLO_MCP_PORT=8081 hansolo-mcp
+# Check tool is exported in server
+grep "MyTool" bin/hansolo-mcp
 
-# Check logs
-tail -f ~/.hansolo/logs/mcp-server.log
+# Verify build included new tool
+npm run build:mcp
 ```
 
-## Uninstalling
-
-### Remove global link
+### Issue: TypeScript Errors
 
 ```bash
-# Unlink globally
-npm unlink -g hansolo-cli
+# Clean and rebuild
+rm -rf dist/
+npm run build
 
-# Remove from project
-cd /path/to/your/project
-npm unlink hansolo-cli
+# Check TypeScript version
+npx tsc --version
+# Should be 5.x
 ```
 
-### Clean up
+### Issue: Test Failures
 
 ```bash
-# Remove hansolo data (careful!)
-rm -rf ~/.hansolo
-rm -rf ./.hansolo  # In project directory
+# Clean test cache
+npm run test:clean
+
+# Run tests with verbose output
+npm test -- --verbose
+
+# Run specific test file
+npm test -- src/mcp/tools/commit-tool.test.ts
 ```
 
-## Environment Variables
+## Building for Distribution
 
-Configure hansolo behavior:
+### Create Release Build
 
 ```bash
-export HANSOLO_DEBUG=1           # Enable debug output
-export HANSOLO_MCP_PORT=8081     # Custom MCP port
-export HANSOLO_LOG_LEVEL=debug   # Set log level
-export HANSOLO_NO_COLOR=1        # Disable colors
-export GITHUB_TOKEN=ghp_xxx      # Optional: For GitHub integration (or use 'gh auth login')
+# Clean build
+rm -rf dist/ bin/hansolo-mcp
+
+# Install production dependencies only
+npm ci --production
+
+# Build
+npm run build
+npm run build:mcp
+
+# Test the build
+node bin/hansolo-mcp
 ```
 
-## Next Steps
+### Create Package
 
-1. Initialize hansolo in your project: `hansolo init`
-2. Configure Claude Desktop for MCP integration
-3. Read the [Command Reference](../reference/command-reference.md)
-4. Check the [Troubleshooting Guide](./troubleshooting.md)
+```bash
+# Create tarball
+npm pack
 
-## Support
+# Test installation from tarball
+npm install -g hansolo-mcp-2.0.0.tgz
+```
 
-- Documentation: `/docs` directory
-- Issues: GitHub Issues (when published)
-- Logs: `~/.hansolo/logs/`
+## Project Structure (for Developers)
+
+```
+hansolo/
+├── bin/
+│   └── hansolo-mcp          # Built MCP server executable
+├── src/
+│   ├── mcp/
+│   │   ├── server.ts        # MCP server implementation
+│   │   ├── tools/           # MCP tool implementations
+│   │   │   ├── launch-tool.ts
+│   │   │   ├── commit-tool.ts
+│   │   │   ├── ship-tool.ts
+│   │   │   └── ...
+│   │   └── validation/      # Validation services
+│   ├── core/
+│   │   ├── git/             # Git operations
+│   │   ├── github/          # GitHub integration
+│   │   └── sessions/        # Session management
+│   └── utils/               # Utilities
+├── tests/
+│   ├── unit/                # Unit tests
+│   ├── integration/         # Integration tests
+│   └── fixtures/            # Test fixtures
+├── docs/
+│   ├── guides/              # User documentation
+│   └── dev/                 # Developer documentation
+└── dist/                    # Built TypeScript output
+```
+
+## Next Steps for Developers
+
+1. Read [MCP Architecture](mcp-architecture.md) - Understand the architecture
+2. Read [MCP Tools System](mcp-tools.md) - Learn tool patterns
+3. Read [API Reference](api.md) - Core service APIs
+4. Read [Contributing Guide](../../../CONTRIBUTING.md) - Contribution guidelines
+5. Check [Development Learnings](../learnings/) - Patterns and best practices
+
+## Common Development Tasks
+
+### Adding a New MCP Tool
+
+1. Create tool file: `src/mcp/tools/my-tool.ts`
+2. Implement `MCPTool` interface
+3. Add pre-flight checks
+4. Add post-flight verifications
+5. Register in `src/mcp/server.ts`
+6. Write tests: `tests/unit/mcp/tools/my-tool.test.ts`
+7. Update documentation
+
+### Updating Pre-Flight Checks
+
+1. Edit `src/mcp/validation/pre-flight-check-service.ts`
+2. Add new check method
+3. Use in relevant tools
+4. Write tests
+
+### Updating Tool Results
+
+1. Edit `src/mcp/types/results.ts`
+2. Update result interfaces
+3. Update tools using the results
+4. Update tests
+
+### Running CI Locally
+
+```bash
+# Run all checks that CI runs
+npm run ci
+
+# Which includes:
+# - lint
+# - type check
+# - unit tests
+# - integration tests
+# - build
+```
+
+## Support for Developers
+
+- **Architecture Docs**: `docs/dev/system/mcp-architecture.md`
+- **Tool Development**: `docs/dev/system/mcp-tools.md`
+- **Patterns**: `docs/dev/learnings/`
+- **GitHub Issues**: Report bugs or ask questions
+- **Discussions**: Ask development questions
 
 ---
 
-*Installation guide v1.0.0*
-*Last updated: 2025-10-02*
+**Installation Guide Version**: 2.0.0 (Pure MCP)
+
+**Last Updated**: 2025-10-10
+
+**Target Audience**: han-solo developers and contributors

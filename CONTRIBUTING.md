@@ -35,22 +35,24 @@ By participating in this project, you agree to abide by our Code of Conduct:
 
 ### Using han-solo for Development
 
-We eat our own dog food! Use han-solo to manage your contribution:
+We eat our own dog food! Use han-solo via Claude Code to manage your contribution:
 
-```bash
-# Start a new feature
-hansolo launch --branch feature/amazing-feature
+1. **Configure han-solo MCP server** in Claude Code (see Installation below)
+2. **Use natural language** to manage your workflow:
+   ```
+   "Launch a new feature for amazing functionality"
+   → Claude uses hansolo_launch tool
 
-# Make your changes and commit
-hansolo ship --message "feat: add amazing feature"
+   "Ship this feature"
+   → Claude uses hansolo_ship tool
 
-# For urgent fixes
-hansolo hotfix --issue "CRITICAL-123" --severity critical
-```
+   "Create an emergency hotfix"
+   → Claude uses hansolo_hotfix tool
+   ```
 
-### Manual Workflow
+### Manual Git Workflow
 
-If you prefer the traditional approach:
+If you prefer the traditional Git approach:
 
 1. Create a branch from `main`
 2. Make your changes
@@ -65,14 +67,39 @@ If you prefer the traditional approach:
 - Node.js >= 18.0.0
 - npm >= 8.0.0
 - Git >= 2.30.0
+- Claude Code (for MCP integration testing)
 
-### Running Locally
+### MCP Server Setup
+
+1. **Build the MCP server**:
+   ```bash
+   npm install
+   npm run build
+   ```
+
+2. **Configure Claude Code** to load han-solo MCP server:
+   ```json
+   {
+     "mcpServers": {
+       "hansolo": {
+         "command": "node",
+         "args": ["/path/to/hansolo/build/index.js"]
+       }
+     }
+   }
+   ```
+
+3. **Restart Claude Code** to load the MCP tools
+
+4. **Test via natural language**: "Show han-solo status"
+
+### Running Tests
 
 ```bash
 # Build the project
 npm run build
 
-# Run tests
+# Run all tests
 npm test
 
 # Run tests in watch mode
@@ -142,19 +169,37 @@ test: add unit tests for SessionRepository
 ```
 hansolo/
 ├── src/
-│   ├── cli.ts              # Main CLI entry point
-│   ├── commands/           # CLI command implementations
-│   ├── models/             # Data models and types
-│   ├── services/           # Business logic services
-│   ├── state-machines/     # Workflow state machines
-│   ├── mcp/               # MCP server integration
+│   ├── index.ts           # MCP server entry point
+│   ├── tools/             # MCP tool implementations
+│   │   ├── init.ts
+│   │   ├── launch.ts
+│   │   ├── ship.ts
+│   │   ├── status.ts
+│   │   ├── sessions.ts
+│   │   ├── swap.ts
+│   │   ├── abort.ts
+│   │   ├── commit.ts
+│   │   └── status-line.ts
+│   ├── core/              # Core functionality
+│   │   ├── state-machine.ts
+│   │   ├── session-manager.ts
+│   │   ├── git-operations.ts
+│   │   └── github-integration.ts
+│   ├── models/            # Data models and types
 │   └── utils/             # Utility functions
+│       ├── prompts.ts     # Prompt-based parameter collection
+│       ├── validation.ts
+│       └── formatting.ts
 ├── tests/
 │   ├── unit/              # Unit tests
 │   ├── integration/       # Integration tests
 │   └── contracts/         # Contract tests
-├── templates/             # File templates
+├── build/                 # Compiled JavaScript
+│   └── index.js          # Built MCP server
 ├── docs/                  # Documentation
+│   ├── guides/           # User guides
+│   ├── dev/              # Developer docs
+│   └── specs/            # Product specs
 └── scripts/              # Build and utility scripts
 ```
 

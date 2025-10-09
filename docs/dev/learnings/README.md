@@ -22,7 +22,25 @@ This serves as institutional memory - a knowledge base for current and future de
 - Git workflow learnings
 - Tool configurations and why
 
-## Structure Suggestions
+## Current Learnings
+
+### [Prompt-Based Parameter Collection Pattern](prompt-based-parameter-collection.md)
+**Status**: ✅ Active (v2.0.0) - Extended with Hybrid Approach
+
+A pattern for handling missing optional parameters in MCP tools by returning successful results with prompts instead of errors. This leverages Claude Code's conversational abilities to fill in missing information through AI-assisted generation **or user input**.
+
+**Key Insight**: Since Claude Code doesn't support MCP elicitations, we return success with context and prompts, allowing Claude to generate missing parameters (commit messages, PR descriptions, etc.) in a multi-turn conversation. The pattern supports three interaction models:
+- **AI-Generated**: Claude automatically generates the parameter
+- **User-Provided**: Claude asks user for input
+- **Collaborative**: Claude suggests, user modifies
+
+**Used In**: CommitTool, ShipTool, LaunchTool, HotfixTool
+
+**Benefits**: Natural conversational flow, AI assistance when helpful, user control when needed
+
+---
+
+## Future Topics (To Document)
 
 Organize by topic:
 - `typescript-patterns.md` - TypeScript-specific patterns

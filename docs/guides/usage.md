@@ -1,94 +1,101 @@
 # han-solo Usage Guide
 
-Practical examples and best practices for using han-solo in real-world development scenarios.
+Practical examples and best practices for using han-solo with Claude Code in real-world development scenarios.
 
 ## Table of Contents
 
 - [Basic Workflows](#basic-workflows)
 - [Team Collaboration](#team-collaboration)
-- [CI/CD Integration](#cicd-integration)
 - [Advanced Workflows](#advanced-workflows)
 - [Best Practices](#best-practices)
 - [Common Scenarios](#common-scenarios)
+- [Tips for Different Team Sizes](#tips-for-different-team-sizes)
 
 ## Basic Workflows
 
 ### Simple Feature Development
 
-The most common workflow: develop a feature and ship it.
+The most common workflow: develop a feature with Claude Code and ship it.
 
-```bash
-# 1. Start new feature
-hansolo launch
-# Generated branch: feature/2025-01-15-14-30-45
+**Natural Language Pattern:**
 
-# 2. Make your changes
-vim src/new-feature.ts
-vim tests/new-feature.test.ts
+```
+"Start a new feature for improving the search functionality"
+*work with Claude to implement the feature*
+"Commit these changes with message 'feat: improve search with fuzzy matching'"
+"Ship this feature with PR description: Improve search with fuzzy matching algorithm"
+```
 
-# 3. Commit your changes
-hansolo commit --message "feat: add new feature
+**With Direct MCP Tools:**
 
-Implemented new feature with comprehensive tests.
-Updated documentation to reflect changes."
+```
+Use hansolo_launch with description "Improve search functionality"
+# Generated branch: feature/improve-search-functionality
 
-# 4. Ship it (pushes, creates PR, merges, cleans up)
-hansolo ship --pr-description "## Summary
-Adds new feature functionality
+*implement the feature*
 
-## Changes
-- New feature implementation
-- Comprehensive test coverage
+Use hansolo_commit with message "feat: improve search with fuzzy matching"
 
-## Testing
-All tests passing"
+Use hansolo_ship with createPR true, merge true, and prDescription "Improve search with fuzzy matching algorithm"
 ```
 
 **Timeline**: ~2 minutes from launch to merged PR (excluding CI time)
+
+**What han-solo does automatically:**
+- ✅ Creates feature branch
+- ✅ Tracks workflow state
+- ✅ Commits changes
+- ✅ Pushes to GitHub
+- ✅ Creates pull request
+- ✅ Waits for CI checks
+- ✅ Auto-merges PR
+- ✅ Cleans up branches
+- ✅ Returns you to main
 
 ### Named Feature Branch
 
 When you want a specific branch name:
 
-```bash
-# Start with custom name
-hansolo launch --branch feature/user-authentication
+**Natural Language:**
 
-# Work on the feature
-vim src/auth-endpoints.ts
+```
+"Start a feature branch called feature/user-authentication for implementing OAuth"
+*work on authentication*
+"Commit with message 'feat: implement OAuth2 authentication'"
+"Ship this feature"
+```
 
-# Commit changes
-hansolo commit --message "feat: implement user authentication
+**Direct Tools:**
 
-Added OAuth2 endpoints and JWT token validation.
-Includes middleware for protected routes."
+```
+Use hansolo_launch with branchName "feature/user-authentication" and description "OAuth2 authentication system"
 
-# Ship it
-hansolo ship --pr-description "## Summary
-Implements user authentication system
+Use hansolo_commit with message "feat: implement OAuth2 authentication"
 
-## Changes
-- OAuth2 endpoints
-- JWT token validation
-- Protected route middleware"
+Use hansolo_ship with createPR true and merge true
 ```
 
 ### Quick Hotfix
 
 For urgent bug fixes:
 
-```bash
-# Launch hotfix
-hansolo launch --branch hotfix/critical-security-bug
+**Natural Language:**
 
-# Fix the bug
-vim src/security-fix.ts
+```
+"Create a hotfix for the critical security vulnerability in the auth module"
+*fix the vulnerability*
+"Commit this security fix"
+"Ship the hotfix immediately"
+```
 
-# Commit the fix
-hansolo commit --message "fix: patch critical security vulnerability"
+**Direct Tools:**
 
-# Ship immediately (bypasses waiting for approvals if configured)
-hansolo ship --force
+```
+Use hansolo_hotfix with issue "security vulnerability in auth module" and severity "critical"
+
+Use hansolo_commit with message "fix: patch critical security vulnerability in auth"
+
+Use hansolo_ship with merge true and force true
 ```
 
 ## Team Collaboration
@@ -98,59 +105,62 @@ hansolo ship --force
 han-solo prevents conflicts when multiple developers work on different features.
 
 **Developer A:**
-```bash
-# Start feature A
-hansolo launch --branch feature/api-integration
 
-# Work...
-vim src/api-client.ts
-
-# Commit
-hansolo commit --message "feat: add API client integration"
-
-# Ship
-hansolo ship
+```
+"Start a new feature for API client integration"
+*implement API client*
+"Commit with message 'feat: add REST API client with retry logic'"
+"Ship this feature"
 ```
 
 **Developer B (at the same time):**
-```bash
-# Start feature B (independent of A)
-hansolo launch --branch feature/ui-redesign
 
-# Work...
-vim src/components/Header.tsx
-
-# Commit
-hansolo commit --message "feat: redesign header component"
-
-# Ship (han-solo handles any rebasing automatically)
-hansolo ship
+```
+"Start a feature for redesigning the header component"
+*redesign header*
+"Commit with message 'feat: redesign header with responsive layout'"
+"Ship the header redesign"
 ```
 
 **Key Benefits:**
-- Each developer has isolated sessions
+- Each developer has isolated workflow sessions
 - No stepping on each other's toes
 - Linear history maintained automatically
 - No merge commits cluttering history
+- han-solo handles rebasing automatically
 
 ### Code Review Workflow
 
 Integrate han-solo with your team's review process:
 
-```bash
-# 1. Commit and ship to create PR (but don't auto-merge)
-hansolo commit --message "feat: initial implementation"
-hansolo ship
+**Initial Implementation:**
 
-# This creates the PR and waits for CI
-# Reviewers can now review on GitHub
+```
+"Start a new feature for the payment integration"
+*implement payment flow*
+"Commit with message 'feat: initial payment integration'"
+"Create a PR for this feature but don't merge yet"
+```
 
-# 2. If changes needed, make them, commit, and ship again
-vim src/requested-changes.ts
-hansolo commit --message "fix: address review comments"
-hansolo ship  # Updates existing PR
+**With direct tools:**
 
-# 3. Once approved, ship merges automatically
+```
+Use hansolo_ship with push true, createPR true, merge false
+```
+
+**After Review Feedback:**
+
+```
+*address review comments*
+"Commit with message 'fix: address code review feedback'"
+"Update the PR and merge if approved"
+```
+
+**With direct tools:**
+
+```
+Use hansolo_commit with message "fix: address code review feedback"
+Use hansolo_ship with push true
 ```
 
 ### Pair Programming
@@ -158,106 +168,34 @@ hansolo ship  # Updates existing PR
 Two developers working on the same feature:
 
 **Developer 1:**
+
+```
+"Start a feature called feature/complex-algorithm for the new sorting algorithm"
+*implement initial version*
+"Commit the work in progress"
+```
+
+Then push manually:
 ```bash
-# Start the feature
-hansolo launch --branch feature/complex-algorithm
-
-# Push work-in-progress
 git push origin feature/complex-algorithm
-
-# Share session ID with Developer 2
-hansolo status  # Shows session ID
 ```
 
 **Developer 2:**
+
 ```bash
 # Pull the branch
 git fetch origin
 git checkout feature/complex-algorithm
-
-# Continue work
-vim src/algorithm.ts
-
-# Either developer can ship when ready
-hansolo ship
 ```
 
-## CI/CD Integration
-
-### GitHub Actions Integration
-
-han-solo works seamlessly in CI/CD pipelines:
-
-**.github/workflows/deploy.yml:**
-```yaml
-name: Deploy Feature
-
-on:
-  push:
-    branches:
-      - feature/**
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install han-solo
-        run: npm install -g @hansolo/cli
-
-      - name: Ship feature
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          hansolo ship --yes  # Auto-confirm prompts
+Then in Claude Code:
+```
+*continue the implementation*
+"Commit with message 'feat: optimize algorithm performance'"
+"Ship this feature when ready"
 ```
 
-### GitLab CI Integration
-
-**.gitlab-ci.yml:**
-```yaml
-stages:
-  - deploy
-
-deploy-feature:
-  stage: deploy
-  only:
-    - feature/*
-  script:
-    - npm install -g @hansolo/cli
-    - export GITLAB_TOKEN=$CI_JOB_TOKEN
-    - hansolo ship --yes
-  when: manual  # Trigger manually
-```
-
-### Jenkins Pipeline
-
-**Jenkinsfile:**
-```groovy
-pipeline {
-    agent any
-
-    stages {
-        stage('Deploy Feature') {
-            when {
-                branch 'feature/*'
-            }
-            steps {
-                sh 'npm install -g @hansolo/cli'
-                withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-                    sh 'hansolo ship --yes'
-                }
-            }
-        }
-    }
-}
-```
+Either developer can ship when the feature is complete.
 
 ## Advanced Workflows
 
@@ -265,138 +203,198 @@ pipeline {
 
 Work on multiple features and switch between them:
 
-```bash
-# Start feature 1
-hansolo launch --branch feature/database-migration
-# Work...
-vim src/migrations/001_initial.sql
-hansolo commit --message "feat: add migration scripts"
+**Starting Multiple Features:**
 
-# Need to work on something else - launch feature 2
-hansolo launch --branch feature/api-docs
-# Work...
-vim docs/api.md
-hansolo commit --message "docs: add API documentation"
+```
+"Start a feature for database migration scripts"
+*work on migrations*
+"Commit with message 'feat: add initial migration scripts'"
 
-# Switch back to feature 1
-hansolo swap feature/database-migration
-# Continue work...
+"Start another feature for API documentation"
+*work on docs*
+"Commit with message 'docs: add comprehensive API documentation'"
 
-# Ship feature 1
-hansolo ship
+"Switch back to the database migration feature"
+*continue migration work*
+"Commit more changes to migrations"
 
-# Switch to feature 2
-hansolo swap feature/api-docs
-# Ship feature 2
-hansolo ship
+"Ship the database migration feature"
+
+"Switch to the API documentation feature"
+*finish documentation*
+"Ship the API documentation feature"
+```
+
+**With Direct Tools:**
+
+```
+Use hansolo_launch with branchName "feature/database-migration"
+Use hansolo_commit with message "feat: add initial migration scripts"
+
+Use hansolo_launch with branchName "feature/api-docs"
+Use hansolo_commit with message "docs: add comprehensive API documentation"
+
+Use hansolo_swap with branchName "feature/database-migration"
+Use hansolo_commit with message "feat: add remaining migrations"
+Use hansolo_ship with merge true
+
+Use hansolo_swap with branchName "feature/api-docs"
+Use hansolo_ship with merge true
+```
+
+**View All Sessions:**
+
+```
+"Show me all my active han-solo sessions"
+```
+
+Or:
+
+```
+Use hansolo_sessions with verbose true
 ```
 
 ### Long-Running Feature Branches
 
 For features that take days or weeks:
 
-```bash
-# Day 1: Start feature
-hansolo launch --branch feature/major-refactor
-vim src/refactor-1.ts
-hansolo commit --message "WIP: Initial refactoring"
-git push  # Save work
+**Day 1:**
 
-# Day 2: Continue
-git pull  # Get latest if working from different machine
-# More work...
-vim src/refactor-2.ts
-hansolo commit --message "WIP: Refactor services"
-git push
-
-# Day 5: Ready to ship
-# han-solo rebases on latest main automatically
-hansolo ship --pr-description "## Summary
-Major refactoring of core services
-
-## Changes
-- Refactored service layer
-- Improved error handling
-- Better test coverage"
 ```
+"Start a feature for the major service layer refactor"
+*work on refactoring*
+"Commit with message 'WIP: initial service refactoring'"
+```
+
+Push manually to save work:
+```bash
+git push origin feature/major-refactor
+```
+
+**Day 2:**
+
+```bash
+git pull  # Get latest if working from different machine
+```
+
+```
+*continue refactoring*
+"Commit with message 'WIP: refactor authentication service'"
+```
+
+**Day 5:**
+
+```
+*finish refactoring*
+"Commit with message 'feat: complete service layer refactoring'"
+"Ship this feature with PR description: Major service layer refactoring with improved error handling and test coverage"
+```
+
+han-solo automatically rebases on latest main when shipping.
 
 ### Handling Merge Conflicts
 
 han-solo automates rebasing, but conflicts may still occur:
 
+**When Shipping:**
+
+```
+"Ship this feature"
+```
+
+If conflicts occur during rebase, han-solo will report them. Then:
+
 ```bash
-# Ship your feature
-hansolo ship
+# 1. Check conflicted files
+git status
 
-# If conflicts occur during rebase:
-# han-solo stops and shows conflicted files
-
-# 1. Resolve conflicts manually
-git status  # See conflicted files
+# 2. Resolve conflicts manually
 vim src/conflicted-file.ts  # Fix conflicts
 git add src/conflicted-file.ts
 
-# 2. Continue
+# 3. Continue rebase
 git rebase --continue
+```
 
-# 3. Ship again
-hansolo ship
+Then in Claude Code:
+
+```
+"Ship this feature again"
 ```
 
 ### Feature Flags Integration
 
-Combine han-solo with feature flags:
+Combine han-solo with feature flags for gradual rollouts:
 
-```bash
-# Launch feature with flag
-hansolo launch --branch feature/beta-ui
+**Implement Behind Feature Flag:**
 
-# Implement behind feature flag
-cat > src/featureFlags.ts << EOF
+```
+"Start a feature for the new beta UI design"
+*implement new UI with feature flag check*
+"Commit with message 'feat: add beta UI behind feature flag'"
+"Ship to production (feature disabled by default)"
+```
+
+The feature is in production but disabled:
+
+```typescript
+// In code
 export const BETA_UI = process.env.ENABLE_BETA_UI === 'true';
-EOF
 
-# Ship to production (feature disabled)
-hansolo ship
+if (BETA_UI) {
+  // New beta UI
+} else {
+  // Existing UI
+}
+```
 
-# Enable for testing
-export ENABLE_BETA_UI=true
+**Enable Feature Later:**
 
-# Enable for all users later (separate ship)
-hansolo launch --branch feature/enable-beta-ui
-vim src/featureFlags.ts  # Change default to true
-hansolo ship
+```
+"Start a feature to enable the beta UI for all users"
+*change feature flag default*
+"Commit with message 'feat: enable beta UI for all users'"
+"Ship this change"
 ```
 
 ## Best Practices
 
 ### 1. Always Launch Before Starting Work
 
-❌ **Bad:**
+**❌ Bad (breaks han-solo tracking):**
+
 ```bash
 git checkout -b feature/my-feature
 # han-solo doesn't know about this!
 ```
 
-✅ **Good:**
-```bash
-hansolo launch --branch feature/my-feature
+**✅ Good:**
+
+```
+"Start a new feature for my awesome feature"
 # han-solo tracks everything
 ```
 
-### 2. Use Descriptive Branch Names
+### 2. Use Descriptive Branch Names and Descriptions
 
-❌ **Bad:**
-```bash
-hansolo launch --branch feature/fix
-hansolo launch --branch feature/stuff
+**❌ Bad:**
+
+```
+"Start a feature"
+# Generates: feature/2025-10-10-14-30-45 (timestamp only)
 ```
 
-✅ **Good:**
-```bash
-hansolo launch --branch feature/user-authentication
-hansolo launch --branch feature/payment-integration
-hansolo launch --branch hotfix/memory-leak-in-parser
+**✅ Good:**
+
+```
+"Start a feature for user authentication with OAuth2"
+# Generates: feature/user-authentication-with-oauth2 (descriptive)
+```
+
+Or with explicit name:
+
+```
+Use hansolo_launch with branchName "feature/oauth2-integration" and description "OAuth2 authentication system"
 ```
 
 **Branch Naming Rules:**
@@ -407,95 +405,124 @@ hansolo launch --branch hotfix/memory-leak-in-parser
 - Auto-generated names are automatically truncated to fit
 
 **PR Title Prefixes:**
-- **Launch workflows**: PRs are prefixed with `[ship]`
+- **Launch workflows**: PRs are prefixed with `[launch]`
 - **Hotfix workflows**: PRs are prefixed with `[hotfix]`
-- Example: `[ship] feature/user-authentication`
+- Example: `[launch] feature/user-authentication`
 
 ### 3. Check Status Before Shipping
 
-✅ **Good:**
-```bash
+**✅ Good:**
+
+```
 # Always check status first
-hansolo status
+"What's my current workflow status?"
 
 # Review what will be committed
-git status
-git diff
+"Show me what changes are staged"
 
 # Then ship
-hansolo ship
+"Ship this feature"
 ```
 
 ### 4. Clean Up Regularly
 
-```bash
-# After merging PRs manually on GitHub
-hansolo cleanup
+After merging PRs or finishing features:
 
-# Or run periodically
-hansolo cleanup --days 7  # Clean up sessions older than 7 days
+```
+"Clean up old han-solo sessions and merged branches"
 ```
 
-### 5. Use Commit and Ship for Everything
+Or with direct tools:
 
-❌ **Bad:**
-```bash
-git add .
-git commit -m "My feature"
-git push
-# Now manually create PR on GitHub
-# Manually merge after CI
-# Manually delete branches
-# Manually sync main
+```
+Use hansolo_cleanup with deleteBranches true
 ```
 
-✅ **Good:**
+### 5. Let han-solo Handle Git Operations
+
+During an active han-solo session, avoid direct git commands:
+
+**❌ Avoid during active sessions:**
+
 ```bash
-hansolo commit --message "feat: my feature"
-hansolo ship
-# Commit handles staging and committing
-# Ship handles push, PR, merge, cleanup automatically!
+git commit -m "my changes"
+git push origin feature/my-branch
+gh pr create
 ```
+
+**✅ Use han-solo tools instead:**
+
+```
+"Commit these changes with message 'feat: my changes'"
+"Ship this feature"
+```
+
+**Why?** han-solo maintains a state machine that tracks your workflow. Direct git operations bypass this tracking and can cause workflow corruption.
 
 ### 6. Commit Incrementally, Ship When Ready
 
-✅ **Good:**
-```bash
-# Make some changes
-hansolo commit --message "feat: add user model"
+**✅ Good workflow:**
 
-# Make more changes
-hansolo commit --message "feat: add user controller"
+```
+*implement user model*
+"Commit with message 'feat: add user model with validation'"
 
-# Make final changes
-hansolo commit --message "feat: add user routes"
+*implement user controller*
+"Commit with message 'feat: add user controller with CRUD operations'"
+
+*implement user routes*
+"Commit with message 'feat: add user API routes'"
 
 # Now ship all commits together
-hansolo ship
+"Ship this feature"
 ```
 
-### 7. Leverage Claude Code Integration
+This creates a clean PR with multiple well-described commits.
 
-If using Claude Code:
+### 7. Leverage Natural Language
 
-```bash
-# Enable status line for constant visibility
-/mcp__hansolo__status_line enable
+Claude Code understands your intent:
 
-# Use MCP tools for convenience
-/mcp__hansolo__launch
-/mcp__hansolo__commit
-/mcp__hansolo__ship
+**✅ Preferred approach:**
 
-# Let Claude Code generate commit messages and PR descriptions
-# Just call the commands without parameters!
 ```
+"Start working on the shopping cart feature"
+"Commit my changes with a good message"  # Claude generates appropriate message
+"Ship this when tests pass"
+```
+
+**Also valid (more explicit):**
+
+```
+Use hansolo_launch with description "Shopping cart functionality"
+Use hansolo_commit with message "feat: add shopping cart with item management"
+Use hansolo_ship with createPR true and merge true
+```
+
+### 8. Enable Status Line for Visibility
+
+See your workflow state at all times:
+
+```
+"Enable the han-solo status line in Claude Code"
+```
+
+You'll see:
+
+```
+[han-solo] 📝 0c2a20a7 | feature/user-auth | CHANGES_COMMITTED
+```
+
+This helps you always know:
+- Current session ID
+- Active branch
+- Workflow state
 
 ## Common Scenarios
 
 ### Scenario 1: Forgot to Launch
 
-You started coding without running `hansolo launch`:
+You started coding without launching a han-solo workflow:
 
 ```bash
 # You have uncommitted changes on main
@@ -503,91 +530,105 @@ git status  # Shows modified files
 
 # Stash changes
 git stash
+```
 
-# Launch properly
-hansolo launch --branch feature/my-feature
+Then in Claude Code:
 
+```
+"Start a feature for my changes"
+```
+
+```bash
 # Restore changes
 git stash pop
+```
 
-# Continue normally
-hansolo ship
+```
+"Commit and ship normally"
 ```
 
 ### Scenario 2: Need to Abort Feature
 
 Started a feature but decided not to continue:
 
-```bash
-# Abort the workflow
-hansolo abort
+**Abort and return to main:**
 
-# Keep the branch (for later)
-hansolo abort --no-delete
+```
+"Abort this workflow"
+```
 
-# Or delete everything
-hansolo abort --delete-branch
+**Abort but keep branch for later:**
+
+```
+Use hansolo_abort with deleteBranch false
+```
+
+**Abort and delete everything:**
+
+```
+Use hansolo_abort with deleteBranch true
 ```
 
 ### Scenario 3: CI Failed
 
 Your CI checks failed after shipping:
 
-```bash
-# Fix the issue
-vim src/broken-test.ts
-
-# Commit the fix
-hansolo commit --message "fix: broken test"
-
-# Ship again (updates the same PR)
-hansolo ship
 ```
+*fix the failing tests*
+"Commit with message 'fix: resolve failing tests'"
+"Ship again to update the PR"
+```
+
+han-solo updates the existing PR instead of creating a new one.
 
 ### Scenario 4: Need to Update Dependencies
 
 Mid-feature, you need to update packages:
 
 ```bash
-# Update dependencies
 npm update
-
-# Commit the dependency changes
-hansolo commit --message "chore: update dependencies"
-
-# Continue with your feature
-vim src/my-feature.ts
-
-# Commit feature changes
-hansolo commit --message "feat: implement feature"
-
-# Ship everything together
-hansolo ship
 ```
+
+```
+"Commit with message 'chore: update dependencies'"
+*continue feature work*
+"Commit with message 'feat: implement feature with updated dependencies'"
+"Ship the complete feature"
+```
+
+All commits ship together in one PR.
 
 ### Scenario 5: Working Across Multiple Machines
 
 Started work on laptop, continuing on desktop:
 
 **On Laptop:**
+
+```
+"Start a feature for the mobile app redesign"
+*work on mobile UI*
+"Commit the work in progress"
+```
+
 ```bash
-hansolo launch --branch feature/mobile-app
-# Work...
 git push  # Save work to remote
 ```
 
 **On Desktop:**
+
 ```bash
 # Fetch and checkout
 git fetch origin
-git checkout feature/mobile-app
-
-# Resume work...
-# han-solo automatically detects the session
-
-# Ship when done
-hansolo ship
+git checkout feature/mobile-app-redesign
 ```
+
+```
+*resume work*
+"Commit additional changes"
+"Ship when done"
+```
+
+han-solo automatically detects the existing session.
 
 ### Scenario 6: Emergency Rollback
 
@@ -596,93 +637,213 @@ Need to quickly rollback a deployed feature:
 ```bash
 # Create rollback branch from last good commit
 git checkout main
-git checkout -b hotfix/rollback-bad-feature HEAD~1
+git pull
+git checkout -b hotfix/rollback-problematic-feature
+git revert HEAD~1  # Revert the problematic commit
+```
 
-# Ship the rollback
-hansolo launch --branch hotfix/rollback-bad-feature
-hansolo ship --force  # Skip some checks for urgency
+```
+"Ship this rollback immediately with force"
+```
+
+Or:
+
+```
+Use hansolo_hotfix with issue "rollback problematic feature" and severity "critical"
+Use hansolo_ship with force true
+```
+
+### Scenario 7: Want to See All Sessions
+
+Check what workflows you have active:
+
+```
+"Show me all my active han-solo sessions"
+```
+
+**With details:**
+
+```
+Use hansolo_sessions with verbose true
+```
+
+**Including completed:**
+
+```
+Use hansolo_sessions with all true
 ```
 
 ## Tips for Different Team Sizes
 
 ### Solo Developer
 
-```bash
+```
 # Simple workflow
-hansolo launch
-# work...
-hansolo ship
+"Start a new feature"
+*work*
+"Ship it"
 
-# Can skip some checks
-hansolo ship --yes  # Auto-confirm everything
+# Can be more casual with naming
+"Start working on that bug I found"
 ```
 
 ### Small Team (2-5 developers)
 
-```bash
-# Use named branches for clarity
-hansolo launch --branch feature/your-name-feature-description
-
-# Regular cleanup
-hansolo cleanup  # Run weekly
+```
+# Use descriptive names for clarity
+"Start a feature called feature/john-user-profile for the user profile page"
 
 # Communicate about long-running branches
+"Show me all active sessions to see what everyone is working on"
+
+# Regular cleanup
+"Clean up old sessions"  # Weekly
 ```
 
 ### Large Team (5+ developers)
 
-```bash
-# Strict branch naming convention
-hansolo launch --branch feature/TICKET-123-short-description
+```
+# Strict naming with ticket numbers
+"Start a feature called feature/JIRA-456-oauth-integration for OAuth integration"
 
 # Integrate with project management
-hansolo launch --branch feature/JIRA-456-user-auth
+Use hansolo_launch with branchName "feature/TICKET-123-user-dashboard" and description "Implement user dashboard per TICKET-123"
 
-# Regular cleanup is critical
-hansolo cleanup --days 7  # Run daily in CI
-
-# Use configuration to enforce standards
-hansolo config --global workflows.launch.branchPrefix feature/TEAM-
+# Regular automated cleanup
+Use hansolo_cleanup with deleteBranches true  # Daily via automation
 ```
 
-## Keyboard Shortcuts & Aliases
+## Understanding Workflow States
 
-Speed up your workflow with bash aliases:
+han-solo tracks your progress through these states:
 
-```bash
-# Add to ~/.bashrc or ~/.zshrc
+| State | Meaning | What You Can Do |
+|-------|---------|-----------------|
+| `INIT` | Just initialized | Launch a feature |
+| `BRANCH_READY` | Feature branch created | Make changes, commit |
+| `CHANGES_COMMITTED` | Changes committed | Ship or commit more |
+| `PUSHED` | Pushed to remote | Create PR |
+| `PR_CREATED` | PR is open | Merge or wait for CI |
+| `WAITING_APPROVAL` | Awaiting review | Get approval, address feedback |
+| `MERGED` | PR merged | Launch next feature |
+| `COMPLETE` | Workflow finished | Launch next feature |
 
-alias hl='hansolo launch'
-alias hs='hansolo ship'
-alias hst='hansolo status'
-alias hsw='hansolo swap'
-alias ha='hansolo abort'
-alias hc='hansolo cleanup'
+Ask Claude anytime:
 
-# Use them
-hl --branch feature/quick-fix
-# work...
-hs
 ```
+"What state am I in and what should I do next?"
+```
+
+## Natural Language vs Direct Tools
+
+han-solo supports both interaction styles:
+
+### Natural Language (Recommended)
+
+**Advantages:**
+- More intuitive and conversational
+- Claude understands intent and context
+- Can handle complex requests
+- Generates good commit messages and PR descriptions
+
+**Examples:**
+
+```
+"Start working on the user profile feature"
+"Commit my authentication changes with an appropriate message"
+"Ship this feature when all tests pass"
+"Clean up my old branches"
+```
+
+### Direct MCP Tools (More Control)
+
+**Advantages:**
+- Explicit parameter control
+- Predictable behavior
+- Good for automation patterns
+- Clear what's happening
+
+**Examples:**
+
+```
+Use hansolo_launch with branchName "feature/user-profile" and description "User profile page implementation"
+Use hansolo_commit with message "feat: add user profile page" and stagedOnly false
+Use hansolo_ship with push true, createPR true, merge true, and prDescription "Add user profile page with edit functionality"
+Use hansolo_cleanup with deleteBranches true
+```
+
+### Hybrid Approach (Best of Both)
+
+Mix both styles as needed:
+
+```
+"Start a feature for the payment integration"
+*work on implementation*
+Use hansolo_commit with message "feat: add Stripe payment integration" and stagedOnly false
+"Ship this feature when ready with a detailed PR description"
+```
+
+## Troubleshooting Tips
+
+### Check Current State
+
+```
+"What's my current han-solo status?"
+```
+
+### View Detailed Session Info
+
+```
+Use hansolo_sessions with verbose true
+```
+
+### Fix Stuck Workflow
+
+```
+"Abort the current workflow"
+"Start a fresh feature"
+```
+
+### Verify MCP Server
+
+```
+"Test the han-solo connection"
+```
+
+If issues persist, see the [Troubleshooting Guide](troubleshooting.md).
 
 ## Conclusion
 
-han-solo is designed to make Git workflows effortless. The key is:
+han-solo with Claude Code makes Git workflows effortless through AI-native interaction. The key principles:
 
 1. **Always launch** before starting work
 2. **Commit incrementally** as you make changes
 3. **Ship when ready** to push, PR, merge, and cleanup
-4. **Always cleanup** after merging
-5. **Let han-solo handle** the Git complexity
+4. **Clean up regularly** to remove old sessions
+5. **Let han-solo handle Git complexity** while you focus on code
+6. **Use natural language** for intuitive interaction
+7. **Enable status line** for constant workflow visibility
 
 The separation of commit (version control) and ship (delivery pipeline) gives you flexibility to:
 - Commit multiple times during development
 - Review your commits before shipping
 - Ship only when you're ready to create a PR
 - Let Claude Code help generate commit messages and PR descriptions
+- Maintain clean, linear Git history automatically
 
 For more help:
-- [Quick Start Guide](QUICKSTART.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Configuration](docs/configuration.md)
-- [Full README](README.md)
+- [Quick Start Guide](quickstart.md)
+- [MCP Tools Reference](mcp-tools-reference.md)
+- [Troubleshooting](troubleshooting.md)
+- [Migration from v1.x](migration-from-cli.md)
+- [MCP Architecture](../dev/system/mcp-architecture.md)
+
+---
+
+**Ready to ship features faster?** Start your first workflow:
+
+```
+"Start a new feature for [your feature description]"
+```
+
+🚀 Welcome to AI-native Git workflow automation!
