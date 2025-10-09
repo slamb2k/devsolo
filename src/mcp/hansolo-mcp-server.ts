@@ -27,8 +27,8 @@ const InitSchema = z.object({
 });
 
 const LaunchSchema = z.object({
-  branchName: z.string().optional(),
   description: z.string().optional(),
+  branchName: z.string().optional(),
   force: z.boolean().optional(),
   stashRef: z.string().optional(),
   popStash: z.boolean().optional(),
@@ -131,13 +131,13 @@ export class HanSoloMCPServer {
             inputSchema: {
               type: 'object',
               properties: {
-                branchName: {
-                  type: 'string',
-                  description: 'Name for the feature branch',
-                },
                 description: {
                   type: 'string',
                   description: 'Description of the feature',
+                },
+                branchName: {
+                  type: 'string',
+                  description: 'Name for the feature branch',
                 },
                 force: {
                   type: 'boolean',
@@ -360,13 +360,13 @@ export class HanSoloMCPServer {
             description: '🌟 Start a new feature workflow',
             arguments: [
               {
-                name: 'branchName',
-                description: 'Name for the feature branch',
+                name: 'description',
+                description: 'Description of the feature',
                 required: false,
               },
               {
-                name: 'description',
-                description: 'Description of the feature',
+                name: 'branchName',
+                description: 'Name for the feature branch',
                 required: false,
               },
             ],
@@ -718,33 +718,41 @@ IMPORTANT: You must include this parameter in your tool call:
             capturedOutput.push(getBanner('launch'));
           }
 
-          // If no branchName or description provided, ask for description to generate better branch name
-          let description = params.description;
+          const description = params.description;
           const branchName = params.branchName;
 
+          // If no parameters provided, ask Claude to analyze changes and generate branch name/description
           if (!branchName && !description) {
-            try {
-              const elicitResult = await this.server.elicitInput({
-                message: 'Describe your feature/fix (or press Enter to auto-generate branch name):',
-                requestedSchema: {
-                  type: 'object',
-                  properties: {
-                    description: {
-                      type: 'string',
-                      title: 'Feature description',
-                      description: 'Brief description of the feature or fix (used to generate branch name)',
-                    },
-                  },
-                },
-              });
+            return {
+              content: [{
+                type: 'text',
+                text: `Before launching a new feature, let me analyze your changes to generate an appropriate branch name and description.
 
-              if (elicitResult.action === 'accept' && elicitResult.content?.['description']) {
-                description = elicitResult.content['description'] as string;
-              }
-            } catch (error) {
-              // Elicitation not supported - will auto-generate
-              console.error('[MCP] Elicitation not supported, auto-generating branch name');
-            }
+1. **Review current changes**: Run 'git status' to see which files have been modified
+2. **Examine the changes**: Run 'git diff' to understand what's being worked on (skip if too large or no changes yet)
+3. **Generate branch info**: Based on your analysis (or if starting fresh, ask the user), create:
+
+   **Branch Description** (for description parameter):
+   - A clear, concise description of the feature/fix (2-8 words)
+   - Examples: "Add user authentication", "Fix memory leak in parser", "Update documentation"
+   - This will be used to generate a properly formatted branch name
+
+   Alternatively, if you want full control:
+   **Branch Name** (for branchName parameter):
+   - Use standard format: type/description-in-kebab-case
+   - Types: feature, bugfix, hotfix, release, chore, docs, test, refactor
+   - Example: "feature/add-user-authentication"
+
+4. **Call launch again** with the generated description (or branchName if you prefer):
+
+IMPORTANT: Include one of these parameter combinations:
+- Simple: <parameter name="description">Your description here</parameter>
+- Advanced: <parameter name="branchName">type/description-in-kebab-case</parameter>
+
+Also include:
+<parameter name="mcpPrompt">true</parameter>`,
+              }],
+            };
           }
 
           const launchCommand = new LaunchCommand(this.basePath);
