@@ -102,8 +102,32 @@ export class GitOperations {
     await this.git.add('.');
   }
 
-  async commit(message: string, options?: { noVerify?: boolean }): Promise<{ commit: string }> {
-    const args = ['--message', message];
+  /**
+   * Get list of staged files ready for commit
+   */
+  async getStagedFiles(): Promise<string[]> {
+    const status = await this.git.status();
+    return status.staged;
+  }
+
+  /**
+   * Check if there are any staged files
+   */
+  async hasStagedFiles(): Promise<boolean> {
+    const staged = await this.getStagedFiles();
+    return staged.length > 0;
+  }
+
+  async commit(message: string, options?: { noVerify?: boolean; stagedOnly?: boolean }): Promise<{ commit: string }> {
+    const args: string[] = [];
+
+    // If not staged-only, add all changes before committing
+    if (!options?.stagedOnly) {
+      args.push('-a');
+    }
+
+    args.push('--message', message);
+
     if (options?.noVerify) {
       args.push('--no-verify');
     }

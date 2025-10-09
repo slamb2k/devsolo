@@ -61,6 +61,7 @@ const AbortSchema = z.object({
 
 const CommitSchema = z.object({
   message: z.string().optional(),
+  stagedOnly: z.boolean().optional(),
   mcpPrompt: z.boolean().optional(),
 });
 
@@ -238,13 +239,18 @@ export class HanSoloMCPServer {
           },
           {
             name: 'hansolo_commit',
-            description: 'Commit staged changes with optional message',
+            description: 'Commit changes with optional message. Use stagedOnly to commit only staged files.',
             inputSchema: {
               type: 'object',
               properties: {
                 message: {
                   type: 'string',
                   description: 'Commit message (footer added automatically)',
+                },
+                stagedOnly: {
+                  type: 'boolean',
+                  description: 'If true, only commit staged files (use "git add" first). If false, stages and commits all changes.',
+                  default: false,
                 },
               },
             },
@@ -997,6 +1003,7 @@ Also include:
           const commitCommand = new CommitCommand(this.basePath);
           const result = await commitCommand.execute({
             message: params.message,
+            stagedOnly: params.stagedOnly,
             mcpPrompt: params.mcpPrompt,
           });
 
