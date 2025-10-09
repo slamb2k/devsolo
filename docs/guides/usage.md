@@ -399,6 +399,18 @@ hansolo launch --branch feature/payment-integration
 hansolo launch --branch hotfix/memory-leak-in-parser
 ```
 
+**Branch Naming Rules:**
+- **Maximum length**: 80 characters
+- **Format**: `type/description-in-kebab-case`
+- **Valid types**: feature, bugfix, hotfix, release, chore, docs, test, refactor
+- Names exceeding 80 characters will be rejected with truncated suggestions
+- Auto-generated names are automatically truncated to fit
+
+**PR Title Prefixes:**
+- **Launch workflows**: PRs are prefixed with `[ship]`
+- **Hotfix workflows**: PRs are prefixed with `[hotfix]`
+- Example: `[ship] feature/user-authentication`
+
 ### 3. Check Status Before Shipping
 
 ✅ **Good:**
