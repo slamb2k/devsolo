@@ -46,7 +46,8 @@ Store external materials that provide context for development:
 - `installation.md` - Developer installation methods (npm link, local dev setup)
 - `configuration.md` - Complete configuration schema and all settings
 - `api.md` - TypeScript API documentation for internal classes
-- `commands.md` - Exhaustive command reference with implementation details
+- `mcp-tools.md` - MCP tools implementation guide for developers
+- `mcp-architecture.md` - MCP server architecture overview
 - `pre-flight-checks.md` - Pre-flight and post-flight check specifications
 
 ### 📋 [specs/](./specs/)
@@ -197,10 +198,12 @@ pattern-<name>-guide.md
 **I want to...**
 - **Get started with han-solo** → [guides/quickstart.md](./guides/quickstart.md)
 - **See usage examples** → [guides/usage.md](./guides/usage.md)
-- **Fix a problem** → [guides/troubleshooting.md](./guides/troubleshooting.md)
+- **Learn about MCP tools** → [guides/mcp-tools-reference.md](./guides/mcp-tools-reference.md)
 - **Set up Claude Code integration** → [guides/mcp-integration.md](./guides/mcp-integration.md)
+- **Migrate from CLI version** → [guides/migration-from-cli.md](./guides/migration-from-cli.md)
 - **Understand internal APIs** → [dev/system/api.md](./dev/system/api.md)
-- **See all commands** → [dev/system/commands.md](./dev/system/commands.md)
+- **See MCP tools implementation** → [dev/system/mcp-tools.md](./dev/system/mcp-tools.md)
+- **Understand MCP architecture** → [dev/system/mcp-architecture.md](./dev/system/mcp-architecture.md)
 - **Understand complete config schema** → [dev/system/configuration.md](./dev/system/configuration.md)
 - **Understand the product vision** → [specs/hansolo-prd.md](./specs/hansolo-prd.md)
 - **Contribute code** → [dev/learnings/](./dev/learnings/) + [dev/reports/](./dev/reports/)
@@ -208,42 +211,14 @@ pattern-<name>-guide.md
 
 ## Maintenance Guidelines
 
-### Using the /hansolo:doc Command
+### Documentation Consistency
 
-The `/hansolo:doc` MCP command helps maintain documentation consistency (available when han-solo MCP server is connected):
-
-**Audit Mode** (no arguments):
-```bash
-/hansolo:doc
-```
-- Scans all documentation for issues
-- Checks naming conventions (lowercase-with-hyphens.md)
-- Validates folder placement
-- Identifies missing README.md entries
-- Finds documents that should be archived
-- Offers to fix issues automatically
-- Updates all README.md files
-
-**Create Mode** (with content):
-```bash
-/hansolo:doc <name> <content>
-```
-- Creates new documentation
-- Determines correct placement automatically
-- Applies naming conventions
-- Updates README.md files
-- Archives superseded documents
-
-### Using the /hansolo:prime Command
-
-The `/hansolo:prime` command quickly gives Claude Code context about your codebase:
-
-```bash
-/hansolo:prime
-```
-- Reads README.md and docs/README.md
-- Provides overview of project structure and documentation organization
-- Helps Claude Code understand the codebase before making changes
+When working on documentation:
+- Follow the naming convention: `lowercase-with-hyphens.md`
+- Place documents in the correct folder (use decision tree)
+- Update folder README.md to index new documents
+- Link related documents for cross-references
+- Archive completed or superseded documentation
 
 ### Adding New Documentation Manually
 

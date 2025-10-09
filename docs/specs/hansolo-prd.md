@@ -78,82 +78,111 @@ han-solo uses a dual-layer architecture that separates control from intelligence
 
 ### 5.1 Installation Architecture
 
-han-solo uses a two-phase installation process:
-1. **Package Installation**: Installs MCP server and optional components
-2. **Project Initialization**: Configures Git repository for han-solo workflows
+han-solo uses MCP (Model Context Protocol) for integration with Claude Code:
+1. **MCP Server Installation**: Configure Claude Code to load han-solo MCP server
+2. **Project Initialization**: Use `hansolo_init` tool to configure Git repository
+3. **Natural Language Interface**: Access all features through Claude Code
 
 ### 5.2 Installation Methods
 
-#### Standard npm Installation
-```bash
-# Global installation
-npm install -g @hansolo/cli
+#### Primary Method: MCP Configuration
+Add han-solo to your Claude Code MCP configuration:
 
-# Project installation  
-npm install --save-dev @hansolo/cli
+```json
+{
+  "mcpServers": {
+    "hansolo": {
+      "command": "node",
+      "args": ["/path/to/hansolo/build/index.js"]
+    }
+  }
+}
 ```
 
-#### Direct Installation with npx
-```bash
-# One-time installer execution without package installation
-npx @hansolo/cli install
+Then restart Claude Code and run:
+```
+"Initialize han-solo in this project"
+→ Claude uses hansolo_init tool
 ```
 
-After installation, initialize projects with:
+#### Development Mode
 ```bash
-/hansolo:init  # Required before using any other commands
+# Clone repository
+git clone https://github.com/your-org/hansolo
+cd hansolo
+
+# Install dependencies
+npm install
+
+# Build
+npm run build
+
+# Configure MCP server path in Claude Code
+# Then use through Claude Code natural language interface
 ```
 
-### 5.3 Interactive Installer
+### 5.3 Project Initialization
 
-When installing the npm package, an interactive installer automatically runs to set up:
+After configuring the MCP server in Claude Code, each project requires one-time initialization:
 
-#### Installation Profiles
-- **Solo Developer**: Full suite for independent development
-- **Team Workflow**: Collaborative development tools  
-- **Minimal**: Essential commands only
-- **Custom**: Choose specific components
+```
+User: "Initialize han-solo in this project"
 
-#### Component Selection
-- **MCP Server** (always installed): Core workflow engine
-- **Status Lines**: Terminal awareness scripts (han-solo.sh, han-solo-minimal.sh)
-- **Git Hooks**: Pre-commit/pre-push safety checks
-- **Git Templates**: Commit message and PR templates
-- **Utility Scripts**: Helper tools and automation
+Claude: Uses hansolo_init MCP tool
+→ Creates .hansolo/ directory
+→ Sets up Git repository if needed
+→ Creates GitHub/GitLab remote if requested
+→ Installs Git hooks for safety
+→ Creates hansolo.yaml marker file
+→ Configures branch protection
+```
 
-#### Installation Scope
-- **User-level** (`~/.hansolo/`): Components available across all projects
-- **Project-level** (`./.hansolo/`): Components specific to this project
+#### Initialization Modes
 
-### 5.4 Component Locations
+**New Project** (no Git repository):
+- Creates Git repository
+- Offers to create GitHub/GitLab remote
+- Sets up complete workflow environment
 
-| Component | User-Level | Project-Level | Purpose |
-|-----------|------------|---------------|---------|
-| MCP Server | npm global/local | npm node_modules | Core engine |
-| Status Lines | `~/.hansolo/status_lines/` | `./.hansolo/status_lines/` | Terminal display |
-| Git Hooks | `~/.hansolo/hooks/` | `./.hansolo/hooks/` | Safety checks |
-| Git Templates | `~/.hansolo/templates/` | `./.hansolo/templates/` | Message templates |
-| Claude Settings | `~/.claude/settings.local.json` | `./.claude/settings.local.json` | Claude configuration |
-| hansolo.yaml | N/A | `./hansolo.yaml` | Project marker |
+**Existing Project** (has Git repository):
+- Validates existing setup
+- Adds han-solo configuration
+- Preserves existing Git configuration
+
+### 5.4 Project Structure After Initialization
+
+```
+project-root/
+├── .hansolo/
+│   ├── session.json              # Active session state
+│   └── sessions/                 # Session history
+│       └── {session-id}.json
+├── .git/
+│   └── hooks/                    # Safety hooks (if installed)
+│       ├── pre-commit
+│       └── pre-push
+├── hansolo.yaml                  # Project configuration
+└── CLAUDE.md                     # Claude Code instructions (updated)
+```
 
 ## 6. Feature Specifications
 
-### 6.1 Commands
+### 6.1 MCP Tools (Accessed via Natural Language)
 
-| Command | Description | Primary Tool | State Changes |
-|---------|-------------|--------------|---------------|
-| `/hansolo:init` | Initialize project with han-solo (MANDATORY FIRST) | `configure_workflow` | N/A - Setup only |
-| `/hansolo:launch` | Create feature branch safely | `start_workflow("launch")` | INIT → BRANCH_READY |
-| `/hansolo:ship` | Complete shipping workflow | `start_workflow("ship")` | BRANCH_READY → COMPLETE |
-| `/hansolo:hotfix` | Emergency production fix | `start_workflow("hotfix")` | HOTFIX_INIT → HOTFIX_COMPLETE |
-| `/hansolo:status` | Show all sessions and states | `get_sessions_status` | Read-only |
-| `/hansolo:sessions` | List active workflow sessions | `get_sessions_status` | Read-only |
-| `/hansolo:swap` | Switch between sessions | `swap_session` | Context switch |
-| `/hansolo:cleanup` | Manual branch cleanup | `cleanup_operations` | N/A - Maintenance |
-| `/hansolo:validate` | Pre-flight checks | `validate_environment` | Read-only |
-| `/hansolo:abort` | Cancel active workflow | `abort_workflow` | * → INIT |
-| `/hansolo:config` | Configure preferences | `configure_workflow` | N/A - Settings |
-| `/hansolo:status-line` | Configure terminal status line | `manage_status_line` | N/A - Terminal UI |
+| MCP Tool | Natural Language Triggers | Description | State Changes |
+|----------|---------------------------|-------------|---------------|
+| `hansolo_init` | "Initialize han-solo", "Set up han-solo" | Initialize project (MANDATORY FIRST) | N/A - Setup only |
+| `hansolo_launch` | "Launch a feature", "Start new feature", "Create branch" | Create feature branch safely | INIT → BRANCH_READY |
+| `hansolo_ship` | "Ship this feature", "Complete workflow", "Merge to main" | Complete shipping workflow | BRANCH_READY → COMPLETE |
+| `hansolo_hotfix` | "Emergency fix", "Hotfix", "Production fix" | Emergency production fix | HOTFIX_INIT → HOTFIX_COMPLETE |
+| `hansolo_status` | "Show status", "What's the current state" | Show all sessions and states | Read-only |
+| `hansolo_sessions` | "List sessions", "Show active work" | List active workflow sessions | Read-only |
+| `hansolo_swap` | "Switch to branch X", "Swap sessions" | Switch between sessions | Context switch |
+| `hansolo_abort` | "Cancel workflow", "Abort this work" | Cancel active workflow | * → INIT |
+| `hansolo_commit` | "Commit changes", "Create commit" | Commit with optional message | Updates session state |
+| `hansolo_status_line` | "Configure status line", "Setup terminal" | Configure terminal status line | N/A - Terminal UI |
+
+**Usage**: All tools are accessed through natural language in Claude Code. Claude intelligently selects the appropriate MCP tool based on user intent.
 
 ### 6.2 MCP Server Tools
 
@@ -238,9 +267,33 @@ Controls the terminal status line display for ambient awareness:
 
 ## 7. Key Use Case Scenarios
 
+### 7.1 Init: Complete Project Setup
+
+```
+User: "Initialize han-solo in this project"
+
+System: Detects no .git directory
+Claude: Uses hansolo_init tool with prompts
+
+Tool executes initialization:
+1. Creates Git repository
+2. Prompts for remote (GitHub/GitLab/Local only)
+3. If GitHub selected:
+   - Prompts for repository name
+   - Prompts for visibility (public/private)
+   - Creates remote repository
+   - Configures remote origin
+4. Creates .hansolo/ directory
+5. Installs Git hooks
+6. Creates hansolo.yaml marker
+7. Updates CLAUDE.md with workflow instructions
+
+Result: Complete project setup ready for workflows
+```
+
 ### 7.1.1 CLAUDE.md Configuration
 
-During init, han-solo adds or updates the CLAUDE.md file with instructions for Claude Code integration:
+During initialization, han-solo updates the CLAUDE.md file with instructions for Claude Code integration:
 
 ```markdown
 # CLAUDE.md
@@ -436,57 +489,83 @@ Result: Complete setup optimized for solo development
 
 ### 7.2 Launch: Safe Branch Creation
 ```
-Developer: /hansolo:launch
+User: "I want to start working on a new authentication feature"
+
+Claude: Uses hansolo_launch tool
 System: Detects 5 uncommitted files on main
-Claude: "You have uncommitted changes. How should I handle them?"
-        [s]tash  [c]ommit  [m]ove  [d]iscard
-User: m
+
+Claude prompts: "You have uncommitted changes. How should I handle them?"
+Options presented:
+  - Stash and restore later
+  - Commit them first
+  - Move them to new branch
+  - Discard (if safe)
+
+User: "Move them to the new branch"
+
 System: Analyzes changes (auth/login.js, auth/jwt.js modified)
-Claude: "Based on your auth changes, suggested names:
-        1. feat/auth-improvements
-        2. feat/jwt-authentication
-        3. feat/login-updates"
-User: 1
-Result: Branch created with changes moved, session started
+Claude suggests branch names:
+  1. feat/auth-improvements
+  2. feat/jwt-authentication
+  3. feat/login-updates
+
+User selects: 1
+
+Result:
+✓ Branch feat/auth-improvements created
+✓ Uncommitted changes moved to new branch
+✓ Session started (ID: a3f2b1)
+✓ Ready to continue work
 ```
 
 ### 7.3 Ship: Complete Workflow with Auto-Merge Flexibility
 
 #### Scenario A: Auto-Merge Enabled
 ```
-Developer: /hansolo:ship
-[... commits, pushes ...]
-System: Creates PR, attempts to enable auto-merge
-Claude: "PR #456 created with auto-merge enabled.
-        
+User: "Ship this feature to production"
+
+Claude: Uses hansolo_ship tool
+System executes workflow:
+1. Commits changes (prompts for message)
+2. Pushes to remote
+3. Creates PR #456
+4. Attempts to enable auto-merge
+
+Claude reports: "PR #456 created with auto-merge enabled.
+
         Waiting for requirements:
         ⏳ CI/CD checks (0/5 passed)
         ⏳ Required reviews (0/2)
         ⏳ Branch up-to-date check
-        
+
         ⚠️ Manual review required. Please ask reviewers to approve.
-        Run /hansolo:ship again after approval to complete workflow."
+        Say 'continue shipping' after approval to complete workflow."
 
 [Developer gets reviews, returns later]
 
-Developer: /hansolo:ship
+User: "Continue shipping the feature"
+
+Claude: Uses hansolo_ship tool again
 System: Detects PR already merged via auto-merge
-Claude: "Great! PR #456 was auto-merged after all requirements passed.
-        
+
+Claude reports: "Great! PR #456 was auto-merged after all requirements passed.
+
         Completing remaining steps:
         ✔ Syncing local main with origin
         ✔ Deleting local branch feat/payment-api
         ✔ Deleting remote branch origin/feat/payment-api
-        
+
         Ship complete! You're on clean main."
 ```
 
 ### 7.4 Status: Comprehensive Environment Check
 ```
-Developer: /hansolo:status
+User: "What's the status of my work?"
 
-[MCP Server: get_sessions_status()]
-Claude: "📊 Comprehensive Workflow Status
+Claude: Uses hansolo_status tool
+System: Queries all sessions and repository state
+
+Claude reports: "📊 Comprehensive Workflow Status
         
         Current Branch: feat/payment-api
         Active Session: #a3f2 (WAITING_APPROVAL)
@@ -550,104 +629,82 @@ The architecture enforces a "guard rails" approach:
 - **Claude Code**: Operates within the rails, providing intelligence at decision points
 - **Result**: Workflows cannot be broken, but remain flexible and intelligent
 
-### 8.2 Package Structure
+### 8.2 MCP Server Structure
 
 ```
-@hansolo/cli/
-├── package.json          # Defines bin commands and postinstall
-├── bin/
-│   ├── hansolo.js       # CLI entry point for MCP server
-│   └── install.js       # Interactive installer
-├── lib/
-│   ├── mcp-server.js    # Core MCP server implementation
-│   └── state-machine.js # Workflow state management
-├── files/               # Bundled installation files
-│   ├── status_lines/    # Status line scripts
-│   │   ├── han-solo.sh
-│   │   └── han-solo-minimal.sh
-│   ├── hooks/           # Git safety hooks
-│   │   ├── pre-commit.sh
-│   │   └── pre-push.sh
-│   └── templates/       # Git templates
-│       ├── commit-message.txt
-│       └── pull-request.md
+hansolo/
+├── package.json              # Node.js project configuration
+├── src/
+│   ├── index.ts             # MCP server entry point
+│   ├── tools/               # MCP tool implementations
+│   │   ├── init.ts
+│   │   ├── launch.ts
+│   │   ├── ship.ts
+│   │   ├── status.ts
+│   │   ├── sessions.ts
+│   │   ├── swap.ts
+│   │   ├── abort.ts
+│   │   ├── commit.ts
+│   │   └── status-line.ts
+│   ├── core/                # Core functionality
+│   │   ├── state-machine.ts
+│   │   ├── session-manager.ts
+│   │   ├── git-operations.ts
+│   │   └── github-integration.ts
+│   └── utils/               # Utilities
+│       ├── prompts.ts       # Prompt-based parameter collection
+│       ├── validation.ts
+│       └── formatting.ts
+├── build/                   # Compiled JavaScript output
+│   └── index.js            # Built MCP server
 └── README.md
 
-package.json:
-{
-  "name": "@hansolo/cli",
-  "bin": {
-    "hansolo": "./bin/hansolo.js",
-    "hansolo-install": "./bin/install.js"
-  },
-  "scripts": {
-    "postinstall": "node ./bin/install.js --auto"
-  }
-}
+Integration with Claude Code via MCP configuration
 ```
 
-### 8.3 Installation Flow
+### 8.3 MCP Integration Flow
 
-#### npm install -g @hansolo/cli
-1. npm installs package globally
-2. **postinstall** script runs automatically
-3. Interactive installer launches:
-   - Detects global installation
-   - Prompts for profile and components
-   - Installs to `~/.hansolo/` (user-level)
-   - Updates `~/.claude/settings.local.json` with paths
-4. `hansolo` command becomes available globally
-5. User runs `hansolo init` in any project
+#### One-Time MCP Server Setup
+1. Clone han-solo repository (or install via npm if published)
+2. Build the TypeScript project: `npm run build`
+3. Configure Claude Code to load han-solo MCP server:
+   ```json
+   {
+     "mcpServers": {
+       "hansolo": {
+         "command": "node",
+         "args": ["/path/to/hansolo/build/index.js"]
+       }
+     }
+   }
+   ```
+4. Restart Claude Code
+5. MCP tools become available for natural language use
 
-#### npm install --save-dev @hansolo/cli
-1. npm installs package in project
-2. **postinstall** script runs automatically
-3. Interactive installer launches:
-   - Detects project installation
-   - Prompts for profile and components
-   - Installs to `./.hansolo/` (project-level)
-   - Updates `./.claude/settings.local.json` with paths
-4. User runs `npx hansolo init` in this project
+#### Per-Project Initialization
+1. User requests initialization: "Initialize han-solo in this project"
+2. Claude invokes `hansolo_init` MCP tool
+3. Tool creates project structure (see 8.4)
+4. Project is ready for workflow commands
 
-#### npx @hansolo/cli init
-1. npm downloads package to temporary cache
-2. **postinstall** script runs with detection:
-   - Checks for existing installation
-   - If missing, runs installer (defaults to user-level)
-   - If present, skips installation
-3. Executes `hansolo init` command directly
+### 8.4 Directory Structure After Initialization
 
-### 8.4 Directory Structure After Installation
-
-**User-level installation** (`npm install -g`):
-```
-~/
-├── .hansolo/                    # han-solo components
-│   ├── status_lines/
-│   │   ├── han-solo.sh
-│   │   └── han-solo-minimal.sh
-│   ├── hooks/
-│   │   ├── pre-commit.sh
-│   │   └── pre-push.sh
-│   └── templates/
-│       ├── commit-message.txt
-│       └── pull-request.md
-└── .claude/                     # Claude configuration
-    └── settings.local.json      # Points to ~/.hansolo/ components
-```
-
-**Project-level installation** (`npm install --save-dev`):
+**Project directory**:
 ```
 project-root/
-├── .hansolo/                    # han-solo components
-│   ├── status_lines/
-│   ├── hooks/
-│   └── templates/
-├── .claude/                     # Claude configuration
-│   └── settings.local.json      # Points to ./.hansolo/ components
-├── hansolo.yaml                 # Project configuration (after init)
-└── package.json                 # Contains @hansolo/cli dependency
+├── .hansolo/                    # Session and state management
+│   ├── session.json            # Current active session
+│   └── sessions/               # Session history
+│       └── {session-id}.json   # Individual session data
+├── .git/                       # Git repository
+│   └── hooks/                  # Safety hooks (optional)
+│       ├── pre-commit
+│       └── pre-push
+├── hansolo.yaml                # Project configuration
+└── CLAUDE.md                   # Updated with han-solo instructions
 ```
+
+**No user-level installation required** - MCP server is configured once in Claude Code and works across all projects.
 
 ### 8.5 Communication Protocol
 - **Format**: JSON over stdio

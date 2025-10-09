@@ -31,23 +31,27 @@ Adapts from individual developers (0 reviews) to large teams
 
 ## How It Works
 
-Simple commands replace complex Git workflows:
-- `/hansolo:init` → One-time setup (creates GitHub repo if needed)
-- `/hansolo:launch` → Creates branch with safety checks
-- `/hansolo:ship` → Complete workflow from commit to deployment  
-- `/hansolo:hotfix` → Emergency fixes with automatic backporting
-- `/hansolo:status` → Comprehensive workflow visibility
-- `/hansolo:sessions` → Multi-tasking with concurrent workflows
+Simple MCP tools accessed through Claude Code replace complex Git workflows:
+- `hansolo_init` → One-time setup (creates GitHub repo if needed)
+- `hansolo_launch` → Creates branch with safety checks
+- `hansolo_ship` → Complete workflow from commit to deployment
+- `hansolo_hotfix` → Emergency fixes with automatic backporting
+- `hansolo_status` → Comprehensive workflow visibility
+- `hansolo_sessions` → Multi-tasking with concurrent workflows
 
-Under the hood:
+**Architecture**:
+- **MCP Server**: Deterministic state machine enforces workflow rules (100% reliable)
+- **Claude Code**: Natural language interface and intelligent content generation
+- **Validation Contracts**: Ensure consistent behavior regardless of AI reasoning
+- **Result**: Guaranteed linear history with zero learning curve
+
+**Under the hood**:
 - First-time init creates Git repo and GitHub/GitLab remote automatically
-- MCP server enforces workflow rules (100% deterministic)
-- Validation contracts ensure consistent behavior regardless of AI reasoning
-- Claude AI generates content (commit messages, PR descriptions)
+- MCP server state machines prevent workflow violations
+- Claude generates commit messages, PR descriptions, branch names
 - Visual feedback with colors, icons, and progress indicators
 - Status lines provide ambient terminal awareness
 - Adapts to org constraints (auto-merge when allowed, manual when not)
-- Result: Guaranteed linear history with zero learning curve
 
 ## Developer Experience
 
@@ -98,23 +102,23 @@ Under the hood:
 
 ## Complete Feature Set
 
-**Core Workflows**
-- `/hansolo:init` - Mandatory first-time setup with repo creation
-- `/hansolo:launch` - Safe feature branch creation
-- `/hansolo:ship` - Complete commit-to-merge automation
-- `/hansolo:hotfix` - Emergency production fixes
+**Core Workflows** (MCP Tools)
+- `hansolo_init` - Mandatory first-time setup with repo creation
+- `hansolo_launch` - Safe feature branch creation
+- `hansolo_ship` - Complete commit-to-merge automation
+- `hansolo_hotfix` - Emergency production fixes
 
-**Session Management**
-- `/hansolo:status` - Comprehensive environment overview
-- `/hansolo:sessions` - List all active workflows
-- `/hansolo:swap` - Switch between concurrent sessions
-- `/hansolo:abort` - Safe workflow cancellation
+**Session Management** (MCP Tools)
+- `hansolo_status` - Comprehensive environment overview
+- `hansolo_sessions` - List all active workflows
+- `hansolo_swap` - Switch between concurrent sessions
+- `hansolo_abort` - Safe workflow cancellation
 
-**Maintenance**
-- `/hansolo:cleanup` - Remove merged branches
-- `/hansolo:validate` - Pre-flight checks
-- `/hansolo:config` - Update preferences
-- `/hansolo:status-line` - Configure terminal awareness
+**Additional Features** (MCP Tools)
+- `hansolo_commit` - Commit with optional message
+- `hansolo_status_line` - Configure terminal awareness
+- Natural language interface through Claude Code
+- Prompt-based parameter collection for user-friendly interactions
 
 **Safety Features**
 - Pre-commit hooks block direct main commits
@@ -126,16 +130,17 @@ Under the hood:
 ## Installation & Setup
 
 **5 Minute Setup Process**
-1. `npm install -g @hansolo/cli` - Install globally
-2. Interactive installer configures components
-3. `/hansolo:init` in your project - One-time setup
-4. Ready to use all commands immediately
+1. Add han-solo MCP server to Claude Code configuration
+2. Restart Claude Code to load MCP tools
+3. Run `hansolo_init` in your project (one-time setup)
+4. Ready to use all MCP tools immediately through natural language
 
 **Zero Configuration Required**
 - Automatic GitHub/GitLab repo creation
 - Smart defaults for solo developers
 - Optional team configurations
 - Works with existing repos
+- MCP tools appear automatically in Claude Code
 
 ## Traction & Validation
 

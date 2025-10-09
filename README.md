@@ -20,32 +20,36 @@ han-solo is a powerful MCP server designed exclusively for Claude Code, streamli
 
 ## Installation
 
-### Via Claude Code (Recommended)
+### MCP Server Setup
 
-han-solo is designed to be installed as an MCP server for Claude Code:
+1. **Clone and build** the han-solo repository:
+   ```bash
+   git clone https://github.com/slamb2k/hansolo.git
+   cd hansolo
+   npm install
+   npm run build
+   ```
 
-```bash
-# In your project directory with Claude Code open
-hansolo_init --scope project
-```
+2. **Configure Claude Code** to load the MCP server:
+   Add to your Claude Code MCP configuration file:
+   ```json
+   {
+     "mcpServers": {
+       "hansolo": {
+         "command": "node",
+         "args": ["/path/to/hansolo/build/index.js"]
+       }
+     }
+   }
+   ```
 
-Claude Code will automatically detect and configure the MCP server.
+3. **Restart Claude Code** to load the MCP tools
 
-### Manual MCP Configuration
-
-Add to your Claude Code MCP configuration:
-
-```json
-{
-  "mcpServers": {
-    "hansolo": {
-      "command": "node",
-      "args": ["/path/to/hansolo/bin/hansolo-mcp"],
-      "cwd": "${workspaceFolder}"
-    }
-  }
-}
-```
+4. **Initialize in your project** using natural language:
+   ```
+   "Initialize han-solo in this project"
+   ```
+   Claude will invoke the `hansolo_init` tool automatically.
 
 ## Quick Start
 
@@ -501,14 +505,14 @@ npm run test:mcp
 - **docs/guides/usage.md** - Practical examples and real-world scenarios
 
 ### Reference
-- **docs/reference/mcp-tools.md** - Complete MCP tool reference
-- **docs/reference/configuration.md** - Configuration options
-- **docs/reference/validation.md** - Pre/post-flight checks documentation
+- **docs/guides/mcp-tools-reference.md** - Complete MCP tool reference
+- **docs/dev/system/configuration.md** - Configuration options
+- **docs/dev/system/pre-flight-checks.md** - Pre/post-flight checks documentation
 
 ### Advanced
-- **docs/dev/system/architecture.md** - System architecture overview
-- **docs/dev/system/state-machine.md** - Workflow state machine details
-- **docs/specs/pure-mcp-architecture.md** - MCP-only design philosophy
+- **docs/dev/system/mcp-architecture.md** - MCP architecture overview
+- **docs/dev/system/mcp-tools.md** - MCP tools implementation details
+- **docs/dev/plans/phase3-pure-mcp-architecture.md** - MCP-only design philosophy
 
 ### Migration
 - **docs/guides/migration-from-cli.md** - Migrating from CLI-based versions (v1.x)
