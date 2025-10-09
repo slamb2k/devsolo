@@ -15,6 +15,7 @@ import { SwapCommand } from '../commands/hansolo-swap';
 import { AbortCommand } from '../commands/hansolo-abort';
 import { CommitCommand } from '../commands/hansolo-commit';
 import { ShipCommand } from '../commands/hansolo-ship';
+import { StatusLineCommand } from '../commands/hansolo-status-line';
 import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
 import { getBanner } from '../ui/banners';
@@ -81,6 +82,15 @@ const HotfixSchema = z.object({
   autoMerge: z.boolean().optional(),
   force: z.boolean().optional(),
   yes: z.boolean().optional(),
+  mcpPrompt: z.boolean().optional(),
+});
+
+const StatusLineSchema = z.object({
+  action: z.enum(['enable', 'disable', 'update', 'show']).optional(),
+  format: z.string().optional(),
+  showSessionInfo: z.boolean().optional(),
+  showBranchInfo: z.boolean().optional(),
+  showStateInfo: z.boolean().optional(),
   mcpPrompt: z.boolean().optional(),
 });
 
@@ -1065,45 +1075,43 @@ Also include:
         }
 
         case 'hansolo_status_line': {
-          if (!processedArgs?.['mcpPrompt']) {
+          const params = StatusLineSchema.parse(processedArgs);
+          if (!params.mcpPrompt) {
             capturedOutput.push(getBanner('status-line'));
           }
-          const { ManageStatusLineTool } = await import('../mcp-server/tools/manage-status-line');
-          const statusLineTool = new ManageStatusLineTool();
-          const result = await statusLineTool.execute(processedArgs as any);
 
-          let message = '';
-          let isError = false;
-
-          if (result.success) {
-            message = result.message || '';
-            if (result.enabled && result.currentFormat) {
-              message += `\nFormat: ${result.currentFormat}`;
-            }
-            if (result.preview) {
-              message += `\nPreview: ${result.preview}`;
-            }
-            if (!message) {
-              message = 'Status line operation completed';
-            }
-          } else {
-            message = `Error: ${result.error || 'Unknown error'}`;
-            isError = true;
+          // Convert params to string array format expected by command
+          const args: string[] = [];
+          if (params.action) {
+            args.push(params.action);
+          }
+          if (params.format) {
+            args.push('--format');
+            args.push(params.format);
+          }
+          if (params.showSessionInfo !== undefined) {
+            args.push('--show-session-info');
+            args.push(String(params.showSessionInfo));
+          }
+          if (params.showBranchInfo !== undefined) {
+            args.push('--show-branch-info');
+            args.push(String(params.showBranchInfo));
+          }
+          if (params.showStateInfo !== undefined) {
+            args.push('--show-state-info');
+            args.push(String(params.showStateInfo));
           }
 
-          // Prepend banner to output
-          const outputText = capturedOutput.length > 0
-            ? capturedOutput.join('\n') + '\n\n' + message
-            : message;
+          const statusLineCommand = new StatusLineCommand();
+          await statusLineCommand.execute(args);
 
           return {
             content: [
               {
                 type: 'text',
-                text: outputText,
+                text: capturedOutput.join('\n') || 'Status line command executed',
               },
             ],
-            isError,
           };
         }
 

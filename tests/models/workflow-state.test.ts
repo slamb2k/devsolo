@@ -1,5 +1,4 @@
 import { WorkflowState } from '../../src/models/workflow-state';
-import { StateTransition } from '../../src/models/state-transition';
 
 describe('WorkflowState Model', () => {
   describe('State Creation', () => {

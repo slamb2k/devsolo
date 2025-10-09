@@ -1,5 +1,5 @@
-import { SessionRepository } from '../../services/session-repository';
-import { WorkflowSession } from '../../models/workflow-session';
+import { SessionRepository } from '../../src/services/session-repository';
+import { WorkflowSession } from '../../src/models/workflow-session';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { mkdtempSync } from 'fs';

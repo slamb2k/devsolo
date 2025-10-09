@@ -1,5 +1,4 @@
 import { StateTransition } from '../../src/models/state-transition';
-import { WorkflowState } from '../../src/models/workflow-state';
 
 describe('StateTransition Model', () => {
   describe('Transition Creation', () => {
@@ -67,7 +66,7 @@ describe('StateTransition Model', () => {
       const invalidTransition = new StateTransition({
         sessionId: 'session-2',
         workflowType: 'launch',
-        fromState: 'BRANCH_READY',
+        fromState: 'COMPLETE',
         toState: 'PR_CREATED',
         trigger: 'invalid'
       });

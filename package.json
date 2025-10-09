@@ -5,8 +5,7 @@
   "main": "dist/index.js",
   "bin": {
     "hansolo": "./bin/hansolo.js",
-    "hansolo-mcp": "./bin/hansolo-mcp",
-    "hansolo-mcp-enhanced": "./bin/hansolo-mcp-enhanced"
+    "hansolo-mcp": "./bin/hansolo-mcp"
   },
   "scripts": {
     "build": "tsc",
@@ -26,8 +25,7 @@
     "typecheck": "tsc --noEmit",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "changelog:full": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "mcp:start": "node dist/mcp/hansolo-mcp-server-enhanced.js",
-    "mcp:start:legacy": "node dist/mcp/hansolo-mcp-server.js",
+    "mcp:start": "node dist/mcp/hansolo-mcp-server.js",
     "mcp:test": "npm run build:mcp && npm run test:mcp",
     "postinstall": "node scripts/postinstall.js",
     "prepack": "npm run clean && npm run build && npm run build:mcp",
