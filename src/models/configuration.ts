@@ -23,12 +23,33 @@ export class Configuration {
       utilityScripts: true,
     };
 
-    this.preferences = options?.preferences || {
+    // Merge preferences with defaults to ensure new fields are populated
+    const defaultPreferences = {
       defaultBranchPrefix: 'feature/',
       autoCleanup: true,
       confirmBeforePush: true,
       colorOutput: true,
-      logLevel: 'warn',
+      logLevel: 'warn' as const,
+      commitTemplate: {
+        footer: '๋🚀 Generated with [Han Solo](https://github.com/slamb2k/hansolo)',
+      },
+      prTemplate: {
+        footer: '๋🚀 Generated with [Han Solo](https://github.com/slamb2k/hansolo)',
+      },
+    };
+
+    this.preferences = {
+      ...defaultPreferences,
+      ...options?.preferences,
+      // Deep merge template objects
+      commitTemplate: {
+        ...defaultPreferences.commitTemplate,
+        ...options?.preferences?.commitTemplate,
+      },
+      prTemplate: {
+        ...defaultPreferences.prTemplate,
+        ...options?.preferences?.prTemplate,
+      },
     };
 
     this.gitPlatform = options?.gitPlatform;

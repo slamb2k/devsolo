@@ -132,6 +132,12 @@ export interface UserPreferences {
   };
   enforceConventionalCommits?: boolean;
   runTestsOnPush?: boolean;
+  commitTemplate?: {
+    footer?: string;
+  };
+  prTemplate?: {
+    footer?: string;
+  };
 }
 
 export interface ValidationResult {
