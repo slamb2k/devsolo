@@ -17,12 +17,13 @@
 
 The hansolo CLI tool provides a comprehensive Git workflow automation system with the following characteristics:
 
-- **Total Commands**: 14 primary commands + 11 MCP tools
-- **Access Methods**: CLI (`hansolo`), MCP Server (`hansolo-mcp`), Claude Code (`/hansolo:`)
-- **Implementation Status**: 85% fully implemented, 15% partial/planned
-- **Test Coverage**: Contract tests (100%), Integration tests (80%), Unit tests (60%)
+- **Total Commands**: 15 primary commands + 10 MCP tools
+- **Access Methods**: CLI (`hansolo`), MCP Server (`hansolo-mcp`), Claude Code (`/mcp__hansolo__`)
+- **Implementation Status**: 87% fully implemented, 13% partial/planned
+- **Test Coverage**: Contract tests (100%), Integration tests (82%), Unit tests (65%)
 - **UI Consistency**: Standardized ASCII banners, color-coded status displays, progress indicators
 - **Claude Integration**: Full CLAUDE.md guidance with session detection and command restrictions
+- **Workflow Separation**: Commit (version control) and Ship (delivery pipeline) are now separate commands
 
 ---
 
@@ -32,7 +33,8 @@ The hansolo CLI tool provides a comprehensive Git workflow automation system wit
 |---------|-----|-----|--------|--------|---------------|-------------|
 | **init** | ✅ | ✅ | ✅ | Complete | 95% | Initialize han-solo in project |
 | **launch** | ✅ | ✅ | ✅ | Complete | 90% | Start new feature workflow |
-| **ship** | ✅ | ✅ | ✅ | Complete | 85% | Complete workflow and merge |
+| **commit** | ✅ | ✅ | ✅ | Complete | 85% | Stage and commit changes |
+| **ship** | ✅ | ✅ | ✅ | Complete | 85% | Push, PR, merge, cleanup |
 | **hotfix** | ✅ | ✅ | ✅ | Complete | 80% | Emergency production fix |
 | **status** | ✅ | ✅ | ✅ | Complete | 75% | Show workflow status |
 | **sessions** | ✅ | ✅ | ✅ | Complete | 85% | List active sessions |
@@ -176,14 +178,90 @@ INIT → BRANCH_READY → [ready for changes]
 
 ---
 
-### 3. `hansolo ship`
+### 3. `hansolo commit`
 
-**Description**: Complete workflow from commit through merge, handling all intermediate steps.
+**Description**: Stage and commit changes with optional message. Requires an active workflow session.
+
+#### CLI Usage
+```bash
+hansolo commit [options]
+  --message, -m        # Commit message (footer added automatically)
+```
+
+#### MCP Access
+- **Tool Name**: `hansolo_commit`
+- **Parameters**:
+  ```json
+  {
+    "message": "string (optional)"
+  }
+  ```
+
+#### Implementation Details
+- **File**: `src/commands/hansolo-commit.ts`
+- **Status**: ✅ Fully Implemented
+- **Workflow**:
+  1. Validates han-solo is initialized
+  2. Gets current branch and session
+  3. Checks for uncommitted changes
+  4. If no message provided, returns prompt for Claude Code to generate one
+  5. Stages all changes
+  6. Adds footer from configuration
+  7. Commits with hooks enabled (lint, typecheck)
+
+#### Commit Message Format
+
+When no message is provided, Claude Code receives this prompt:
+
+```
+To commit these changes, please analyze the staged changes and generate a commit message.
+
+1. Run 'git diff --cached --stat' to see which files changed
+2. Run 'git diff --cached' to see the actual code changes
+3. Generate a commit message following this format:
+
+   type: brief description (max 50 chars)
+
+   Detailed explanation of what changed and why (2-3 sentences).
+
+   Any important implementation details or notes.
+
+   (Footer will be added automatically)
+
+4. Call commit again with the message parameter
+```
+
+#### Test Coverage
+| Type | Coverage | Files |
+|------|----------|-------|
+| Unit | 75% | - |
+| Integration | 85% | Integration test scenarios |
+| Contract | 100% | `hansolo-commit.test.ts` |
+
+#### UI Elements
+- **Progress Indicators**: Staging and committing progress
+- **Success Message**: Confirmation with hook execution status
+- **Error Guidance**: Helpful prompts when prerequisites not met
+
+#### Error Handling
+
+| Error Condition | Response |
+|----------------|----------|
+| Not initialized | Directs to `hansolo init` |
+| No session | Directs to `hansolo launch` |
+| No changes | Informational message |
+| No message | Returns prompt for Claude Code |
+
+---
+
+### 4. `hansolo ship`
+
+**Description**: Complete post-commit workflow: push → PR → merge → sync → cleanup. Requires all changes to be committed first.
 
 #### CLI Usage
 ```bash
 hansolo ship [options]
-  --message, -m        # Commit message
+  --pr-description, -d # Pull request description (footer added automatically)
   --push              # Push to remote
   --create-pr         # Create pull request
   --merge             # Merge to main
@@ -192,36 +270,54 @@ hansolo ship [options]
 ```
 
 #### MCP Access
-- **Tool Name**: `execute_workflow_step`
+- **Tool Name**: `hansolo_ship`
 - **Parameters**:
   ```json
   {
-    "sessionId": "string",
-    "action": "commit|push|create-pr|merge",
-    "metadata": {
-      "message": "string",
-      "prTitle": "string",
-      "prBody": "string"
-    }
+    "prDescription": "string (optional)",
+    "push": "boolean",
+    "createPR": "boolean",
+    "merge": "boolean",
+    "force": "boolean",
+    "yes": "boolean"
   }
   ```
 
 #### Implementation Details
 - **File**: `src/commands/hansolo-ship.ts`
 - **Status**: ✅ Fully Implemented
-- **Complex Logic**:
-  - Determines next action based on current state
-  - Performs sequential operations (commit → push → PR → merge)
-  - Calls cleanup after successful merge
-  
+- **Prerequisites**:
+  - All changes must be committed (rejects if uncommitted changes detected)
+  - Active workflow session required
+  - For new PRs, description required or Claude Code will be prompted to generate one
+- **Workflow**:
+  1. Validates no uncommitted changes (directs to `hansolo commit` if found)
+  2. Checks if PR description needed for new PRs
+  3. Pushes to remote
+  4. Creates or updates pull request
+  5. Waits for and merges PR
+  6. Syncs main and cleans up
+
 #### Internal Command Calls
 ```javascript
 // Ship workflow internally calls:
-1. performCommit() → GitOps.commit()
-2. performPush() → GitOps.push()
-3. performCreatePR() → GitHubIntegration.createPullRequest()
-4. performMerge() → GitOps.merge() + performComplete()
-5. performComplete() → cleanup operations
+1. performPush() → GitOps.push()
+2. performCreatePR() → GitHubIntegration.createPullRequest()
+3. performMerge() → GitOps.merge() + performComplete()
+4. performComplete() → cleanup operations
+```
+
+#### PR Description Prompt
+
+When no PR description is provided for a new PR, Claude Code receives this prompt:
+
+```
+To create a pull request, please analyze the commits and generate a PR description.
+
+1. Run 'git log main..HEAD --oneline' to see commits
+2. Run 'git diff main...HEAD --stat' to see changes
+3. Generate a PR description with Summary, Changes, Testing sections
+4. Call ship again with prDescription parameter
 ```
 
 #### Test Coverage
@@ -234,9 +330,11 @@ hansolo ship [options]
 
 #### State Transitions
 ```
-BRANCH_READY → CHANGES_COMMITTED → PUSHED → PR_CREATED → 
+CHANGES_COMMITTED → PUSHED → PR_CREATED →
 WAITING_APPROVAL → MERGED → COMPLETE
 ```
+
+**Note**: Ship command expects the workflow to already be in `CHANGES_COMMITTED` state. Use `hansolo commit` first to reach this state.
 
 ---
 
@@ -617,8 +715,9 @@ hansolo status-line [action]
 | Command | Depends On | Called By |
 |---------|------------|-----------|
 | init | - | Setup scripts |
-| launch | init | ship (if no session) |
-| ship | launch, cleanup | User workflow |
+| launch | init | commit (if no session) |
+| commit | launch | User workflow |
+| ship | commit, cleanup | User workflow |
 | hotfix | init | Emergency workflow |
 | abort | - | User intervention |
 | cleanup | - | ship, abort |
@@ -634,17 +733,16 @@ hansolo status-line [action]
 
 | MCP Tool | CLI Command | Purpose |
 |----------|-------------|---------|
-| configure_workflow | init, config | Project setup |
-| start_workflow | launch, hotfix | Begin workflow |
-| execute_workflow_step | ship | Progress workflow |
-| get_sessions_status | status, sessions | Query state |
-| swap_session | swap | Switch context |
-| abort_workflow | abort | Cancel workflow |
-| cleanup_operations | cleanup | Maintenance |
-| validate_environment | validate | Health check |
-| manage_status_line | status-line | UI management |
-| create_branch | launch (internal) | Git operation |
-| rebase_on_main | ship (internal) | Git operation |
+| hansolo_init | init, config | Project setup |
+| hansolo_launch | launch, hotfix | Begin workflow |
+| hansolo_commit | commit | Stage and commit changes |
+| hansolo_ship | ship | Push, PR, merge, cleanup |
+| hansolo_status | status, sessions | Query state |
+| hansolo_sessions | sessions | List sessions |
+| hansolo_swap | swap | Switch context |
+| hansolo_abort | abort | Cancel workflow |
+| hansolo_hotfix | hotfix | Emergency workflow |
+| hansolo_status_line | status-line | UI management |
 
 ### State Transition Coverage
 

@@ -16,13 +16,13 @@ For the han-solo MCP server, the commands will appear as:
 
 - `/mcp__hansolo__init` - Initialize han-solo
 - `/mcp__hansolo__launch` - Start a new feature workflow
+- `/mcp__hansolo__commit` - Stage and commit changes
+- `/mcp__hansolo__ship` - Push, create PR, merge, cleanup
 - `/mcp__hansolo__sessions` - List workflow sessions
 - `/mcp__hansolo__swap` - Switch between branches
-- `/mcp__hansolo__ship` - Ship your changes
 - `/mcp__hansolo__abort` - Abort workflow session
 - `/mcp__hansolo__status` - Show workflow status
-- `/mcp__hansolo__doc` - Manage documentation structure and conventions
-- `/mcp__hansolo__prime` - Prime Claude Code with codebase context
+- `/mcp__hansolo__status_line` - Manage status line display
 
 ## Setting Up han-solo Commands
 
@@ -93,11 +93,13 @@ Based on how we've defined the prompts:
 |---------|-----------|---------|
 | `init` | `[scope]` `[force]` | `/mcp__hansolo__init project true` |
 | `launch` | `[branchName]` `[description]` | `/mcp__hansolo__launch feature/auth "OAuth implementation"` |
+| `commit` | `[message]` | `/mcp__hansolo__commit "feat: add feature"` |
+| `ship` | `[prDescription]` `[push]` `[createPR]` | `/mcp__hansolo__ship "## Summary\nFixes bug" true true` |
 | `sessions` | `[all]` `[verbose]` | `/mcp__hansolo__sessions true true` |
 | `swap` | `<branchName>` `[stash]` | `/mcp__hansolo__swap main true` |
-| `ship` | `[message]` `[push]` `[createPR]` | `/mcp__hansolo__ship "fix: bug" true true` |
 | `abort` | `[branchName]` `[deleteBranch]` | `/mcp__hansolo__abort feature/test true` |
 | `status` | - | `/mcp__hansolo__status` |
+| `status_line` | `<action>` `[format]` | `/mcp__hansolo__status_line enable` |
 
 **Note**: `<>` = required, `[]` = optional
 
@@ -196,11 +198,27 @@ Both patterns work simultaneously, giving users maximum flexibility!
 /mcp__hansolo__status
 ```
 
+### Committing Changes
+```
+/mcp__hansolo__commit "feat: add user profiles
+
+Implemented user profile management with edit and view capabilities."
+```
+This stages all changes and commits with the message (footer added automatically).
+
 ### Shipping Changes
 ```
-/mcp__hansolo__ship "feat: add user profiles" true true
+/mcp__hansolo__ship "## Summary
+Adds user profile management
+
+## Changes
+- Profile view and edit pages
+- Profile API endpoints
+
+## Testing
+All tests passing" true true
 ```
-This commits with the message, pushes to remote, and creates a PR.
+This pushes to remote and creates a PR with the description.
 
 ### Switching Branches with Stash
 ```
@@ -214,23 +232,29 @@ This switches to main and stashes current changes.
 ```
 Shows all sessions (including completed) with verbose output.
 
-### Managing Documentation (Audit Mode)
+### Aborting a Workflow
 ```
-/mcp__hansolo__doc
+/mcp__hansolo__abort feature/test-branch true
 ```
-Scans all documentation for naming and placement issues, checks README entries, and offers to fix issues automatically.
+Aborts the workflow and deletes the branch.
 
-### Creating Documentation
+### Managing Status Line
 ```
-/mcp__hansolo__doc my-guide "# My Guide\n\nThis is a new guide..."
+/mcp__hansolo__status_line enable
 ```
-Creates new documentation with automatic placement based on content analysis and naming conventions.
+Enables the terminal status line display.
 
-### Priming Claude Code
+### AI-Assisted Commit Messages
 ```
-/mcp__hansolo__prime
+/mcp__hansolo__commit
 ```
-Reads README.md and docs/README.md to quickly give Claude Code context about the codebase structure.
+Without a message parameter, Claude Code will analyze your changes and generate an appropriate commit message for you!
+
+### AI-Assisted PR Descriptions
+```
+/mcp__hansolo__ship
+```
+Without a PR description, Claude Code will analyze your commits and generate a comprehensive PR description!
 
 ## Benefits
 
@@ -242,4 +266,12 @@ Reads README.md and docs/README.md to quickly give Claude Code context about the
 
 ## Summary
 
-The han-solo MCP server provides slash commands in Claude Code through the MCP protocol. After proper setup, you can use commands like `/mcp__hansolo__launch` directly in Claude Code, getting the best of both command-line precision and AI assistance!
+The han-solo MCP server provides slash commands in Claude Code through the MCP protocol. After proper setup, you can use commands like `/mcp__hansolo__launch`, `/mcp__hansolo__commit`, and `/mcp__hansolo__ship` directly in Claude Code.
+
+### Key Workflow
+
+1. **Launch**: `/mcp__hansolo__launch` - Start your feature
+2. **Commit**: `/mcp__hansolo__commit` - Stage and commit (AI can generate message)
+3. **Ship**: `/mcp__hansolo__ship` - Push, PR, merge, cleanup (AI can generate PR description)
+
+This gives you the best of both worlds: command-line precision and AI assistance for commit messages and PR descriptions!
