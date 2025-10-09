@@ -56,3 +56,68 @@ Direct git operations bypass this state tracking and will cause workflow corrupt
 - **Mixed teams**: Both can work simultaneously using session detection
 
 <!-- END HAN-SOLO MANAGED SECTION -->
+
+## 📚 Documentation Guidelines
+
+When creating or updating documentation, follow the structure defined in `docs/README.md`.
+
+### Folder Structure
+
+- **`docs/guides/`** - User-facing how-to documentation (installation, quickstart, usage, troubleshooting, integrations)
+- **`docs/reference/`** - External references and AI context (cached external docs, repomix snapshots)
+- **`docs/dev/system/`** - Internal system documentation (source of truth for generating user docs)
+- **`docs/dev/plans/`** - Implementation plans, task lists, roadmaps
+- **`docs/dev/reports/`** - Bug reports, reviews, implementation summaries
+- **`docs/dev/learnings/`** - Reusable patterns, strategies, best practices
+- **`docs/specs/`** - Product specifications and design philosophy
+- **`docs/archive/`** - Superseded or historical documentation
+
+### Naming Conventions
+
+Always use **lowercase-with-hyphens.md** format:
+
+```
+✅ CORRECT: quickstart.md, mcp-integration.md, feature-plan.md
+❌ INCORRECT: QuickStart.md, mcp_integration.md, Feature Plan.md
+```
+
+For dated snapshots: `repomix-2025-10-09.md`, `export-2025-01-15.md`
+
+### Placement Rules
+
+**Before creating documentation**, read `docs/README.md` for the complete decision tree. Quick guide:
+
+- **User guides** (how-to for end users) → `docs/guides/`
+- **External references** (cached external docs, repomix snapshots) → `docs/reference/`
+- **Internal system docs** (APIs, commands, config schema) → `docs/dev/system/`
+- **Implementation plans** → `docs/dev/plans/`
+- **Bug reports, reviews** → `docs/dev/reports/`
+- **Patterns, learnings** → `docs/dev/learnings/`
+- **Product specs** → `docs/specs/`
+- **Completed/superseded docs** → `docs/archive/`
+
+### Using the /doc Command
+
+The `/doc` slash command has two modes:
+
+**AUDIT MODE** (no arguments): `/doc`
+- Scans all documentation for naming and placement issues
+- Checks for missing README.md entries
+- Identifies documents that should be archived
+- Offers to fix issues automatically
+- Updates all README.md files
+- Reports all findings and actions
+
+**CREATE MODE** (with content): `/doc <name> <content>`
+- Analyzes your content to determine correct placement
+- Applies naming conventions automatically
+- Updates relevant README.md files
+- Archives superseded documents
+- Reports all actions taken
+
+### Maintaining READMEs
+
+When adding significant documentation:
+1. Create the document in the appropriate folder
+2. Update that folder's README.md with an entry
+3. Link related documents for cross-references
