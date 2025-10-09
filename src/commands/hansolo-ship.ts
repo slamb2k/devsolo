@@ -296,6 +296,7 @@ export class ShipCommand {
   private githubIntegration: GitHubIntegration;
   private branchValidator: BranchValidator;
   private prValidator: PRValidator;
+  private customPRDescription?: string;
 
   constructor(basePath: string = '.hansolo') {
     this.sessionRepo = new SessionRepository(basePath);
@@ -306,11 +307,14 @@ export class ShipCommand {
     this.prValidator = new PRValidator(basePath);
   }
 
-  async execute(options: {message?: string; yes?: boolean; force?: boolean;} = {}): Promise<void> {
+  async execute(options: {message?: string; prDescription?: string; yes?: boolean; force?: boolean;} = {}): Promise<void> {
     const logger = getLogger();
 
     try {
       logger.debug('Ship command started', 'ship');
+
+      // Store custom PR description if provided
+      this.customPRDescription = options.prDescription;
 
       // Check initialization
       if (!(await this.configManager.isInitialized())) {
@@ -640,30 +644,36 @@ export class ShipCommand {
   private async generatePRDescription(session: WorkflowSession): Promise<string> {
     // Load config to get PR template
     const config = await this.configManager.load();
-    const bodyTemplate = config.preferences.prTemplate?.body;
     const footer = config.preferences.prTemplate?.footer || '';
-
-    // Get description from session metadata
-    const storedDescription = (session.metadata?.context as any)?.description ||
-                              session.branchName.replace(/^[^/]+\//, '').replace(/-/g, ' ');
-
-    // Get commit messages since main
-    const commitMessages = await this.gitOps.getCommitMessagesSince('main');
-    const commitsText = commitMessages.length > 0
-      ? commitMessages.map(msg => `- ${msg}`).join('\n')
-      : '- Initial commit';
 
     let description: string;
 
-    if (bodyTemplate) {
-      // Use template with placeholders
-      description = bodyTemplate
-        .replace(/\{\{description\}\}/g, storedDescription)
-        .replace(/\{\{commits\}\}/g, commitsText)
-        .trim(); // Trim to remove any trailing whitespace
+    // If custom PR description provided (from AI analysis), use it directly
+    if (this.customPRDescription) {
+      description = this.customPRDescription.trim();
     } else {
-      // Fallback to old format if no template
-      description = `## Summary
+      // Use template-based generation
+      const bodyTemplate = config.preferences.prTemplate?.body;
+
+      // Get description from session metadata
+      const storedDescription = (session.metadata?.context as any)?.description ||
+                                session.branchName.replace(/^[^/]+\//, '').replace(/-/g, ' ');
+
+      // Get commit messages since main
+      const commitMessages = await this.gitOps.getCommitMessagesSince('main');
+      const commitsText = commitMessages.length > 0
+        ? commitMessages.map(msg => `- ${msg}`).join('\n')
+        : '- Initial commit';
+
+      if (bodyTemplate) {
+        // Use template with placeholders
+        description = bodyTemplate
+          .replace(/\{\{description\}\}/g, storedDescription)
+          .replace(/\{\{commits\}\}/g, commitsText)
+          .trim(); // Trim to remove any trailing whitespace
+      } else {
+        // Fallback to old format if no template
+        description = `## Summary
 
 Branch: ${session.branchName}
 Session: ${session.id}
@@ -672,6 +682,7 @@ Created: ${new Date(session.createdAt).toLocaleString()}
 ## Changes
 
 ${commitsText}`;
+      }
     }
 
     // Add footer with guaranteed blank line separation
