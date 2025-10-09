@@ -32,9 +32,6 @@ module.exports = {
     '/src/__tests__/services/session-repository.test.ts',
     '/src/__tests__/state-machines/',
     // Skip MCP server test (requires ESM module handling for chalk/boxen)
-    '/tests/mcp/hansolo-mcp-server.test.ts',
-    // Skip state machine tests with type issues
-    '/tests/state-machines/ship-workflow.test.ts',
-    '/tests/state-machines/hotfix-workflow.test.ts'
+    '/tests/mcp/hansolo-mcp-server.test.ts'
   ]
 };
