@@ -153,6 +153,12 @@ hansolo launch [options]
 #### Implementation Details
 - **File**: `src/commands/hansolo-launch.ts`
 - **Status**: ✅ Fully Implemented
+- **Branch Name Validation**:
+  - Maximum length: 80 characters
+  - Format: `type/description-in-kebab-case`
+  - Valid types: feature, bugfix, hotfix, release, chore, docs, test, refactor
+  - Auto-truncation: Generated names are automatically truncated to 80 chars
+  - Validation via `BranchNamingService`
 - **Internal Calls**:
   - Creates session via SessionRepository
   - Creates branch via GitOperations
@@ -286,6 +292,10 @@ hansolo ship [options]
 #### Implementation Details
 - **File**: `src/commands/hansolo-ship.ts`
 - **Status**: ✅ Fully Implemented
+- **PR Title Format**:
+  - Launch workflows: `[ship] <branch-name>`
+  - Hotfix workflows: `[hotfix] <branch-name>`
+  - Other workflows: `[<workflow-type>] <branch-name>`
 - **Prerequisites**:
   - All changes must be committed (rejects if uncommitted changes detected)
   - Active workflow session required
@@ -294,7 +304,7 @@ hansolo ship [options]
   1. Validates no uncommitted changes (directs to `hansolo commit` if found)
   2. Checks if PR description needed for new PRs
   3. Pushes to remote
-  4. Creates or updates pull request
+  4. Creates or updates pull request with appropriate title prefix
   5. Waits for and merges PR
   6. Syncs main and cleans up
 

@@ -44,6 +44,9 @@ export class BranchNamingService {
   // Pattern: type/description-in-kebab-case
   private readonly BRANCH_NAME_PATTERN = /^(feature|bugfix|hotfix|release|chore|docs|test|refactor)\/([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 
+  // Maximum branch name length
+  private readonly MAX_BRANCH_NAME_LENGTH = 80;
+
   constructor() {
     this.gitOps = new GitOperations();
   }
@@ -52,6 +55,18 @@ export class BranchNamingService {
    * Validate a branch name against standard conventions
    */
   validate(branchName: string): BranchNameValidation {
+    // Check length first
+    if (branchName.length > this.MAX_BRANCH_NAME_LENGTH) {
+      const truncated = branchName.substring(0, this.MAX_BRANCH_NAME_LENGTH);
+      const suggestions = this.generateSuggestions(truncated);
+
+      return {
+        isValid: false,
+        message: `Branch name exceeds maximum length of ${this.MAX_BRANCH_NAME_LENGTH} characters (currently ${branchName.length})`,
+        suggestions: suggestions.length > 0 ? suggestions : [truncated],
+      };
+    }
+
     const match = branchName.match(this.BRANCH_NAME_PATTERN);
 
     if (match) {
@@ -149,8 +164,16 @@ export class BranchNamingService {
   generateFromDescription(description: string, type?: BranchType): string {
     const branchType = type || this.guessType(description);
     const kebabDescription = this.toKebabCase(description);
+    const branchName = `${branchType}/${kebabDescription}`;
 
-    return `${branchType}/${kebabDescription}`;
+    // Truncate if too long
+    if (branchName.length > this.MAX_BRANCH_NAME_LENGTH) {
+      const maxDescLength = this.MAX_BRANCH_NAME_LENGTH - branchType.length - 1; // -1 for slash
+      const truncatedDesc = kebabDescription.substring(0, maxDescLength);
+      return `${branchType}/${truncatedDesc}`;
+    }
+
+    return branchName;
   }
 
   /**

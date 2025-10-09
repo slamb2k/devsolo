@@ -472,8 +472,11 @@ export class ShipCommand {
 
     this.progress.start('Creating pull request...');
 
+    // Map workflow type to PR prefix
+    const prPrefix = session.workflowType === 'launch' ? 'ship' : session.workflowType;
+
     const prInfo = {
-      title: `[${session.workflowType}] ${session.branchName}`,
+      title: `[${prPrefix}] ${session.branchName}`,
       body: await this.generatePRDescription(session),
       base: 'main',
       head: session.branchName,
