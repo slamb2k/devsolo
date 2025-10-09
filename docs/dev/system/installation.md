@@ -207,7 +207,7 @@ async function useHansolo() {
   // Initialize
   const init = new InitCommand();
   await init.execute();
-  
+
   // Launch workflow
   const launch = new LaunchCommand();
   await launch.execute({
@@ -322,7 +322,7 @@ export GITHUB_TOKEN=ghp_xxx      # Optional: For GitHub integration (or use 'gh 
 
 1. Initialize hansolo in your project: `hansolo init`
 2. Configure Claude Desktop for MCP integration
-3. Read the [Command Reference](./command-reference.md)
+3. Read the [Command Reference](../reference/command-reference.md)
 4. Check the [Troubleshooting Guide](./troubleshooting.md)
 
 ## Support
