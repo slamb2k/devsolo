@@ -490,6 +490,15 @@ export class ShipCommand {
       }
     }
 
+    // Always add footer to custom messages too
+    if (message && footer) {
+      // Ensure there's always a blank line before footer
+      if (!commitMessage.endsWith('\n\n')) {
+        commitMessage += '\n\n';
+      }
+      commitMessage += footer;
+    }
+
     await this.gitOps.commit(commitMessage, { noVerify: false });
 
     this.progress.succeed('Changes committed (hooks: lint, typecheck)');
