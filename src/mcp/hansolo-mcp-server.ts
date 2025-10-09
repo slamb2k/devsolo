@@ -61,6 +61,7 @@ const AbortSchema = z.object({
 
 const CommitSchema = z.object({
   message: z.string().optional(),
+  stagedOnly: z.boolean().optional(),
   mcpPrompt: z.boolean().optional(),
 });
 
@@ -71,6 +72,7 @@ const ShipSchema = z.object({
   merge: z.boolean().optional(),
   force: z.boolean().optional(),
   yes: z.boolean().optional(),
+  stagedOnly: z.boolean().optional(),
   mcpPrompt: z.boolean().optional(),
 });
 
@@ -238,13 +240,18 @@ export class HanSoloMCPServer {
           },
           {
             name: 'hansolo_commit',
-            description: 'Commit staged changes with optional message',
+            description: 'Commit changes with optional message. Use stagedOnly to commit only staged files.',
             inputSchema: {
               type: 'object',
               properties: {
                 message: {
                   type: 'string',
                   description: 'Commit message (footer added automatically)',
+                },
+                stagedOnly: {
+                  type: 'boolean',
+                  description: 'If true, only commit staged files (use "git add" first). If false, stages and commits all changes.',
+                  default: false,
                 },
               },
             },
@@ -278,6 +285,11 @@ export class HanSoloMCPServer {
                 yes: {
                   type: 'boolean',
                   description: 'Skip confirmations',
+                },
+                stagedOnly: {
+                  type: 'boolean',
+                  description: 'If true, only commit staged files when committing changes. If false, stages and commits all changes.',
+                  default: false,
                 },
               },
             },
@@ -997,6 +1009,7 @@ Also include:
           const commitCommand = new CommitCommand(this.basePath);
           const result = await commitCommand.execute({
             message: params.message,
+            stagedOnly: params.stagedOnly,
             mcpPrompt: params.mcpPrompt,
           });
 
@@ -1026,6 +1039,7 @@ Also include:
             prDescription: params.prDescription,
             yes: params.yes,
             force: params.force,
+            stagedOnly: params.stagedOnly,
             mcpPrompt: params.mcpPrompt,
           });
 

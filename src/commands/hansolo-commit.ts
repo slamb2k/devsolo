@@ -26,10 +26,11 @@ export class CommitCommand {
   /**
    * Execute commit command
    * @param options.message - Optional commit message. If not provided, returns prompt asking Claude Code to generate one
+   * @param options.stagedOnly - If true, only commit staged files (don't stage all changes)
    * @param options.mcpPrompt - If true, returns prompts instead of displaying them
    * @returns Either a prompt string (orchestration) or success message
    */
-  async execute(options: { message?: string; mcpPrompt?: boolean } = {}): Promise<string> {
+  async execute(options: { message?: string; stagedOnly?: boolean; mcpPrompt?: boolean } = {}): Promise<string> {
     const logger = getLogger();
 
     try {
@@ -57,14 +58,26 @@ export class CommitCommand {
 
       logger.info(`Committing changes for session ${session.id} on branch ${currentBranch}`, 'commit');
 
-      // Check if there are uncommitted changes
-      const hasChanges = await this.gitOps.hasUncommittedChanges();
+      // Check if there are changes to commit
+      if (options.stagedOnly) {
+        // For staged-only mode, check if there are staged files
+        const hasStagedFiles = await this.gitOps.hasStagedFiles();
 
-      if (!hasChanges) {
-        const msg = 'No uncommitted changes to commit';
-        this.output.infoMessage(msg);
-        logger.info('Commit command completed - no changes', 'commit');
-        return msg;
+        if (!hasStagedFiles) {
+          const msg = 'No files staged for commit. Use "git add <files>" to stage files, or remove --staged-only to commit all changes.';
+          this.output.errorMessage(msg);
+          throw new Error(msg);
+        }
+      } else {
+        // For normal mode, check if there are uncommitted changes
+        const hasChanges = await this.gitOps.hasUncommittedChanges();
+
+        if (!hasChanges) {
+          const msg = 'No uncommitted changes to commit';
+          this.output.infoMessage(msg);
+          logger.info('Commit command completed - no changes', 'commit');
+          return msg;
+        }
       }
 
       // If no message provided, return prompt asking Claude Code to generate one (ORCHESTRATION)
@@ -84,9 +97,11 @@ export class CommitCommand {
       }
 
       // Execute the commit
-      await this.commitChanges(session, options.message);
+      await this.commitChanges(session, options.message, options.stagedOnly);
 
-      const successMsg = 'Changes committed successfully';
+      const successMsg = options.stagedOnly
+        ? 'Staged files committed successfully'
+        : 'Changes committed successfully';
       this.output.successMessage(`✓ ${successMsg}`);
       logger.info('Commit command completed successfully', 'commit');
       return successMsg;
@@ -142,13 +157,18 @@ Session context:
   /**
    * Commit changes with the provided message
    */
-  private async commitChanges(_session: WorkflowSession, message: string): Promise<void> {
-    this.progress.start('Staging changes...');
+  private async commitChanges(_session: WorkflowSession, message: string, stagedOnly?: boolean): Promise<void> {
+    // Only stage all changes if not in staged-only mode
+    if (!stagedOnly) {
+      this.progress.start('Staging changes...');
+      await this.gitOps.stageAll();
+      this.progress.succeed('Changes staged');
+    } else {
+      // Show what's being committed
+      const stagedFiles = await this.gitOps.getStagedFiles();
+      this.output.info(`📦 Committing ${stagedFiles.length} staged file(s)`);
+    }
 
-    // Stage all changes first
-    await this.gitOps.stageAll();
-
-    this.progress.succeed('Changes staged');
     this.progress.start('Committing changes...');
 
     // Load config to get commit template footer
@@ -167,7 +187,7 @@ Session context:
     }
 
     // Commit with hooks enabled
-    await this.gitOps.commit(commitMessage, { noVerify: false });
+    await this.gitOps.commit(commitMessage, { noVerify: false, stagedOnly });
 
     this.progress.succeed('Changes committed (hooks: lint, typecheck)');
   }
