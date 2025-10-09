@@ -47,12 +47,12 @@ Changes:
 {{commits}}`,
         footer: `<br/>
 <pre>
-  ········◢█████◣
+········◢█████◣
   ······◢████████◣
-  ◢████████████████◣     DELIVERED BY <a href="https://github.com/slamb2k/hansolo">HAN SOLO</a>
-  ◥████████████████◤        "Turn the ship around..."
+   ... ◢███████████████████◣    DELIVERED BY <a href="https://github.com/slamb2k/hansolo">HAN SOLO</a>
+   ... ◥███████████████████◤       "Turn the ship around..."
   ······◥████████◤
-  ········◥█████◤
+········◥█████◤
 </pre>`,
       },
     };
