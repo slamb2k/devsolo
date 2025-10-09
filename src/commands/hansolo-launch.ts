@@ -525,7 +525,7 @@ export class LaunchCommand {
 
   private async createSession(
     branchName: string,
-    _description?: string
+    description?: string
   ): Promise<WorkflowSession> {
     const session = new WorkflowSession({
       branchName,
@@ -533,6 +533,7 @@ export class LaunchCommand {
       metadata: {
         projectPath: process.cwd(),
         startedAt: new Date().toISOString(),
+        context: description ? { description } : undefined,
       },
     });
 
