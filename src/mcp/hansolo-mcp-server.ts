@@ -23,7 +23,7 @@ import { HotfixCommand } from '../commands/hansolo-hotfix';
 const InitSchema = z.object({
   scope: z.enum(['project', 'user']).optional(),
   force: z.boolean().optional(),
-  skipBanner: z.boolean().optional(),
+  mcpPrompt: z.boolean().optional(),
 });
 
 const LaunchSchema = z.object({
@@ -32,21 +32,21 @@ const LaunchSchema = z.object({
   force: z.boolean().optional(),
   stashRef: z.string().optional(),
   popStash: z.boolean().optional(),
-  skipBanner: z.boolean().optional(),
+  mcpPrompt: z.boolean().optional(),
 });
 
 const SessionsSchema = z.object({
   all: z.boolean().optional(),
   verbose: z.boolean().optional(),
   cleanup: z.boolean().optional(),
-  skipBanner: z.boolean().optional(),
+  mcpPrompt: z.boolean().optional(),
 });
 
 const SwapSchema = z.object({
   branchName: z.string().optional(),
   force: z.boolean().optional(),
   stash: z.boolean().optional(),
-  skipBanner: z.boolean().optional(),
+  mcpPrompt: z.boolean().optional(),
 });
 
 const AbortSchema = z.object({
@@ -54,7 +54,7 @@ const AbortSchema = z.object({
   force: z.boolean().optional(),
   deleteBranch: z.boolean().optional(),
   yes: z.boolean().optional(),
-  skipBanner: z.boolean().optional(),
+  mcpPrompt: z.boolean().optional(),
 });
 
 const ShipSchema = z.object({
@@ -64,7 +64,7 @@ const ShipSchema = z.object({
   merge: z.boolean().optional(),
   force: z.boolean().optional(),
   yes: z.boolean().optional(),
-  skipBanner: z.boolean().optional(),
+  mcpPrompt: z.boolean().optional(),
 });
 
 const HotfixSchema = z.object({
@@ -75,7 +75,7 @@ const HotfixSchema = z.object({
   autoMerge: z.boolean().optional(),
   force: z.boolean().optional(),
   yes: z.boolean().optional(),
-  skipBanner: z.boolean().optional(),
+  mcpPrompt: z.boolean().optional(),
 });
 
 export class HanSoloMCPServer {
@@ -572,16 +572,16 @@ export class HanSoloMCPServer {
         });
       }
 
-      // Build arguments string for display (exclude internal parameters, but we'll add skipBanner explicitly)
-      const displayArgs = Object.entries(toolArgs).filter(([k]) => k !== 'skipBanner');
+      // Build arguments string for display (exclude internal parameters, but we'll add mcpPrompt explicitly)
+      const displayArgs = Object.entries(toolArgs).filter(([k]) => k !== 'mcpPrompt');
       const userArgsStr = displayArgs.length > 0
         ? displayArgs.map(([k, v]) => `${k}=${v}`).join(', ')
         : '';
 
-      // Build complete args string with skipBanner=true always included
+      // Build complete args string with mcpPrompt=true always included
       const argsStr = userArgsStr
-        ? ` with ${userArgsStr} and skipBanner=true`
-        : ' with skipBanner=true';
+        ? ` with ${userArgsStr} and mcpPrompt=true`
+        : ' with mcpPrompt=true';
 
       // Construct the prompt returned from the mcp server
       const banner = getBanner(name);
@@ -593,7 +593,7 @@ ${banner}
 Once that has been shown to the user, now run the han-solo ${name} command${argsStr}
 
 IMPORTANT: You must include this parameter in your tool call:
-<parameter name="skipBanner">true</parameter>`;
+<parameter name="mcpPrompt">true</parameter>`;
 
 
       return {
@@ -650,7 +650,7 @@ IMPORTANT: You must include this parameter in your tool call:
         switch (name) {
         case 'hansolo_init': {
           const params = InitSchema.parse(processedArgs);
-          if (!params.skipBanner) {
+          if (!params.mcpPrompt) {
             capturedOutput.push(getBanner('init'));
           }
           const initCommand = new InitCommand(this.basePath);
@@ -667,7 +667,7 @@ IMPORTANT: You must include this parameter in your tool call:
 
         case 'hansolo_launch': {
           const params = LaunchSchema.parse(processedArgs);
-          if (!params.skipBanner) {
+          if (!params.mcpPrompt) {
             capturedOutput.push(getBanner('launch'));
           }
 
@@ -714,7 +714,7 @@ IMPORTANT: You must include this parameter in your tool call:
 
         case 'hansolo_sessions': {
           const params = SessionsSchema.parse(processedArgs);
-          if (!params.skipBanner) {
+          if (!params.mcpPrompt) {
             capturedOutput.push(getBanner('sessions'));
           }
           // SessionsCommand is available but we'll use SessionRepository directly
@@ -762,7 +762,7 @@ IMPORTANT: You must include this parameter in your tool call:
 
         case 'hansolo_swap': {
           const params = SwapSchema.parse(processedArgs);
-          if (!params.skipBanner) {
+          if (!params.mcpPrompt) {
             capturedOutput.push(getBanner('swap'));
           }
 
@@ -839,7 +839,7 @@ IMPORTANT: You must include this parameter in your tool call:
 
         case 'hansolo_abort': {
           const params = AbortSchema.parse(processedArgs);
-          if (!params.skipBanner) {
+          if (!params.mcpPrompt) {
             capturedOutput.push(getBanner('abort'));
           }
 
@@ -907,7 +907,7 @@ IMPORTANT: You must include this parameter in your tool call:
 
         case 'hansolo_ship': {
           const params = ShipSchema.parse(processedArgs);
-          if (!params.skipBanner) {
+          if (!params.mcpPrompt) {
             capturedOutput.push(getBanner('ship'));
           }
 
@@ -965,7 +965,7 @@ IMPORTANT: You must include this parameter in your tool call:
         }
 
         case 'hansolo_status': {
-          if (!processedArgs?.['skipBanner']) {
+          if (!processedArgs?.['mcpPrompt']) {
             capturedOutput.push(getBanner('status'));
           }
           const gitOps = new GitOperations();
@@ -1003,7 +1003,7 @@ IMPORTANT: You must include this parameter in your tool call:
         }
 
         case 'hansolo_status_line': {
-          if (!processedArgs?.['skipBanner']) {
+          if (!processedArgs?.['mcpPrompt']) {
             capturedOutput.push(getBanner('status-line'));
           }
           const { ManageStatusLineTool } = await import('../mcp-server/tools/manage-status-line');
@@ -1047,7 +1047,7 @@ IMPORTANT: You must include this parameter in your tool call:
 
         case 'hansolo_hotfix': {
           const params = HotfixSchema.parse(processedArgs);
-          if (!params.skipBanner) {
+          if (!params.mcpPrompt) {
             capturedOutput.push(getBanner('hotfix'));
           }
           const hotfixCommand = new HotfixCommand(this.basePath);
