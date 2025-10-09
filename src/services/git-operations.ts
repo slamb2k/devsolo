@@ -397,6 +397,24 @@ export class GitOperations {
     return [...commits.all];
   }
 
+  /**
+   * Get commit messages since diverging from a base branch (default: main)
+   * Returns array of commit messages suitable for PR descriptions
+   */
+  async getCommitMessagesSince(baseBranch: string = 'main'): Promise<string[]> {
+    try {
+      // Get commits that are on current branch but not on base branch
+      const commits = await this.git.log({ from: baseBranch, to: 'HEAD' });
+      return commits.all.map(commit => {
+        const firstLine = commit.message.split('\n')[0];
+        return firstLine || commit.message; // Fallback to full message if split fails
+      });
+    } catch {
+      // If comparison fails, return empty array
+      return [];
+    }
+  }
+
   async getAheadBehindCount(): Promise<{ ahead: number; behind: number }> {
     try {
       const status = await this.git.status();
@@ -423,6 +441,44 @@ export class GitOperations {
     return {
       message: log.latest?.message || '',
     };
+  }
+
+  /**
+   * Get a summary of staged changes for generating detailed commit messages
+   * Returns file change statistics and types of changes
+   */
+  async getStagedChangesSummary(): Promise<{
+    filesChanged: number;
+    insertions: number;
+    deletions: number;
+    files: { path: string; changes: string }[];
+  }> {
+    try {
+      // Get diff stats for staged files
+      const diffSummary = await this.git.diffSummary(['--cached']);
+
+      return {
+        filesChanged: diffSummary.changed,
+        insertions: diffSummary.insertions,
+        deletions: diffSummary.deletions,
+        files: diffSummary.files.map(f => {
+          // Handle binary files that don't have insertions/deletions
+          const insertions = 'insertions' in f ? f.insertions : 0;
+          const deletions = 'deletions' in f ? f.deletions : 0;
+          return {
+            path: f.file,
+            changes: `+${insertions} -${deletions}`,
+          };
+        }),
+      };
+    } catch {
+      return {
+        filesChanged: 0,
+        insertions: 0,
+        deletions: 0,
+        files: [],
+      };
+    }
   }
 
   async isBranchMerged(branch: string): Promise<boolean> {

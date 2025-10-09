@@ -31,9 +31,20 @@ export class Configuration {
       colorOutput: true,
       logLevel: 'warn' as const,
       commitTemplate: {
+        body: `{{description}}
+
+Changes:
+{{files}}
+
+{{stats}}`,
         footer: '๋🚀 Generated with [Han Solo](https://github.com/slamb2k/hansolo)',
       },
       prTemplate: {
+        body: `## Summary
+{{description}}
+
+## Changes
+{{commits}}`,
         footer: '๋🚀 Generated with [Han Solo](https://github.com/slamb2k/hansolo)',
       },
     };

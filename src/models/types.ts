@@ -133,9 +133,11 @@ export interface UserPreferences {
   enforceConventionalCommits?: boolean;
   runTestsOnPush?: boolean;
   commitTemplate?: {
+    body?: string;
     footer?: string;
   };
   prTemplate?: {
+    body?: string;
     footer?: string;
   };
 }

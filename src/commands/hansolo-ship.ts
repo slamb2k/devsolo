@@ -428,19 +428,64 @@ export class ShipCommand {
   private async commitChanges(session: WorkflowSession, message?: string): Promise<void> {
     this.progress.start('Committing changes...');
 
+    // Stage all changes first
+    await this.gitOps.stageAll();
+
     // Load config to get commit template
     const config = await this.configManager.load();
+    const bodyTemplate = config.preferences.commitTemplate?.body;
     const footer = config.preferences.commitTemplate?.footer || '';
 
     let commitMessage = message;
     if (!commitMessage) {
-      commitMessage = `feat: ${session.branchName}`;
+      // Get description from session metadata
+      const description = (session.metadata?.context as any)?.description ||
+                         session.branchName.replace(/^[^/]+\//, '').replace(/-/g, ' ');
+
+      // Get staged changes summary
+      const changesSummary = await this.gitOps.getStagedChangesSummary();
+
+      // Determine commit type based on branch name or default to feat
+      const commitType = session.branchName.startsWith('fix/') ? 'fix' :
+        session.branchName.startsWith('docs/') ? 'docs' :
+          session.branchName.startsWith('refactor/') ? 'refactor' :
+            session.branchName.startsWith('test/') ? 'test' :
+              session.branchName.startsWith('chore/') ? 'chore' : 'feat';
+
+      // Build subject line (max 50 chars for best practice)
+      const subject = description.length > 50 ? description.substring(0, 47) + '...' : description;
+
+      // Build commit message
+      commitMessage = `${commitType}: ${subject}`;
+
+      // Add body if template exists
+      if (bodyTemplate && changesSummary.filesChanged > 0) {
+        const filesText = changesSummary.files
+          .slice(0, 10) // Limit to first 10 files
+          .map(f => `- ${f.path} (${f.changes})`)
+          .join('\n');
+
+        const statsText = `${changesSummary.filesChanged} file(s) changed, ${changesSummary.insertions} insertion(s), ${changesSummary.deletions} deletion(s)`;
+
+        const body = bodyTemplate
+          .replace(/\{\{description\}\}/g, description)
+          .replace(/\{\{files\}\}/g, filesText || 'No files to display')
+          .replace(/\{\{stats\}\}/g, statsText)
+          .trim(); // Trim to remove any trailing whitespace
+
+        commitMessage += `\n\n${body}`;
+      }
+
+      // Add footer with guaranteed blank line separation
       if (footer) {
-        commitMessage += `\n\n${footer}`;
+        // Ensure there's always a blank line before footer
+        if (!commitMessage.endsWith('\n\n')) {
+          commitMessage += '\n\n';
+        }
+        commitMessage += footer;
       }
     }
 
-    await this.gitOps.stageAll();
     await this.gitOps.commit(commitMessage, { noVerify: false });
 
     this.progress.succeed('Changes committed (hooks: lint, typecheck)');
@@ -595,9 +640,30 @@ export class ShipCommand {
   private async generatePRDescription(session: WorkflowSession): Promise<string> {
     // Load config to get PR template
     const config = await this.configManager.load();
+    const bodyTemplate = config.preferences.prTemplate?.body;
     const footer = config.preferences.prTemplate?.footer || '';
 
-    let description = `## Summary
+    // Get description from session metadata
+    const storedDescription = (session.metadata?.context as any)?.description ||
+                              session.branchName.replace(/^[^/]+\//, '').replace(/-/g, ' ');
+
+    // Get commit messages since main
+    const commitMessages = await this.gitOps.getCommitMessagesSince('main');
+    const commitsText = commitMessages.length > 0
+      ? commitMessages.map(msg => `- ${msg}`).join('\n')
+      : '- Initial commit';
+
+    let description: string;
+
+    if (bodyTemplate) {
+      // Use template with placeholders
+      description = bodyTemplate
+        .replace(/\{\{description\}\}/g, storedDescription)
+        .replace(/\{\{commits\}\}/g, commitsText)
+        .trim(); // Trim to remove any trailing whitespace
+    } else {
+      // Fallback to old format if no template
+      description = `## Summary
 
 Branch: ${session.branchName}
 Session: ${session.id}
@@ -605,12 +671,16 @@ Created: ${new Date(session.createdAt).toLocaleString()}
 
 ## Changes
 
-- Feature implementation
-- Tests added
-- Documentation updated`;
+${commitsText}`;
+    }
 
+    // Add footer with guaranteed blank line separation
     if (footer) {
-      description += `\n\n${footer}`;
+      // Ensure there's always a blank line before footer
+      if (!description.endsWith('\n\n')) {
+        description += '\n\n';
+      }
+      description += footer;
     }
 
     return description;
