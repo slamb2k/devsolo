@@ -248,7 +248,7 @@ export class StatusLineCommand implements CommandHandler {
 
     const stateEmojis: Record<string, string> = {
       'INIT': '🌱',
-      'BRANCH_READY': '✏️',
+      'BRANCH_READY': '💻',
       'CHANGES_COMMITTED': '📝',
       'PUSHED': '⬆️',
       'PR_CREATED': '🔀',

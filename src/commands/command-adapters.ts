@@ -68,7 +68,8 @@ export class ShipCommandAdapter implements CommandHandler {
         options.skipPR = true;
       }
     }
-    return this.command.execute(options);
+    // Execute and discard string result (used for MCP orchestration)
+    await this.command.execute(options);
   }
 
   validate(_args: string[]): boolean {

@@ -995,16 +995,21 @@ Also include:
           }
 
           const commitCommand = new CommitCommand(this.basePath);
-          await commitCommand.execute({
+          const result = await commitCommand.execute({
             message: params.message,
             mcpPrompt: params.mcpPrompt,
           });
+
+          // Result is either:
+          // - A prompt (orchestration instructions for Claude Code)
+          // - A success message (changes committed)
+          // Errors are thrown and handled by outer try/catch
 
           return {
             content: [
               {
                 type: 'text',
-                text: capturedOutput.join('\n') || 'Changes committed successfully',
+                text: result,
               },
             ],
           };
@@ -1017,20 +1022,23 @@ Also include:
           }
 
           const shipCommand = new ShipCommand(this.basePath);
-          await shipCommand.execute({
+          const result = await shipCommand.execute({
             prDescription: params.prDescription,
             yes: params.yes,
             force: params.force,
             mcpPrompt: params.mcpPrompt,
           });
 
-          const outputText = capturedOutput.join('\n');
+          // Result is either:
+          // - A prompt (orchestration instructions for Claude Code)
+          // - A success message (workflow completed)
+          // Errors are thrown and handled by outer try/catch
 
           return {
             content: [
               {
                 type: 'text',
-                text: outputText || 'Workflow shipped successfully',
+                text: result,
               },
             ],
           };

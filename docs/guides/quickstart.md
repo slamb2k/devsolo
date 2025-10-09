@@ -111,7 +111,7 @@ In Claude Code, run:
 
 Now you'll see your workflow status at all times:
 ```
-[han-solo] ✏️ 0c2a20a7 | feature/my-feature | BRANCH_READY
+[han-solo] 📝 0c2a20a7 | feature/my-feature | BRANCH_READY
 ```
 
 ### 3. Use Slash Commands

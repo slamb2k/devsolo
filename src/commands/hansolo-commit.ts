@@ -25,10 +25,11 @@ export class CommitCommand {
 
   /**
    * Execute commit command
-   * @param options.message - Optional commit message. If not provided, returns error asking Claude Code to generate one
-   * @param options.mcpPrompt - If true, returns structured error for MCP to handle
+   * @param options.message - Optional commit message. If not provided, returns prompt asking Claude Code to generate one
+   * @param options.mcpPrompt - If true, returns prompts instead of displaying them
+   * @returns Either a prompt string (orchestration) or success message
    */
-  async execute(options: { message?: string; mcpPrompt?: boolean } = {}): Promise<void> {
+  async execute(options: { message?: string; mcpPrompt?: boolean } = {}): Promise<string> {
     const logger = getLogger();
 
     try {
@@ -37,13 +38,8 @@ export class CommitCommand {
       // Check if hansolo is initialized
       if (!(await this.configManager.isInitialized())) {
         const errorMsg = 'han-solo is not initialized. Run "hansolo init" first.';
-
-        if (options.mcpPrompt) {
-          throw new Error(errorMsg);
-        }
-
         this.output.errorMessage(errorMsg);
-        return;
+        throw new Error(errorMsg);
       }
 
       // Get current branch and session
@@ -55,13 +51,8 @@ export class CommitCommand {
       // If no session exists, guide user to launch one
       if (!session) {
         const errorMsg = `No workflow session found for branch '${currentBranch}'. Use "hansolo launch" to start a new workflow.`;
-
-        if (options.mcpPrompt) {
-          throw new Error(errorMsg);
-        }
-
         this.output.errorMessage(errorMsg);
-        return;
+        throw new Error(errorMsg);
       }
 
       logger.info(`Committing changes for session ${session.id} on branch ${currentBranch}`, 'commit');
@@ -71,35 +62,34 @@ export class CommitCommand {
 
       if (!hasChanges) {
         const msg = 'No uncommitted changes to commit';
-
-        if (options.mcpPrompt) {
-          this.output.infoMessage(msg);
-          return;
-        }
-
         this.output.infoMessage(msg);
-        return;
+        logger.info('Commit command completed - no changes', 'commit');
+        return msg;
       }
 
-      // If no message provided, return error asking Claude Code to generate one
+      // If no message provided, return prompt asking Claude Code to generate one (ORCHESTRATION)
       if (!options.message) {
-        const errorMsg = this.buildMessagePrompt(session);
+        const prompt = this.buildMessagePrompt(session);
 
         if (options.mcpPrompt) {
-          throw new Error(errorMsg);
+          // For MCP, return the prompt so Claude Code can execute it
+          return prompt;
         }
 
+        // For CLI, display the instructions
         this.output.errorMessage('Commit message required');
         this.output.info('\nPlease provide a commit message:');
-        this.output.info(errorMsg);
-        return;
+        this.output.info(prompt);
+        return prompt;
       }
 
       // Execute the commit
       await this.commitChanges(session, options.message);
 
-      this.output.successMessage('✓ Changes committed successfully');
+      const successMsg = 'Changes committed successfully';
+      this.output.successMessage(`✓ ${successMsg}`);
       logger.info('Commit command completed successfully', 'commit');
+      return successMsg;
 
     } catch (error) {
       logger.error(

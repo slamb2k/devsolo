@@ -307,7 +307,7 @@ export class ShipCommand {
     this.prValidator = new PRValidator(basePath);
   }
 
-  async execute(options: {prDescription?: string; yes?: boolean; force?: boolean; mcpPrompt?: boolean} = {}): Promise<void> {
+  async execute(options: {prDescription?: string; yes?: boolean; force?: boolean; mcpPrompt?: boolean} = {}): Promise<string> {
     const logger = getLogger();
 
     try {
@@ -319,9 +319,9 @@ export class ShipCommand {
       // Check initialization
       if (!(await this.configManager.isInitialized())) {
         logger.warn('han-solo not initialized', 'ship');
-        this.output.errorMessage('han-solo is not initialized');
-        this.output.infoMessage('Run "hansolo init" first');
-        return;
+        const errorMsg = 'han-solo is not initialized. Run "hansolo init" first.';
+        this.output.errorMessage(errorMsg);
+        throw new Error(errorMsg);
       }
 
       // Get current branch and session
@@ -332,33 +332,74 @@ export class ShipCommand {
 
       if (!session) {
         logger.warn(`No session found for branch: ${currentBranch}`, 'ship');
-        this.output.errorMessage(`No workflow session found for branch '${currentBranch}'`);
-        this.output.infoMessage('Use "hansolo launch" to start a new workflow');
-        return;
+        const errorMsg = `No workflow session found for branch '${currentBranch}'. Use "hansolo launch" to start a new workflow.`;
+        this.output.errorMessage(errorMsg);
+        throw new Error(errorMsg);
       }
 
       logger.info(`Shipping session ${session.id} on branch ${currentBranch}`, 'ship');
 
-      // Check if PR description is needed
-      // Only require PR description if we'll be creating a PR (not if updating existing)
-      const prCheck = await this.prValidator.checkForPRConflicts(currentBranch);
-      if (prCheck.action === 'create' && !options.prDescription) {
-        const errorMsg = this.buildPRDescriptionPrompt(session);
-
-        if (options.mcpPrompt) {
-          throw new Error(errorMsg);
-        }
-
-        this.output.errorMessage('PR description required');
-        this.output.info('\nPlease provide a PR description:');
-        this.output.info(errorMsg);
-        return;
-      }
-
-      // Initialize GitHub integration (tries env vars, config, then gh CLI)
+      // STEP 1: Check for merged/closed PR on this branch (ACTUAL ERROR)
+      // Initialize GitHub to check for PRs
+      logger.info('STEP 1: Starting merged PR check', 'ship');
       logger.debug('Initializing GitHub integration', 'ship');
       const githubInitialized = await this.githubIntegration.initialize();
-      logger.debug(`GitHub integration initialized: ${githubInitialized}`, 'ship');
+      logger.info(`GitHub integration initialized: ${githubInitialized}`, 'ship');
+
+      if (githubInitialized) {
+        const mergedPR = await this.githubIntegration.getPullRequestForBranch(currentBranch, 'all');
+        if (mergedPR && (mergedPR.merged || mergedPR.state === 'closed')) {
+          throw new Error(
+            `Branch "${currentBranch}" has a ${mergedPR.merged ? 'merged' : 'closed'} PR (#${mergedPR.number}).\n\n` +
+            'Branches cannot be reused after PR merge/close.\n\n' +
+            'Please:\n' +
+            '1. Abort this session: /hansolo:abort --delete-branch\n' +
+            '2. Launch a new session with a fresh branch name'
+          );
+        }
+      }
+
+      // STEP 2: Check for uncommitted changes (ORCHESTRATION PROMPT)
+      const hasChanges = await this.gitOps.hasUncommittedChanges();
+      logger.debug(`Uncommitted changes check: hasChanges=${hasChanges}, mcpPrompt=${options.mcpPrompt}`, 'ship');
+
+      if (hasChanges) {
+        logger.debug('Uncommitted changes detected - generating commit prompt', 'ship');
+        const prompt = this.buildCommitPrompt(session, currentBranch);
+
+        if (options.mcpPrompt) {
+          logger.debug('Returning orchestration prompt for commit', 'ship');
+          // For MCP, return the prompt so Claude Code can execute it
+          return prompt;
+        }
+
+        // For CLI, display the instructions
+        this.output.errorMessage('⚠️  Uncommitted changes detected');
+        this.output.info('\n' + prompt);
+        return prompt;
+      }
+
+      // STEP 3: Check if PR description is needed (ORCHESTRATION PROMPT)
+      const prCheck = await this.prValidator.checkForPRConflicts(currentBranch);
+      logger.debug(`PR check result: action=${prCheck.action}`, 'ship');
+
+      // Need PR description for both 'create' and 'create-new' actions
+      if ((prCheck.action === 'create' || prCheck.action === 'create-new') && !options.prDescription) {
+        logger.debug('PR description needed - generating prompt', 'ship');
+        const prompt = this.buildPRDescriptionPrompt(session);
+
+        if (options.mcpPrompt) {
+          logger.debug('Returning orchestration prompt for PR description', 'ship');
+          // For MCP, return the prompt so Claude Code can execute it
+          return prompt;
+        }
+
+        // For CLI, display the instructions
+        this.output.errorMessage('PR description required');
+        this.output.info('\nPlease provide a PR description:');
+        this.output.info(prompt);
+        return prompt;
+      }
 
       // Run pre-flight checks
       logger.debug('Running pre-flight checks', 'ship');
@@ -378,8 +419,9 @@ export class ShipCommand {
 
       if (!preFlightPassed) {
         logger.error('Pre-flight checks failed', 'ship');
-        this.output.errorMessage('\n❌ Pre-flight checks failed - aborting ship');
-        return;
+        const errorMsg = 'Pre-flight checks failed - aborting ship';
+        this.output.errorMessage('\n❌ ' + errorMsg);
+        throw new Error(errorMsg);
       }
 
       logger.info('Pre-flight checks passed', 'ship');
@@ -406,6 +448,8 @@ export class ShipCommand {
       this.output.info('');
       this.output.successMessage('🎉 Feature shipped! Ready for next feature.');
       logger.info('Ship command completed successfully', 'ship');
+
+      return `Workflow shipped successfully! PR #${session.metadata?.pr?.number} merged and cleaned up.`;
     } catch (error) {
       logger.error(
         `Ship command failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -425,19 +469,10 @@ export class ShipCommand {
   ): Promise<void> {
     this.output.subheader('📊 Executing Workflow');
 
-    // Step 1: Commit changes (if any) using CommitCommand
-    if (await this.gitOps.hasUncommittedChanges()) {
-      this.output.errorMessage('⚠️  Uncommitted changes detected');
-      this.output.infoMessage('Please commit your changes first using:');
-      this.output.infoMessage('  hansolo commit --message "your commit message"');
-      this.output.infoMessage('\nOr from Claude Code MCP:');
-      this.output.infoMessage('  /hansolo:commit');
-      throw new Error('Uncommitted changes must be committed before shipping');
-    } else {
-      this.output.dim('  ✓ No uncommitted changes');
-    }
+    // Note: Uncommitted changes are now checked earlier and handled via orchestration
+    this.output.dim('  ✓ No uncommitted changes');
 
-    // Step 2: Push to remote
+    // Step 1: Push to remote
     await this.pushToRemote(session, options.force);
 
     // Step 3: Create or update PR
@@ -598,6 +633,34 @@ export class ShipCommand {
     ];
 
     await this.progress.runSteps(steps);
+  }
+
+  /**
+   * Build a helpful prompt for Claude Code to generate a commit message
+   */
+  private buildCommitPrompt(session: WorkflowSession, branchName: string): string {
+    return `To ship this feature, I need to commit the uncommitted changes first.
+
+1. Run 'git diff --stat' to see which files have uncommitted changes
+2. Run 'git diff' to see the actual changes
+3. Generate a commit message following this format:
+
+   type: brief description (max 50 chars)
+
+   Detailed explanation of what changed and why (2-3 sentences).
+
+   Any important implementation details or notes.
+
+4. Call /hansolo:commit with the generated message:
+   /hansolo:commit --message "your generated commit message here"
+
+5. Once committed, call /hansolo:ship again to continue the shipping process
+
+Current context:
+- Branch: ${branchName}
+- Session: ${session.id}
+- Description: ${(session.metadata?.context as any)?.['description'] || 'N/A'}
+`.trim();
   }
 
   /**
