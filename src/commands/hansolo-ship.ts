@@ -311,6 +311,7 @@ export class ShipCommand {
     const logger = getLogger();
 
     try {
+      console.error(`[TRACE] Ship execute called with options: ${JSON.stringify(options)}`);
       logger.debug('Ship command started', 'ship');
 
       // Store custom PR description if provided
@@ -381,25 +382,29 @@ export class ShipCommand {
 
       // STEP 3: Check if PR description is needed (ORCHESTRATION PROMPT)
       const prCheck = await this.prValidator.checkForPRConflicts(currentBranch);
-      logger.debug(`PR check result: action=${prCheck.action}, mcpPrompt=${options.mcpPrompt}`, 'ship');
+      console.error(`[TRACE] PR check: action=${prCheck.action}, hasPrDesc=${!!options.prDescription}, mcpPrompt=${options.mcpPrompt}, type=${typeof options.mcpPrompt}`);
 
       // Need PR description for both 'create' and 'create-new' actions
       if ((prCheck.action === 'create' || prCheck.action === 'create-new') && !options.prDescription) {
-        logger.debug('PR description needed - generating prompt', 'ship');
+        console.error('[TRACE] INSIDE PR description needed block');
         const prompt = this.buildPRDescriptionPrompt(session);
+        console.error(`[TRACE] Built prompt, first 50 chars: ${prompt.substring(0, 50)}`);
 
         if (options.mcpPrompt) {
-          logger.debug('Returning orchestration prompt for PR description', 'ship');
+          console.error('[TRACE] mcpPrompt truthy - RETURNING PROMPT');
           // For MCP, return the prompt so Claude Code can execute it
           return prompt;
         }
 
+        console.error('[TRACE] mcpPrompt falsy - RETURNING PROMPT FOR CLI');
         // For CLI, display the instructions
         this.output.errorMessage('PR description required');
         this.output.info('\nPlease provide a PR description:');
         this.output.info(prompt);
         return prompt;
       }
+
+      console.error('[TRACE] Skipped PR description block - continuing');
 
       // Run pre-flight checks
       logger.debug('Running pre-flight checks', 'ship');
