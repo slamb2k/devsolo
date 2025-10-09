@@ -2,6 +2,10 @@
 
 This folder contains implementation plans, task lists, and roadmaps for upcoming features and improvements.
 
+## Contents
+
+- **codebase-cleanup-phase1-plan.md** - Phase 1 (Quick Wins) implementation plan for codebase optimization: removing build artifacts, unused dependencies, and runtime files
+
 ## What Goes Here
 
 - Feature implementation plans
