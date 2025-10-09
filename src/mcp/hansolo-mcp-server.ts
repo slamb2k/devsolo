@@ -72,6 +72,7 @@ const ShipSchema = z.object({
   merge: z.boolean().optional(),
   force: z.boolean().optional(),
   yes: z.boolean().optional(),
+  stagedOnly: z.boolean().optional(),
   mcpPrompt: z.boolean().optional(),
 });
 
@@ -284,6 +285,11 @@ export class HanSoloMCPServer {
                 yes: {
                   type: 'boolean',
                   description: 'Skip confirmations',
+                },
+                stagedOnly: {
+                  type: 'boolean',
+                  description: 'If true, only commit staged files when committing changes. If false, stages and commits all changes.',
+                  default: false,
                 },
               },
             },
@@ -1033,6 +1039,7 @@ Also include:
             prDescription: params.prDescription,
             yes: params.yes,
             force: params.force,
+            stagedOnly: params.stagedOnly,
             mcpPrompt: params.mcpPrompt,
           });
 

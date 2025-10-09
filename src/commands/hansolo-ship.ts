@@ -307,7 +307,7 @@ export class ShipCommand {
     this.prValidator = new PRValidator(basePath);
   }
 
-  async execute(options: {prDescription?: string; yes?: boolean; force?: boolean; mcpPrompt?: boolean} = {}): Promise<string> {
+  async execute(options: {prDescription?: string; yes?: boolean; force?: boolean; stagedOnly?: boolean; mcpPrompt?: boolean} = {}): Promise<string> {
     const logger = getLogger();
 
     try {
@@ -315,6 +315,9 @@ export class ShipCommand {
 
       // Store custom PR description if provided
       this.customPRDescription = options.prDescription;
+
+      // Store stagedOnly flag for commit prompt
+      const stagedOnly = options.stagedOnly || false;
 
       // Check initialization
       if (!(await this.configManager.isInitialized())) {
@@ -365,7 +368,7 @@ export class ShipCommand {
 
       if (hasChanges) {
         logger.debug('Uncommitted changes detected - generating commit prompt', 'ship');
-        const prompt = this.buildCommitPrompt(session, currentBranch);
+        const prompt = this.buildCommitPrompt(session, currentBranch, stagedOnly);
 
         if (options.mcpPrompt) {
           logger.debug('Returning orchestration prompt for commit', 'ship');
@@ -638,7 +641,12 @@ export class ShipCommand {
   /**
    * Build a helpful prompt for Claude Code to generate a commit message
    */
-  private buildCommitPrompt(session: WorkflowSession, branchName: string): string {
+  private buildCommitPrompt(session: WorkflowSession, branchName: string, stagedOnly: boolean = false): string {
+    const stagedOnlyFlag = stagedOnly ? ' --staged-only' : '';
+    const stagedOnlyNote = stagedOnly
+      ? '\n\nNote: Using --staged-only mode - only staged files will be committed.\nUse "git add <files>" to stage files before committing.'
+      : '';
+
     return `To ship this feature, I need to commit the uncommitted changes first.
 
 1. Run 'git diff --stat' to see which files have uncommitted changes
@@ -652,9 +660,9 @@ export class ShipCommand {
    Any important implementation details or notes.
 
 4. Call /hansolo:commit with the generated message:
-   /hansolo:commit --message "your generated commit message here"
+   /hansolo:commit${stagedOnlyFlag} --message "your generated commit message here"
 
-5. Once committed, call /hansolo:ship again to continue the shipping process
+5. Once committed, call /hansolo:ship${stagedOnlyFlag} again to continue the shipping process${stagedOnlyNote}
 
 Current context:
 - Branch: ${branchName}
