@@ -1,51 +1,67 @@
 # han-solo 🚀
 
-> Git workflow automation tool that enforces linear history and prevents merge conflicts
+> AI-native Git workflow automation via Model Context Protocol (MCP) for Claude Code
 
-han-solo is a powerful CLI tool designed to streamline Git workflows while maintaining clean, linear commit history. It integrates with Claude Code through MCP (Model Context Protocol) and GitHub API for seamless PR management.
+han-solo is a powerful MCP server designed exclusively for Claude Code, streamlining Git workflows while maintaining clean, linear commit history. It provides structured validation, automated PR management, and seamless integration with GitHub.
 
 ## Features
 
-- **🚀 One-Command Workflow**: Ship entire feature in a single command (v2)
-- **🛡️ Pre/Post-Flight Checks**: Comprehensive validation before and after every operation
+- **🤖 AI-Native Design**: Built exclusively for Claude Code via Model Context Protocol (MCP)
+- **🚀 One-Command Workflow**: Ship entire features in a single MCP tool call
+- **🛡️ Structured Validation**: Pre/post-flight checks with JSON results (no UI dependencies)
 - **🚫 Branch Reuse Prevention**: Blocks reusing branch names after merge
 - **✓ PR Conflict Detection**: Ensures single PR per branch lifecycle
-- **📊 Colorful ASCII Art**: Professional, color-coded visual feedback for all commands
-- **📉 Context Window Display**: Real-time token usage tracking with visual progress bars
 - **📈 Linear History Enforcement**: Ensures all merges result in clean, linear commit history
 - **🔄 Session Management**: Track multiple concurrent workflows with isolated sessions
 - **⚙️ State Machine Control**: Deterministic workflow states prevent invalid operations
 - **🔗 GitHub Integration**: Automatic PR creation, CI monitoring, and merging
-- **🤖 MCP Server**: Native Claude Code integration for AI-assisted workflows
-- **🎨 Rich Terminal UI**: Progress indicators, status displays, and clear reporting
 - **🔒 Safety First**: Built-in safeguards prevent accidental commits to main
 - **📍 Smart Status Line**: Always-visible workflow status in Claude Code
 
 ## Installation
 
-### Global Installation (Recommended)
+### Via Claude Code (Recommended)
+
+han-solo is designed to be installed as an MCP server for Claude Code:
+
 ```bash
-npm install -g @hansolo/cli
+# In your project directory with Claude Code open
+hansolo_init --scope project
 ```
 
-### Project-level Installation
-```bash
-npm install --save-dev @hansolo/cli
+Claude Code will automatically detect and configure the MCP server.
+
+### Manual MCP Configuration
+
+Add to your Claude Code MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "hansolo": {
+      "command": "node",
+      "args": ["/path/to/hansolo/bin/hansolo-mcp"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}
 ```
 
 ## Quick Start
 
-> **New to han-solo?** Check out the [Quick Start Guide](QUICKSTART.md) for a detailed walkthrough, or follow the steps below to get started immediately.
+> **New to han-solo?** Follow these steps to get started with Claude Code.
 
 ### 1. Initialize han-solo in your project
-```bash
-cd your-project
-hansolo init
+
+In Claude Code, ask:
+```
+Use hansolo_init to initialize han-solo in this project
 ```
 
-This creates a `.hansolo` directory with configuration and session storage. If Claude Code is detected, it automatically sets up MCP integration.
+This creates a `.hansolo` directory with configuration and session storage.
 
 ### 2. (Optional) Set up GitHub authentication
+
 ```bash
 # Option A: GitHub CLI (easiest)
 gh auth login
@@ -55,28 +71,32 @@ export GITHUB_TOKEN=ghp_your_token_here
 ```
 
 ### 3. Start a new feature workflow
-```bash
-hansolo launch
+
+In Claude Code, ask:
+```
+Use hansolo_launch to start a new feature for [your feature description]
 ```
 
 This creates a new feature branch and starts tracking your workflow.
 
 ### 4. Make your changes
+
 Work on your feature as normal. han-solo tracks your session automatically.
 
-```bash
-# Check status anytime
-hansolo status
+```
+Use hansolo_status to check current workflow status
 ```
 
 ### 5. Ship your changes (One Command! 🚀)
-```bash
-hansolo ship
+
+In Claude Code, ask:
+```
+Use hansolo_ship to commit, push, create PR, and merge this feature
 ```
 
-That's it! This single command:
-- ✅ Commits your changes (runs lint/typecheck hooks)
-- ✅ Pushes to remote (runs test hooks)
+That's it! This single MCP tool call:
+- ✅ Commits your changes
+- ✅ Pushes to remote
 - ✅ Creates or updates PR
 - ✅ Waits for CI checks
 - ✅ Auto-merges when ready
@@ -88,223 +108,211 @@ That's it! This single command:
 
 ---
 
-**Using Claude Code?** After `hansolo init`, enable the status line for always-visible workflow status:
+### Enable Status Line (Optional)
+
+For always-visible workflow status in Claude Code:
 ```
-/hansolo:status-line enable
+Use hansolo_status_line with action "enable"
 ```
 
-For detailed examples and advanced workflows, see the [Usage Guide](USAGE.md).
+## Core MCP Tools
 
-## Core Commands
+All han-solo functionality is exposed through MCP tools that Claude Code can invoke.
 
-### `hansolo init`
-Initialize han-solo in your project. Creates configuration and installs Git hooks.
+### `hansolo_init`
+Initialize han-solo in your project. Creates configuration and session storage.
 
-**Options:**
-- `--scope [project|user]` - Installation scope (default: project)
-- `--force` - Force reinitialization
+**Input:**
+- `scope` (optional): Installation scope - "project" or "user" (default: "project")
+- `force` (optional): Force reinitialization (default: false)
 
-### `hansolo launch`
+**Returns:** Structured result with success status and initialization details
+
+### `hansolo_launch`
 Start a new feature workflow with automatic branch creation.
 
-**Options:**
-- `--branch <name>` - Specify branch name (auto-generated if omitted)
-- `--description <desc>` - Add description for the feature
-- `--force` - Launch even with uncommitted changes
+**Input:**
+- `branchName` (optional): Specify branch name (auto-generated if omitted)
+- `description` (optional): Add description for the feature
+- `force` (optional): Launch even with uncommitted changes
+- `stashRef` (optional): Git stash reference to restore after branch creation
+- `popStash` (optional): Whether to pop the stash (default: true if stashRef provided)
 
-### `hansolo ship`
-**NEW IN V2:** Complete the entire workflow automatically in a single command!
+**Returns:** SessionToolResult with pre/post-flight check results
 
-Ship now handles everything: commit → push → PR → CI wait → merge → cleanup
+### `hansolo_commit`
+Commit changes to the current feature branch.
+
+**Input:**
+- `message` (optional): Commit message (generated if omitted)
+- `stagedOnly` (optional): If true, only commit staged files (default: false)
+
+**Returns:** SessionToolResult with commit details
+
+### `hansolo_ship`
+**COMPLETE WORKFLOW:** Complete the entire workflow automatically in a single command!
+
+Ship handles everything: push → PR → CI wait → merge → cleanup
 
 **What it does:**
-1. Commits any uncommitted changes (runs pre-commit hooks)
-2. Pushes to remote (runs pre-push hooks)
-3. Creates or updates GitHub PR
-4. Waits for CI checks to pass
-5. Auto-merges PR with squash
-6. Syncs local main branch
-7. Deletes feature branches (local & remote)
-8. Marks session as complete
+1. Pushes to remote
+2. Creates or updates GitHub PR
+3. Waits for CI checks to pass (20 minute timeout)
+4. Auto-merges PR with squash
+5. Syncs local main branch
+6. Deletes feature branches (local & remote)
+7. Marks session as complete
 
-**Options:**
-- `--message <msg>` - Custom commit message
-- `--force` - Override safety checks
-- `--yes` - Skip confirmations (for automation)
+**Input:**
+- `prDescription` (optional): PR description (required for new PRs)
+- `push` (optional): Push to remote (default: true)
+- `createPR` (optional): Create pull request (default: true)
+- `merge` (optional): Merge PR after CI passes (default: true)
+- `force` (optional): Override safety checks
+- `yes` (optional): Skip confirmations
+- `stagedOnly` (optional): Only commit staged files when committing changes
 
-**Example:**
-```bash
-# Ship everything at once
-hansolo ship
+**Returns:** GitHubToolResult with PR number, URL, and merge status
 
-# With custom commit message
-hansolo ship --message "feat: add user authentication"
-
-# Skip confirmations for CI/CD
-hansolo ship --yes
-```
-
-### `hansolo sessions`
+### `hansolo_sessions`
 List and manage active workflow sessions.
 
-**Options:**
-- `--all` - Show all sessions including completed
-- `--verbose` - Detailed session information
-- `--cleanup` - Remove expired sessions
+**Input:**
+- `all` (optional): Show all sessions including completed
+- `verbose` (optional): Detailed session information
+- `cleanup` (optional): Remove expired sessions
 
-### `hansolo swap`
+**Returns:** QueryToolResult with session list
+
+### `hansolo_swap`
 Switch between active workflow sessions.
 
-**Usage:**
-```bash
-hansolo swap [branch-name]
-```
+**Input:**
+- `branchName`: Branch to swap to (required)
+- `force` (optional): Force swap with uncommitted changes
+- `stash` (optional): Stash changes before swapping
 
-**Options:**
-- `--force` - Force swap with uncommitted changes
-- `--stash` - Stash changes before swapping
+**Returns:** SessionToolResult with swap details
 
-### `hansolo abort`
+### `hansolo_abort`
 Cancel an active workflow session.
 
-**Options:**
-- `--branch <name>` - Specify branch to abort (current if omitted)
-- `--delete-branch` - Delete the branch after aborting
-- `--force` - Force abort
-- `--yes` - Skip confirmation
-- `--all` - Abort all active workflows
+**Input:**
+- `branchName` (optional): Specify branch to abort (current if omitted)
+- `deleteBranch` (optional): Delete the branch after aborting
+- `force` (optional): Force abort
+- `yes` (optional): Skip confirmation
 
-### `hansolo status`
+**Returns:** SessionToolResult with abort details
+
+### `hansolo_status`
 Show current workflow status and session information.
 
-### `hansolo cleanup`
-Clean up completed sessions, merged branches, and sync main with remote.
+**Input:** None required
 
-**Critical:** Run this after PRs are merged on GitHub to ensure local main is synced and feature branches are removed.
+**Returns:** QueryToolResult with current status
 
-**Usage:**
-```bash
-hansolo cleanup
+### `hansolo_status_line`
+Manage Claude Code status line display.
+
+**Input:**
+- `action`: Action to perform - "enable", "disable", "update", or "show" (required)
+- `format` (optional): Custom format string (e.g., "{icon} {branch} {state}")
+- `showBranchInfo` (optional): Show branch name in status line
+- `showSessionInfo` (optional): Show session ID in status line
+- `showStateInfo` (optional): Show workflow state in status line
+
+**Returns:** QueryToolResult with status line configuration
+
+### `hansolo_hotfix`
+Create emergency hotfix workflow.
+
+**Input:**
+- `issue` (optional): Issue number or description
+- `severity` (optional): Severity level - "critical", "high", or "medium"
+- `force` (optional): Force operations
+- `skipTests` (optional): Skip running tests
+- `skipReview` (optional): Skip code review
+- `autoMerge` (optional): Automatically merge when checks pass
+- `yes` (optional): Skip confirmations
+
+**Returns:** SessionToolResult with hotfix details
+
+## Structured Results
+
+All MCP tools return structured JSON results for programmatic handling by Claude Code:
+
+### SessionToolResult
+```typescript
+{
+  success: boolean;
+  branchName?: string;
+  state?: string;
+  preFlightChecks?: CheckResult[];
+  postFlightVerifications?: CheckResult[];
+  errors?: string[];
+  warnings?: string[];
+  nextSteps?: string[];
+}
 ```
 
-**Options:**
-- `--dry-run` - Show what would be cleaned up without making changes
-- `--force` / `-f` - Skip confirmation prompts
-- `--all` - Clean up everything including old audit logs
-- `--sessions-only` - Only clean up sessions, keep branches
-- `--branches-only` - Only clean up branches, keep sessions
-- `--days <N>` - Clean up sessions completed N+ days ago (default: 30)
-- `--no-sync` - Skip syncing main branch with remote
+### GitHubToolResult
+```typescript
+{
+  success: boolean;
+  prNumber?: number;
+  prUrl?: string;
+  merged?: boolean;
+  preFlightChecks?: CheckResult[];
+  postFlightVerifications?: CheckResult[];
+  errors?: string[];
+  warnings?: string[];
+}
+```
 
-**What it does:**
-1. **Syncs main branch**: Pulls latest from remote (includes squashed PR commits)
-2. **Removes merged branches**: Deletes local branches that have been merged
-3. **Archives sessions**: Cleans up completed/expired workflow sessions
-4. **Removes stale locks**: Clears lock files older than 24 hours
-5. **Cleans audit logs**: (with `--all`) Removes old audit entries
+### QueryToolResult
+```typescript
+{
+  success: boolean;
+  data: Record<string, unknown>;
+  message?: string;
+  errors?: string[];
+  warnings?: string[];
+}
+```
 
-**When to run:**
-- After merging a PR on GitHub
-- Periodically to keep repository tidy
-- Before starting new work to ensure clean state
+## Pre-Flight and Post-Flight Checks
 
-## V2 Features (NEW! 🎉)
-
-### Pre-Flight and Post-Flight Checks
-
-Every command now includes comprehensive validation:
+Every MCP tool includes comprehensive validation with structured results:
 
 **Pre-Flight Checks** (before execution):
-```
-🔍 Pre-Flight Checks (5/5 passed)
-  ✓ On main/master branch: main
-  ✓ Working directory clean
-  ✓ Main up to date with origin
-  ✓ No existing session
-  ✓ Branch name available: feature/my-feature
-
-✓ All checks passed (5/5)
-```
+- Validates prerequisites are met
+- Returns structured check results
+- Provides actionable error messages
+- Can be overridden with `force` flag
 
 **Post-Flight Verifications** (after execution):
-```
-✅ Post-Flight Verification (5/5 passed)
-  ✓ Session created: ID: abc12345...
-  ✓ Feature branch created: feature/my-feature
-  ✓ Branch checked out: feature/my-feature
-  ✓ Session state: BRANCH_READY
-  ✓ No uncommitted changes
-```
+- Confirms expected state was achieved
+- Verifies all operations completed
+- Identifies any issues that occurred
+- Returns detailed verification results
 
-**Benefits:**
-- Catch issues before making changes
-- Confirm expected state after operations
-- Clear visual feedback (✓/⚠/✗)
-- Actionable suggestions for failures
-
-See [PRE-FLIGHT-CHECKS.md](./docs/PRE-FLIGHT-CHECKS.md) for complete documentation.
-
-### Branch Reuse Prevention
-
-Han-solo now prevents branch name reuse after merge:
-
-| Scenario | Action |
-|----------|--------|
-| Branch merged & deleted | **BLOCKED** - Name retired |
-| Branch merged, deleted, recreated | **BLOCKED** - Critical error |
-| Branch aborted (never merged) | **ALLOWED** - Safe to reuse |
-| Adding commits after merge | **ALLOWED** - Creates new PR |
-
-**Example:**
-```bash
-hansolo launch "add-auth"
-# ... work, ship, merge ...
-
-hansolo launch "add-auth"
-# ✗ Branch name available: Previously used for PR #15
-#   Branch names cannot be reused after merge
-#   Suggestion: feature/add-auth-v2
+**Check Result Structure:**
+```typescript
+{
+  name: string;
+  passed: boolean;
+  message: string;
+  severity: 'error' | 'warning' | 'info';
+  details?: {
+    expected?: any;
+    actual?: any;
+    suggestion?: string;
+  };
+}
 ```
 
-### PR Conflict Detection
-
-Enforces single PR per branch lifecycle:
-
-| Scenario | Action |
-|----------|--------|
-| Multiple open PRs | **BLOCKED** - Manual fix needed |
-| Single open PR | **UPDATES** existing PR |
-| Previous PR merged | **CREATES** new PR |
-| No PR exists | **CREATES** new PR |
-
-### ASCII Art Banners
-
-All commands now display professional banners:
-
-```
-  ╔═══════════════════════════════════════════╗
-  ║        🚀  LAUNCHING WORKFLOW  🚀         ║
-  ╚═══════════════════════════════════════════╝
-```
-
-Consistent branding across:
-- 🚀 Launch
-- 🚢 Ship
-- 🧹 Cleanup
-- ⛔ Abort
-- 🔄 Swap
-- 📊 Status
-- 📋 Sessions
-
-### Migration from V1
-
-See [MIGRATION-V2.md](./docs/MIGRATION-V2.md) for complete migration guide.
-
-**Key Changes:**
-- `hansolo ship` now does everything automatically (no more flags)
-- Pre/post-flight checks on all commands
-- Better error messages with suggestions
-- Consistent visual output
+See docs/guides/validation.md for complete documentation.
 
 ## Workflow States
 
@@ -335,84 +343,34 @@ export GITHUB_TOKEN=your_github_token
 export GH_TOKEN=your_github_token
 ```
 
-han-solo automatically detects and uses `gh` CLI authentication if available, so explicit token setup is often unnecessary for local development.
+han-solo automatically detects and uses `gh` CLI authentication if available.
 
 ### Features
 - Automatic PR creation with generated descriptions
+- CI check monitoring with configurable timeout
 - Review status tracking
-- Check suite monitoring
 - Squash merge support
 - Automatic branch cleanup
 
-## MCP Server (Claude Code Integration)
-
-han-solo includes an MCP server for seamless Claude Code integration.
-
-### Quick Setup with Claude Code
-
-1. **Initialize han-solo** in your project:
-   ```bash
-   hansolo init
-   ```
-   This automatically configures the MCP server in Claude Code.
-
-2. **Enable the Status Line** (optional but recommended):
-   ```bash
-   /hansolo:status-line enable
-   ```
-
-3. **Start using han-solo via Claude Code**:
-   ```
-   /hansolo:launch
-   /hansolo:ship
-   /hansolo:status
-   ```
-
-### Available MCP Tools
-
-All han-solo commands are available through Claude Code's slash command interface:
-
-| Command | Description |
-|---------|-------------|
-| `/hansolo:init` | Initialize han-solo in your project |
-| `/hansolo:launch` | Start a new feature workflow |
-| `/hansolo:ship` | Complete and merge your feature |
-| `/hansolo:status` | Show current workflow status |
-| `/hansolo:sessions` | List all active sessions |
-| `/hansolo:swap` | Switch between sessions |
-| `/hansolo:abort` | Cancel current workflow |
-| `/hansolo:status-line` | Manage Claude Code status line |
-
-### Status Line Integration
+## Status Line Integration
 
 The status line provides at-a-glance workflow information directly in Claude Code:
 
 ```
-[han-solo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY | 45000/200000 ██░░░░░░░░ 22%
+[han-solo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY
 ```
 
 **Status Line Components:**
 - **Session ID**: Short identifier for current session
 - **Branch Name**: Current feature branch
 - **State**: Workflow state (BRANCH_READY, PUSHED, etc.)
-- **Token Usage**: Context window usage with visual progress bar
-  - Green: < 50% (plenty of room)
-  - Yellow: 50-80% (getting full)
-  - Red: > 80% (approaching limit)
 
 **Managing the Status Line:**
-```bash
-# Enable status line
-/hansolo:status-line enable
-
-# Disable status line
-/hansolo:status-line disable
-
-# Show current status
-/hansolo:status-line show
-
-# Update configuration
-/hansolo:status-line update --show-branch-info true
+```
+Use hansolo_status_line with action "enable"
+Use hansolo_status_line with action "disable"
+Use hansolo_status_line with action "show"
+Use hansolo_status_line with action "update" and showBranchInfo true
 ```
 
 ## Session Management
@@ -435,40 +393,40 @@ gitPlatform:
   type: github
   owner: your-org
   repo: your-repo
-components:
-  mpcServer: true
-  statusLines: true
-  gitHooks: true
 preferences:
   defaultBranchPrefix: feature/
   autoCleanup: true
-  confirmBeforePush: true
-  colorOutput: true
-  verboseLogging: false
+  prTemplate:
+    footer: "🤖 Generated with han-solo"
 ```
 
 ## Architecture
 
-han-solo follows a layered architecture:
+han-solo follows a pure MCP architecture:
 
 ```
 ┌─────────────────────────────────┐
 │         Claude Code             │
-│         (via MCP)               │
+│    (MCP Client - AI Agent)      │
+└─────────────────────────────────┘
+                ↓ JSON-RPC
+┌─────────────────────────────────┐
+│       MCP Server                │
+│    (HanSoloMCPServer)           │
 └─────────────────────────────────┘
                 ↓
 ┌─────────────────────────────────┐
-│       CLI Interface             │
-│    (Commands & Options)         │
+│       MCP Tools Layer           │
+│  (LaunchTool, ShipTool, etc.)   │
 └─────────────────────────────────┘
                 ↓
 ┌─────────────────────────────────┐
-│     State Machine Layer         │
-│  (Workflow Control & Rules)     │
+│  Validation Services Layer      │
+│  (Pre/Post-Flight Checks)       │
 └─────────────────────────────────┘
                 ↓
 ┌─────────────────────────────────┐
-│     Services Layer              │
+│     Core Services Layer         │
 │ (Git, GitHub, Sessions, Config) │
 └─────────────────────────────────┘
                 ↓
@@ -499,13 +457,16 @@ npm test
 npm run test:coverage
 ```
 
-### Running Locally
+### Testing the MCP Server
 ```bash
-# Link for local development
-npm link
+# Build MCP server
+npm run build:mcp
 
-# Now use globally
-hansolo init
+# Start MCP server for testing
+npm run mcp:start
+
+# Run MCP tests
+npm run test:mcp
 ```
 
 ## Testing
@@ -521,82 +482,52 @@ npm run test:watch
 
 # Coverage report
 npm run test:coverage
+
+# Unit tests only
+npm run test:unit
+
+# Integration tests only
+npm run test:integration
+
+# MCP server tests only
+npm run test:mcp
 ```
 
 ## Documentation
 
 ### Getting Started
-- **[Quick Start Guide](QUICKSTART.md)** - Get up and running in 5 minutes
-- **[Installation Guide](INSTALL.md)** - Detailed installation instructions for all platforms
-- **[Usage Guide](USAGE.md)** - Practical examples and real-world scenarios
+- **docs/guides/quickstart.md** - Get up and running in 5 minutes
+- **docs/guides/installation.md** - Detailed installation instructions
+- **docs/guides/usage.md** - Practical examples and real-world scenarios
 
 ### Reference
-- **[Command Reference](docs/command-reference.md)** - Complete command documentation
-- **[Configuration Guide](docs/configuration.md)** - Configuration options and best practices
-- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
-- **[API Documentation](docs/API.md)** - Complete API reference
+- **docs/reference/mcp-tools.md** - Complete MCP tool reference
+- **docs/reference/configuration.md** - Configuration options
+- **docs/reference/validation.md** - Pre/post-flight checks documentation
 
 ### Advanced
-- **[Pre-Flight Checks](docs/PRE-FLIGHT-CHECKS.md)** - Understanding validation checks
-- **[Migration Guide (V2)](docs/MIGRATION-V2.md)** - Upgrading from V1 to V2
-- **[MCP Integration](docs/MCP-INTEGRATION.md)** - Claude Code integration details
+- **docs/dev/system/architecture.md** - System architecture overview
+- **docs/dev/system/state-machine.md** - Workflow state machine details
+- **docs/specs/pure-mcp-architecture.md** - MCP-only design philosophy
 
-### Project
-- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute to han-solo
-- **[Changelog](CHANGELOG.md)** - Version history and changes
-- **[Man Page](man/hansolo.1)** - Unix manual page
-
-## Shell Completions
-
-han-solo provides shell completions for enhanced CLI experience:
-
-- **Bash**: `source completions/hansolo.bash`
-- **ZSH**: `source completions/hansolo.zsh`
-- **Fish**: Copy to `~/.config/fish/completions/`
-
-## Git Hooks
-
-Install Git hooks to enforce han-solo workflows:
-
-```bash
-sh hooks/install.sh
-```
-
-Available hooks:
-- **pre-commit**: Prevents direct commits to protected branches
-- **pre-push**: Validates workflow state before pushing
-- **commit-msg**: Enforces conventional commit messages
-
-## Docker Support
-
-Run han-solo in a container:
-
-```bash
-# Build image
-docker build -t hansolo .
-
-# Run container
-docker run -it --rm -v $(pwd):/workspace hansolo
-
-# Using docker-compose
-docker-compose run hansolo
-```
+### Migration
+- **docs/guides/migration-from-cli.md** - Migrating from CLI-based versions (v1.x)
 
 ## Contributing
 
-Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+Contributions are welcome! Please see our Contributing Guide for details.
 
 1. Fork the repository
-2. Create a feature branch (`hansolo launch --branch feature/your-feature`)
+2. Start a new workflow (Use hansolo_launch via Claude Code)
 3. Make your changes
 4. Add tests for new functionality
 5. Run tests and linting
-6. Ship your changes (`hansolo ship`)
+6. Ship your changes (Use hansolo_ship via Claude Code)
 7. Create a pull request
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details
+MIT License - see LICENSE file for details
 
 ## Support
 
@@ -612,4 +543,5 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ---
 
-**han-solo** - *May your commits be linear and your conflicts be few* 🚀
+**han-solo v2.0** - *AI-native Git workflow automation for Claude Code* 🤖
+
