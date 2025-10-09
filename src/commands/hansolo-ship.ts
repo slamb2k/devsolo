@@ -493,8 +493,8 @@ export class ShipCommand {
     // Always add footer to custom messages too
     if (message && footer) {
       // Ensure there's always a blank line before footer
-      if (!commitMessage.endsWith('\n\n')) {
-        commitMessage += '\n\n';
+      if (!commitMessage.endsWith('\n\n---\n')) {
+        commitMessage += '\n\n---\n';
       }
       commitMessage += footer;
     }
