@@ -16,6 +16,7 @@ import { AbortCommand } from '../commands/hansolo-abort';
 import { ShipCommand } from '../commands/hansolo-ship';
 import { SessionRepository } from '../services/session-repository';
 import { GitOperations } from '../services/git-operations';
+import { ConfigurationManager } from '../services/configuration-manager';
 import { getBanner } from '../ui/banners';
 import { HotfixCommand } from '../commands/hansolo-hotfix';
 
@@ -516,6 +517,59 @@ export class HanSoloMCPServer {
       };
     });
 
+    /**
+     * Smart argument parser that supports both positional and flag-style arguments
+     *
+     * Examples:
+     * - Positional: {branchName: "feature/foo", description: "desc"} → {branchName: "feature/foo", description: "desc"}
+     * - Flag-only: {branchName: "--description", description: "My feature"} → {description: "My feature"}
+     * - Mixed: {branchName: "feature/foo", description: "--force"} → {branchName: "feature/foo", force: true}
+     * - Boolean flags: {branchName: "--force", description: "--yes"} → {force: true, yes: true}
+     */
+    const parseArguments = (args: Record<string, any>): Record<string, any> => {
+      const result: Record<string, any> = {};
+      const entries = Object.entries(args).filter(([_, v]) => v !== undefined && v !== null && v !== '');
+
+      let i = 0;
+      while (i < entries.length) {
+        const entry = entries[i];
+        if (!entry) {
+          break;
+        }
+
+        const [paramName, value] = entry;
+
+        // Check if this value is a flag (starts with --)
+        if (typeof value === 'string' && value.startsWith('--')) {
+          const flagName = value.replace(/^--/, '');
+
+          // Check if next argument exists and is NOT a flag (it's the flag's value)
+          if (i + 1 < entries.length) {
+            const nextEntry = entries[i + 1];
+            if (nextEntry) {
+              const nextValue = nextEntry[1];
+              if (typeof nextValue === 'string' && !nextValue.startsWith('--')) {
+                result[flagName] = nextValue;
+                i += 2; // Skip both flag and its value
+                continue;
+              }
+            }
+          }
+
+          // Boolean flag (no value following, or next is also a flag)
+          result[flagName] = true;
+          i++;
+          continue;
+        }
+
+        // Regular positional argument - use its parameter name
+        result[paramName] = value;
+        i++;
+      }
+
+      return result;
+    };
+
     // Handle prompt requests
     this.server.setRequestHandler(GetPromptRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
@@ -562,15 +616,8 @@ export class HanSoloMCPServer {
       }
 
       // Handle standard han-solo commands
-      // Build tool call arguments
-      const toolArgs: Record<string, any> = {};
-      if (args) {
-        Object.entries(args).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== '') {
-            toolArgs[key] = value;
-          }
-        });
-      }
+      // Build tool call arguments with smart parsing (supports both positional and flag-style)
+      const toolArgs = args ? parseArguments(args) : {};
 
       // Build arguments string for display (exclude internal parameters, but we'll add mcpPrompt explicitly)
       const displayArgs = Object.entries(toolArgs).filter(([k]) => k !== 'mcpPrompt');
@@ -921,9 +968,18 @@ IMPORTANT: You must include this parameter in your tool call:
               const currentBranch = await gitOps.getCurrentBranch();
               const session = await sessionRepo.getSessionByBranch(currentBranch);
 
-              const defaultMessage = session
-                ? `feat: ${session.branchName}\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>`
-                : '';
+              // Load config to get commit template
+              const configManager = new ConfigurationManager(this.basePath);
+              const config = await configManager.load();
+              const footer = config.preferences.commitTemplate?.footer || '';
+
+              let defaultMessage = '';
+              if (session) {
+                defaultMessage = `feat: ${session.branchName}`;
+                if (footer) {
+                  defaultMessage += `\n\n${footer}`;
+                }
+              }
 
               const elicitResult = await this.server.elicitInput({
                 message: 'Enter a commit message (or press Enter to use default):',

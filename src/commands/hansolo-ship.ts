@@ -428,13 +428,17 @@ export class ShipCommand {
   private async commitChanges(session: WorkflowSession, message?: string): Promise<void> {
     this.progress.start('Committing changes...');
 
-    const commitMessage =
-      message ||
-      `feat: ${session.branchName}
+    // Load config to get commit template
+    const config = await this.configManager.load();
+    const footer = config.preferences.commitTemplate?.footer || '';
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>`;
+    let commitMessage = message;
+    if (!commitMessage) {
+      commitMessage = `feat: ${session.branchName}`;
+      if (footer) {
+        commitMessage += `\n\n${footer}`;
+      }
+    }
 
     await this.gitOps.stageAll();
     await this.gitOps.commit(commitMessage, { noVerify: false });
@@ -465,7 +469,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>`;
 
     const prInfo = {
       title: `[${session.workflowType}] ${session.branchName}`,
-      body: this.generatePRDescription(session),
+      body: await this.generatePRDescription(session),
       base: 'main',
       head: session.branchName,
     };
@@ -588,8 +592,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>`;
     await this.progress.runSteps(steps);
   }
 
-  private generatePRDescription(session: WorkflowSession): string {
-    return `## Summary
+  private async generatePRDescription(session: WorkflowSession): Promise<string> {
+    // Load config to get PR template
+    const config = await this.configManager.load();
+    const footer = config.preferences.prTemplate?.footer || '';
+
+    let description = `## Summary
 
 Branch: ${session.branchName}
 Session: ${session.id}
@@ -599,8 +607,12 @@ Created: ${new Date(session.createdAt).toLocaleString()}
 
 - Feature implementation
 - Tests added
-- Documentation updated
+- Documentation updated`;
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)`;
+    if (footer) {
+      description += `\n\n${footer}`;
+    }
+
+    return description;
   }
 }
