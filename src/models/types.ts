@@ -130,6 +130,13 @@ export interface UserPreferences {
   statusLineFormat?: {
     template?: string;
   };
+  statusLine?: {
+    enabled?: boolean;
+    format?: string;
+    showBranchInfo?: boolean;
+    showSessionInfo?: boolean;
+    showStateInfo?: boolean;
+  };
   enforceConventionalCommits?: boolean;
   runTestsOnPush?: boolean;
   commitTemplate?: {
