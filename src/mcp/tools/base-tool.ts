@@ -26,6 +26,8 @@ export interface SessionToolResult extends ToolResultWithValidation {
   branchName?: string;
   state?: string;
   nextSteps?: string[];
+  message?: string;  // For prompt-based parameter collection
+  data?: Record<string, unknown>;  // For providing context to Claude
 }
 
 /**
@@ -36,6 +38,9 @@ export interface GitHubToolResult extends ToolResultWithValidation {
   prUrl?: string;
   commitSha?: string;
   merged?: boolean;
+  message?: string;  // For prompt-based parameter collection
+  data?: Record<string, unknown>;  // For providing context to Claude
+  nextSteps?: string[];  // For guidance
 }
 
 /**

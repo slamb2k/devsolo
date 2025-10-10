@@ -7,7 +7,7 @@ import { ConfigurationManager } from '../../services/configuration-manager';
  * Input for commit tool
  */
 export interface CommitToolInput {
-  message: string;
+  message?: string;
   stagedOnly?: boolean;
 }
 
@@ -39,6 +39,43 @@ export class CommitTool implements MCPTool<CommitToolInput, SessionToolResult> {
         return {
           success: false,
           errors: [`No workflow session found for branch '${currentBranch}'.`],
+        };
+      }
+
+      // Prompt-based parameter collection: handle missing message
+      if (!input.message) {
+        const status = await this.gitOps.getStatus();
+        const changedFiles = [...status.staged, ...status.modified, ...status.created, ...status.deleted];
+
+        if (changedFiles.length === 0) {
+          return {
+            success: false,
+            warnings: ['No changes to commit'],
+          };
+        }
+
+        // Get raw diff for Claude to analyze
+        const diff = await this.gitOps.getDiff();
+
+        return {
+          success: true,
+          message: 'No commit message provided. Analyze the changes below and generate an appropriate commit message, or ask the user to provide one.',
+          data: {
+            changedFiles: changedFiles,
+            diff: diff.substring(0, 5000), // Limit diff size, first 5000 chars should be enough
+            status: {
+              staged: status.staged,
+              modified: status.modified,
+              created: status.created,
+              deleted: status.deleted,
+            },
+          },
+          nextSteps: [
+            'Analyze the diff to understand what changed',
+            'Generate a conventional commit message (feat/fix/docs/refactor/etc)',
+            'OR ask the user what commit message they want to use',
+            'Call hansolo_commit again with the message parameter',
+          ],
         };
       }
 

@@ -3,12 +3,13 @@ import { WorkflowSession } from '../../models/workflow-session';
 import { GitOperations } from '../../services/git-operations';
 import { SessionRepository } from '../../services/session-repository';
 import { ConfigurationManager } from '../../services/configuration-manager';
+import { GitHubIntegration } from '../../services/github-integration';
 
 /**
  * Input for hotfix tool
  */
 export interface HotfixToolInput {
-  issue: string;
+  issue?: string;
   severity?: 'critical' | 'high' | 'medium';
   skipTests?: boolean;
   skipReview?: boolean;
@@ -24,7 +25,8 @@ export class HotfixTool implements MCPTool<HotfixToolInput, SessionToolResult> {
   constructor(
     private gitOps: GitOperations,
     private sessionRepo: SessionRepository,
-    private configManager: ConfigurationManager
+    private configManager: ConfigurationManager,
+    private githubIntegration: GitHubIntegration
   ) {}
 
   async execute(input: HotfixToolInput): Promise<SessionToolResult> {
@@ -35,6 +37,11 @@ export class HotfixTool implements MCPTool<HotfixToolInput, SessionToolResult> {
           success: false,
           errors: ['han-solo is not initialized. Run hansolo_init first.'],
         };
+      }
+
+      // Prompt-based parameter collection: handle missing issue
+      if (!input.issue) {
+        return await this.promptForIssue(input);
       }
 
       // Validate we're on main branch
@@ -121,6 +128,53 @@ export class HotfixTool implements MCPTool<HotfixToolInput, SessionToolResult> {
       };
     } catch (error) {
       return createErrorResult(error, 'HotfixTool');
+    }
+  }
+
+  /**
+   * Prompt for issue with raw context (no generation)
+   */
+  private async promptForIssue(input: HotfixToolInput): Promise<SessionToolResult> {
+    try {
+      // Get recent commits for context
+      const recentCommits = await this.gitOps.getCommitsSince('main');
+      const lastCommits = recentCommits.slice(0, 10);
+
+      // Check GitHub availability (issues fetching not yet implemented)
+      let githubAvailable = false;
+      try {
+        githubAvailable = await this.githubIntegration.initialize();
+      } catch (error) {
+        // GitHub integration not available - that's okay
+      }
+
+      return {
+        success: true,
+        message: 'No issue provided. Analyze the context below and either generate an issue description from recent commits or ask the user.',
+        data: {
+          // Raw commits for analysis
+          recentCommits: lastCommits.map(c => ({
+            message: c.message,
+            hash: c.hash.substring(0, 7),
+            author: c.author_name,
+            date: c.date,
+          })),
+
+          // Additional context
+          severity: input.severity || 'high',
+          githubAvailable: githubAvailable,
+        },
+        nextSteps: [
+          'Option 1: Analyze recent commits to generate an issue description',
+          'Option 2: Ask the user what issue they want to fix',
+          'Call hansolo_hotfix again with issue parameter',
+        ],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errors: [`Failed to gather issue context: ${error instanceof Error ? error.message : String(error)}`],
+      };
     }
   }
 }

@@ -55,7 +55,41 @@ export class LaunchTool implements MCPTool<LaunchToolInput, SessionToolResult> {
         };
       }
 
-      // Determine branch name
+      // Prompt-based parameter collection: handle missing branch name
+      if (!input.branchName) {
+        // Get context for branch name generation
+        const hasChanges = await this.gitOps.hasUncommittedChanges();
+        let diffContext = '';
+
+        if (hasChanges && !input.stashRef) {
+          const status = await this.gitOps.getStatus();
+          const changedFiles = [...status.staged, ...status.modified, ...status.created];
+          diffContext = changedFiles.slice(0, 5).join(', '); // First few files for context
+        }
+
+        return {
+          success: true,
+          message: 'No branch name provided. Generate a branch name from the description or changes, or ask the user to provide one.',
+          data: {
+            description: input.description || null,
+            hasUncommittedChanges: hasChanges,
+            changedFilesContext: diffContext || null,
+            branchNamingRules: {
+              format: 'feature/fix/docs/refactor prefix with descriptive-name',
+              examples: ['feature/user-auth', 'fix/login-bug', 'docs/api-guide'],
+            },
+          },
+          nextSteps: [
+            'If description provided, generate branch name from it (e.g., "user authentication" -> "feature/user-authentication")',
+            'If no description, analyze changed files to generate name',
+            'OR ask the user what branch name they want to use',
+            'Validate the name follows naming conventions',
+            'Call hansolo_launch again with branchName parameter',
+          ],
+        };
+      }
+
+      // Determine branch name from input
       const branchName = await this.determineBranchName(input);
       if (!branchName) {
         return {
