@@ -14,6 +14,7 @@ import { PostFlightVerification, PostFlightVerificationResult } from '../../serv
 import { GitHubIntegration } from '../../services/github-integration';
 import { ConfigurationManager } from '../../services/configuration-manager';
 import { BranchValidator } from '../../services/validation/branch-validator';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
  * Input for ship tool
@@ -40,9 +41,10 @@ export class ShipTool extends BaseMCPTool<ShipToolInput, GitHubToolResult> {
     private githubIntegration: GitHubIntegration,
     private branchValidator: BranchValidator,
     configManager: ConfigurationManager,
-    _basePath: string = '.hansolo'
+    _basePath: string = '.hansolo',
+    server?: Server
   ) {
-    super(configManager);
+    super(configManager, server);
     this.preFlightCheckService = new PreFlightCheckService(gitOps, sessionRepo);
     this.postFlightVerification = new PostFlightVerification(gitOps, sessionRepo);
   }

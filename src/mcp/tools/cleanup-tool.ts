@@ -8,6 +8,7 @@ import { QueryToolResult } from './base-tool';
 import { SessionRepository } from '../../services/session-repository';
 import { GitOperations } from '../../services/git-operations';
 import { ConfigurationManager } from '../../services/configuration-manager';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
  * Input for cleanup tool
@@ -23,9 +24,10 @@ export class CleanupTool extends BaseMCPTool<CleanupToolInput, QueryToolResult> 
   constructor(
     private sessionRepo: SessionRepository,
     private gitOps: GitOperations,
-    configManager: ConfigurationManager
+    configManager: ConfigurationManager,
+    server?: Server
   ) {
-    super(configManager);
+    super(configManager, server);
   }
 
   protected getBanner(): string {

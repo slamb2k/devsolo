@@ -6,6 +6,7 @@ import {
 } from './workflow-tool-base';
 import { BaseToolResult } from './base-tool';
 import { ConfigurationManager } from '../../services/configuration-manager';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
  * Input for status-line tool
@@ -22,8 +23,8 @@ export interface StatusLineToolInput extends WorkflowToolInput {
  * StatusLine tool - Manages Claude Code status line display
  */
 export class StatusLineTool extends BaseMCPTool<StatusLineToolInput, BaseToolResult> {
-  constructor(configManager: ConfigurationManager) {
-    super(configManager);
+  constructor(configManager: ConfigurationManager, server?: Server) {
+    super(configManager, server);
   }
 
   protected getBanner(): string {
