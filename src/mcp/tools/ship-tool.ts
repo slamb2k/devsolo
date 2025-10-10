@@ -388,6 +388,14 @@ export class ShipTool implements MCPTool<ShipToolInput, GitHubToolResult> {
     // Mark session as complete
     session.transitionTo('COMPLETE', 'ship_command');
     await this.sessionRepo.updateSession(session.id, session);
+
+    // Clean up completed session to prevent accumulation
+    try {
+      await this.sessionRepo.deleteSession(session.id);
+    } catch (error) {
+      // Non-fatal - session marked complete even if cleanup fails
+      console.error('Failed to cleanup session:', error);
+    }
   }
 
   /**

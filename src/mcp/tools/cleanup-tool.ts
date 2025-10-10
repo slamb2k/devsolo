@@ -35,8 +35,15 @@ export class CleanupTool implements MCPTool<CleanupToolInput, QueryToolResult> {
       // Cleanup expired sessions
       const expiredSessionCount = await this.sessionRepo.cleanupExpiredSessions();
 
+      // Cleanup completed/aborted sessions to prevent accumulation
+      const completedSessionCount = await this.sessionRepo.cleanupCompletedSessions();
+
+      const totalCleaned = expiredSessionCount + completedSessionCount;
+
       const result: Record<string, unknown> = {
-        sessionsRemoved: expiredSessionCount,
+        sessionsRemoved: totalCleaned,
+        expiredSessions: expiredSessionCount,
+        completedSessions: completedSessionCount,
         sessions: [],
       };
 
@@ -72,7 +79,7 @@ export class CleanupTool implements MCPTool<CleanupToolInput, QueryToolResult> {
       return {
         success: true,
         data: result,
-        message: `Cleaned up ${expiredSessionCount} session(s)${
+        message: `Cleaned up ${totalCleaned} session(s) (${expiredSessionCount} expired, ${completedSessionCount} completed)${
           input.deleteBranches ? ` and ${result['branchesRemoved']} branch(es)` : ''
         }`,
       };

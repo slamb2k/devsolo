@@ -292,7 +292,13 @@ export class PreFlightCheckService {
   private async checkNoExistingSession(_context: PreFlightContext): Promise<PreFlightCheckResult> {
     try {
       const sessions = await this.sessionRepo.listSessions();
-      const session = sessions[0] || null;
+
+      // Filter out completed and aborted sessions - only check for active ones
+      const activeSessions = sessions.filter(s =>
+        s.currentState !== 'COMPLETE' &&
+        s.currentState !== 'ABORTED'
+      );
+      const session = activeSessions[0] || null;
 
       if (!session) {
         return {

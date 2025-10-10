@@ -56,6 +56,14 @@ export class AbortTool implements MCPTool<AbortToolInput, SessionToolResult> {
       session.transitionTo('ABORTED', 'user_action');
       await this.sessionRepo.updateSession(session.id, session);
 
+      // Clean up aborted session to prevent accumulation
+      try {
+        await this.sessionRepo.deleteSession(session.id);
+      } catch (error) {
+        // Non-fatal - session marked aborted even if cleanup fails
+        console.error('Failed to cleanup session:', error);
+      }
+
       // Delete branch if requested
       if (input.deleteBranch) {
         try {
