@@ -7,6 +7,7 @@ import {
   GetPromptRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
+import { getBanner } from '../ui/banners';
 
 // Import MCP tools (no CLI/UI dependencies!)
 import {
@@ -119,6 +120,21 @@ export class HanSoloMCPServer {
   private hotfixTool: HotfixTool;
   private statusLineTool: StatusLineTool;
 
+  // ANSI color codes for banner display
+  private static readonly RESET = '\x1b[0m';
+  private static readonly COLOR_PALETTE = [
+    '\x1b[33m',  // Yellow
+    '\x1b[36m',  // Cyan
+    '\x1b[35m',  // Magenta
+    '\x1b[32m',  // Green
+    '\x1b[91m',  // Bright Red
+    '\x1b[92m',  // Bright Green
+    '\x1b[93m',  // Bright Yellow
+    '\x1b[94m',  // Bright Blue
+    '\x1b[95m',  // Bright Magenta
+    '\x1b[96m',  // Bright Cyan
+  ];
+
   constructor(basePath: string = '.hansolo') {
     this.server = new Server(
       {
@@ -175,6 +191,33 @@ export class HanSoloMCPServer {
 
     this.setupHandlers();
     this.setupPromptHandlers();
+  }
+
+  /**
+   * Send banner notification immediately for a tool
+   * @param toolName - Tool name (e.g., 'hansolo_launch')
+   */
+  private async sendBannerNotification(toolName: string): Promise<void> {
+    const banner = getBanner(toolName);
+    if (!banner) {
+      return;
+    }
+
+    // Wrap with random color
+    const randomColor = HanSoloMCPServer.COLOR_PALETTE[
+      Math.floor(Math.random() * HanSoloMCPServer.COLOR_PALETTE.length)
+    ];
+    const coloredBanner = `${randomColor}${banner}${HanSoloMCPServer.RESET}\n`;
+
+    // Send notification immediately (don't await - fire and forget for speed)
+    this.server.sendLoggingMessage({
+      level: 'info',
+      logger: 'han-solo',
+      data: coloredBanner,
+    }).catch(err => {
+      // Silently ignore notification errors - don't block tool execution
+      console.error('Failed to send banner notification:', err);
+    });
   }
 
   private setupHandlers(): void {
@@ -468,6 +511,8 @@ export class HanSoloMCPServer {
       try {
         switch (name) {
         case 'hansolo_init': {
+          // Send banner immediately before any processing
+          await this.sendBannerNotification(name);
           const params = InitSchema.parse(processedArgs);
           const result = await this.initTool.execute(params);
           return {
@@ -482,6 +527,8 @@ export class HanSoloMCPServer {
         }
 
         case 'hansolo_launch': {
+          // Send banner immediately before any processing
+          await this.sendBannerNotification(name);
           const params = LaunchSchema.parse(processedArgs);
           const result = await this.launchTool.execute(params);
           return {
@@ -496,6 +543,8 @@ export class HanSoloMCPServer {
         }
 
         case 'hansolo_sessions': {
+          // Send banner immediately before any processing
+          await this.sendBannerNotification(name);
           const params = SessionsSchema.parse(processedArgs);
           const result = await this.sessionsTool.execute(params);
           return {
@@ -510,6 +559,8 @@ export class HanSoloMCPServer {
         }
 
         case 'hansolo_swap': {
+          // Send banner immediately before any processing
+          await this.sendBannerNotification(name);
           const params = SwapSchema.parse(processedArgs);
           const result = await this.swapTool.execute(params);
           return {
@@ -524,6 +575,8 @@ export class HanSoloMCPServer {
         }
 
         case 'hansolo_abort': {
+          // Send banner immediately before any processing
+          await this.sendBannerNotification(name);
           const params = AbortSchema.parse(processedArgs);
           const result = await this.abortTool.execute(params);
           return {
@@ -538,6 +591,8 @@ export class HanSoloMCPServer {
         }
 
         case 'hansolo_commit': {
+          // Send banner immediately before any processing
+          await this.sendBannerNotification(name);
           const params = CommitSchema.parse(processedArgs);
           const result = await this.commitTool.execute(params);
           return {
@@ -552,6 +607,8 @@ export class HanSoloMCPServer {
         }
 
         case 'hansolo_ship': {
+          // Send banner immediately before any processing
+          await this.sendBannerNotification(name);
           const params = ShipSchema.parse(processedArgs);
           const result = await this.shipTool.execute(params);
           return {
@@ -566,6 +623,8 @@ export class HanSoloMCPServer {
         }
 
         case 'hansolo_status': {
+          // Send banner immediately before any processing
+          await this.sendBannerNotification(name);
           const result = await this.statusTool.execute({});
           return {
             content: [
@@ -579,6 +638,8 @@ export class HanSoloMCPServer {
         }
 
         case 'hansolo_cleanup': {
+          // Send banner immediately before any processing
+          await this.sendBannerNotification(name);
           const params = CleanupSchema.parse(processedArgs);
           const result = await this.cleanupTool.execute(params);
           return {
@@ -593,6 +654,8 @@ export class HanSoloMCPServer {
         }
 
         case 'hansolo_status_line': {
+          // Send banner immediately before any processing
+          await this.sendBannerNotification(name);
           const params = StatusLineSchema.parse(processedArgs);
           const result = await this.statusLineTool.execute(params);
           return {
@@ -607,6 +670,8 @@ export class HanSoloMCPServer {
         }
 
         case 'hansolo_hotfix': {
+          // Send banner immediately before any processing
+          await this.sendBannerNotification(name);
           const params = HotfixSchema.parse(processedArgs);
           const result = await this.hotfixTool.execute(params);
           return {

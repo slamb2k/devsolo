@@ -101,19 +101,11 @@ implements MCPTool<TInput, TResult> {
    * This enforces the standard pattern for all tools
    */
   async execute(input: TInput): Promise<TResult> {
-    // Phase 0: Get banner and send notification immediately
+    // Phase 0: Get banner for display in result
+    // Note: Banner is sent by MCP server handler BEFORE this method is called
     const banner = this.getBanner();
     const coloredBanner = this.wrapBannerWithColor(banner);
     const bannerOutput = coloredBanner ? coloredBanner + '\n' : null;
-
-    // Send banner as immediate notification (displays before processing starts)
-    if (bannerOutput && this.server) {
-      await this.server.sendLoggingMessage({
-        level: 'info',
-        logger: 'han-solo',
-        data: bannerOutput,
-      });
-    }
 
     try {
       // Phase 1: Check initialization
