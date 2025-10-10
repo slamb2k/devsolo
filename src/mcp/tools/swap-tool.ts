@@ -10,6 +10,7 @@ import { GitOperations } from '../../services/git-operations';
 import { StashManager } from '../../services/stash-manager';
 import { ConfigurationManager } from '../../services/configuration-manager';
 import { WorkflowSession } from '../../models/workflow-session';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
  * Input for swap tool
@@ -27,9 +28,10 @@ export class SwapTool extends BaseMCPTool<SwapToolInput, SessionToolResult> {
     private sessionRepo: SessionRepository,
     private gitOps: GitOperations,
     private stashManager: StashManager,
-    configManager: ConfigurationManager
+    configManager: ConfigurationManager,
+    server?: Server
   ) {
-    super(configManager);
+    super(configManager, server);
   }
 
   protected getBanner(): string {

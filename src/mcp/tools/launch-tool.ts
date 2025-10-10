@@ -16,6 +16,7 @@ import { PostFlightVerification, PostFlightVerificationResult } from '../../serv
 import { GitHubIntegration } from '../../services/github-integration';
 import { StashManager } from '../../services/stash-manager';
 import { ConfigurationManager } from '../../services/configuration-manager';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
  * Input for launch tool
@@ -42,9 +43,10 @@ export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> 
     _githubIntegration: GitHubIntegration,
     private stashManager: StashManager,
     configManager: ConfigurationManager,
-    _basePath: string = '.hansolo'
+    _basePath: string = '.hansolo',
+    server?: Server
   ) {
-    super(configManager);
+    super(configManager, server);
     this.preFlightCheckService = new PreFlightCheckService(gitOps, sessionRepo);
     this.postFlightVerification = new PostFlightVerification(gitOps, sessionRepo);
   }

@@ -9,6 +9,7 @@ import { SessionRepository } from '../../services/session-repository';
 import { GitOperations } from '../../services/git-operations';
 import { ConfigurationManager } from '../../services/configuration-manager';
 import { WorkflowSession } from '../../models/workflow-session';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
  * Input for abort tool
@@ -25,9 +26,10 @@ export class AbortTool extends BaseMCPTool<AbortToolInput, SessionToolResult> {
   constructor(
     private sessionRepo: SessionRepository,
     private gitOps: GitOperations,
-    configManager: ConfigurationManager
+    configManager: ConfigurationManager,
+    server?: Server
   ) {
-    super(configManager);
+    super(configManager, server);
   }
 
   protected getBanner(): string {

@@ -11,6 +11,7 @@ import { GitOperations } from '../../services/git-operations';
 import { SessionRepository } from '../../services/session-repository';
 import { ConfigurationManager } from '../../services/configuration-manager';
 import { GitHubIntegration } from '../../services/github-integration';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
  * Input for hotfix tool
@@ -31,9 +32,10 @@ export class HotfixTool extends BaseMCPTool<HotfixToolInput, SessionToolResult> 
     private gitOps: GitOperations,
     private sessionRepo: SessionRepository,
     configManager: ConfigurationManager,
-    private githubIntegration: GitHubIntegration
+    private githubIntegration: GitHubIntegration,
+    server?: Server
   ) {
-    super(configManager);
+    super(configManager, server);
   }
 
   protected getBanner(): string {

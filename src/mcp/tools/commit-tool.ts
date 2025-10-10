@@ -10,6 +10,7 @@ import { GitOperations } from '../../services/git-operations';
 import { SessionRepository } from '../../services/session-repository';
 import { ConfigurationManager } from '../../services/configuration-manager';
 import { WorkflowSession } from '../../models/workflow-session';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
  * Input for commit tool
@@ -26,9 +27,10 @@ export class CommitTool extends BaseMCPTool<CommitToolInput, SessionToolResult> 
   constructor(
     private gitOps: GitOperations,
     private sessionRepo: SessionRepository,
-    configManager: ConfigurationManager
+    configManager: ConfigurationManager,
+    server?: Server
   ) {
-    super(configManager);
+    super(configManager, server);
   }
 
   protected getBanner(): string {

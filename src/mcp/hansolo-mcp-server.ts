@@ -143,7 +143,7 @@ export class HanSoloMCPServer {
     const stashManager = new StashManager(basePath);
 
     // Initialize MCP tools with dependencies
-    this.initTool = new InitTool(configManager, gitOps);
+    this.initTool = new InitTool(configManager, gitOps, this.server);
     this.launchTool = new LaunchTool(
       gitOps,
       sessionRepo,
@@ -152,7 +152,8 @@ export class HanSoloMCPServer {
       githubIntegration,
       stashManager,
       configManager,
-      basePath
+      basePath,
+      this.server
     );
     this.shipTool = new ShipTool(
       gitOps,
@@ -160,16 +161,17 @@ export class HanSoloMCPServer {
       githubIntegration,
       branchValidator,
       configManager,
-      basePath
+      basePath,
+      this.server
     );
-    this.commitTool = new CommitTool(gitOps, sessionRepo, configManager);
-    this.statusTool = new StatusTool(sessionRepo, gitOps, configManager);
-    this.sessionsTool = new SessionsTool(sessionRepo, configManager);
-    this.abortTool = new AbortTool(sessionRepo, gitOps, configManager);
-    this.swapTool = new SwapTool(sessionRepo, gitOps, stashManager, configManager);
-    this.cleanupTool = new CleanupTool(sessionRepo, gitOps, configManager);
-    this.hotfixTool = new HotfixTool(gitOps, sessionRepo, configManager, githubIntegration);
-    this.statusLineTool = new StatusLineTool(configManager);
+    this.commitTool = new CommitTool(gitOps, sessionRepo, configManager, this.server);
+    this.statusTool = new StatusTool(sessionRepo, gitOps, configManager, this.server);
+    this.sessionsTool = new SessionsTool(sessionRepo, configManager, this.server);
+    this.abortTool = new AbortTool(sessionRepo, gitOps, configManager, this.server);
+    this.swapTool = new SwapTool(sessionRepo, gitOps, stashManager, configManager, this.server);
+    this.cleanupTool = new CleanupTool(sessionRepo, gitOps, configManager, this.server);
+    this.hotfixTool = new HotfixTool(gitOps, sessionRepo, configManager, githubIntegration, this.server);
+    this.statusLineTool = new StatusLineTool(configManager, this.server);
 
     this.setupHandlers();
     this.setupPromptHandlers();

@@ -7,6 +7,7 @@ import {
 import { BaseToolResult } from './base-tool';
 import { ConfigurationManager } from '../../services/configuration-manager';
 import { GitOperations } from '../../services/git-operations';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
  * Input for init tool
@@ -21,9 +22,10 @@ export interface InitToolInput extends WorkflowToolInput {
 export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
   constructor(
     configManager: ConfigurationManager,
-    private gitOps: GitOperations
+    private gitOps: GitOperations,
+    server?: Server
   ) {
-    super(configManager);
+    super(configManager, server);
   }
 
   protected getBanner(): string {

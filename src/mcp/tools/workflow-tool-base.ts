@@ -2,6 +2,7 @@ import { BaseToolResult, MCPTool } from './base-tool';
 import { ConfigurationManager } from '../../services/configuration-manager';
 import { PreFlightVerificationResult } from '../../services/validation/pre-flight-check-service';
 import { PostFlightVerificationResult } from '../../services/validation/post-flight-verification';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
  * Standard input structure for all workflow tools
@@ -66,7 +67,10 @@ implements MCPTool<TInput, TResult> {
     '\x1b[96m',  // Bright Cyan
   ];
 
-  constructor(protected configManager: ConfigurationManager) {}
+  constructor(
+    protected configManager: ConfigurationManager,
+    protected server?: Server
+  ) {}
 
   /**
    * Get banner for this tool
@@ -93,30 +97,22 @@ implements MCPTool<TInput, TResult> {
   }
 
   /**
-   * Phase 0: Display banner
-   * Shows consistent ASCII art banner for all commands
-   * Calls getBanner() which subclasses override
-   */
-  protected displayBanner(): void {
-    const banner = this.getBanner();
-    if (banner) {
-      console.log('\n' + this.wrapBannerWithColor(banner) + '\n');
-    }
-  }
-
-  /**
    * Main execution flow - DO NOT OVERRIDE
    * This enforces the standard pattern for all tools
    */
   async execute(input: TInput): Promise<TResult> {
-    // Phase 0: Get banner and display immediately
+    // Phase 0: Get banner and send notification immediately
     const banner = this.getBanner();
     const coloredBanner = this.wrapBannerWithColor(banner);
     const bannerOutput = coloredBanner ? coloredBanner + '\n' : null;
 
-    // Output banner to stderr immediately (shows in MCP logs/terminal before processing)
-    if (bannerOutput) {
-      console.error(bannerOutput);
+    // Send banner as immediate notification (displays before processing starts)
+    if (bannerOutput && this.server) {
+      await this.server.sendLoggingMessage({
+        level: 'info',
+        logger: 'han-solo',
+        data: bannerOutput,
+      });
     }
 
     try {

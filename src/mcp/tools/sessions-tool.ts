@@ -7,6 +7,7 @@ import {
 import { QueryToolResult } from './base-tool';
 import { SessionRepository } from '../../services/session-repository';
 import { ConfigurationManager } from '../../services/configuration-manager';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
  * Input for sessions tool
@@ -23,9 +24,10 @@ export interface SessionsToolInput extends WorkflowToolInput {
 export class SessionsTool extends BaseMCPTool<SessionsToolInput, QueryToolResult> {
   constructor(
     private sessionRepo: SessionRepository,
-    configManager: ConfigurationManager
+    configManager: ConfigurationManager,
+    server?: Server
   ) {
-    super(configManager);
+    super(configManager, server);
   }
 
   protected getBanner(): string {
