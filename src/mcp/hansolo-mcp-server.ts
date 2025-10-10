@@ -3,6 +3,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 
@@ -126,6 +128,7 @@ export class HanSoloMCPServer {
       {
         capabilities: {
           tools: {},
+          prompts: {},
         },
       }
     );
@@ -169,6 +172,7 @@ export class HanSoloMCPServer {
     this.statusLineTool = new StatusLineTool(configManager);
 
     this.setupHandlers();
+    this.setupPromptHandlers();
   }
 
   private setupHandlers(): void {
@@ -721,6 +725,240 @@ export class HanSoloMCPServer {
     }
 
     return lines.join('\n');
+  }
+
+  private setupPromptHandlers(): void {
+    // List available prompts
+    this.server.setRequestHandler(ListPromptsRequestSchema, async () => {
+      return {
+        prompts: [
+          {
+            name: 'init',
+            description: '🚀 Initialize han-solo in your project',
+            arguments: [
+              {
+                name: 'scope',
+                description: 'Installation scope (project or user)',
+                required: false,
+              },
+              {
+                name: 'force',
+                description: 'Force reinitialization',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'launch',
+            description: '🌟 Start a new feature workflow',
+            arguments: [
+              {
+                name: 'description',
+                description: 'Description of the feature',
+                required: false,
+              },
+              {
+                name: 'branchName',
+                description: 'Name for the feature branch',
+                required: false,
+              },
+              {
+                name: 'force',
+                description: 'Force launch even with uncommitted changes',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'commit',
+            description: '💾 Commit changes with a message',
+            arguments: [
+              {
+                name: 'message',
+                description: 'Commit message',
+                required: true,
+              },
+              {
+                name: 'stagedOnly',
+                description: 'Only commit staged files',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'ship',
+            description: '🚢 Ship your changes (commit, push, PR, merge)',
+            arguments: [
+              {
+                name: 'prDescription',
+                description: 'Pull request description',
+                required: false,
+              },
+              {
+                name: 'push',
+                description: 'Push to remote',
+                required: false,
+              },
+              {
+                name: 'createPR',
+                description: 'Create pull request',
+                required: false,
+              },
+              {
+                name: 'merge',
+                description: 'Merge pull request',
+                required: false,
+              },
+              {
+                name: 'stagedOnly',
+                description: 'Only commit staged files',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'swap',
+            description: '🔄 Switch between workflow sessions',
+            arguments: [
+              {
+                name: 'branchName',
+                description: 'Branch to swap to',
+                required: true,
+              },
+              {
+                name: 'stash',
+                description: 'Stash changes before swapping',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'abort',
+            description: '❌ Abort workflow session',
+            arguments: [
+              {
+                name: 'branchName',
+                description: 'Branch to abort (current if not specified)',
+                required: false,
+              },
+              {
+                name: 'deleteBranch',
+                description: 'Delete the branch after aborting',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'sessions',
+            description: '📋 List workflow sessions',
+            arguments: [
+              {
+                name: 'all',
+                description: 'Show all sessions including completed',
+                required: false,
+              },
+              {
+                name: 'verbose',
+                description: 'Show detailed session information',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'status',
+            description: '📊 Show current workflow status',
+            arguments: [],
+          },
+          {
+            name: 'cleanup',
+            description: '🧹 Clean up expired sessions',
+            arguments: [
+              {
+                name: 'deleteBranches',
+                description: 'Delete stale branches',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'hotfix',
+            description: '🔥 Create emergency hotfix workflow',
+            arguments: [
+              {
+                name: 'issue',
+                description: 'Issue number or description',
+                required: true,
+              },
+              {
+                name: 'severity',
+                description: 'Severity level (critical, high, medium)',
+                required: false,
+              },
+            ],
+          },
+          {
+            name: 'status-line',
+            description: '📍 Manage Claude Code status line display',
+            arguments: [
+              {
+                name: 'action',
+                description: 'Action to perform (enable, disable, update, show)',
+                required: true,
+              },
+            ],
+          },
+        ],
+      };
+    });
+
+    // Handle prompt requests
+    this.server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+      const { name, arguments: args } = request.params;
+
+      // Map prompt names to tool names
+      const toolMap: Record<string, string> = {
+        'init': 'hansolo_init',
+        'launch': 'hansolo_launch',
+        'commit': 'hansolo_commit',
+        'ship': 'hansolo_ship',
+        'swap': 'hansolo_swap',
+        'abort': 'hansolo_abort',
+        'sessions': 'hansolo_sessions',
+        'status': 'hansolo_status',
+        'cleanup': 'hansolo_cleanup',
+        'hotfix': 'hansolo_hotfix',
+        'status-line': 'hansolo_status_line',
+      };
+
+      const toolName = toolMap[name];
+      if (!toolName) {
+        throw new Error(`Unknown prompt: ${name}`);
+      }
+
+      // Build tool call parameters string
+      const params = args || {};
+      const paramsStr = Object.keys(params).length > 0
+        ? ` with parameters: ${JSON.stringify(params, null, 2)}`
+        : '';
+
+      // Generate prompt message
+      const message = `Execute the han-solo ${name} command${paramsStr}
+
+Use the MCP tool: ${toolName}`;
+
+      return {
+        description: `Execute han-solo ${name} command`,
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: message,
+            },
+          },
+        ],
+      };
+    });
   }
 
   async run(): Promise<void> {

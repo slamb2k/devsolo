@@ -37,7 +37,7 @@ Changes:
 {{files}}
 
 {{stats}}`,
-        footer: '📢 SHIPPED BY [Han Solo](https://github.com/slamb2k/hansolo)',
+        footer: '💥 SHIPPED BY [Han Solo](https://github.com/slamb2k/hansolo)',
       },
       prTemplate: {
         body: `## Summary
@@ -49,7 +49,7 @@ Changes:
 <pre>
 ········◢█████◣
   ······◢████████◣
-   ... ◢███████████████████◣    📢 DELIVERED BY <a href="https://github.com/slamb2k/hansolo">HAN SOLO</a>
+   ... ◢███████████████████◣    DELIVERED BY <a href="https://github.com/slamb2k/hansolo">HAN SOLO</a> 🎉
    ... ◥███████████████████◤       "Turn the ship around..."
   ······◥████████◤
 ········◥█████◤
