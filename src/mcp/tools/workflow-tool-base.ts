@@ -79,9 +79,14 @@ implements MCPTool<TInput, TResult> {
    * This enforces the standard pattern for all tools
    */
   async execute(input: TInput): Promise<TResult> {
-    // Phase 0: Get banner (will be included in output)
+    // Phase 0: Get banner and display immediately
     const banner = this.getBanner();
     const bannerOutput = banner ? '\n' + banner + '\n' : null;
+
+    // Output banner to stderr immediately (shows in MCP logs/terminal before processing)
+    if (banner) {
+      console.error(bannerOutput);
+    }
 
     try {
       // Phase 1: Check initialization
