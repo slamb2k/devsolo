@@ -4,8 +4,15 @@ This folder contains implementation plans, task lists, and roadmaps for upcoming
 
 ## Contents
 
-- **codebase-cleanup-phase1-plan.md** - Phase 1 (Quick Wins) implementation plan for codebase optimization: removing build artifacts, unused dependencies, and runtime files
-- **phase2-architecture-cleanup-plan.md** - Phase 2 (Architecture Cleanup) implementation plan: remove dead MCP server code (2,600 lines), fix test suite (re-enable 50% of skipped tests), and refactor large command files (700+ lines → <300 lines)
+### Completed Plans
+
+- **phase3-pure-mcp-architecture.md** - ✅ **COMPLETED** - Phase 3 (Pure MCP Pivot) implementation plan: architectural pivot from dual CLI/MCP to pure MCP server, deleted ~8,300 lines, removed ESM dependencies, achieved 40% codebase reduction (shipped in PR #79, v2.0.0)
+- **phase2-architecture-cleanup-plan.md** - ✅ COMPLETED - Phase 2 (Architecture Cleanup) implementation plan: removed dead MCP server code (2,600 lines), fixed test suite (re-enabled 50% of skipped tests), and refactored large command files (700+ lines → <300 lines)
+- **codebase-cleanup-phase1-plan.md** - ✅ COMPLETED - Phase 1 (Quick Wins) implementation plan for codebase optimization: removed build artifacts, unused dependencies, and runtime files
+
+### Active Plans
+
+*No active plans currently*
 
 ## What Goes Here
 

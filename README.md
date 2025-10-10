@@ -7,6 +7,7 @@ han-solo is a powerful MCP server designed exclusively for Claude Code, streamli
 ## Features
 
 - **🤖 AI-Native Design**: Built exclusively for Claude Code via Model Context Protocol (MCP)
+- **⚡ Slash Commands**: Quick access via `/hansolo:` prompts in Claude Code
 - **🚀 One-Command Workflow**: Ship entire features in a single MCP tool call
 - **🛡️ Structured Validation**: Pre/post-flight checks with JSON results (no UI dependencies)
 - **🚫 Branch Reuse Prevention**: Blocks reusing branch names after merge
@@ -55,9 +56,38 @@ han-solo is a powerful MCP server designed exclusively for Claude Code, streamli
 
 > **New to han-solo?** Follow these steps to get started with Claude Code.
 
+### Two Ways to Use han-solo
+
+han-solo provides both **slash command prompts** and **direct tool calls** for maximum flexibility:
+
+**Option 1: Slash Commands (Easiest)** 🎯
+```
+/hansolo:init       - Initialize han-solo
+/hansolo:launch     - Start a new feature
+/hansolo:commit     - Commit changes
+/hansolo:ship       - Ship your changes (full workflow)
+/hansolo:status     - Check current status
+```
+
+**Option 2: Natural Language**
+```
+"Use hansolo_init to initialize han-solo in this project"
+"Use hansolo_launch to start a new feature for authentication"
+"Use hansolo_ship to commit, push, create PR, and merge"
+```
+
+Both approaches invoke the same MCP tools - use whichever feels more natural!
+
+---
+
 ### 1. Initialize han-solo in your project
 
-In Claude Code, ask:
+**Using slash command:**
+```
+/hansolo:init
+```
+
+**Or using natural language:**
 ```
 Use hansolo_init to initialize han-solo in this project
 ```
@@ -76,7 +106,12 @@ export GITHUB_TOKEN=ghp_your_token_here
 
 ### 3. Start a new feature workflow
 
-In Claude Code, ask:
+**Using slash command:**
+```
+/hansolo:launch
+```
+
+**Or using natural language:**
 ```
 Use hansolo_launch to start a new feature for [your feature description]
 ```
@@ -87,13 +122,19 @@ This creates a new feature branch and starts tracking your workflow.
 
 Work on your feature as normal. han-solo tracks your session automatically.
 
+**Check status:**
 ```
-Use hansolo_status to check current workflow status
+/hansolo:status
 ```
 
 ### 5. Ship your changes (One Command! 🚀)
 
-In Claude Code, ask:
+**Using slash command:**
+```
+/hansolo:ship
+```
+
+**Or using natural language:**
 ```
 Use hansolo_ship to commit, push, create PR, and merge this feature
 ```
@@ -116,8 +157,46 @@ That's it! This single MCP tool call:
 
 For always-visible workflow status in Claude Code:
 ```
-Use hansolo_status_line with action "enable"
+/hansolo:status-line
 ```
+
+---
+
+## MCP Prompts (Slash Commands)
+
+han-solo provides convenient slash commands for all functionality. Type `/hansolo:` in Claude Code to see the full list.
+
+### Available Prompts
+
+| Prompt | Description | Example |
+|--------|-------------|---------|
+| `/hansolo:init` | Initialize han-solo in your project | `/hansolo:init` |
+| `/hansolo:launch` | Start a new feature workflow | `/hansolo:launch` |
+| `/hansolo:commit` | Commit changes with a message | `/hansolo:commit` |
+| `/hansolo:ship` | Complete workflow (commit, push, PR, merge) | `/hansolo:ship` |
+| `/hansolo:swap` | Switch between workflow sessions | `/hansolo:swap` |
+| `/hansolo:abort` | Abort current workflow session | `/hansolo:abort` |
+| `/hansolo:sessions` | List all workflow sessions | `/hansolo:sessions` |
+| `/hansolo:status` | Show current workflow status | `/hansolo:status` |
+| `/hansolo:cleanup` | Clean up expired sessions | `/hansolo:cleanup` |
+| `/hansolo:hotfix` | Create emergency hotfix workflow | `/hansolo:hotfix` |
+| `/hansolo:status-line` | Manage Claude Code status line | `/hansolo:status-line` |
+
+### How Prompts Work
+
+When you use a slash command like `/hansolo:launch`, Claude Code:
+1. Shows the prompt in the slash command menu
+2. Lets you provide parameters interactively (if needed)
+3. Invokes the corresponding MCP tool (`hansolo_launch`)
+4. Returns structured results
+
+**Benefits of using prompts:**
+- 🎯 **Discoverable** - Shows up in `/` menu
+- ⚡ **Fast** - Quick access to commands
+- 📝 **Guided** - Parameter descriptions built-in
+- 🔄 **Flexible** - Can still use natural language when you prefer
+
+---
 
 ## Core MCP Tools
 

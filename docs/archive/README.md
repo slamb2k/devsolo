@@ -5,6 +5,7 @@ This folder contains superseded, completed, or historical documentation that is 
 ## Contents
 
 ### Implementation Archives
+- **phase3-esm-and-refactoring-plan-obsolete.md** - OBSOLETE plan for ESM lazy-loading and ship command refactoring (superseded by pure MCP pivot in phase3-pure-mcp-architecture.md)
 - **v2-implementation-complete.md** - V2 architecture implementation completion summary
 - **adapter-layer-implementation.md** - Adapter layer implementation (removed in v2)
 - **banner-consolidation.md** - Banner consolidation implementation plan (completed)
