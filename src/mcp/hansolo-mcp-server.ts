@@ -641,6 +641,31 @@ export class HanSoloMCPServer {
   private formatToolResult(result: any): string {
     const lines: string[] = [];
 
+    // Extract banner from warnings (if present) and display FIRST
+    let banner: string | null = null;
+    const remainingWarnings: string[] = [];
+
+    if (result.warnings && result.warnings.length > 0) {
+      // Banner is the first warning (contains ASCII art box-drawing characters)
+      const firstWarning = result.warnings[0];
+      if (firstWarning && (firstWarning.includes('░') || firstWarning.includes('▀') || firstWarning.includes('█'))) {
+        banner = firstWarning;
+        // Keep remaining warnings (skip the banner)
+        for (let i = 1; i < result.warnings.length; i++) {
+          remainingWarnings.push(result.warnings[i]);
+        }
+      } else {
+        // No banner, keep all warnings
+        remainingWarnings.push(...result.warnings);
+      }
+    }
+
+    // Display banner FIRST if present
+    if (banner) {
+      lines.push(banner);
+      lines.push(''); // Add blank line after banner
+    }
+
     // Success/failure header
     if (result.success) {
       lines.push('✅ Success');
@@ -706,10 +731,10 @@ export class HanSoloMCPServer {
       result.errors.forEach((err: string) => lines.push(`  - ${err}`));
     }
 
-    // Warnings
-    if (result.warnings && result.warnings.length > 0) {
+    // Warnings (excluding banner which was already displayed)
+    if (remainingWarnings.length > 0) {
       lines.push('\n⚠️ Warnings:');
-      result.warnings.forEach((warn: string) => lines.push(`  - ${warn}`));
+      remainingWarnings.forEach((warn: string) => lines.push(`  - ${warn}`));
     }
 
     // Next steps
