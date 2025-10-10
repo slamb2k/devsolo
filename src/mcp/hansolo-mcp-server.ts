@@ -934,23 +934,55 @@ export class HanSoloMCPServer {
     this.server.setRequestHandler(GetPromptRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
 
-      // Map prompt names to tool names
-      const toolMap: Record<string, string> = {
-        'init': 'hansolo_init',
-        'launch': 'hansolo_launch',
-        'commit': 'hansolo_commit',
-        'ship': 'hansolo_ship',
-        'swap': 'hansolo_swap',
-        'abort': 'hansolo_abort',
-        'sessions': 'hansolo_sessions',
-        'status': 'hansolo_status',
-        'cleanup': 'hansolo_cleanup',
-        'hotfix': 'hansolo_hotfix',
-        'status-line': 'hansolo_status_line',
+      // Map prompt names to tool names and their argument hints
+      const toolMap: Record<string, { toolName: string; argumentHint?: string }> = {
+        'init': {
+          toolName: 'hansolo_init',
+          argumentHint: '[scope] [force]',
+        },
+        'launch': {
+          toolName: 'hansolo_launch',
+          argumentHint: '[description] [branchName] [auto]',
+        },
+        'commit': {
+          toolName: 'hansolo_commit',
+          argumentHint: '[message] [stagedOnly]',
+        },
+        'ship': {
+          toolName: 'hansolo_ship',
+          argumentHint: '[prDescription] [push] [createPR] [merge] [stagedOnly]',
+        },
+        'swap': {
+          toolName: 'hansolo_swap',
+          argumentHint: '[branchName] [stash]',
+        },
+        'abort': {
+          toolName: 'hansolo_abort',
+          argumentHint: '[branchName] [deleteBranch]',
+        },
+        'sessions': {
+          toolName: 'hansolo_sessions',
+          argumentHint: '[all] [verbose]',
+        },
+        'status': {
+          toolName: 'hansolo_status',
+        },
+        'cleanup': {
+          toolName: 'hansolo_cleanup',
+          argumentHint: '[deleteBranches]',
+        },
+        'hotfix': {
+          toolName: 'hansolo_hotfix',
+          argumentHint: '[issue] [severity]',
+        },
+        'status-line': {
+          toolName: 'hansolo_status_line',
+          argumentHint: '[action]',
+        },
       };
 
-      const toolName = toolMap[name];
-      if (!toolName) {
+      const toolConfig = toolMap[name];
+      if (!toolConfig) {
         throw new Error(`Unknown prompt: ${name}`);
       }
 
@@ -960,10 +992,21 @@ export class HanSoloMCPServer {
         ? ` with parameters: ${JSON.stringify(params, null, 2)}`
         : '';
 
-      // Generate prompt message
-      const message = `Execute the han-solo ${name} command${paramsStr}
+      // Generate prompt message with argument hint frontmatter
+      let message = '';
+      if (toolConfig.argumentHint) {
+        message = `---
+argument-hint: ${toolConfig.argumentHint}
+---
 
-Use the MCP tool: ${toolName}`;
+Execute the han-solo ${name} command${paramsStr}
+
+Use the MCP tool: ${toolConfig.toolName}`;
+      } else {
+        message = `Execute the han-solo ${name} command${paramsStr}
+
+Use the MCP tool: ${toolConfig.toolName}`;
+      }
 
       return {
         description: `Execute han-solo ${name} command`,

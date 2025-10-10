@@ -51,6 +51,21 @@ export interface WorkflowExecutionResult {
  */
 export abstract class BaseMCPTool<TInput extends WorkflowToolInput, TResult extends BaseToolResult>
 implements MCPTool<TInput, TResult> {
+  // ANSI color codes for banner display
+  private static readonly RESET = '\x1b[0m';
+  private static readonly COLOR_PALETTE = [
+    '\x1b[33m',  // Yellow
+    '\x1b[36m',  // Cyan
+    '\x1b[35m',  // Magenta
+    '\x1b[32m',  // Green
+    '\x1b[91m',  // Bright Red
+    '\x1b[92m',  // Bright Green
+    '\x1b[93m',  // Bright Yellow
+    '\x1b[94m',  // Bright Blue
+    '\x1b[95m',  // Bright Magenta
+    '\x1b[96m',  // Bright Cyan
+  ];
+
   constructor(protected configManager: ConfigurationManager) {}
 
   /**
@@ -63,6 +78,21 @@ implements MCPTool<TInput, TResult> {
   }
 
   /**
+   * Wrap banner with a random ANSI color code
+   * @param banner - Raw banner string
+   * @returns Banner wrapped with random color codes
+   */
+  private wrapBannerWithColor(banner: string): string {
+    if (!banner) {
+      return '';
+    }
+    const randomColor = BaseMCPTool.COLOR_PALETTE[
+      Math.floor(Math.random() * BaseMCPTool.COLOR_PALETTE.length)
+    ];
+    return `${randomColor}${banner}${BaseMCPTool.RESET}`;
+  }
+
+  /**
    * Phase 0: Display banner
    * Shows consistent ASCII art banner for all commands
    * Calls getBanner() which subclasses override
@@ -70,7 +100,7 @@ implements MCPTool<TInput, TResult> {
   protected displayBanner(): void {
     const banner = this.getBanner();
     if (banner) {
-      console.log('\n' + banner + '\n');
+      console.log('\n' + this.wrapBannerWithColor(banner) + '\n');
     }
   }
 
@@ -81,10 +111,11 @@ implements MCPTool<TInput, TResult> {
   async execute(input: TInput): Promise<TResult> {
     // Phase 0: Get banner and display immediately
     const banner = this.getBanner();
-    const bannerOutput = banner ? banner + '\n' : null;
+    const coloredBanner = this.wrapBannerWithColor(banner);
+    const bannerOutput = coloredBanner ? coloredBanner + '\n' : null;
 
     // Output banner to stderr immediately (shows in MCP logs/terminal before processing)
-    if (banner) {
+    if (bannerOutput) {
       console.error(bannerOutput);
     }
 
