@@ -93,7 +93,11 @@ implements MCPTool<TInput, TResult> {
     const randomColor = BaseMCPTool.COLOR_PALETTE[
       Math.floor(Math.random() * BaseMCPTool.COLOR_PALETTE.length)
     ];
-    return `${randomColor}${banner}${BaseMCPTool.RESET}`;
+    // Apply color to each line of the banner
+    return banner
+      .split('\n')
+      .map(line => `${randomColor}${line}${BaseMCPTool.RESET}`)
+      .join('\n');
   }
 
   /**

@@ -196,43 +196,27 @@ export class HanSoloMCPServer {
   /**
    * Send banner notification immediately for a tool
    * @param toolName - Tool name (e.g., 'hansolo_launch')
-   * @param progressToken - Optional progress token from request for progress notifications
+   *
+   * Note: Uses logging notifications which Claude Code may buffer until
+   * tool execution completes. Banners appear immediately on fast operations
+   * but may be delayed on long-running operations.
    */
-  private async sendBannerNotification(
-    toolName: string,
-    progressToken?: string | number
-  ): Promise<void> {
+  private async sendBannerNotification(toolName: string): Promise<void> {
     const banner = getBanner(toolName);
     if (!banner) {
       return;
     }
 
-    // Wrap with random color
+    // Apply random color to each line
     const randomColor = HanSoloMCPServer.COLOR_PALETTE[
       Math.floor(Math.random() * HanSoloMCPServer.COLOR_PALETTE.length)
     ];
-    const coloredBanner = `${randomColor}${banner}${HanSoloMCPServer.RESET}\n`;
+    const coloredBanner = banner
+      .split('\n')
+      .map(line => `${randomColor}${line}${HanSoloMCPServer.RESET}`)
+      .join('\n') + '\n';
 
-    // If progress token available, use progress notification (may display more immediately)
-    if (progressToken !== undefined) {
-      try {
-        await this.server.notification({
-          method: 'notifications/progress',
-          params: {
-            progressToken,
-            progress: 0,
-            total: 1,
-            message: coloredBanner,
-          },
-        });
-        return;
-      } catch (err) {
-        // Fall through to logging notification if progress fails
-        console.error('Failed to send progress notification, falling back to logging:', err);
-      }
-    }
-
-    // Fallback: Send logging notification (don't await - fire and forget for speed)
+    // Send logging notification (fire and forget for speed)
     this.server.sendLoggingMessage({
       level: 'info',
       logger: 'han-solo',
@@ -516,7 +500,6 @@ export class HanSoloMCPServer {
     // Handle tool calls
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
-      const progressToken = request.params._meta?.progressToken;
 
       // Preprocess args to convert string booleans to actual booleans
       const processedArgs: any = {};
@@ -536,7 +519,7 @@ export class HanSoloMCPServer {
         switch (name) {
         case 'hansolo_init': {
           // Send banner immediately before any processing
-          await this.sendBannerNotification(name, progressToken);
+          await this.sendBannerNotification(name);
           const params = InitSchema.parse(processedArgs);
           const result = await this.initTool.execute(params);
           return {
@@ -552,7 +535,7 @@ export class HanSoloMCPServer {
 
         case 'hansolo_launch': {
           // Send banner immediately before any processing
-          await this.sendBannerNotification(name, progressToken);
+          await this.sendBannerNotification(name);
           const params = LaunchSchema.parse(processedArgs);
           const result = await this.launchTool.execute(params);
           return {
@@ -568,7 +551,7 @@ export class HanSoloMCPServer {
 
         case 'hansolo_sessions': {
           // Send banner immediately before any processing
-          await this.sendBannerNotification(name, progressToken);
+          await this.sendBannerNotification(name);
           const params = SessionsSchema.parse(processedArgs);
           const result = await this.sessionsTool.execute(params);
           return {
@@ -584,7 +567,7 @@ export class HanSoloMCPServer {
 
         case 'hansolo_swap': {
           // Send banner immediately before any processing
-          await this.sendBannerNotification(name, progressToken);
+          await this.sendBannerNotification(name);
           const params = SwapSchema.parse(processedArgs);
           const result = await this.swapTool.execute(params);
           return {
@@ -600,7 +583,7 @@ export class HanSoloMCPServer {
 
         case 'hansolo_abort': {
           // Send banner immediately before any processing
-          await this.sendBannerNotification(name, progressToken);
+          await this.sendBannerNotification(name);
           const params = AbortSchema.parse(processedArgs);
           const result = await this.abortTool.execute(params);
           return {
@@ -616,7 +599,7 @@ export class HanSoloMCPServer {
 
         case 'hansolo_commit': {
           // Send banner immediately before any processing
-          await this.sendBannerNotification(name, progressToken);
+          await this.sendBannerNotification(name);
           const params = CommitSchema.parse(processedArgs);
           const result = await this.commitTool.execute(params);
           return {
@@ -632,7 +615,7 @@ export class HanSoloMCPServer {
 
         case 'hansolo_ship': {
           // Send banner immediately before any processing
-          await this.sendBannerNotification(name, progressToken);
+          await this.sendBannerNotification(name);
           const params = ShipSchema.parse(processedArgs);
           const result = await this.shipTool.execute(params);
           return {
@@ -648,8 +631,9 @@ export class HanSoloMCPServer {
 
         case 'hansolo_status': {
           // Send banner immediately before any processing
-          await this.sendBannerNotification(name, progressToken);
+          await this.sendBannerNotification(name);
           const result = await this.statusTool.execute({});
+
           return {
             content: [
               {
@@ -663,7 +647,7 @@ export class HanSoloMCPServer {
 
         case 'hansolo_cleanup': {
           // Send banner immediately before any processing
-          await this.sendBannerNotification(name, progressToken);
+          await this.sendBannerNotification(name);
           const params = CleanupSchema.parse(processedArgs);
           const result = await this.cleanupTool.execute(params);
           return {
@@ -679,7 +663,7 @@ export class HanSoloMCPServer {
 
         case 'hansolo_status_line': {
           // Send banner immediately before any processing
-          await this.sendBannerNotification(name, progressToken);
+          await this.sendBannerNotification(name);
           const params = StatusLineSchema.parse(processedArgs);
           const result = await this.statusLineTool.execute(params);
           return {
@@ -695,7 +679,7 @@ export class HanSoloMCPServer {
 
         case 'hansolo_hotfix': {
           // Send banner immediately before any processing
-          await this.sendBannerNotification(name, progressToken);
+          await this.sendBannerNotification(name);
           const params = HotfixSchema.parse(processedArgs);
           const result = await this.hotfixTool.execute(params);
           return {
@@ -1077,24 +1061,38 @@ export class HanSoloMCPServer {
         throw new Error(`Unknown prompt: ${name}`);
       }
 
+      // Get banner for immediate display
+      const banner = getBanner(toolConfig.toolName);
+      const randomColor = HanSoloMCPServer.COLOR_PALETTE[
+        Math.floor(Math.random() * HanSoloMCPServer.COLOR_PALETTE.length)
+      ];
+
+      // Apply color to each line of the banner
+      const coloredBanner = banner
+        ? banner
+          .split('\n')
+          .map(line => `${randomColor}${line}${HanSoloMCPServer.RESET}`)
+          .join('\n') + '\n\n'
+        : '';
+
       // Build tool call parameters string
       const params = args || {};
       const paramsStr = Object.keys(params).length > 0
         ? ` with parameters: ${JSON.stringify(params, null, 2)}`
         : '';
 
-      // Generate prompt message with argument hint frontmatter
+      // Generate prompt message with banner and argument hint frontmatter
       let message = '';
       if (toolConfig.argumentHint) {
         message = `---
 argument-hint: ${toolConfig.argumentHint}
 ---
 
-Execute the han-solo ${name} command${paramsStr}
+${coloredBanner}Execute the han-solo ${name} command${paramsStr}
 
 Use the MCP tool: ${toolConfig.toolName}`;
       } else {
-        message = `Execute the han-solo ${name} command${paramsStr}
+        message = `${coloredBanner}Execute the han-solo ${name} command${paramsStr}
 
 Use the MCP tool: ${toolConfig.toolName}`;
       }
