@@ -66,7 +66,7 @@ const AbortSchema = z.object({
 });
 
 const CommitSchema = z.object({
-  message: z.string(),
+  message: z.string().optional(),
   stagedOnly: z.boolean().optional(),
 });
 
@@ -81,7 +81,7 @@ const ShipSchema = z.object({
 });
 
 const HotfixSchema = z.object({
-  issue: z.string(),
+  issue: z.string().optional(),
   severity: z.enum(['critical', 'high', 'medium']).optional(),
   skipTests: z.boolean().optional(),
   skipReview: z.boolean().optional(),
@@ -168,7 +168,7 @@ export class HanSoloMCPServer {
     this.abortTool = new AbortTool(sessionRepo, gitOps, configManager);
     this.swapTool = new SwapTool(sessionRepo, gitOps, stashManager, configManager);
     this.cleanupTool = new CleanupTool(sessionRepo, gitOps, configManager);
-    this.hotfixTool = new HotfixTool(gitOps, sessionRepo, configManager);
+    this.hotfixTool = new HotfixTool(gitOps, sessionRepo, configManager, githubIntegration);
     this.statusLineTool = new StatusLineTool(configManager);
 
     this.setupHandlers();
@@ -311,7 +311,6 @@ export class HanSoloMCPServer {
                   default: false,
                 },
               },
-              required: ['message'],
             },
           },
           {
@@ -388,7 +387,6 @@ export class HanSoloMCPServer {
                   description: 'Skip confirmations',
                 },
               },
-              required: ['issue'],
             },
           },
           {

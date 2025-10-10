@@ -85,16 +85,42 @@ export class ShipTool implements MCPTool<ShipToolInput, GitHubToolResult> {
         };
       }
 
-      // Check if PR description needed
+      // Prompt-based parameter collection: handle missing PR description
       if (!input.prDescription) {
         const needsDescription = await this.checkIfPRDescriptionNeeded(currentBranch);
         if (needsDescription) {
+          // Get raw context for Claude to analyze
+          const commits = await this.gitOps.getCommitsSince('main');
+          const commitMessages = await this.gitOps.getCommitMessagesSince('main');
+
+          // Get changed files using git diff
+          const changedFilesOutput = await this.gitOps.execute(['diff', 'main', '--name-only']);
+          const changedFiles = changedFilesOutput.trim().split('\n').filter(f => f.length > 0);
+
+          // Get diff stats (raw output for Claude to parse)
+          const diffStats = await this.gitOps.execute(['diff', 'main', '--stat']);
+
           return {
-            success: false,
-            errors: ['PR description required for new pull request.'],
-            warnings: [
-              'Generate a PR description by analyzing commits and changes',
-              'Then call hansolo_ship with prDescription parameter',
+            success: true,
+            message: 'No PR description provided. Analyze the commits and changes below to generate a comprehensive PR description, or ask the user to provide one.',
+            data: {
+              commits: commits.map(c => ({
+                message: c.message,
+                hash: c.hash.substring(0, 7),
+                author: c.author_name,
+                date: c.date,
+              })),
+              commitMessages: commitMessages,
+              changedFiles: changedFiles,
+              diffStats: diffStats,
+              branchName: currentBranch,
+            },
+            nextSteps: [
+              'Review the commit history and changed files',
+              'Analyze the overall changes and their purpose',
+              'Generate a structured PR description with Summary, Changes, and Testing sections',
+              'OR ask the user what PR description they want to use',
+              'Call hansolo_ship again with prDescription parameter',
             ],
           };
         }
