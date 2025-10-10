@@ -1,4 +1,10 @@
-import { MCPTool, QueryToolResult, createErrorResult } from './base-tool';
+import {
+  BaseMCPTool,
+  WorkflowToolInput,
+  WorkflowContext,
+  WorkflowExecutionResult,
+} from './workflow-tool-base';
+import { QueryToolResult } from './base-tool';
 import { SessionRepository } from '../../services/session-repository';
 import { GitOperations } from '../../services/git-operations';
 import { ConfigurationManager } from '../../services/configuration-manager';
@@ -6,88 +12,97 @@ import { ConfigurationManager } from '../../services/configuration-manager';
 /**
  * Input for cleanup tool
  */
-export interface CleanupToolInput {
+export interface CleanupToolInput extends WorkflowToolInput {
   deleteBranches?: boolean;
-  force?: boolean;
 }
 
 /**
  * Cleanup tool - Cleans up expired sessions and stale branches
  */
-export class CleanupTool implements MCPTool<CleanupToolInput, QueryToolResult> {
+export class CleanupTool extends BaseMCPTool<CleanupToolInput, QueryToolResult> {
   constructor(
     private sessionRepo: SessionRepository,
     private gitOps: GitOperations,
-    private configManager: ConfigurationManager
-  ) {}
+    configManager: ConfigurationManager
+  ) {
+    super(configManager);
+  }
 
-  async execute(input: CleanupToolInput): Promise<QueryToolResult> {
-    try {
-      // Check initialization
-      if (!(await this.configManager.isInitialized())) {
-        return {
-          success: false,
-          data: {},
-          errors: ['han-solo is not initialized. Run hansolo_init first.'],
-        };
-      }
+  protected getBanner(): string {
+    return `░█▀▀░█░░░█▀▀░█▀█░█▀█░█░█░█▀█░
+░█░░░█░░░█▀▀░█▀█░█░█░█░█░█▀▀░
+░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀░░░`;
+  }
 
-      // Cleanup expired sessions
-      const expiredSessionCount = await this.sessionRepo.cleanupExpiredSessions();
+  protected async executeWorkflow(
+    context: WorkflowContext
+  ): Promise<WorkflowExecutionResult> {
+    const input = context.input as CleanupToolInput;
 
-      // Cleanup completed/aborted sessions to prevent accumulation
-      const completedSessionCount = await this.sessionRepo.cleanupCompletedSessions();
+    // Cleanup expired sessions
+    const expiredSessionCount = await this.sessionRepo.cleanupExpiredSessions();
 
-      const totalCleaned = expiredSessionCount + completedSessionCount;
+    // Cleanup completed/aborted sessions to prevent accumulation
+    const completedSessionCount = await this.sessionRepo.cleanupCompletedSessions();
 
-      const result: Record<string, unknown> = {
-        sessionsRemoved: totalCleaned,
-        expiredSessions: expiredSessionCount,
-        completedSessions: completedSessionCount,
-        sessions: [],
-      };
+    const totalCleaned = expiredSessionCount + completedSessionCount;
 
-      // Delete stale branches if requested
-      if (input.deleteBranches) {
-        const branches = await this.gitOps.listBranches();
-        const staleBranches: string[] = [];
+    const result: Record<string, unknown> = {
+      sessionsRemoved: totalCleaned,
+      expiredSessions: expiredSessionCount,
+      completedSessions: completedSessionCount,
+      sessions: [],
+    };
 
-        for (const branch of branches) {
-          // Skip main/master branches
-          if (branch === 'main' || branch === 'master') {
-            continue;
-          }
+    // Delete stale branches if requested
+    if (input.deleteBranches) {
+      const branches = await this.gitOps.listBranches();
+      const staleBranches: string[] = [];
 
-          // Check if branch has a session
-          const session = await this.sessionRepo.getSessionByBranch(branch);
-
-          // Delete if no session or session is complete/aborted
-          if (!session || !session.isActive()) {
-            try {
-              await this.gitOps.deleteBranch(branch, input.force);
-              staleBranches.push(branch);
-            } catch {
-              // Branch might be in use or have unmerged changes
-            }
-          }
+      for (const branch of branches) {
+        // Skip main/master branches
+        if (branch === 'main' || branch === 'master') {
+          continue;
         }
 
-        result['branchesRemoved'] = staleBranches.length;
-        result['branches'] = staleBranches;
+        // Check if branch has a session
+        const session = await this.sessionRepo.getSessionByBranch(branch);
+
+        // Delete if no session or session is complete/aborted
+        if (!session || !session.isActive()) {
+          try {
+            await this.gitOps.deleteBranch(branch, true);
+            staleBranches.push(branch);
+          } catch {
+            // Branch might be in use or have unmerged changes
+          }
+        }
       }
 
-      return {
-        success: true,
-        data: result,
-        message: `Cleaned up ${totalCleaned} session(s) (${expiredSessionCount} expired, ${completedSessionCount} completed)${
-          input.deleteBranches ? ` and ${result['branchesRemoved']} branch(es)` : ''
-        }`,
-      };
-    } catch (error) {
-      return {
-        ...createErrorResult(error, 'CleanupTool'),
-        data: {},
-      };
+      result['branchesRemoved'] = staleBranches.length;
+      result['branches'] = staleBranches;
     }
+
+    result['message'] = `Cleaned up ${totalCleaned} session(s) (${expiredSessionCount} expired, ${completedSessionCount} completed)${
+      input.deleteBranches ? ` and ${result['branchesRemoved']} branch(es)` : ''
+    }`;
+
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
+  // Override to return QueryToolResult format
+  protected createFinalResult(
+    workflowResult: WorkflowExecutionResult
+  ): QueryToolResult {
+    return {
+      success: workflowResult.success,
+      data: workflowResult.data || {},
+      message: (workflowResult.data?.['message'] as string) || undefined,
+      errors: workflowResult.errors,
+      warnings: workflowResult.warnings,
+    };
   }
 }

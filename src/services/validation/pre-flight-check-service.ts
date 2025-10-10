@@ -3,15 +3,28 @@ import { GitOperations } from '../git-operations';
 import { SessionRepository } from '../session-repository';
 
 /**
+ * Option for resolving a failed check
+ */
+export interface CheckOption {
+  id: string;           // Machine-readable ID (e.g., 'stash_changes', 'abort_session')
+  label: string;        // Human-readable label (e.g., 'Stash changes and continue')
+  description?: string; // Detailed explanation
+  action: string;       // What would be executed (e.g., 'git stash && git checkout main')
+  autoRecommended?: boolean; // Whether this is the recommended option for --auto
+  risk?: 'low' | 'medium' | 'high'; // Risk level
+}
+
+/**
  * Result of a single pre-flight check
  */
 export interface PreFlightCheckResult {
   name: string;
   passed: boolean;
   message?: string;
-  level: 'info' | 'warning' | 'error';
+  level: 'info' | 'warning' | 'error' | 'prompt'; // 'prompt' = recoverable issue with options
   suggestions?: string[];
   details?: Record<string, unknown>;
+  options?: CheckOption[]; // Available options when level is 'prompt'
 }
 
 /**
@@ -22,9 +35,11 @@ export interface PreFlightVerificationResult {
   checks: PreFlightCheckResult[];
   failures: string[];
   warnings: string[];
+  prompts: string[]; // Messages for checks that need user input (level='prompt')
   passedCount: number;
-  failedCount: number;
+  failedCount: number; // Only counts 'error' level checks
   warningCount: number;
+  promptCount: number; // Count of checks needing user input
 }
 
 /**
@@ -89,19 +104,26 @@ export class PreFlightCheckService {
       .filter(c => !c.passed && c.level === 'warning')
       .map(c => c.message || c.name);
 
+    const prompts = checks
+      .filter(c => !c.passed && c.level === 'prompt')
+      .map(c => c.message || c.name);
+
     const allPassed = checks.every(c => c.passed);
     const passedCount = checks.filter(c => c.passed).length;
     const failedCount = checks.filter(c => !c.passed && c.level === 'error').length;
     const warningCount = checks.filter(c => !c.passed && c.level === 'warning').length;
+    const promptCount = checks.filter(c => !c.passed && c.level === 'prompt').length;
 
     return {
       allPassed,
       checks,
       failures,
       warnings,
+      prompts,
       passedCount,
       failedCount,
       warningCount,
+      promptCount,
     };
   }
 
@@ -169,13 +191,54 @@ export class PreFlightCheckService {
         };
       }
 
+      // Check if there are uncommitted changes
+      const hasChanges = await this.gitOps.hasUncommittedChanges();
+
+      // Check if there's an active session on current branch
+      const session = await this.sessionRepo.getSessionByBranch(currentBranch);
+
+      const options: CheckOption[] = [];
+
+      if (hasChanges) {
+        // Has changes - offer to stash
+        options.push({
+          id: 'stash_and_switch',
+          label: 'Stash changes and switch to main',
+          description: 'Safely stash your current changes and switch to main branch',
+          action: `git stash push -m "auto-stash before switching to ${mainBranch}" && git checkout ${mainBranch}`,
+          autoRecommended: true,
+          risk: 'low',
+        });
+      } else {
+        // No changes - safe to switch directly
+        options.push({
+          id: 'switch_to_main',
+          label: 'Switch to main branch',
+          description: 'Switch to main branch (working directory is clean)',
+          action: `git checkout ${mainBranch}`,
+          autoRecommended: true,
+          risk: 'low',
+        });
+      }
+
+      if (session) {
+        options.push({
+          id: 'abort_session',
+          label: 'Abort current session and switch to main',
+          description: `Abort session on '${currentBranch}' and switch to main`,
+          action: `abort session ${session.id} && git checkout ${mainBranch}`,
+          autoRecommended: false,
+          risk: 'medium',
+        });
+      }
+
       return {
         name: 'On Main Branch',
         passed: false,
         message: `On branch '${currentBranch}', expected '${mainBranch}'`,
-        level: 'error',
-        suggestions: [`git checkout ${mainBranch}`],
-        details: { currentBranch, mainBranch },
+        level: 'prompt',
+        details: { currentBranch, mainBranch, hasUncommittedChanges: hasChanges },
+        options,
       };
     } catch (error) {
       return {
@@ -204,19 +267,40 @@ export class PreFlightCheckService {
         };
       }
 
+      const currentBranch = await this.gitOps.getCurrentBranch();
+      const stagedCount = status.staged.length;
+      const unstagedCount = status.modified.length + status.created.length + status.deleted.length;
+
+      const options: CheckOption[] = [
+        {
+          id: 'stash_changes',
+          label: 'Stash uncommitted changes',
+          description: 'Safely stash all uncommitted changes to restore later',
+          action: `git stash push -m "auto-stash on ${currentBranch}"`,
+          autoRecommended: true,
+          risk: 'low',
+        },
+        {
+          id: 'commit_changes',
+          label: 'Commit changes first',
+          description: 'Create a commit with these changes before continuing',
+          action: 'Use hansolo_commit to commit changes',
+          autoRecommended: false,
+          risk: 'low',
+        },
+      ];
+
       return {
         name: 'Working Directory Clean',
         passed: false,
-        message: `${status.staged.length} staged, ${status.modified.length + status.created.length + status.deleted.length} unstaged changes`,
-        level: 'error',
-        suggestions: [
-          'Commit or stash your changes',
-          'Use force: true to override (will stash changes)',
-        ],
+        message: `${stagedCount} staged, ${unstagedCount} unstaged changes`,
+        level: 'prompt',
         details: {
-          stagedCount: status.staged.length,
-          unstagedCount: status.modified.length + status.created.length + status.deleted.length,
+          stagedCount,
+          unstagedCount,
+          changedFiles: [...status.staged, ...status.modified, ...status.created, ...status.deleted],
         },
+        options,
       };
     } catch (error) {
       return {
@@ -309,17 +393,45 @@ export class PreFlightCheckService {
         };
       }
 
+      const options: CheckOption[] = [
+        {
+          id: 'abort_session',
+          label: 'Abort current session',
+          description: `Abort the active session on '${session.branchName}' and continue`,
+          action: `abort session ${session.id}`,
+          autoRecommended: true,
+          risk: 'medium',
+        },
+        {
+          id: 'swap_session',
+          label: 'Switch to existing session',
+          description: 'Work on the existing session instead of creating a new one',
+          action: `git checkout ${session.branchName}`,
+          autoRecommended: false,
+          risk: 'low',
+        },
+        {
+          id: 'complete_session',
+          label: 'Complete current session first',
+          description: 'Ship the current session before starting a new one',
+          action: 'Use hansolo_ship to complete current session',
+          autoRecommended: false,
+          risk: 'low',
+        },
+      ];
+
       return {
         name: 'No Existing Session',
         passed: false,
         message: `Active session exists: ${session.id} (branch: ${session.branchName})`,
-        level: 'error',
-        suggestions: [
-          'Complete or abort the current session first',
-          'Use hansolo_swap to switch sessions',
-          'Use force: true to override',
-        ],
-        details: { sessionId: session.id, branchName: session.branchName },
+        level: 'prompt',
+        details: {
+          sessionId: session.id,
+          branchName: session.branchName,
+          state: session.currentState,
+          workflowType: session.workflowType,
+        },
+        options,
       };
     } catch (error) {
       return {

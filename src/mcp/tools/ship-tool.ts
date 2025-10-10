@@ -1,9 +1,16 @@
-import { MCPTool, GitHubToolResult, SessionToolResult, createErrorResult, mergeValidationResults } from './base-tool';
+import {
+  BaseMCPTool,
+  WorkflowToolInput,
+  WorkflowContext,
+  PromptCollectionResult,
+  WorkflowExecutionResult,
+} from './workflow-tool-base';
+import { GitHubToolResult } from './base-tool';
 import { WorkflowSession } from '../../models/workflow-session';
 import { GitOperations } from '../../services/git-operations';
 import { SessionRepository } from '../../services/session-repository';
-import { PreFlightCheckService } from '../../services/validation/pre-flight-check-service';
-import { PostFlightVerification } from '../../services/validation/post-flight-verification';
+import { PreFlightCheckService, PreFlightVerificationResult } from '../../services/validation/pre-flight-check-service';
+import { PostFlightVerification, PostFlightVerificationResult } from '../../services/validation/post-flight-verification';
 import { GitHubIntegration } from '../../services/github-integration';
 import { ConfigurationManager } from '../../services/configuration-manager';
 import { BranchValidator } from '../../services/validation/branch-validator';
@@ -11,21 +18,19 @@ import { BranchValidator } from '../../services/validation/branch-validator';
 /**
  * Input for ship tool
  */
-export interface ShipToolInput {
+export interface ShipToolInput extends WorkflowToolInput {
   message?: string;
   push?: boolean;
   createPR?: boolean;
   merge?: boolean;
   prDescription?: string;
-  force?: boolean;
-  yes?: boolean;
   stagedOnly?: boolean;
 }
 
 /**
  * Ship tool - Commits, pushes, creates PR, merges, and cleans up
  */
-export class ShipTool implements MCPTool<ShipToolInput, GitHubToolResult> {
+export class ShipTool extends BaseMCPTool<ShipToolInput, GitHubToolResult> {
   private preFlightCheckService: PreFlightCheckService;
   private postFlightVerification: PostFlightVerification;
 
@@ -34,73 +39,43 @@ export class ShipTool implements MCPTool<ShipToolInput, GitHubToolResult> {
     private sessionRepo: SessionRepository,
     private githubIntegration: GitHubIntegration,
     private branchValidator: BranchValidator,
-    private configManager: ConfigurationManager,
+    configManager: ConfigurationManager,
     _basePath: string = '.hansolo'
   ) {
+    super(configManager);
     this.preFlightCheckService = new PreFlightCheckService(gitOps, sessionRepo);
     this.postFlightVerification = new PostFlightVerification(gitOps, sessionRepo);
   }
 
-  /**
-   * Execute ship workflow
-   */
-  async execute(input: ShipToolInput): Promise<GitHubToolResult> {
-    try {
-      // Check initialization
-      if (!(await this.configManager.isInitialized())) {
-        return {
-          success: false,
-          errors: ['han-solo is not initialized. Run hansolo_init first.'],
-        };
-      }
+  protected getBanner(): string {
+    return `░█▀▀░█░█░▀█▀░█▀█░█▀█░▀█▀░█▀█░█▀▀░
+░▀▀█░█▀█░░█░░█▀▀░█▀▀░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░`;
+  }
 
-      // Get current branch and session
+  protected async collectMissingParameters(
+    input: ShipToolInput
+  ): Promise<PromptCollectionResult> {
+    // Prompt-based parameter collection: handle missing PR description
+    if (!input.prDescription) {
       const currentBranch = await this.gitOps.getCurrentBranch();
-      const session = await this.sessionRepo.getSessionByBranch(currentBranch);
+      const needsDescription = await this.checkIfPRDescriptionNeeded(currentBranch);
 
-      if (!session) {
+      if (needsDescription) {
+        // Get raw context for Claude to analyze
+        const commits = await this.gitOps.getCommitsSince('main');
+        const commitMessages = await this.gitOps.getCommitMessagesSince('main');
+
+        // Get changed files using git diff
+        const changedFilesOutput = await this.gitOps.execute(['diff', 'main', '--name-only']);
+        const changedFiles = changedFilesOutput.trim().split('\n').filter(f => f.length > 0);
+
+        // Get diff stats (raw output for Claude to parse)
+        const diffStats = await this.gitOps.execute(['diff', 'main', '--stat']);
+
         return {
-          success: false,
-          errors: [`No workflow session found for branch '${currentBranch}'. Use hansolo_launch to start a workflow.`],
-        };
-      }
-
-      // Check for merged/closed PR (BLOCKING ERROR)
-      const mergedPRCheck = await this.checkForMergedPR(currentBranch);
-      if (!mergedPRCheck.success) {
-        return mergedPRCheck;
-      }
-
-      // Check for uncommitted changes
-      const hasChanges = await this.gitOps.hasUncommittedChanges();
-      if (hasChanges) {
-        return {
-          success: false,
-          errors: ['Uncommitted changes detected. Commit changes first using hansolo_commit.'],
-          warnings: [
-            'Run git status to see changes',
-            'Use hansolo_commit --message "your message" to commit',
-            'Then run hansolo_ship again',
-          ],
-        };
-      }
-
-      // Prompt-based parameter collection: handle missing PR description
-      if (!input.prDescription) {
-        const needsDescription = await this.checkIfPRDescriptionNeeded(currentBranch);
-        if (needsDescription) {
-          // Get raw context for Claude to analyze
-          const commits = await this.gitOps.getCommitsSince('main');
-          const commitMessages = await this.gitOps.getCommitMessagesSince('main');
-
-          // Get changed files using git diff
-          const changedFilesOutput = await this.gitOps.execute(['diff', 'main', '--name-only']);
-          const changedFiles = changedFilesOutput.trim().split('\n').filter(f => f.length > 0);
-
-          // Get diff stats (raw output for Claude to parse)
-          const diffStats = await this.gitOps.execute(['diff', 'main', '--stat']);
-
-          return {
+          collected: false,
+          result: {
             success: true,
             message: 'No PR description provided. Analyze the commits and changes below to generate a comprehensive PR description, or ask the user to provide one.',
             data: {
@@ -122,45 +97,145 @@ export class ShipTool implements MCPTool<ShipToolInput, GitHubToolResult> {
               'OR ask the user what PR description they want to use',
               'Call hansolo_ship again with prDescription parameter',
             ],
-          };
-        }
-      }
-
-      // Run pre-flight checks
-      const preFlightResult = await this.runPreFlightChecks(session);
-      if (!preFlightResult.allPassed && !input.force) {
-        return {
-          success: false,
-          preFlightChecks: preFlightResult.checks,
-          errors: preFlightResult.failures,
-          warnings: preFlightResult.warnings.concat(['Use force: true to override pre-flight failures']),
+          } as GitHubToolResult,
         };
       }
-
-      // Execute complete workflow
-      const workflowResult = await this.executeShipWorkflow(session, input);
-      if (!workflowResult.success) {
-        return workflowResult;
-      }
-
-      // Run post-flight verifications
-      const postFlightResult = await this.runPostFlightVerifications(session);
-
-      // Merge all results
-      const finalResult = mergeValidationResults(
-        {
-          success: postFlightResult.allPassed,
-          branchName: session.branchName,
-          state: session.currentState,
-        } as SessionToolResult,
-        preFlightResult,
-        postFlightResult
-      );
-
-      return finalResult;
-    } catch (error) {
-      return createErrorResult(error, 'ShipTool');
     }
+
+    return { collected: true };
+  }
+
+  protected async createContext(_input: ShipToolInput): Promise<Record<string, unknown>> {
+    // Get current branch and session
+    const currentBranch = await this.gitOps.getCurrentBranch();
+    const session = await this.sessionRepo.getSessionByBranch(currentBranch);
+
+    if (!session) {
+      throw new Error(`No workflow session found for branch '${currentBranch}'. Use hansolo_launch to start a workflow.`);
+    }
+
+    // Check for merged/closed PR (BLOCKING ERROR)
+    const mergedPRCheck = await this.checkForMergedPR(currentBranch);
+    if (!mergedPRCheck.success) {
+      throw new Error(mergedPRCheck.errors?.join(', ') || 'PR check failed');
+    }
+
+    // Check for uncommitted changes
+    const hasChanges = await this.gitOps.hasUncommittedChanges();
+    if (hasChanges) {
+      throw new Error('Uncommitted changes detected. Commit changes first using hansolo_commit.');
+    }
+
+    return { session };
+  }
+
+  protected async runPreFlightChecks(
+    context: WorkflowContext
+  ): Promise<PreFlightVerificationResult> {
+    const session = context['session'] as WorkflowSession;
+
+    return this.preFlightCheckService.runAll(
+      [
+        'sessionExists',
+        'onFeatureBranch',
+        'hasCommitsToShip',
+        'noMergeConflicts',
+      ],
+      { session }
+    );
+  }
+
+  protected async executeWorkflow(
+    context: WorkflowContext
+  ): Promise<WorkflowExecutionResult> {
+    const input = context.input as ShipToolInput;
+    const session = context['session'] as WorkflowSession;
+
+    // Step 1: Push to remote
+    await this.pushToRemote(session);
+
+    // Step 2: Create or update PR
+    const pr = await this.createOrUpdatePR(session, input.prDescription);
+    if (!pr) {
+      return {
+        success: false,
+        errors: ['Failed to create/update pull request'],
+      };
+    }
+
+    // Update session with PR info
+    session.metadata = session.metadata || ({} as any);
+    session.metadata.pr = {
+      number: pr.number,
+      url: pr.url,
+    };
+    await this.sessionRepo.updateSession(session.id, session);
+
+    // Step 3: Wait for CI checks and merge
+    const mergeResult = await this.waitAndMerge(session, pr.number);
+    if (!mergeResult.success) {
+      return {
+        success: false,
+        errors: mergeResult.errors || ['Failed to merge PR'],
+      };
+    }
+
+    // Step 4: Sync main and cleanup
+    await this.syncMainAndCleanup(session);
+
+    return {
+      success: true,
+      data: {
+        prNumber: pr.number,
+        prUrl: pr.url,
+        merged: true,
+      },
+    };
+  }
+
+  protected async runPostFlightVerifications(
+    context: WorkflowContext,
+    _workflowResult: WorkflowExecutionResult
+  ): Promise<PostFlightVerificationResult> {
+    const session = context['session'] as WorkflowSession;
+
+    return this.postFlightVerification.runAll(
+      [
+        'branchMerged',
+        'featureBranchDeleted',
+        'sessionClosed',
+      ],
+      { session }
+    );
+  }
+
+  protected createFinalResult(
+    workflowResult: WorkflowExecutionResult,
+    preFlightResult: PreFlightVerificationResult | null,
+    postFlightResult: PostFlightVerificationResult | null
+  ): GitHubToolResult {
+    const result: any = {
+      success: postFlightResult ? postFlightResult.failedCount === 0 : workflowResult.success,
+      ...workflowResult.data,
+      errors: [...(workflowResult.errors || [])],
+      warnings: [...(workflowResult.warnings || [])],
+    };
+
+    // Merge pre-flight results
+    if (preFlightResult) {
+      result.preFlightChecks = preFlightResult.checks;
+      result.errors.push(...preFlightResult.failures);
+      result.warnings.push(...preFlightResult.warnings);
+    }
+
+    // Merge post-flight results
+    if (postFlightResult) {
+      result.postFlightVerifications = postFlightResult.checks;
+      result.errors.push(...postFlightResult.failures);
+      result.warnings.push(...postFlightResult.warnings);
+    }
+
+    return result as GitHubToolResult;
   }
 
   /**
@@ -212,76 +287,6 @@ export class ShipTool implements MCPTool<ShipToolInput, GitHubToolResult> {
     }
   }
 
-  /**
-   * Run pre-flight checks
-   */
-  private async runPreFlightChecks(session: WorkflowSession) {
-    return this.preFlightCheckService.runAll(
-      [
-        'sessionExists',
-        'onFeatureBranch',
-        'hasCommitsToShip',
-        'noMergeConflicts',
-      ],
-      { session }
-    );
-  }
-
-  /**
-   * Execute complete ship workflow
-   */
-  private async executeShipWorkflow(
-    session: WorkflowSession,
-    input: ShipToolInput
-  ): Promise<GitHubToolResult> {
-    try {
-      // Step 1: Push to remote
-      await this.pushToRemote(session);
-
-      // Step 2: Create or update PR
-      const pr = await this.createOrUpdatePR(session, input.prDescription);
-      if (!pr) {
-        return {
-          success: false,
-          errors: ['Failed to create/update pull request'],
-        };
-      }
-
-      // Update session with PR info
-      session.metadata = session.metadata || ({} as any);
-      session.metadata.pr = {
-        number: pr.number,
-        url: pr.url,
-      };
-      await this.sessionRepo.updateSession(session.id, session);
-
-      // Step 3: Wait for CI checks and merge
-      const mergeResult = await this.waitAndMerge(session, pr.number);
-      if (!mergeResult.success) {
-        return {
-          success: false,
-          prNumber: pr.number,
-          prUrl: pr.url,
-          errors: mergeResult.errors || ['Failed to merge PR'],
-        };
-      }
-
-      // Step 4: Sync main and cleanup
-      await this.syncMainAndCleanup(session);
-
-      return {
-        success: true,
-        prNumber: pr.number,
-        prUrl: pr.url,
-        merged: true,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        errors: [`Workflow execution failed: ${error instanceof Error ? error.message : String(error)}`],
-      };
-    }
-  }
 
   /**
    * Push to remote
@@ -481,17 +486,4 @@ ${commitsText}`;
     return description;
   }
 
-  /**
-   * Run post-flight verifications
-   */
-  private async runPostFlightVerifications(session: WorkflowSession) {
-    return this.postFlightVerification.runAll(
-      [
-        'branchMerged',
-        'featureBranchDeleted',
-        'sessionClosed',
-      ],
-      { session }
-    );
-  }
 }

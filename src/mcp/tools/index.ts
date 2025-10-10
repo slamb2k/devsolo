@@ -27,3 +27,11 @@ export {
   createSuccessResult,
   mergeValidationResults,
 } from './base-tool';
+
+export {
+  BaseMCPTool,
+  WorkflowToolInput,
+  WorkflowContext,
+  PromptCollectionResult,
+  WorkflowExecutionResult,
+} from './workflow-tool-base';
