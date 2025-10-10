@@ -52,76 +52,27 @@ export interface WorkflowExecutionResult {
  */
 export abstract class BaseMCPTool<TInput extends WorkflowToolInput, TResult extends BaseToolResult>
 implements MCPTool<TInput, TResult> {
-  // ANSI color codes for banner display
-  private static readonly RESET = '\x1b[0m';
-  private static readonly COLOR_PALETTE = [
-    '\x1b[33m',  // Yellow
-    '\x1b[36m',  // Cyan
-    '\x1b[35m',  // Magenta
-    '\x1b[32m',  // Green
-    '\x1b[91m',  // Bright Red
-    '\x1b[92m',  // Bright Green
-    '\x1b[93m',  // Bright Yellow
-    '\x1b[94m',  // Bright Blue
-    '\x1b[95m',  // Bright Magenta
-    '\x1b[96m',  // Bright Cyan
-  ];
-
   constructor(
     protected configManager: ConfigurationManager,
     protected server?: Server
   ) {}
 
   /**
-   * Get banner for this tool
-   * Override in subclasses to define tool-specific banner
-   * @returns Banner string or empty string for no banner
-   */
-  protected getBanner(): string {
-    return ''; // Default: no banner (override in subclasses)
-  }
-
-  /**
-   * Wrap banner with a random ANSI color code
-   * @param banner - Raw banner string
-   * @returns Banner wrapped with random color codes
-   */
-  private wrapBannerWithColor(banner: string): string {
-    if (!banner) {
-      return '';
-    }
-    const randomColor = BaseMCPTool.COLOR_PALETTE[
-      Math.floor(Math.random() * BaseMCPTool.COLOR_PALETTE.length)
-    ];
-    // Apply color to each line of the banner
-    return banner
-      .split('\n')
-      .map(line => `${randomColor}${line}${BaseMCPTool.RESET}`)
-      .join('\n');
-  }
-
-  /**
    * Main execution flow - DO NOT OVERRIDE
    * This enforces the standard pattern for all tools
    */
   async execute(input: TInput): Promise<TResult> {
-    // Phase 0: Get banner for display in result
-    // Note: Banner is sent by MCP server handler BEFORE this method is called
-    const banner = this.getBanner();
-    const coloredBanner = this.wrapBannerWithColor(banner);
-    const bannerOutput = coloredBanner ? coloredBanner + '\n' : null;
-
     try {
       // Phase 1: Check initialization
       const initCheck = await this.checkInitialization();
       if (!initCheck.success) {
-        return this.addBannerToResult(initCheck as TResult, bannerOutput);
+        return initCheck as TResult;
       }
 
       // Phase 2: Prompt-based parameter collection
       const paramResult = await this.collectMissingParameters(input);
       if (!paramResult.collected && paramResult.result) {
-        return this.addBannerToResult(paramResult.result as TResult, bannerOutput);
+        return paramResult.result as TResult;
       }
 
       // Create workflow context
@@ -137,31 +88,28 @@ implements MCPTool<TInput, TResult> {
       if (preFlightResult && preFlightResult.promptCount > 0) {
         const promptResult = await this.handlePrompts(preFlightResult, input);
         if (promptResult) {
-          return this.addBannerToResult(promptResult as TResult, bannerOutput);
+          return promptResult as TResult;
         }
       }
 
       // Phase 5: Handle errors (only internal failures)
       if (preFlightResult && preFlightResult.failedCount > 0) {
-        return this.addBannerToResult(this.createPreFlightErrorResult(preFlightResult) as TResult, bannerOutput);
+        return this.createPreFlightErrorResult(preFlightResult) as TResult;
       }
 
       // Phase 6: Execute core workflow
       const workflowResult = await this.executeWorkflow(context);
       if (!workflowResult.success) {
-        return this.addBannerToResult(this.createWorkflowErrorResult(workflowResult) as TResult, bannerOutput);
+        return this.createWorkflowErrorResult(workflowResult) as TResult;
       }
 
       // Phase 7: Run post-flight verifications
       const postFlightResult = await this.runPostFlightVerifications(context, workflowResult);
 
       // Phase 8: Merge and return final result
-      return this.addBannerToResult(
-        this.createFinalResult(workflowResult, preFlightResult, postFlightResult),
-        bannerOutput
-      );
+      return this.createFinalResult(workflowResult, preFlightResult, postFlightResult);
     } catch (error) {
-      return this.addBannerToResult(this.createErrorResult(error), bannerOutput);
+      return this.createErrorResult(error);
     }
   }
 
@@ -342,22 +290,5 @@ implements MCPTool<TInput, TResult> {
    */
   protected getToolName(): string {
     return this.constructor.name;
-  }
-
-  /**
-   * Add banner to result output
-   * Prepends banner to warnings array so it's visible in MCP output
-   */
-  protected addBannerToResult(result: TResult, banner: string | null): TResult {
-    if (!banner) {
-      return result;
-    }
-
-    // Add banner to warnings array (will be displayed first)
-    const warnings = (result as any).warnings || [];
-    return {
-      ...result,
-      warnings: [banner, ...warnings],
-    } as TResult;
   }
 }
