@@ -3,14 +3,27 @@ import { GitOperations } from '../git-operations';
 import { SessionRepository } from '../session-repository';
 
 /**
+ * Option for resolving a failed check
+ */
+export interface CheckOption {
+  id: string;           // Machine-readable ID (e.g., 'stash_changes', 'abort_session')
+  label: string;        // Human-readable label (e.g., 'Stash changes and continue')
+  description?: string; // Detailed explanation
+  action: string;       // What would be executed (e.g., 'git stash && git checkout main')
+  autoRecommended?: boolean; // Whether this is the recommended option for --auto
+  risk?: 'low' | 'medium' | 'high'; // Risk level
+}
+
+/**
  * Result of a single post-flight check
  */
 export interface PostFlightCheckResult {
   name: string;
   passed: boolean;
   message?: string;
-  level: 'info' | 'warning' | 'error';
+  level: 'info' | 'warning' | 'error' | 'prompt'; // 'prompt' = recoverable issue with options
   details?: Record<string, unknown>;
+  options?: CheckOption[]; // Available options when level is 'prompt'
 }
 
 /**
@@ -21,9 +34,11 @@ export interface PostFlightVerificationResult {
   checks: PostFlightCheckResult[];
   failures: string[];
   warnings: string[];
+  prompts: string[]; // Messages for checks that need user input (level='prompt')
   passedCount: number;
-  failedCount: number;
+  failedCount: number; // Only counts 'error' level checks
   warningCount: number;
+  promptCount: number; // Count of checks needing user input
 }
 
 /**
@@ -88,19 +103,26 @@ export class PostFlightVerification {
       .filter(c => !c.passed && c.level === 'warning')
       .map(c => c.message || c.name);
 
+    const prompts = checks
+      .filter(c => !c.passed && c.level === 'prompt')
+      .map(c => c.message || c.name);
+
     const allPassed = checks.every(c => c.passed);
     const passedCount = checks.filter(c => c.passed).length;
     const failedCount = checks.filter(c => !c.passed && c.level === 'error').length;
     const warningCount = checks.filter(c => !c.passed && c.level === 'warning').length;
+    const promptCount = checks.filter(c => !c.passed && c.level === 'prompt').length;
 
     return {
       allPassed,
       checks,
       failures,
       warnings,
+      prompts,
       passedCount,
       failedCount,
       warningCount,
+      promptCount,
     };
   }
 
@@ -298,7 +320,7 @@ export class PostFlightVerification {
       };
     }
 
-    const validStates = ['feature_branch_created', 'changes_committed', 'branch_pushed', 'pr_created', 'ready_to_merge', 'merged'];
+    const validStates = ['BRANCH_READY', 'CHANGES_COMMITTED', 'PUSHED', 'PR_CREATED', 'READY_TO_MERGE', 'COMPLETE'];
 
     if (validStates.includes(session.currentState)) {
       return {

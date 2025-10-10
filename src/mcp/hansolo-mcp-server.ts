@@ -35,13 +35,13 @@ import { StashManager } from '../services/stash-manager';
 // Tool parameter schemas
 const InitSchema = z.object({
   scope: z.enum(['project', 'user']).optional(),
-  force: z.boolean().optional(),
+  auto: z.boolean().optional(),
 });
 
 const LaunchSchema = z.object({
   description: z.string().optional(),
   branchName: z.string().optional(),
-  force: z.boolean().optional(),
+  auto: z.boolean().optional(),
   stashRef: z.string().optional(),
   popStash: z.boolean().optional(),
 });
@@ -50,23 +50,24 @@ const SessionsSchema = z.object({
   all: z.boolean().optional(),
   verbose: z.boolean().optional(),
   cleanup: z.boolean().optional(),
+  auto: z.boolean().optional(),
 });
 
 const SwapSchema = z.object({
   branchName: z.string(),
-  force: z.boolean().optional(),
+  auto: z.boolean().optional(),
   stash: z.boolean().optional(),
 });
 
 const AbortSchema = z.object({
   branchName: z.string().optional(),
-  force: z.boolean().optional(),
+  auto: z.boolean().optional(),
   deleteBranch: z.boolean().optional(),
-  yes: z.boolean().optional(),
 });
 
 const CommitSchema = z.object({
   message: z.string().optional(),
+  auto: z.boolean().optional(),
   stagedOnly: z.boolean().optional(),
 });
 
@@ -75,8 +76,7 @@ const ShipSchema = z.object({
   push: z.boolean().optional(),
   createPR: z.boolean().optional(),
   merge: z.boolean().optional(),
-  force: z.boolean().optional(),
-  yes: z.boolean().optional(),
+  auto: z.boolean().optional(),
   stagedOnly: z.boolean().optional(),
 });
 
@@ -86,8 +86,7 @@ const HotfixSchema = z.object({
   skipTests: z.boolean().optional(),
   skipReview: z.boolean().optional(),
   autoMerge: z.boolean().optional(),
-  force: z.boolean().optional(),
-  yes: z.boolean().optional(),
+  auto: z.boolean().optional(),
 });
 
 const StatusLineSchema = z.object({
@@ -96,11 +95,12 @@ const StatusLineSchema = z.object({
   showSessionInfo: z.boolean().optional(),
   showBranchInfo: z.boolean().optional(),
   showStateInfo: z.boolean().optional(),
+  auto: z.boolean().optional(),
 });
 
 const CleanupSchema = z.object({
   deleteBranches: z.boolean().optional(),
-  force: z.boolean().optional(),
+  auto: z.boolean().optional(),
 });
 
 export class HanSoloMCPServer {
@@ -212,9 +212,9 @@ export class HanSoloMCPServer {
                   type: 'string',
                   description: 'Name for the feature branch',
                 },
-                force: {
+                auto: {
                   type: 'boolean',
-                  description: 'Force launch even with uncommitted changes',
+                  description: 'Automatically choose recommended options for prompts',
                 },
                 stashRef: {
                   type: 'string',
@@ -305,6 +305,10 @@ export class HanSoloMCPServer {
                   type: 'string',
                   description: 'Commit message (footer added automatically)',
                 },
+                auto: {
+                  type: 'boolean',
+                  description: 'Automatically choose recommended options for prompts',
+                },
                 stagedOnly: {
                   type: 'boolean',
                   description: 'If true, only commit staged files (use "git add" first). If false, stages and commits all changes.',
@@ -335,13 +339,9 @@ export class HanSoloMCPServer {
                   type: 'boolean',
                   description: 'Merge to main',
                 },
-                force: {
+                auto: {
                   type: 'boolean',
-                  description: 'Force operations',
-                },
-                yes: {
-                  type: 'boolean',
-                  description: 'Skip confirmations',
+                  description: 'Automatically choose recommended options for prompts',
                 },
                 stagedOnly: {
                   type: 'boolean',
@@ -378,13 +378,9 @@ export class HanSoloMCPServer {
                   type: 'boolean',
                   description: 'Automatically merge when checks pass',
                 },
-                force: {
+                auto: {
                   type: 'boolean',
-                  description: 'Force operations',
-                },
-                yes: {
-                  type: 'boolean',
-                  description: 'Skip confirmations',
+                  description: 'Automatically choose recommended options for prompts',
                 },
               },
             },
@@ -761,8 +757,8 @@ export class HanSoloMCPServer {
                 required: false,
               },
               {
-                name: 'force',
-                description: 'Force launch even with uncommitted changes',
+                name: 'auto',
+                description: 'Automatically choose recommended options for prompts',
                 required: false,
               },
             ],

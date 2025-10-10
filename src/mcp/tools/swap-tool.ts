@@ -1,71 +1,79 @@
-import { MCPTool, SessionToolResult, createErrorResult } from './base-tool';
+import {
+  BaseMCPTool,
+  WorkflowToolInput,
+  WorkflowContext,
+  WorkflowExecutionResult,
+} from './workflow-tool-base';
+import { SessionToolResult } from './base-tool';
 import { SessionRepository } from '../../services/session-repository';
 import { GitOperations } from '../../services/git-operations';
 import { StashManager } from '../../services/stash-manager';
 import { ConfigurationManager } from '../../services/configuration-manager';
+import { WorkflowSession } from '../../models/workflow-session';
 
 /**
  * Input for swap tool
  */
-export interface SwapToolInput {
+export interface SwapToolInput extends WorkflowToolInput {
   branchName: string;
   stash?: boolean;
-  force?: boolean;
 }
 
 /**
  * Swap tool - Switches between workflow sessions
  */
-export class SwapTool implements MCPTool<SwapToolInput, SessionToolResult> {
+export class SwapTool extends BaseMCPTool<SwapToolInput, SessionToolResult> {
   constructor(
     private sessionRepo: SessionRepository,
     private gitOps: GitOperations,
     private stashManager: StashManager,
-    private configManager: ConfigurationManager
-  ) {}
+    configManager: ConfigurationManager
+  ) {
+    super(configManager);
+  }
 
-  async execute(input: SwapToolInput): Promise<SessionToolResult> {
-    try {
-      // Check initialization
-      if (!(await this.configManager.isInitialized())) {
-        return {
-          success: false,
-          errors: ['han-solo is not initialized. Run hansolo_init first.'],
-        };
+  protected getBanner(): string {
+    return `░█▀▀░█░█░█▀█░█▀█░█▀█░▀█▀░█▀█░█▀▀░
+░▀▀█░█▄█░█▀█░█▀▀░█▀▀░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀░▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░`;
+  }
+
+  protected async createContext(input: SwapToolInput): Promise<Record<string, unknown>> {
+    // Get target session
+    const targetSession = await this.sessionRepo.getSessionByBranch(input.branchName);
+
+    if (!targetSession) {
+      throw new Error(`No session found for branch '${input.branchName}'`);
+    }
+
+    // Check for uncommitted changes
+    const hasChanges = await this.gitOps.hasUncommittedChanges();
+
+    if (hasChanges) {
+      if (input.stash) {
+        // Stash changes
+        const currentBranch = await this.gitOps.getCurrentBranch();
+        await this.stashManager.stashChanges('swap', currentBranch);
+      } else if (!input.auto) {
+        throw new Error('Uncommitted changes detected. Use stash: true to stash changes, or auto: true to proceed automatically.');
       }
+    }
 
-      // Get target session
-      const targetSession = await this.sessionRepo.getSessionByBranch(input.branchName);
+    return { targetSession };
+  }
 
-      if (!targetSession) {
-        return {
-          success: false,
-          errors: [`No session found for branch '${input.branchName}'`],
-        };
-      }
+  protected async executeWorkflow(
+    context: WorkflowContext
+  ): Promise<WorkflowExecutionResult> {
+    const input = context.input as SwapToolInput;
+    const targetSession = context['targetSession'] as WorkflowSession;
 
-      // Check for uncommitted changes
-      const hasChanges = await this.gitOps.hasUncommittedChanges();
+    // Switch to target branch
+    await this.gitOps.checkoutBranch(input.branchName);
 
-      if (hasChanges) {
-        if (input.stash) {
-          // Stash changes
-          const currentBranch = await this.gitOps.getCurrentBranch();
-          await this.stashManager.stashChanges('swap', currentBranch);
-        } else if (!input.force) {
-          return {
-            success: false,
-            errors: ['Uncommitted changes detected'],
-            warnings: ['Use stash: true to stash changes, or force: true to discard them'],
-          };
-        }
-      }
-
-      // Switch to target branch
-      await this.gitOps.checkoutBranch(input.branchName);
-
-      return {
-        success: true,
+    return {
+      success: true,
+      data: {
         sessionId: targetSession.id,
         branchName: targetSession.branchName,
         state: targetSession.currentState,
@@ -74,9 +82,7 @@ export class SwapTool implements MCPTool<SwapToolInput, SessionToolResult> {
           'Continue working on this feature',
           'Use hansolo_status to check current state',
         ],
-      };
-    } catch (error) {
-      return createErrorResult(error, 'SwapTool');
-    }
+      },
+    };
   }
 }

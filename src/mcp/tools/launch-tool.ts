@@ -1,11 +1,18 @@
-import { MCPTool, SessionToolResult, createErrorResult, mergeValidationResults } from './base-tool';
+import {
+  BaseMCPTool,
+  WorkflowToolInput,
+  WorkflowContext,
+  PromptCollectionResult,
+  WorkflowExecutionResult,
+} from './workflow-tool-base';
+import { SessionToolResult } from './base-tool';
 import { WorkflowSession } from '../../models/workflow-session';
 import { GitOperations } from '../../services/git-operations';
 import { SessionRepository } from '../../services/session-repository';
 import { BranchNamingService } from '../../services/branch-naming';
 import { BranchValidator } from '../../services/validation/branch-validator';
-import { PreFlightCheckService } from '../../services/validation/pre-flight-check-service';
-import { PostFlightVerification } from '../../services/validation/post-flight-verification';
+import { PreFlightCheckService, PreFlightVerificationResult } from '../../services/validation/pre-flight-check-service';
+import { PostFlightVerification, PostFlightVerificationResult } from '../../services/validation/post-flight-verification';
 import { GitHubIntegration } from '../../services/github-integration';
 import { StashManager } from '../../services/stash-manager';
 import { ConfigurationManager } from '../../services/configuration-manager';
@@ -13,10 +20,9 @@ import { ConfigurationManager } from '../../services/configuration-manager';
 /**
  * Input for launch tool
  */
-export interface LaunchToolInput {
+export interface LaunchToolInput extends WorkflowToolInput {
   branchName?: string;
   description?: string;
-  force?: boolean;
   stashRef?: string;
   popStash?: boolean;
 }
@@ -24,7 +30,7 @@ export interface LaunchToolInput {
 /**
  * Launch tool - Creates a new feature branch and workflow session
  */
-export class LaunchTool implements MCPTool<LaunchToolInput, SessionToolResult> {
+export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> {
   private preFlightCheckService: PreFlightCheckService;
   private postFlightVerification: PostFlightVerification;
 
@@ -35,39 +41,38 @@ export class LaunchTool implements MCPTool<LaunchToolInput, SessionToolResult> {
     _branchValidator: BranchValidator,
     _githubIntegration: GitHubIntegration,
     private stashManager: StashManager,
-    private configManager: ConfigurationManager,
+    configManager: ConfigurationManager,
     _basePath: string = '.hansolo'
   ) {
+    super(configManager);
     this.preFlightCheckService = new PreFlightCheckService(gitOps, sessionRepo);
     this.postFlightVerification = new PostFlightVerification(gitOps, sessionRepo);
   }
 
-  /**
-   * Execute launch workflow
-   */
-  async execute(input: LaunchToolInput): Promise<SessionToolResult> {
-    try {
-      // Check initialization
-      if (!(await this.configManager.isInitialized())) {
-        return {
-          success: false,
-          errors: ['han-solo is not initialized. Run hansolo_init first.'],
-        };
+  protected getBanner(): string {
+    return `░█░░░█▀█░█░█░█▀█░█▀▀░█░█░▀█▀░█▀█░█▀▀░
+░█░░░█▀█░█░█░█░█░█░░░█▀█░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░`;
+  }
+
+  protected async collectMissingParameters(
+    input: LaunchToolInput
+  ): Promise<PromptCollectionResult> {
+    // Prompt-based parameter collection: handle missing branch name
+    if (!input.branchName) {
+      // Get context for branch name generation
+      const hasChanges = await this.gitOps.hasUncommittedChanges();
+      let diffContext = '';
+
+      if (hasChanges && !input.stashRef) {
+        const status = await this.gitOps.getStatus();
+        const changedFiles = [...status.staged, ...status.modified, ...status.created];
+        diffContext = changedFiles.slice(0, 5).join(', '); // First few files for context
       }
 
-      // Prompt-based parameter collection: handle missing branch name
-      if (!input.branchName) {
-        // Get context for branch name generation
-        const hasChanges = await this.gitOps.hasUncommittedChanges();
-        let diffContext = '';
-
-        if (hasChanges && !input.stashRef) {
-          const status = await this.gitOps.getStatus();
-          const changedFiles = [...status.staged, ...status.modified, ...status.created];
-          diffContext = changedFiles.slice(0, 5).join(', '); // First few files for context
-        }
-
-        return {
+      return {
+        collected: false,
+        result: {
           success: true,
           message: 'No branch name provided. Generate a branch name from the description or changes, or ask the user to provide one.',
           data: {
@@ -86,77 +91,114 @@ export class LaunchTool implements MCPTool<LaunchToolInput, SessionToolResult> {
             'Validate the name follows naming conventions',
             'Call hansolo_launch again with branchName parameter',
           ],
-        };
-      }
-
-      // Determine branch name from input
-      const branchName = await this.determineBranchName(input);
-      if (!branchName) {
-        return {
-          success: false,
-          errors: ['Failed to determine branch name'],
-        };
-      }
-
-      // Handle uncommitted changes
-      const stashResult = await this.handleUncommittedChanges(input);
-      if (!stashResult.success) {
-        return stashResult;
-      }
-
-      // Abort active session if exists
-      const abortResult = await this.handleActiveSession();
-      if (!abortResult.success) {
-        return abortResult;
-      }
-
-      // Run pre-flight checks
-      const preFlightResult = await this.runPreFlightChecks(branchName, input.force);
-      if (!preFlightResult.allPassed && !input.force) {
-        return {
-          success: false,
-          preFlightChecks: preFlightResult.checks,
-          errors: preFlightResult.failures,
-          warnings: preFlightResult.warnings.concat(['Use force: true to override pre-flight failures']),
-        };
-      }
-
-      // Execute core workflow
-      const workflowResult = await this.executeLaunchWorkflow(branchName, input);
-      if (!workflowResult.success || !workflowResult.session) {
-        return {
-          success: false,
-          errors: workflowResult.errors || ['Failed to execute launch workflow'],
-        };
-      }
-
-      // Run post-flight verifications
-      const postFlightResult = await this.runPostFlightVerifications(
-        workflowResult.session,
-        branchName,
-        stashResult.stashPopped
-      );
-
-      // Merge all results
-      const finalResult = mergeValidationResults(
-        {
-          success: postFlightResult.allPassed,
-          branchName: workflowResult.session.branchName,
-          state: workflowResult.session.currentState,
-          nextSteps: [
-            'Make your code changes',
-            'Use hansolo_ship to commit, push, and create PR',
-            'Use hansolo_status to check current state',
-          ],
         } as SessionToolResult,
-        preFlightResult,
-        postFlightResult
-      );
-
-      return finalResult;
-    } catch (error) {
-      return createErrorResult(error, 'LaunchTool');
+      };
     }
+
+    return { collected: true };
+  }
+
+  protected async createContext(input: LaunchToolInput): Promise<Record<string, unknown>> {
+    // Determine branch name from input
+    const branchName = await this.determineBranchName(input);
+    if (!branchName) {
+      throw new Error('Failed to determine branch name');
+    }
+
+    // Handle uncommitted changes
+    const stashResult = await this.handleUncommittedChanges(input);
+    if (!stashResult.success) {
+      throw new Error(stashResult.errors?.join(', ') || 'Failed to handle uncommitted changes');
+    }
+
+    // Abort active session if exists
+    const abortResult = await this.handleActiveSession();
+    if (!abortResult.success) {
+      throw new Error(abortResult.errors?.join(', ') || 'Failed to handle active session');
+    }
+
+    return {
+      branchName,
+      stashPopped: stashResult.stashPopped,
+      stashRef: stashResult.stashRef,
+    };
+  }
+
+  protected async runPreFlightChecks(
+    context: WorkflowContext
+  ): Promise<PreFlightVerificationResult> {
+    const branchName = context['branchName'] as string;
+    const input = context.input as LaunchToolInput;
+
+    return this.preFlightCheckService.runAll(
+      [
+        'onMainBranch',
+        'workingDirectoryClean',
+        'mainUpToDate',
+        'noExistingSession',
+        'branchNameAvailable',
+      ],
+      { branchName, auto: input.auto }
+    );
+  }
+
+  protected async executeWorkflow(
+    context: WorkflowContext
+  ): Promise<WorkflowExecutionResult> {
+    const input = context.input as LaunchToolInput;
+    const branchName = context['branchName'] as string;
+
+    // Create session
+    const session = await this.createSession(branchName, input.description);
+
+    // Create and checkout branch
+    await this.createBranch(branchName);
+
+    // Restore stashed work if stashRef provided
+    if (input.stashRef && input.popStash !== false) {
+      await this.gitOps.stashPopSpecific(input.stashRef);
+    }
+
+    return {
+      success: true,
+      data: {
+        session,
+        sessionId: session.id,
+        branchName: session.branchName,
+        state: session.currentState,
+        nextSteps: [
+          'Make your code changes',
+          'Use hansolo_ship to commit, push, and create PR',
+          'Use hansolo_status to check current state',
+        ],
+      },
+    };
+  }
+
+  protected async runPostFlightVerifications(
+    context: WorkflowContext,
+    workflowResult: WorkflowExecutionResult
+  ): Promise<PostFlightVerificationResult> {
+    const session = (workflowResult.data as any).session as WorkflowSession;
+    const branchName = context['branchName'] as string;
+    const stashPopped = context['stashPopped'] as boolean;
+
+    const checks = [
+      'sessionCreated',
+      'featureBranchCreated',
+      'branchCheckedOut',
+      'sessionStateCorrect',
+    ];
+
+    // Only check for no uncommitted changes if no stash was popped
+    if (!stashPopped) {
+      checks.push('noUncommittedChanges');
+    }
+
+    return this.postFlightVerification.runAll(
+      checks as any[],
+      { session, branchName }
+    );
   }
 
   /**
@@ -251,50 +293,6 @@ export class LaunchTool implements MCPTool<LaunchToolInput, SessionToolResult> {
   }
 
   /**
-   * Run pre-flight checks
-   */
-  private async runPreFlightChecks(branchName: string, force?: boolean) {
-    return this.preFlightCheckService.runAll(
-      [
-        'onMainBranch',
-        'workingDirectoryClean',
-        'mainUpToDate',
-        'noExistingSession',
-        'branchNameAvailable',
-      ],
-      { branchName, force }
-    );
-  }
-
-  /**
-   * Execute core launch workflow
-   */
-  private async executeLaunchWorkflow(
-    branchName: string,
-    input: LaunchToolInput
-  ): Promise<{ success: boolean; session?: WorkflowSession; errors?: string[] }> {
-    try {
-      // Create session
-      const session = await this.createSession(branchName, input.description);
-
-      // Create and checkout branch
-      await this.createBranch(branchName);
-
-      // Restore stashed work if stashRef provided
-      if (input.stashRef && input.popStash !== false) {
-        await this.gitOps.stashPopSpecific(input.stashRef);
-      }
-
-      return { success: true, session };
-    } catch (error) {
-      return {
-        success: false,
-        errors: [`Workflow execution failed: ${error instanceof Error ? error.message : String(error)}`],
-      };
-    }
-  }
-
-  /**
    * Create workflow session
    */
   private async createSession(branchName: string, description?: string): Promise<WorkflowSession> {
@@ -321,31 +319,5 @@ export class LaunchTool implements MCPTool<LaunchToolInput, SessionToolResult> {
   private async createBranch(branchName: string): Promise<void> {
     await this.gitOps.createBranch(branchName);
     await this.gitOps.checkoutBranch(branchName);
-  }
-
-  /**
-   * Run post-flight verifications
-   */
-  private async runPostFlightVerifications(
-    session: WorkflowSession,
-    branchName: string,
-    stashPopped: boolean
-  ) {
-    const checks = [
-      'sessionCreated',
-      'featureBranchCreated',
-      'branchCheckedOut',
-      'sessionStateCorrect',
-    ];
-
-    // Only check for no uncommitted changes if no stash was popped
-    if (!stashPopped) {
-      checks.push('noUncommittedChanges');
-    }
-
-    return this.postFlightVerification.runAll(
-      checks as any[],
-      { session, branchName }
-    );
   }
 }

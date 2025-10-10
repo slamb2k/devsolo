@@ -1,4 +1,10 @@
-import { MCPTool, QueryToolResult, createErrorResult } from './base-tool';
+import {
+  BaseMCPTool,
+  WorkflowToolInput,
+  WorkflowContext,
+  WorkflowExecutionResult,
+} from './workflow-tool-base';
+import { QueryToolResult } from './base-tool';
 import { SessionRepository } from '../../services/session-repository';
 import { GitOperations } from '../../services/git-operations';
 import { ConfigurationManager } from '../../services/configuration-manager';
@@ -6,68 +12,75 @@ import { ConfigurationManager } from '../../services/configuration-manager';
 /**
  * Input for status tool
  */
-export interface StatusToolInput {
-  // No input required
+export interface StatusToolInput extends WorkflowToolInput {
+  // No additional input required
 }
 
 /**
  * Status tool - Shows current workflow status
  */
-export class StatusTool implements MCPTool<StatusToolInput, QueryToolResult> {
+export class StatusTool extends BaseMCPTool<StatusToolInput, QueryToolResult> {
   constructor(
     private sessionRepo: SessionRepository,
     private gitOps: GitOperations,
-    private configManager: ConfigurationManager
-  ) {}
+    configManager: ConfigurationManager
+  ) {
+    super(configManager);
+  }
 
-  async execute(_input: StatusToolInput): Promise<QueryToolResult> {
-    try {
-      // Check initialization
-      if (!(await this.configManager.isInitialized())) {
-        return {
-          success: false,
-          data: {},
-          errors: ['han-solo is not initialized. Run hansolo_init first.'],
-        };
-      }
+  protected getBanner(): string {
+    return `░█▀▀░▀█▀░█▀█░▀█▀░█░█░█▀▀░
+░▀▀█░░█░░█▀█░░█░░█░█░▀▀█░
+░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀░`;
+  }
 
-      const currentBranch = await this.gitOps.getCurrentBranch();
-      const session = await this.sessionRepo.getSessionByBranch(currentBranch);
-      const gitStatus = await this.gitOps.getStatus();
+  protected async executeWorkflow(
+    _context: WorkflowContext
+  ): Promise<WorkflowExecutionResult> {
+    const currentBranch = await this.gitOps.getCurrentBranch();
+    const session = await this.sessionRepo.getSessionByBranch(currentBranch);
+    const gitStatus = await this.gitOps.getStatus();
 
-      const data: Record<string, unknown> = {
-        currentBranch,
-        hasSession: !!session,
-        gitStatus: {
-          staged: gitStatus.staged.length,
-          unstaged: gitStatus.modified.length + gitStatus.created.length + gitStatus.deleted.length,
-          untracked: gitStatus.not_added?.length || 0,
-        },
+    const data: Record<string, unknown> = {
+      currentBranch,
+      hasSession: !!session,
+      gitStatus: {
+        staged: gitStatus.staged.length,
+        unstaged: gitStatus.modified.length + gitStatus.created.length + gitStatus.deleted.length,
+        untracked: gitStatus.not_added?.length || 0,
+      },
+    };
+
+    if (session) {
+      data['session'] = {
+        id: session.id,
+        branchName: session.branchName,
+        state: session.currentState,
+        workflowType: session.workflowType,
+        createdAt: session.createdAt,
+        pr: session.metadata?.pr,
       };
-
-      if (session) {
-        data['session'] = {
-          id: session.id,
-          branchName: session.branchName,
-          state: session.currentState,
-          workflowType: session.workflowType,
-          createdAt: session.createdAt,
-          pr: session.metadata?.pr,
-        };
-      }
-
-      return {
-        success: true,
-        data,
-        message: session
-          ? `Active session on ${currentBranch} (state: ${session.currentState})`
-          : `No active session on ${currentBranch}`,
-      };
-    } catch (error) {
-      return {
-        ...createErrorResult(error, 'StatusTool'),
-        data: {},
-      };
+      data['message'] = `Active session on ${currentBranch} (state: ${session.currentState})`;
+    } else {
+      data['message'] = `No active session on ${currentBranch}`;
     }
+
+    return {
+      success: true,
+      data,
+    };
+  }
+
+  // Override to return QueryToolResult format
+  protected createFinalResult(
+    workflowResult: WorkflowExecutionResult
+  ): QueryToolResult {
+    return {
+      success: workflowResult.success,
+      data: workflowResult.data || {},
+      message: (workflowResult.data?.['message'] as string) || undefined,
+      errors: workflowResult.errors,
+      warnings: workflowResult.warnings,
+    };
   }
 }
