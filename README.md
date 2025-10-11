@@ -1,13 +1,13 @@
 # han-solo 🚀
 
-> AI-native Git workflow automation via Model Context Protocol (MCP) for Claude Code
+> AI-native Git workflow automation via Model Context Protocol (MCP) and native slash commands for Claude Code
 
-han-solo is a powerful MCP server designed exclusively for Claude Code, streamlining Git workflows while maintaining clean, linear commit history. It provides structured validation, automated PR management, and seamless integration with GitHub.
+han-solo is a powerful Claude Code plugin that streamlines Git workflows while maintaining clean, linear commit history. It provides structured validation, automated PR management, and seamless integration with GitHub through native slash commands and specialized sub-agents.
 
 ## Features
 
-- **🤖 AI-Native Design**: Built exclusively for Claude Code via Model Context Protocol (MCP)
-- **⚡ Slash Commands**: Quick access via `/hansolo:` prompts in Claude Code
+- **🤖 AI-Native Design**: Built exclusively for Claude Code with native plugin architecture
+- **⚡ Slash Commands**: Quick access via `/hansolo` commands in Claude Code
 - **🚀 One-Command Workflow**: Ship entire features in a single MCP tool call
 - **🛡️ Structured Validation**: Pre/post-flight checks with JSON results (no UI dependencies)
 - **🚫 Branch Reuse Prevention**: Blocks reusing branch names after merge
@@ -58,9 +58,9 @@ han-solo is a powerful MCP server designed exclusively for Claude Code, streamli
 
 ### Two Ways to Use han-solo
 
-han-solo provides both **slash command prompts** and **direct tool calls** for maximum flexibility:
+han-solo provides both **native slash commands** and **direct MCP tool calls** for maximum flexibility:
 
-**Option 1: Slash Commands (Easiest)** 🎯
+**Option 1: Slash Commands (Recommended)** 🎯
 ```
 /hansolo:init       - Initialize han-solo
 /hansolo:launch     - Start a new feature
@@ -69,14 +69,14 @@ han-solo provides both **slash command prompts** and **direct tool calls** for m
 /hansolo:status     - Check current status
 ```
 
-**Option 2: Natural Language**
+**Option 2: Natural Language (Direct MCP Tool Calls)**
 ```
 "Use hansolo_init to initialize han-solo in this project"
 "Use hansolo_launch to start a new feature for authentication"
 "Use hansolo_ship to commit, push, create PR, and merge"
 ```
 
-Both approaches invoke the same MCP tools - use whichever feels more natural!
+Slash commands provide better integration, auto-completion, and coordinated workflows via specialized sub-agents (git-droid, docs-droid)!
 
 ---
 
@@ -162,39 +162,79 @@ For always-visible workflow status in Claude Code:
 
 ---
 
-## MCP Prompts (Slash Commands)
+## Slash Commands
 
-han-solo provides convenient slash commands for all functionality. Type `/hansolo:` in Claude Code to see the full list.
+han-solo provides native Claude Code slash commands for all functionality. Type `/hansolo` in Claude Code to see the full list.
 
-### Available Prompts
+### Available Commands
 
-| Prompt | Description | Example |
+| Command | Description | Example |
 |--------|-------------|---------|
 | `/hansolo:init` | Initialize han-solo in your project | `/hansolo:init` |
 | `/hansolo:launch` | Start a new feature workflow | `/hansolo:launch` |
 | `/hansolo:commit` | Commit changes with a message | `/hansolo:commit` |
 | `/hansolo:ship` | Complete workflow (commit, push, PR, merge) | `/hansolo:ship` |
-| `/hansolo:swap` | Switch between workflow sessions | `/hansolo:swap` |
+| `/hansolo:swap` | Switch between workflow sessions | `/hansolo:swap feature/other-branch` |
 | `/hansolo:abort` | Abort current workflow session | `/hansolo:abort` |
 | `/hansolo:sessions` | List all workflow sessions | `/hansolo:sessions` |
 | `/hansolo:status` | Show current workflow status | `/hansolo:status` |
 | `/hansolo:cleanup` | Clean up expired sessions | `/hansolo:cleanup` |
 | `/hansolo:hotfix` | Create emergency hotfix workflow | `/hansolo:hotfix` |
 | `/hansolo:status-line` | Manage Claude Code status line | `/hansolo:status-line` |
+| `/hansolo:prime` | Prime understanding of codebase | `/hansolo:prime` |
+| `/hansolo:doc` | Manage documentation | `/hansolo:doc` |
 
-### How Prompts Work
+### How Slash Commands Work
 
 When you use a slash command like `/hansolo:launch`, Claude Code:
-1. Shows the prompt in the slash command menu
-2. Lets you provide parameters interactively (if needed)
-3. Invokes the corresponding MCP tool (`hansolo_launch`)
-4. Returns structured results
+1. Displays the unique ASCII art banner for immediate visual feedback
+2. Orchestrates the workflow using specialized sub-agents (git-droid, docs-droid)
+3. Invokes the appropriate MCP tools for execution
+4. Returns structured results with pre/post-flight checks
 
-**Benefits of using prompts:**
-- 🎯 **Discoverable** - Shows up in `/` menu
-- ⚡ **Fast** - Quick access to commands
-- 📝 **Guided** - Parameter descriptions built-in
-- 🔄 **Flexible** - Can still use natural language when you prefer
+**Benefits of slash commands:**
+- 🎯 **Discoverable** - Shows up in `/` menu with auto-completion
+- ⚡ **Fast** - Quick access to commands with visual feedback
+- 📝 **Guided** - Parameter hints and descriptions built-in
+- 🤖 **Smart** - Coordinated by specialized sub-agents for intelligent workflows
+- 🔄 **Flexible** - Can still use natural language for direct MCP tool calls
+
+---
+
+## Architecture
+
+han-solo uses a plugin architecture with clear separation of concerns:
+
+```
+User → Slash Command → Sub-Agent → MCP Tools → Git/GitHub
+         ↓              ↓            ↓
+    Orchestration   Coordination   Execution
+```
+
+### Sub-Agents
+
+han-solo includes specialized sub-agents for intelligent coordination:
+
+- **git-droid** 🤖 - Git workflow coordination and automation
+  - Manages branch creation and cleanup
+  - Coordinates multi-step git operations
+  - Provides intelligent defaults for git workflows
+  - Handles state transitions and safety checks
+
+- **docs-droid** 📚 - Documentation management and validation
+  - Enforces documentation structure and naming conventions
+  - Automatically places docs in correct locations
+  - Maintains README.md indexes
+  - Archives outdated documentation
+
+### How It Works
+
+1. **Slash commands** provide the user interface and high-level orchestration
+2. **Sub-agents** coordinate operations with git-aware intelligence
+3. **MCP tools** execute focused, single-purpose operations
+4. **Services** provide core functionality (git operations, GitHub API, etc.)
+
+This architecture ensures maintainability, testability, and a great user experience.
 
 ---
 
