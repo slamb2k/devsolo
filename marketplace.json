@@ -1,0 +1,17 @@
+{
+  "name": "local-hansolo-test",
+  "version": "1.0.0",
+  "description": "Local marketplace for testing han-solo Claude Code plugin",
+  "plugins": {
+    "hansolo": {
+      "name": "hansolo",
+      "displayName": "han-solo",
+      "description": "AI-native Git workflow automation for Claude Code",
+      "version": "2.0.0",
+      "source": "file:///home/slamb2k/work/hansolo/dist-plugin",
+      "homepage": "https://github.com/slamb2k/hansolo",
+      "author": "han-solo contributors",
+      "license": "MIT"
+    }
+  }
+}

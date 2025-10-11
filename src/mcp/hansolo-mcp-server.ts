@@ -121,6 +121,14 @@ export class HanSoloMCPServer {
   private statusLineTool: StatusLineTool;
 
   constructor(basePath: string = '.hansolo') {
+    // Detect plugin context
+    const isPluginMode = !!process.env['CLAUDE_PLUGIN_ROOT'];
+    const pluginRoot = process.env['CLAUDE_PLUGIN_ROOT'] || '';
+
+    if (isPluginMode) {
+      console.error(`han-solo running in plugin mode: ${pluginRoot}`);
+    }
+
     this.server = new Server(
       {
         name: 'hansolo',
@@ -133,7 +141,7 @@ export class HanSoloMCPServer {
       }
     );
 
-    // Initialize services
+    // Initialize services (basePath is always relative to project root, not plugin root)
     const gitOps = new GitOperations();
     const sessionRepo = new SessionRepository(basePath);
     const configManager = new ConfigurationManager(basePath);
@@ -762,7 +770,8 @@ export class HanSoloMCPServer {
     });
 
     // Log to stderr (stdout is used for MCP protocol)
-    console.error('han-solo MCP server v2.0.0 running (Plugin Architecture - Tools Only)');
+    const mode = process.env['CLAUDE_PLUGIN_ROOT'] ? 'Plugin Mode' : 'Standalone Mode';
+    console.error(`han-solo MCP server v2.0.0 running (${mode})`);
 
     // Keep the async function from returning by waiting on a promise
     // that resolves when the transport closes

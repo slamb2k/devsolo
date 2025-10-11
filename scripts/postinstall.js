@@ -17,6 +17,13 @@ if (process.env.CI || process.env.CONTINUOUS_INTEGRATION) {
   process.exit(0);
 }
 
+// Skip if installed as Claude Code plugin
+if (process.env['CLAUDE_PLUGIN_ROOT']) {
+  console.log('✅ Installed as Claude Code plugin - no setup required');
+  console.log('📋 Plugin will be automatically configured by Claude Code');
+  process.exit(0);
+}
+
 // Skip if running in npm scripts context that shouldn't trigger installer
 if (process.env.npm_lifecycle_event === 'prepare' ||
     process.env.npm_lifecycle_event === 'prepack' ||
