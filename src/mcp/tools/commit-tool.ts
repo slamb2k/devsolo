@@ -10,6 +10,7 @@ import { GitOperations } from '../../services/git-operations';
 import { SessionRepository } from '../../services/session-repository';
 import { ConfigurationManager } from '../../services/configuration-manager';
 import { WorkflowSession } from '../../models/workflow-session';
+import { PreFlightCheckService, PreFlightVerificationResult } from '../../services/validation/pre-flight-check-service';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
@@ -24,6 +25,8 @@ export interface CommitToolInput extends WorkflowToolInput {
  * Commit tool - Commits changes with a message
  */
 export class CommitTool extends BaseMCPTool<CommitToolInput, SessionToolResult> {
+  private preFlightCheckService: PreFlightCheckService;
+
   constructor(
     private gitOps: GitOperations,
     private sessionRepo: SessionRepository,
@@ -31,6 +34,7 @@ export class CommitTool extends BaseMCPTool<CommitToolInput, SessionToolResult> 
     server?: Server
   ) {
     super(configManager, server);
+    this.preFlightCheckService = new PreFlightCheckService(gitOps, sessionRepo);
   }
 
   protected getBanner(): string {
@@ -93,19 +97,21 @@ export class CommitTool extends BaseMCPTool<CommitToolInput, SessionToolResult> 
     const currentBranch = await this.gitOps.getCurrentBranch();
     const session = await this.sessionRepo.getSessionByBranch(currentBranch);
 
-    if (!session) {
-      throw new Error(`No workflow session found for branch '${currentBranch}'.`);
-    }
-
-    // Check for changes
-    const status = await this.gitOps.getStatus();
-    const hasChanges = status.staged.length > 0 || status.modified.length > 0 || status.created.length > 0 || status.deleted.length > 0;
-
-    if (!hasChanges) {
-      throw new Error('No changes to commit');
-    }
-
     return { session };
+  }
+
+  protected async runPreFlightChecks(
+    context: WorkflowContext
+  ): Promise<PreFlightVerificationResult> {
+    const session = context['session'] as WorkflowSession | undefined;
+
+    return this.preFlightCheckService.runAll(
+      [
+        'sessionExists',
+        'hasUncommittedChanges',
+      ],
+      { session }
+    );
   }
 
   protected async executeWorkflow(
