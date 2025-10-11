@@ -37,6 +37,7 @@ import { StashManager } from '../services/stash-manager';
 const InitSchema = z.object({
   scope: z.enum(['project', 'user']).optional(),
   auto: z.boolean().optional(),
+  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const LaunchSchema = z.object({
@@ -45,6 +46,7 @@ const LaunchSchema = z.object({
   auto: z.boolean().optional(),
   stashRef: z.string().optional(),
   popStash: z.boolean().optional(),
+  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const SessionsSchema = z.object({
@@ -52,24 +54,28 @@ const SessionsSchema = z.object({
   verbose: z.boolean().optional(),
   cleanup: z.boolean().optional(),
   auto: z.boolean().optional(),
+  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const SwapSchema = z.object({
   branchName: z.string(),
   auto: z.boolean().optional(),
   stash: z.boolean().optional(),
+  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const AbortSchema = z.object({
   branchName: z.string().optional(),
   auto: z.boolean().optional(),
   deleteBranch: z.boolean().optional(),
+  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const CommitSchema = z.object({
   message: z.string().optional(),
   auto: z.boolean().optional(),
   stagedOnly: z.boolean().optional(),
+  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const ShipSchema = z.object({
@@ -79,6 +85,7 @@ const ShipSchema = z.object({
   merge: z.boolean().optional(),
   auto: z.boolean().optional(),
   stagedOnly: z.boolean().optional(),
+  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const HotfixSchema = z.object({
@@ -88,6 +95,7 @@ const HotfixSchema = z.object({
   skipReview: z.boolean().optional(),
   autoMerge: z.boolean().optional(),
   auto: z.boolean().optional(),
+  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const StatusLineSchema = z.object({
@@ -97,11 +105,17 @@ const StatusLineSchema = z.object({
   showBranchInfo: z.boolean().optional(),
   showStateInfo: z.boolean().optional(),
   auto: z.boolean().optional(),
+  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const CleanupSchema = z.object({
   deleteBranches: z.boolean().optional(),
   auto: z.boolean().optional(),
+  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
+});
+
+const StatusSchema = z.object({
+  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 export class HanSoloMCPServer {
@@ -123,7 +137,7 @@ export class HanSoloMCPServer {
   constructor(basePath: string = '.hansolo') {
     this.server = new Server(
       {
-        name: 'hansolo-mcp',
+        name: 'hansolo',
         version: '2.0.0',
       },
       {
@@ -567,7 +581,8 @@ export class HanSoloMCPServer {
         }
 
         case 'hansolo_status': {
-          const result = await this.statusTool.execute({});
+          const params = StatusSchema.parse(processedArgs);
+          const result = await this.statusTool.execute(params);
 
           return {
             content: [
@@ -995,24 +1010,28 @@ export class HanSoloMCPServer {
 
       // Build tool call parameters string
       const params = args || {};
-      const paramsStr = Object.keys(params).length > 0
-        ? ` with parameters: ${JSON.stringify(params, null, 2)}`
-        : '';
 
       // Generate prompt message with banner and optional argument hint frontmatter
       const frontmatter = toolConfig.argumentHint
         ? `---\nargument-hint: ${toolConfig.argumentHint}\n---`
         : '';
 
+      // Add _via_prompt token to parameters
+      const paramsWithToken = { ...params, _via_prompt: true };
+      const paramsStr = Object.keys(params).length > 0
+        ? ` with parameters: ${JSON.stringify(params, null, 2)}`
+        : '';
+
       const message = `${frontmatter}
-      
+
       Display the following text immediately before you do anything else:
-      
+
       ${banner}
-      
+
       Only when that has been shown, execute the han-solo ${name} command${paramsStr}
-      
-      Use the MCP tool: ${toolConfig.toolName}`;
+
+      Use the MCP tool: ${toolConfig.toolName}
+      IMPORTANT: You MUST pass this exact parameter object: ${JSON.stringify(paramsWithToken, null, 2)}`;
 
       return {
         description: `Execute han-solo ${name} command`,

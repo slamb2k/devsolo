@@ -97,14 +97,26 @@ export class CleanupTool extends BaseMCPTool<CleanupToolInput, QueryToolResult> 
 
   // Override to return QueryToolResult format
   protected createFinalResult(
-    workflowResult: WorkflowExecutionResult
+    workflowResult: WorkflowExecutionResult,
+    _preFlightResult: any = null,
+    _postFlightResult: any = null,
+    viaPrompt: boolean = false,
+    banner: string | null = null
   ): QueryToolResult {
-    return {
+    const result: QueryToolResult = {
       success: workflowResult.success,
       data: workflowResult.data || {},
       message: (workflowResult.data?.['message'] as string) || undefined,
-      errors: workflowResult.errors,
-      warnings: workflowResult.warnings,
+      errors: workflowResult.errors || [],
+      warnings: workflowResult.warnings || [],
     };
+
+    // Include banner in warnings if NOT called via prompt (to show with tool result)
+    if (!viaPrompt && banner) {
+      result.warnings = result.warnings || [];
+      result.warnings.unshift(banner);
+    }
+
+    return result;
   }
 }
