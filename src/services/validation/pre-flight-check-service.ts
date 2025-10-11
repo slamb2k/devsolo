@@ -65,6 +65,7 @@ export type PreFlightCheckType =
   | 'sessionExists'
   | 'onFeatureBranch'
   | 'hasUncommittedChanges'
+  | 'noUncommittedChanges'
   | 'hasCommitsToShip'
   | 'remoteBranchExists'
   | 'ciChecksPassed'
@@ -151,6 +152,8 @@ export class PreFlightCheckService {
       return this.checkOnFeatureBranch(context);
     case 'hasUncommittedChanges':
       return this.checkHasUncommittedChanges(context);
+    case 'noUncommittedChanges':
+      return this.checkNoUncommittedChanges(context);
     case 'hasCommitsToShip':
       return this.checkHasCommitsToShip(context);
     case 'remoteBranchExists':
@@ -595,6 +598,48 @@ export class PreFlightCheckService {
     } catch (error) {
       return {
         name: 'Has Uncommitted Changes',
+        passed: false,
+        message: `Failed to check status: ${error instanceof Error ? error.message : String(error)}`,
+        level: 'error',
+      };
+    }
+  }
+
+  /**
+   * Check if NO uncommitted changes (for ship operation)
+   */
+  private async checkNoUncommittedChanges(_context: PreFlightContext): Promise<PreFlightCheckResult> {
+    try {
+      const status = await this.gitOps.getStatus();
+      const hasChanges = status.staged.length > 0 || status.modified.length > 0 || status.created.length > 0 || status.deleted.length > 0;
+
+      if (!hasChanges) {
+        return {
+          name: 'No Uncommitted Changes',
+          passed: true,
+          message: 'All changes committed',
+          level: 'info',
+        };
+      }
+
+      const stagedCount = status.staged.length;
+      const unstagedCount = status.modified.length + status.created.length + status.deleted.length;
+
+      return {
+        name: 'No Uncommitted Changes',
+        passed: false,
+        message: `${stagedCount} staged, ${unstagedCount} unstaged changes`,
+        level: 'error',
+        details: {
+          stagedCount,
+          unstagedCount,
+          changedFiles: [...status.staged, ...status.modified, ...status.created, ...status.deleted],
+        },
+        suggestions: ['Commit changes first using hansolo_commit'],
+      };
+    } catch (error) {
+      return {
+        name: 'No Uncommitted Changes',
         passed: false,
         message: `Failed to check status: ${error instanceof Error ? error.message : String(error)}`,
         level: 'error',

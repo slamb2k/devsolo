@@ -9,6 +9,7 @@ import { SessionRepository } from '../../services/session-repository';
 import { GitOperations } from '../../services/git-operations';
 import { ConfigurationManager } from '../../services/configuration-manager';
 import { WorkflowSession } from '../../models/workflow-session';
+import { PreFlightVerificationResult, PreFlightCheckResult } from '../../services/validation/pre-flight-check-service';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
@@ -39,20 +40,78 @@ export class AbortTool extends BaseMCPTool<AbortToolInput, SessionToolResult> {
   }
 
   protected async createContext(input: AbortToolInput): Promise<Record<string, unknown>> {
-    // Get session to abort
+    // Get session to abort (will be validated in pre-flight checks)
     const targetBranch = input.branchName || (await this.gitOps.getCurrentBranch());
     const session = await this.sessionRepo.getSessionByBranch(targetBranch);
 
-    if (!session) {
-      throw new Error(`No session found for branch '${targetBranch}'`);
-    }
-
-    // Check if already aborted/complete (only if not in auto mode)
-    if (!session.isActive() && !input.auto) {
-      throw new Error(`Session already in terminal state: ${session.currentState}`);
-    }
-
     return { session, targetBranch };
+  }
+
+  protected async runPreFlightChecks(
+    context: WorkflowContext
+  ): Promise<PreFlightVerificationResult> {
+    const input = context.input as AbortToolInput;
+    const session = context['session'] as WorkflowSession | undefined;
+    const targetBranch = context['targetBranch'] as string;
+
+    const checks: PreFlightCheckResult[] = [];
+
+    // Check 1: Session exists
+    const sessionExistsCheck: PreFlightCheckResult = session
+      ? {
+        name: 'Session Exists',
+        passed: true,
+        message: `Session found for branch '${targetBranch}'`,
+        level: 'info',
+      }
+      : {
+        name: 'Session Exists',
+        passed: false,
+        message: `No session found for branch '${targetBranch}'`,
+        level: 'error',
+        suggestions: ['Use hansolo_sessions to list available sessions'],
+      };
+    checks.push(sessionExistsCheck);
+
+    // Check 2: Session is active (not already aborted/complete) - only if not in auto mode
+    if (session && !input.auto) {
+      const sessionActiveCheck: PreFlightCheckResult = session.isActive()
+        ? {
+          name: 'Session Active',
+          passed: true,
+          message: 'Session is active and can be aborted',
+          level: 'info',
+        }
+        : {
+          name: 'Session Active',
+          passed: false,
+          message: `Session already in terminal state: ${session.currentState}`,
+          level: 'error',
+          suggestions: ['Session is already aborted or complete'],
+        };
+      checks.push(sessionActiveCheck);
+    }
+
+    // Build result
+    const failures = checks
+      .filter(c => !c.passed && c.level === 'error')
+      .map(c => c.message || c.name);
+
+    const allPassed = checks.every(c => c.passed);
+    const passedCount = checks.filter(c => c.passed).length;
+    const failedCount = checks.filter(c => !c.passed && c.level === 'error').length;
+
+    return {
+      allPassed,
+      checks,
+      failures,
+      warnings: [],
+      prompts: [],
+      passedCount,
+      failedCount,
+      warningCount: 0,
+      promptCount: 0,
+    };
   }
 
   protected async executeWorkflow(

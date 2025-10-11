@@ -25,6 +25,15 @@ The `dev/system/` folder is for **comprehensive technical documentation** about 
   - Test coverage information
   - Cross-reference tables
 
+- **command-architecture.md** - Command architecture and execution flow:
+  - Base class architecture (BaseMCPTool)
+  - 8-phase execution pipeline
+  - Pre-flight and post-flight checks per command
+  - Elicitation vs error/halting scenarios
+  - State machine and transitions
+  - Banner display implementation
+  - Error handling strategy
+
 ### Configuration
 - **configuration.md** - Complete configuration schema including:
   - All available settings

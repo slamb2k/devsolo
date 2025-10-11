@@ -112,20 +112,10 @@ export class ShipTool extends BaseMCPTool<ShipToolInput, GitHubToolResult> {
     const currentBranch = await this.gitOps.getCurrentBranch();
     const session = await this.sessionRepo.getSessionByBranch(currentBranch);
 
-    if (!session) {
-      throw new Error(`No workflow session found for branch '${currentBranch}'. Use hansolo_launch to start a workflow.`);
-    }
-
-    // Check for merged/closed PR (BLOCKING ERROR)
+    // Check for merged/closed PR (BLOCKING ERROR - not in pre-flight checks)
     const mergedPRCheck = await this.checkForMergedPR(currentBranch);
     if (!mergedPRCheck.success) {
       throw new Error(mergedPRCheck.errors?.join(', ') || 'PR check failed');
-    }
-
-    // Check for uncommitted changes
-    const hasChanges = await this.gitOps.hasUncommittedChanges();
-    if (hasChanges) {
-      throw new Error('Uncommitted changes detected. Commit changes first using hansolo_commit.');
     }
 
     return { session };
@@ -140,6 +130,7 @@ export class ShipTool extends BaseMCPTool<ShipToolInput, GitHubToolResult> {
       [
         'sessionExists',
         'onFeatureBranch',
+        'noUncommittedChanges',
         'hasCommitsToShip',
         'noMergeConflicts',
       ],
