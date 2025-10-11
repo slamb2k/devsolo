@@ -11,16 +11,6 @@ Cancel the current workflow session and optionally delete the feature branch.
 
 ## Workflow
 
-**Display the following banner immediately before doing anything else:**
-
-```
-░█▀█░█▀▄░█▀█░█▀▄░▀█▀░▀█▀░█▀█░█▀▀░
-░█▀█░█▀▄░█░█░█▀▄░░█░░░█░░█░█░█░█░
-░▀░▀░▀▀░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀░
-```
-
-Once displayed, continue with the following steps:
-
 1. **Invoke git-droid sub-agent** to coordinate the abort workflow
 2. git-droid will:
    - Verify session exists for the target branch
@@ -29,6 +19,14 @@ Once displayed, continue with the following steps:
      - Offer to stash them (unless force=true)
      - Warn about potential data loss
    - Confirm abort (destructive action, unless yes=true)
+   - **Display the following banner immediately before calling the MCP tool:**
+
+```
+░█▀█░█▀▄░█▀█░█▀▄░▀█▀░▀█▀░█▀█░█▀▀░
+░█▀█░█▀▄░█░█░█▀▄░░█░░░█░░█░█░█░█░
+░▀░▀░▀▀░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀░
+```
+
    - Call `mcp__hansolo__hansolo_abort` with parameters
    - Switch to main branch
    - Optionally delete the feature branch

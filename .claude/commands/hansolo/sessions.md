@@ -10,15 +10,13 @@ List and manage workflow sessions.
 
 ## Workflow
 
-**Display the following banner immediately before doing anything else:**
+**Display the following banner immediately before calling the MCP tool:**
 
 ```
 ░█▀▀░█▀▀░█▀▀░█▀▀░▀█▀░█▀█░█▀█░█▀▀░
 ░▀▀█░█▀▀░▀▀█░▀▀█░░█░░█░█░█░█░▀▀█░
 ░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░
 ```
-
-Once displayed, continue with the following steps:
 
 1. Use the `mcp__hansolo__hansolo_sessions` tool to query sessions
 2. Pass along the provided arguments (`all`, `verbose`, `cleanup`)

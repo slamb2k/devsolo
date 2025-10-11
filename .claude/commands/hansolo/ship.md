@@ -13,16 +13,6 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 
 ## Workflow
 
-**Display the following banner immediately before doing anything else:**
-
-```
-░█▀▀░█░█░▀█▀░█▀█░█▀█░▀█▀░█▀█░█▀▀░
-░▀▀█░█▀█░░█░░█▀▀░█▀▀░░█░░█░█░█░█░
-░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
-```
-
-Once displayed, continue with the following steps:
-
 1. **Invoke git-droid sub-agent** to orchestrate the complete ship workflow
 2. git-droid will:
 
@@ -59,6 +49,12 @@ Once displayed, continue with the following steps:
      ```
 
    **Step 3: Ship the Feature**
+   - **Display the following banner immediately before calling the MCP tool:**
+     ```
+     ░█▀▀░█░█░▀█▀░█▀█░█▀█░▀█▀░█▀█░█▀▀░
+     ░▀▀█░█▀█░░█░░█▀▀░█▀▀░░█░░█░█░█░█░
+     ░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
+     ```
    - Call `mcp__hansolo__hansolo_ship` with all parameters
    - This single tool call handles:
      - Push to remote
