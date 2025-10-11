@@ -1,6 +1,6 @@
 # Development Learnings
 
-This folder contains reusable patterns, coding strategies, testing approaches, naming conventions, and best practices discovered during han-solo development.
+This folder contains reusable patterns, coding strategies, testing approaches, naming conventions, and best practices discovered during devsolo development.
 
 ## Purpose
 

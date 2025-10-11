@@ -1,5 +1,5 @@
 /**
- * MCP Tools - Pure business logic for han-solo workflows
+ * MCP Tools - Pure business logic for devsolo workflows
  * No CLI/UI dependencies, returns structured results for MCP clients
  */
 

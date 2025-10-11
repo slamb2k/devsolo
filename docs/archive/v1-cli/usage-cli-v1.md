@@ -1,6 +1,6 @@
-# han-solo Usage Guide
+# devsolo Usage Guide
 
-Practical examples and best practices for using han-solo in real-world development scenarios.
+Practical examples and best practices for using devsolo in real-world development scenarios.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ The most common workflow: develop a feature and ship it.
 
 ```bash
 # 1. Start new feature
-hansolo launch
+devsolo launch
 # Generated branch: feature/2025-01-15-14-30-45
 
 # 2. Make your changes
@@ -27,13 +27,13 @@ vim src/new-feature.ts
 vim tests/new-feature.test.ts
 
 # 3. Commit your changes
-hansolo commit --message "feat: add new feature
+devsolo commit --message "feat: add new feature
 
 Implemented new feature with comprehensive tests.
 Updated documentation to reflect changes."
 
 # 4. Ship it (pushes, creates PR, merges, cleans up)
-hansolo ship --pr-description "## Summary
+devsolo ship --pr-description "## Summary
 Adds new feature functionality
 
 ## Changes
@@ -52,19 +52,19 @@ When you want a specific branch name:
 
 ```bash
 # Start with custom name
-hansolo launch --branch feature/user-authentication
+devsolo launch --branch feature/user-authentication
 
 # Work on the feature
 vim src/auth-endpoints.ts
 
 # Commit changes
-hansolo commit --message "feat: implement user authentication
+devsolo commit --message "feat: implement user authentication
 
 Added OAuth2 endpoints and JWT token validation.
 Includes middleware for protected routes."
 
 # Ship it
-hansolo ship --pr-description "## Summary
+devsolo ship --pr-description "## Summary
 Implements user authentication system
 
 ## Changes
@@ -79,52 +79,52 @@ For urgent bug fixes:
 
 ```bash
 # Launch hotfix
-hansolo launch --branch hotfix/critical-security-bug
+devsolo launch --branch hotfix/critical-security-bug
 
 # Fix the bug
 vim src/security-fix.ts
 
 # Commit the fix
-hansolo commit --message "fix: patch critical security vulnerability"
+devsolo commit --message "fix: patch critical security vulnerability"
 
 # Ship immediately (bypasses waiting for approvals if configured)
-hansolo ship --force
+devsolo ship --force
 ```
 
 ## Team Collaboration
 
 ### Working with Multiple Developers
 
-han-solo prevents conflicts when multiple developers work on different features.
+devsolo prevents conflicts when multiple developers work on different features.
 
 **Developer A:**
 ```bash
 # Start feature A
-hansolo launch --branch feature/api-integration
+devsolo launch --branch feature/api-integration
 
 # Work...
 vim src/api-client.ts
 
 # Commit
-hansolo commit --message "feat: add API client integration"
+devsolo commit --message "feat: add API client integration"
 
 # Ship
-hansolo ship
+devsolo ship
 ```
 
 **Developer B (at the same time):**
 ```bash
 # Start feature B (independent of A)
-hansolo launch --branch feature/ui-redesign
+devsolo launch --branch feature/ui-redesign
 
 # Work...
 vim src/components/Header.tsx
 
 # Commit
-hansolo commit --message "feat: redesign header component"
+devsolo commit --message "feat: redesign header component"
 
-# Ship (han-solo handles any rebasing automatically)
-hansolo ship
+# Ship (devsolo handles any rebasing automatically)
+devsolo ship
 ```
 
 **Key Benefits:**
@@ -135,20 +135,20 @@ hansolo ship
 
 ### Code Review Workflow
 
-Integrate han-solo with your team's review process:
+Integrate devsolo with your team's review process:
 
 ```bash
 # 1. Commit and ship to create PR (but don't auto-merge)
-hansolo commit --message "feat: initial implementation"
-hansolo ship
+devsolo commit --message "feat: initial implementation"
+devsolo ship
 
 # This creates the PR and waits for CI
 # Reviewers can now review on GitHub
 
 # 2. If changes needed, make them, commit, and ship again
 vim src/requested-changes.ts
-hansolo commit --message "fix: address review comments"
-hansolo ship  # Updates existing PR
+devsolo commit --message "fix: address review comments"
+devsolo ship  # Updates existing PR
 
 # 3. Once approved, ship merges automatically
 ```
@@ -160,13 +160,13 @@ Two developers working on the same feature:
 **Developer 1:**
 ```bash
 # Start the feature
-hansolo launch --branch feature/complex-algorithm
+devsolo launch --branch feature/complex-algorithm
 
 # Push work-in-progress
 git push origin feature/complex-algorithm
 
 # Share session ID with Developer 2
-hansolo status  # Shows session ID
+devsolo status  # Shows session ID
 ```
 
 **Developer 2:**
@@ -179,14 +179,14 @@ git checkout feature/complex-algorithm
 vim src/algorithm.ts
 
 # Either developer can ship when ready
-hansolo ship
+devsolo ship
 ```
 
 ## CI/CD Integration
 
 ### GitHub Actions Integration
 
-han-solo works seamlessly in CI/CD pipelines:
+devsolo works seamlessly in CI/CD pipelines:
 
 **.github/workflows/deploy.yml:**
 ```yaml
@@ -208,14 +208,14 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install han-solo
-        run: npm install -g @hansolo/cli
+      - name: Install devsolo
+        run: npm install -g @devsolo/cli
 
       - name: Ship feature
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          hansolo ship --yes  # Auto-confirm prompts
+          devsolo ship --yes  # Auto-confirm prompts
 ```
 
 ### GitLab CI Integration
@@ -230,9 +230,9 @@ deploy-feature:
   only:
     - feature/*
   script:
-    - npm install -g @hansolo/cli
+    - npm install -g @devsolo/cli
     - export GITLAB_TOKEN=$CI_JOB_TOKEN
-    - hansolo ship --yes
+    - devsolo ship --yes
   when: manual  # Trigger manually
 ```
 
@@ -249,9 +249,9 @@ pipeline {
                 branch 'feature/*'
             }
             steps {
-                sh 'npm install -g @hansolo/cli'
+                sh 'npm install -g @devsolo/cli'
                 withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-                    sh 'hansolo ship --yes'
+                    sh 'devsolo ship --yes'
                 }
             }
         }
@@ -267,28 +267,28 @@ Work on multiple features and switch between them:
 
 ```bash
 # Start feature 1
-hansolo launch --branch feature/database-migration
+devsolo launch --branch feature/database-migration
 # Work...
 vim src/migrations/001_initial.sql
-hansolo commit --message "feat: add migration scripts"
+devsolo commit --message "feat: add migration scripts"
 
 # Need to work on something else - launch feature 2
-hansolo launch --branch feature/api-docs
+devsolo launch --branch feature/api-docs
 # Work...
 vim docs/api.md
-hansolo commit --message "docs: add API documentation"
+devsolo commit --message "docs: add API documentation"
 
 # Switch back to feature 1
-hansolo swap feature/database-migration
+devsolo swap feature/database-migration
 # Continue work...
 
 # Ship feature 1
-hansolo ship
+devsolo ship
 
 # Switch to feature 2
-hansolo swap feature/api-docs
+devsolo swap feature/api-docs
 # Ship feature 2
-hansolo ship
+devsolo ship
 ```
 
 ### Long-Running Feature Branches
@@ -297,21 +297,21 @@ For features that take days or weeks:
 
 ```bash
 # Day 1: Start feature
-hansolo launch --branch feature/major-refactor
+devsolo launch --branch feature/major-refactor
 vim src/refactor-1.ts
-hansolo commit --message "WIP: Initial refactoring"
+devsolo commit --message "WIP: Initial refactoring"
 git push  # Save work
 
 # Day 2: Continue
 git pull  # Get latest if working from different machine
 # More work...
 vim src/refactor-2.ts
-hansolo commit --message "WIP: Refactor services"
+devsolo commit --message "WIP: Refactor services"
 git push
 
 # Day 5: Ready to ship
-# han-solo rebases on latest main automatically
-hansolo ship --pr-description "## Summary
+# devsolo rebases on latest main automatically
+devsolo ship --pr-description "## Summary
 Major refactoring of core services
 
 ## Changes
@@ -322,14 +322,14 @@ Major refactoring of core services
 
 ### Handling Merge Conflicts
 
-han-solo automates rebasing, but conflicts may still occur:
+devsolo automates rebasing, but conflicts may still occur:
 
 ```bash
 # Ship your feature
-hansolo ship
+devsolo ship
 
 # If conflicts occur during rebase:
-# han-solo stops and shows conflicted files
+# devsolo stops and shows conflicted files
 
 # 1. Resolve conflicts manually
 git status  # See conflicted files
@@ -340,16 +340,16 @@ git add src/conflicted-file.ts
 git rebase --continue
 
 # 3. Ship again
-hansolo ship
+devsolo ship
 ```
 
 ### Feature Flags Integration
 
-Combine han-solo with feature flags:
+Combine devsolo with feature flags:
 
 ```bash
 # Launch feature with flag
-hansolo launch --branch feature/beta-ui
+devsolo launch --branch feature/beta-ui
 
 # Implement behind feature flag
 cat > src/featureFlags.ts << EOF
@@ -357,15 +357,15 @@ export const BETA_UI = process.env.ENABLE_BETA_UI === 'true';
 EOF
 
 # Ship to production (feature disabled)
-hansolo ship
+devsolo ship
 
 # Enable for testing
 export ENABLE_BETA_UI=true
 
 # Enable for all users later (separate ship)
-hansolo launch --branch feature/enable-beta-ui
+devsolo launch --branch feature/enable-beta-ui
 vim src/featureFlags.ts  # Change default to true
-hansolo ship
+devsolo ship
 ```
 
 ## Best Practices
@@ -375,28 +375,28 @@ hansolo ship
 ❌ **Bad:**
 ```bash
 git checkout -b feature/my-feature
-# han-solo doesn't know about this!
+# devsolo doesn't know about this!
 ```
 
 ✅ **Good:**
 ```bash
-hansolo launch --branch feature/my-feature
-# han-solo tracks everything
+devsolo launch --branch feature/my-feature
+# devsolo tracks everything
 ```
 
 ### 2. Use Descriptive Branch Names
 
 ❌ **Bad:**
 ```bash
-hansolo launch --branch feature/fix
-hansolo launch --branch feature/stuff
+devsolo launch --branch feature/fix
+devsolo launch --branch feature/stuff
 ```
 
 ✅ **Good:**
 ```bash
-hansolo launch --branch feature/user-authentication
-hansolo launch --branch feature/payment-integration
-hansolo launch --branch hotfix/memory-leak-in-parser
+devsolo launch --branch feature/user-authentication
+devsolo launch --branch feature/payment-integration
+devsolo launch --branch hotfix/memory-leak-in-parser
 ```
 
 **Branch Naming Rules:**
@@ -416,24 +416,24 @@ hansolo launch --branch hotfix/memory-leak-in-parser
 ✅ **Good:**
 ```bash
 # Always check status first
-hansolo status
+devsolo status
 
 # Review what will be committed
 git status
 git diff
 
 # Then ship
-hansolo ship
+devsolo ship
 ```
 
 ### 4. Clean Up Regularly
 
 ```bash
 # After merging PRs manually on GitHub
-hansolo cleanup
+devsolo cleanup
 
 # Or run periodically
-hansolo cleanup --days 7  # Clean up sessions older than 7 days
+devsolo cleanup --days 7  # Clean up sessions older than 7 days
 ```
 
 ### 5. Use Commit and Ship for Everything
@@ -451,8 +451,8 @@ git push
 
 ✅ **Good:**
 ```bash
-hansolo commit --message "feat: my feature"
-hansolo ship
+devsolo commit --message "feat: my feature"
+devsolo ship
 # Commit handles staging and committing
 # Ship handles push, PR, merge, cleanup automatically!
 ```
@@ -462,16 +462,16 @@ hansolo ship
 ✅ **Good:**
 ```bash
 # Make some changes
-hansolo commit --message "feat: add user model"
+devsolo commit --message "feat: add user model"
 
 # Make more changes
-hansolo commit --message "feat: add user controller"
+devsolo commit --message "feat: add user controller"
 
 # Make final changes
-hansolo commit --message "feat: add user routes"
+devsolo commit --message "feat: add user routes"
 
 # Now ship all commits together
-hansolo ship
+devsolo ship
 ```
 
 ### 7. Leverage Claude Code Integration
@@ -480,12 +480,12 @@ If using Claude Code:
 
 ```bash
 # Enable status line for constant visibility
-/mcp__hansolo__status_line enable
+/mcp__devsolo__status_line enable
 
 # Use MCP tools for convenience
-/mcp__hansolo__launch
-/mcp__hansolo__commit
-/mcp__hansolo__ship
+/mcp__devsolo__launch
+/mcp__devsolo__commit
+/mcp__devsolo__ship
 
 # Let Claude Code generate commit messages and PR descriptions
 # Just call the commands without parameters!
@@ -495,7 +495,7 @@ If using Claude Code:
 
 ### Scenario 1: Forgot to Launch
 
-You started coding without running `hansolo launch`:
+You started coding without running `devsolo launch`:
 
 ```bash
 # You have uncommitted changes on main
@@ -505,13 +505,13 @@ git status  # Shows modified files
 git stash
 
 # Launch properly
-hansolo launch --branch feature/my-feature
+devsolo launch --branch feature/my-feature
 
 # Restore changes
 git stash pop
 
 # Continue normally
-hansolo ship
+devsolo ship
 ```
 
 ### Scenario 2: Need to Abort Feature
@@ -520,13 +520,13 @@ Started a feature but decided not to continue:
 
 ```bash
 # Abort the workflow
-hansolo abort
+devsolo abort
 
 # Keep the branch (for later)
-hansolo abort --no-delete
+devsolo abort --no-delete
 
 # Or delete everything
-hansolo abort --delete-branch
+devsolo abort --delete-branch
 ```
 
 ### Scenario 3: CI Failed
@@ -538,10 +538,10 @@ Your CI checks failed after shipping:
 vim src/broken-test.ts
 
 # Commit the fix
-hansolo commit --message "fix: broken test"
+devsolo commit --message "fix: broken test"
 
 # Ship again (updates the same PR)
-hansolo ship
+devsolo ship
 ```
 
 ### Scenario 4: Need to Update Dependencies
@@ -553,16 +553,16 @@ Mid-feature, you need to update packages:
 npm update
 
 # Commit the dependency changes
-hansolo commit --message "chore: update dependencies"
+devsolo commit --message "chore: update dependencies"
 
 # Continue with your feature
 vim src/my-feature.ts
 
 # Commit feature changes
-hansolo commit --message "feat: implement feature"
+devsolo commit --message "feat: implement feature"
 
 # Ship everything together
-hansolo ship
+devsolo ship
 ```
 
 ### Scenario 5: Working Across Multiple Machines
@@ -571,7 +571,7 @@ Started work on laptop, continuing on desktop:
 
 **On Laptop:**
 ```bash
-hansolo launch --branch feature/mobile-app
+devsolo launch --branch feature/mobile-app
 # Work...
 git push  # Save work to remote
 ```
@@ -583,10 +583,10 @@ git fetch origin
 git checkout feature/mobile-app
 
 # Resume work...
-# han-solo automatically detects the session
+# devsolo automatically detects the session
 
 # Ship when done
-hansolo ship
+devsolo ship
 ```
 
 ### Scenario 6: Emergency Rollback
@@ -599,8 +599,8 @@ git checkout main
 git checkout -b hotfix/rollback-bad-feature HEAD~1
 
 # Ship the rollback
-hansolo launch --branch hotfix/rollback-bad-feature
-hansolo ship --force  # Skip some checks for urgency
+devsolo launch --branch hotfix/rollback-bad-feature
+devsolo ship --force  # Skip some checks for urgency
 ```
 
 ## Tips for Different Team Sizes
@@ -609,22 +609,22 @@ hansolo ship --force  # Skip some checks for urgency
 
 ```bash
 # Simple workflow
-hansolo launch
+devsolo launch
 # work...
-hansolo ship
+devsolo ship
 
 # Can skip some checks
-hansolo ship --yes  # Auto-confirm everything
+devsolo ship --yes  # Auto-confirm everything
 ```
 
 ### Small Team (2-5 developers)
 
 ```bash
 # Use named branches for clarity
-hansolo launch --branch feature/your-name-feature-description
+devsolo launch --branch feature/your-name-feature-description
 
 # Regular cleanup
-hansolo cleanup  # Run weekly
+devsolo cleanup  # Run weekly
 
 # Communicate about long-running branches
 ```
@@ -633,16 +633,16 @@ hansolo cleanup  # Run weekly
 
 ```bash
 # Strict branch naming convention
-hansolo launch --branch feature/TICKET-123-short-description
+devsolo launch --branch feature/TICKET-123-short-description
 
 # Integrate with project management
-hansolo launch --branch feature/JIRA-456-user-auth
+devsolo launch --branch feature/JIRA-456-user-auth
 
 # Regular cleanup is critical
-hansolo cleanup --days 7  # Run daily in CI
+devsolo cleanup --days 7  # Run daily in CI
 
 # Use configuration to enforce standards
-hansolo config --global workflows.launch.branchPrefix feature/TEAM-
+devsolo config --global workflows.launch.branchPrefix feature/TEAM-
 ```
 
 ## Keyboard Shortcuts & Aliases
@@ -652,12 +652,12 @@ Speed up your workflow with bash aliases:
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
 
-alias hl='hansolo launch'
-alias hs='hansolo ship'
-alias hst='hansolo status'
-alias hsw='hansolo swap'
-alias ha='hansolo abort'
-alias hc='hansolo cleanup'
+alias hl='devsolo launch'
+alias hs='devsolo ship'
+alias hst='devsolo status'
+alias hsw='devsolo swap'
+alias ha='devsolo abort'
+alias hc='devsolo cleanup'
 
 # Use them
 hl --branch feature/quick-fix
@@ -667,13 +667,13 @@ hs
 
 ## Conclusion
 
-han-solo is designed to make Git workflows effortless. The key is:
+devsolo is designed to make Git workflows effortless. The key is:
 
 1. **Always launch** before starting work
 2. **Commit incrementally** as you make changes
 3. **Ship when ready** to push, PR, merge, and cleanup
 4. **Always cleanup** after merging
-5. **Let han-solo handle** the Git complexity
+5. **Let devsolo handle** the Git complexity
 
 The separation of commit (version control) and ship (delivery pipeline) gives you flexibility to:
 - Commit multiple times during development

@@ -120,7 +120,7 @@ export class InstallationStrategyService {
     case 'global':
       // Global install - binary is in PATH
       return {
-        command: 'hansolo-mcp',
+        command: 'devsolo-mcp',
         args: [],
       };
 
@@ -128,7 +128,7 @@ export class InstallationStrategyService {
       // Local install - use npx to run from node_modules
       return {
         command: 'npx',
-        args: ['hansolo-mcp'],
+        args: ['devsolo-mcp'],
       };
 
     case 'npx':

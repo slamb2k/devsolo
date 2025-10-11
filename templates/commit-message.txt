@@ -1,4 +1,4 @@
-# Commit Message Template for han-solo
+# Commit Message Template for devsolo
 #
 # Format: <type>(<scope>): <subject>
 #
@@ -45,6 +45,6 @@
 # Closes #42
 # --------
 #
-# han-solo session: {{SESSION_ID}}
+# devsolo session: {{SESSION_ID}}
 # Branch: {{BRANCH_NAME}}
 # Workflow: {{WORKFLOW_TYPE}}

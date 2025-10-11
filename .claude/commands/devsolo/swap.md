@@ -26,7 +26,7 @@ Switch between active workflow sessions without aborting them.
 ░▀▀▀░▀░▀░▀░▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
 ```
 
-   - Call `mcp__hansolo__hansolo_swap` with parameters
+   - Call `mcp__devsolo__devsolo_swap` with parameters
    - Switch to target branch
    - Activate target session
    - Pop stash if previously stashed on target branch
@@ -63,17 +63,17 @@ Switch between active workflow sessions without aborting them.
 
 ```
 # Swap to specific branch (prompts if uncommitted changes)
-/hansolo swap --branchName="feature/other-work"
+/devsolo swap --branchName="feature/other-work"
 
 # Swap and automatically stash
-/hansolo swap --branchName="feature/other-work" --stash
+/devsolo swap --branchName="feature/other-work" --stash
 
 # Force swap (loses uncommitted changes)
-/hansolo swap --branchName="feature/other-work" --force
+/devsolo swap --branchName="feature/other-work" --force
 
 # List available sessions first, then swap
-/hansolo sessions
-/hansolo swap --branchName="feature/authentication"
+/devsolo sessions
+/devsolo swap --branchName="feature/authentication"
 ```
 
 ## Use Cases
@@ -82,36 +82,36 @@ Switch between active workflow sessions without aborting them.
 ```
 # Working on feature A, need to help with feature B
 # Current: feature/user-auth
-/hansolo swap --branchName="feature/api-client" --stash
+/devsolo swap --branchName="feature/api-client" --stash
 
 # Later, return to feature A
-/hansolo swap --branchName="feature/user-auth"
+/devsolo swap --branchName="feature/user-auth"
 # Automatically restores stashed work
 ```
 
 ### Scenario 2: Review Different Branches
 ```
 # Quickly review multiple feature branches
-/hansolo sessions
-/hansolo swap --branchName="feature/feature-1"
+/devsolo sessions
+/devsolo swap --branchName="feature/feature-1"
 # Review code...
-/hansolo swap --branchName="feature/feature-2"
+/devsolo swap --branchName="feature/feature-2"
 # Review code...
-/hansolo swap --branchName="feature/feature-3"
+/devsolo swap --branchName="feature/feature-3"
 ```
 
 ### Scenario 3: Emergency Interruption
 ```
 # Working on feature, need to fix critical bug immediately
 # Current: feature/new-dashboard (with uncommitted changes)
-/hansolo swap --branchName="fix/critical-login-bug" --stash
+/devsolo swap --branchName="fix/critical-login-bug" --stash
 
 # Fix the bug and ship
-/hansolo commit
-/hansolo ship
+/devsolo commit
+/devsolo ship
 
 # Return to dashboard work
-/hansolo swap --branchName="feature/new-dashboard"
+/devsolo swap --branchName="feature/new-dashboard"
 # Uncommitted work automatically restored
 ```
 
@@ -132,7 +132,7 @@ Switch between active workflow sessions without aborting them.
 
 ## Stash Management
 
-han-solo automatically manages stashes for you:
+devsolo automatically manages stashes for you:
 
 1. **Automatic Stashing**: When swapping with uncommitted changes, creates stash
 2. **Labeled Stashes**: Stashes are labeled with source branch for identification
@@ -144,7 +144,7 @@ han-solo automatically manages stashes for you:
 git-droid will handle common errors:
 
 - **Target session not found**: Lists available sessions to choose from
-- **Target branch doesn't exist**: Reports error, suggests /hansolo sessions
+- **Target branch doesn't exist**: Reports error, suggests /devsolo sessions
 - **Uncommitted changes**: Prompts to stash, commit, or force
 - **Stash conflict**: Guides to manually resolve stash conflicts
 - **Invalid branch name**: Validates branch name format
@@ -156,5 +156,5 @@ git-droid will handle common errors:
 - Can have multiple active sessions
 - Stashes are automatically managed
 - Can view all stashes with `git stash list`
-- Use /hansolo sessions to see all active sessions
+- Use /devsolo sessions to see all active sessions
 - Swap is non-destructive (unlike abort)

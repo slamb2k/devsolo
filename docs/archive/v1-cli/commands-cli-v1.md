@@ -1,4 +1,4 @@
-# hansolo Command Reference
+# devsolo Command Reference
 
 ## Table of Contents
 
@@ -15,10 +15,10 @@
 
 ## Executive Summary
 
-The hansolo CLI tool provides a comprehensive Git workflow automation system with the following characteristics:
+The devsolo CLI tool provides a comprehensive Git workflow automation system with the following characteristics:
 
 - **Total Commands**: 15 primary commands + 10 MCP tools
-- **Access Methods**: CLI (`hansolo`), MCP Server (`hansolo-mcp`), Claude Code (`/mcp__hansolo__`)
+- **Access Methods**: CLI (`devsolo`), MCP Server (`devsolo-mcp`), Claude Code (`/mcp__devsolo__`)
 - **Implementation Status**: 87% fully implemented, 13% partial/planned
 - **Test Coverage**: Contract tests (100%), Integration tests (82%), Unit tests (65%)
 - **UI Consistency**: Standardized ASCII banners, color-coded status displays, progress indicators
@@ -31,7 +31,7 @@ The hansolo CLI tool provides a comprehensive Git workflow automation system wit
 
 | Command | CLI | MCP | Claude | Status | Test Coverage | Description |
 |---------|-----|-----|--------|--------|---------------|-------------|
-| **init** | ✅ | ✅ | ✅ | Complete | 95% | Initialize han-solo in project |
+| **init** | ✅ | ✅ | ✅ | Complete | 95% | Initialize devsolo in project |
 | **launch** | ✅ | ✅ | ✅ | Complete | 90% | Start new feature workflow |
 | **commit** | ✅ | ✅ | ✅ | Complete | 85% | Stage and commit changes |
 | **ship** | ✅ | ✅ | ✅ | Complete | 85% | Push, PR, merge, cleanup |
@@ -51,13 +51,13 @@ The hansolo CLI tool provides a comprehensive Git workflow automation system wit
 
 ## Detailed Command Reference
 
-### 1. `hansolo init`
+### 1. `devsolo init`
 
-**Description**: Initialize han-solo in your project, creating configuration, directories, and hooks.
+**Description**: Initialize devsolo in your project, creating configuration, directories, and hooks.
 
 #### CLI Usage
 ```bash
-hansolo init [options]
+devsolo init [options]
   --force              # Reinitialize even if already configured
   --git-platform       # Specify platform: github|gitlab
   --create-remote      # Create remote repository
@@ -77,7 +77,7 @@ hansolo init [options]
   ```
 
 #### Implementation Details
-- **File**: `src/commands/hansolo-init.ts`
+- **File**: `src/commands/devsolo-init.ts`
 - **Status**: ✅ Fully Implemented
 - **Dependencies**: 
   - ConfigurationManager
@@ -96,7 +96,7 @@ hansolo init [options]
 | E2E | 80% | Manual testing required |
 
 #### UI Elements
-- **ASCII Banner**: ✅ Shows han-solo logo
+- **ASCII Banner**: ✅ Shows devsolo logo
 - **Progress Steps**: ✅ Shows initialization steps with spinner
 - **Success Box**: ✅ Displays completion summary
 - **Color Coding**: Green for success, yellow for warnings
@@ -105,7 +105,7 @@ hansolo init [options]
 ```markdown
 # From CLAUDE.md
 - MANDATORY first command for new projects
-- Use /hansolo:init before any other commands
+- Use /devsolo:init before any other commands
 - Detects existing Git repos automatically
 - Creates GitHub repo if requested
 ```
@@ -113,23 +113,23 @@ hansolo init [options]
 #### Logging & Debug
 ```bash
 # Enable debug logging
-HANSOLO_DEBUG=1 hansolo init
+DEVSOLO_DEBUG=1 devsolo init
 
 # Log output locations
 - Console: Real-time progress
-- File: .hansolo/logs/init-{timestamp}.log
-- Audit: .hansolo/audit/{month}/init.json
+- File: .devsolo/logs/init-{timestamp}.log
+- Audit: .devsolo/audit/{month}/init.json
 ```
 
 ---
 
-### 2. `hansolo launch`
+### 2. `devsolo launch`
 
 **Description**: Create a new feature branch and start a workflow session.
 
 #### CLI Usage
 ```bash
-hansolo launch [options]
+devsolo launch [options]
   --branch, -b <name>     # Specify branch name
   --force, -f             # Force launch with uncommitted changes
   --description, -d       # Add description
@@ -151,7 +151,7 @@ hansolo launch [options]
   ```
 
 #### Implementation Details
-- **File**: `src/commands/hansolo-launch.ts`
+- **File**: `src/commands/devsolo-launch.ts`
 - **Status**: ✅ Fully Implemented
 - **Branch Name Validation**:
   - Maximum length: 80 characters
@@ -184,18 +184,18 @@ INIT → BRANCH_READY → [ready for changes]
 
 ---
 
-### 3. `hansolo commit`
+### 3. `devsolo commit`
 
 **Description**: Stage and commit changes with optional message. Requires an active workflow session.
 
 #### CLI Usage
 ```bash
-hansolo commit [options]
+devsolo commit [options]
   --message, -m        # Commit message (footer added automatically)
 ```
 
 #### MCP Access
-- **Tool Name**: `hansolo_commit`
+- **Tool Name**: `devsolo_commit`
 - **Parameters**:
   ```json
   {
@@ -204,10 +204,10 @@ hansolo commit [options]
   ```
 
 #### Implementation Details
-- **File**: `src/commands/hansolo-commit.ts`
+- **File**: `src/commands/devsolo-commit.ts`
 - **Status**: ✅ Fully Implemented
 - **Workflow**:
-  1. Validates han-solo is initialized
+  1. Validates devsolo is initialized
   2. Gets current branch and session
   3. Checks for uncommitted changes
   4. If no message provided, returns prompt for Claude Code to generate one
@@ -242,7 +242,7 @@ To commit these changes, please analyze the staged changes and generate a commit
 |------|----------|-------|
 | Unit | 75% | - |
 | Integration | 85% | Integration test scenarios |
-| Contract | 100% | `hansolo-commit.test.ts` |
+| Contract | 100% | `devsolo-commit.test.ts` |
 
 #### UI Elements
 - **Progress Indicators**: Staging and committing progress
@@ -253,20 +253,20 @@ To commit these changes, please analyze the staged changes and generate a commit
 
 | Error Condition | Response |
 |----------------|----------|
-| Not initialized | Directs to `hansolo init` |
-| No session | Directs to `hansolo launch` |
+| Not initialized | Directs to `devsolo init` |
+| No session | Directs to `devsolo launch` |
 | No changes | Informational message |
 | No message | Returns prompt for Claude Code |
 
 ---
 
-### 4. `hansolo ship`
+### 4. `devsolo ship`
 
 **Description**: Complete post-commit workflow: push → PR → merge → sync → cleanup. Requires all changes to be committed first.
 
 #### CLI Usage
 ```bash
-hansolo ship [options]
+devsolo ship [options]
   --pr-description, -d # Pull request description (footer added automatically)
   --push              # Push to remote
   --create-pr         # Create pull request
@@ -276,7 +276,7 @@ hansolo ship [options]
 ```
 
 #### MCP Access
-- **Tool Name**: `hansolo_ship`
+- **Tool Name**: `devsolo_ship`
 - **Parameters**:
   ```json
   {
@@ -290,7 +290,7 @@ hansolo ship [options]
   ```
 
 #### Implementation Details
-- **File**: `src/commands/hansolo-ship.ts`
+- **File**: `src/commands/devsolo-ship.ts`
 - **Status**: ✅ Fully Implemented
 - **PR Title Format**:
   - Launch workflows: `[ship] <branch-name>`
@@ -301,7 +301,7 @@ hansolo ship [options]
   - Active workflow session required
   - For new PRs, description required or Claude Code will be prompted to generate one
 - **Workflow**:
-  1. Validates no uncommitted changes (directs to `hansolo commit` if found)
+  1. Validates no uncommitted changes (directs to `devsolo commit` if found)
   2. Checks if PR description needed for new PRs
   3. Pushes to remote
   4. Creates or updates pull request with appropriate title prefix
@@ -344,17 +344,17 @@ CHANGES_COMMITTED → PUSHED → PR_CREATED →
 WAITING_APPROVAL → MERGED → COMPLETE
 ```
 
-**Note**: Ship command expects the workflow to already be in `CHANGES_COMMITTED` state. Use `hansolo commit` first to reach this state.
+**Note**: Ship command expects the workflow to already be in `CHANGES_COMMITTED` state. Use `devsolo commit` first to reach this state.
 
 ---
 
-### 4. `hansolo hotfix`
+### 4. `devsolo hotfix`
 
 **Description**: Emergency production hotfix workflow with automatic backporting.
 
 #### CLI Usage
 ```bash
-hansolo hotfix [options]
+devsolo hotfix [options]
   --issue <id>         # Issue/ticket number
   --severity           # critical|high|medium
   --skip-tests         # Skip test execution
@@ -364,8 +364,8 @@ hansolo hotfix [options]
   --yes, -y            # Skip confirmations
 
 # Additional subcommands
-hansolo hotfix deploy    # Deploy hotfix
-hansolo hotfix rollback  # Rollback hotfix
+devsolo hotfix deploy    # Deploy hotfix
+devsolo hotfix rollback  # Rollback hotfix
 ```
 
 #### MCP Access
@@ -399,13 +399,13 @@ HOTFIX_VALIDATED → HOTFIX_DEPLOYED → HOTFIX_COMPLETE
 
 ---
 
-### 5. `hansolo status`
+### 5. `devsolo status`
 
 **Description**: Display comprehensive workflow and repository status.
 
 #### CLI Usage
 ```bash
-hansolo status [options]
+devsolo status [options]
   --verbose, -v        # Show detailed information
   --json              # Output as JSON
 ```
@@ -421,7 +421,7 @@ hansolo status [options]
   ```
 
 #### Implementation Details
-- **File**: `src/commands/hansolo-status.ts`
+- **File**: `src/commands/devsolo-status.ts`
 - **Status**: ✅ Fully Implemented
 - **Display Components**:
   - Active session details
@@ -437,20 +437,20 @@ hansolo status [options]
 | Contract | 100% | `get-sessions-status.test.ts` |
 
 #### UI Elements
-- **Banner**: "📊 han-solo Status"
+- **Banner**: "📊 devsolo Status"
 - **Boxes**: Multiple bordered boxes for different sections
 - **Tables**: Formatted tables with color coding
 - **State Colors**: Different colors for each workflow state
 
 ---
 
-### 6. `hansolo sessions`
+### 6. `devsolo sessions`
 
 **Description**: List and manage workflow sessions.
 
 #### CLI Usage
 ```bash
-hansolo sessions [options]
+devsolo sessions [options]
   --all, -a            # Show all including completed
   --verbose, -v        # Detailed view
   --cleanup, -c        # Clean up expired sessions
@@ -465,13 +465,13 @@ hansolo sessions [options]
 
 ---
 
-### 7. `hansolo swap`
+### 7. `devsolo swap`
 
 **Description**: Switch between active workflow sessions.
 
 #### CLI Usage
 ```bash
-hansolo swap [branch-name] [options]
+devsolo swap [branch-name] [options]
   --force, -f          # Force swap with uncommitted changes
   --stash, -s          # Stash changes before swapping
 ```
@@ -494,13 +494,13 @@ hansolo swap [branch-name] [options]
 
 ---
 
-### 8. `hansolo abort`
+### 8. `devsolo abort`
 
 **Description**: Cancel an active workflow session.
 
 #### CLI Usage
 ```bash
-hansolo abort [branch-name] [options]
+devsolo abort [branch-name] [options]
   --force, -f          # Force abort
   --delete-branch, -d  # Delete the branch
   --yes, -y            # Skip confirmation
@@ -527,7 +527,7 @@ hansolo abort [branch-name] [options]
 
 ---
 
-### 9. `hansolo cleanup`
+### 9. `devsolo cleanup`
 
 **Description**: Clean up completed sessions, merged branches, and **sync main branch with remote**.
 
@@ -535,7 +535,7 @@ hansolo abort [branch-name] [options]
 
 #### CLI Usage
 ```bash
-hansolo cleanup [options]
+devsolo cleanup [options]
   --dry-run            # Preview without changes
   --force, -f          # Force deletion
   --all                # Clean everything including audit logs
@@ -598,13 +598,13 @@ hansolo cleanup [options]
 
 ---
 
-### 10. `hansolo config`
+### 10. `devsolo config`
 
-**Description**: Manage han-solo configuration settings.
+**Description**: Manage devsolo configuration settings.
 
 #### CLI Usage
 ```bash
-hansolo config [action] [options]
+devsolo config [action] [options]
   show                 # Display current configuration
   set <key> <value>    # Set configuration value
   get <key>            # Get configuration value
@@ -626,13 +626,13 @@ hansolo config [action] [options]
 
 ---
 
-### 11. `hansolo validate`
+### 11. `devsolo validate`
 
 **Description**: Validate environment and configuration.
 
 #### CLI Usage
 ```bash
-hansolo validate [options]
+devsolo validate [options]
   --fix                # Attempt automatic fixes
   --verbose, -v        # Verbose output
   --offline            # Skip remote connectivity checks
@@ -657,13 +657,13 @@ hansolo validate [options]
 
 ---
 
-### 12. `hansolo perf`
+### 12. `devsolo perf`
 
 **Description**: Display performance metrics and monitoring.
 
 #### CLI Usage
 ```bash
-hansolo perf [command] [options]
+devsolo perf [command] [options]
   stats                # Overall statistics
   slow                 # Slowest operations
   failed               # Failed operations
@@ -682,13 +682,13 @@ hansolo perf [command] [options]
 
 ---
 
-### 13. `hansolo status-line`
+### 13. `devsolo status-line`
 
 **Description**: Manage terminal status line display.
 
 #### CLI Usage
 ```bash
-hansolo status-line [action]
+devsolo status-line [action]
   show                 # Display current status
   enable               # Enable status line
   disable              # Disable status line
@@ -743,16 +743,16 @@ hansolo status-line [action]
 
 | MCP Tool | CLI Command | Purpose |
 |----------|-------------|---------|
-| hansolo_init | init, config | Project setup |
-| hansolo_launch | launch, hotfix | Begin workflow |
-| hansolo_commit | commit | Stage and commit changes |
-| hansolo_ship | ship | Push, PR, merge, cleanup |
-| hansolo_status | status, sessions | Query state |
-| hansolo_sessions | sessions | List sessions |
-| hansolo_swap | swap | Switch context |
-| hansolo_abort | abort | Cancel workflow |
-| hansolo_hotfix | hotfix | Emergency workflow |
-| hansolo_status_line | status-line | UI management |
+| devsolo_init | init, config | Project setup |
+| devsolo_launch | launch, hotfix | Begin workflow |
+| devsolo_commit | commit | Stage and commit changes |
+| devsolo_ship | ship | Push, PR, merge, cleanup |
+| devsolo_status | status, sessions | Query state |
+| devsolo_sessions | sessions | List sessions |
+| devsolo_swap | swap | Switch context |
+| devsolo_abort | abort | Cancel workflow |
+| devsolo_hotfix | hotfix | Emergency workflow |
+| devsolo_status_line | status-line | UI management |
 
 ### State Transition Coverage
 
@@ -857,25 +857,25 @@ output.dim('Secondary information');
 
 | Variable | Purpose | Default |
 |----------|---------|---------|
-| HANSOLO_DEBUG | Enable debug output | false |
-| HANSOLO_LOG_LEVEL | Log verbosity (debug/info/warn/error) | info |
-| HANSOLO_LOG_FILE | Log file path | .hansolo/logs/hansolo.log |
-| HANSOLO_MCP_PORT | MCP server port | 8080 |
-| HANSOLO_MCP_TIMEOUT | MCP timeout (ms) | 30000 |
-| HANSOLO_NO_COLOR | Disable color output | false |
-| HANSOLO_PERF | Enable performance monitoring | false |
+| DEVSOLO_DEBUG | Enable debug output | false |
+| DEVSOLO_LOG_LEVEL | Log verbosity (debug/info/warn/error) | info |
+| DEVSOLO_LOG_FILE | Log file path | .devsolo/logs/devsolo.log |
+| DEVSOLO_MCP_PORT | MCP server port | 8080 |
+| DEVSOLO_MCP_TIMEOUT | MCP timeout (ms) | 30000 |
+| DEVSOLO_NO_COLOR | Disable color output | false |
+| DEVSOLO_PERF | Enable performance monitoring | false |
 
 ### Debug Commands
 
 ```bash
 # Enable all debug output
-HANSOLO_DEBUG=1 hansolo status
+DEVSOLO_DEBUG=1 devsolo status
 
 # Performance profiling
-HANSOLO_PERF=1 hansolo ship
+DEVSOLO_PERF=1 devsolo ship
 
 # Verbose MCP server
-HANSOLO_DEBUG=1 hansolo-mcp
+DEVSOLO_DEBUG=1 devsolo-mcp
 
 # Test MCP connection
 curl http://localhost:8080/status
@@ -885,10 +885,10 @@ curl http://localhost:8080/status
 
 | Type | Location | Content |
 |------|----------|---------|
-| Session Logs | `.hansolo/sessions/*.json` | Session state, transitions |
-| Audit Logs | `.hansolo/audit/{month}/*.json` | All operations with timestamps |
-| Debug Logs | `.hansolo/logs/*.log` | Debug output when enabled |
-| Git Hooks | `.hansolo/hooks/*.log` | Hook execution logs |
+| Session Logs | `.devsolo/sessions/*.json` | Session state, transitions |
+| Audit Logs | `.devsolo/audit/{month}/*.json` | All operations with timestamps |
+| Debug Logs | `.devsolo/logs/*.log` | Debug output when enabled |
+| Git Hooks | `.devsolo/hooks/*.log` | Hook execution logs |
 
 ---
 
@@ -898,7 +898,7 @@ curl http://localhost:8080/status
 
 1. **Create Command File**
    ```typescript
-   // src/commands/hansolo-newcmd.ts
+   // src/commands/devsolo-newcmd.ts
    export class NewCommand {
      async execute(options: Options): Promise<void> {
        // Implementation
@@ -977,8 +977,8 @@ await sessionRepo.updateSession(session.id, session);
 
 | Code | Description | Recovery |
 |------|-------------|----------|
-| NOT_INITIALIZED | han-solo not initialized | Run `hansolo init` |
-| SESSION_NOT_FOUND | No active session | Run `hansolo launch` |
+| NOT_INITIALIZED | devsolo not initialized | Run `devsolo init` |
+| SESSION_NOT_FOUND | No active session | Run `devsolo launch` |
 | DIRTY_WORKING_DIR | Uncommitted changes | Commit or stash changes |
 | INVALID_STATE | Invalid state transition | Check workflow state |
 | BRANCH_EXISTS | Branch already exists | Choose different name |

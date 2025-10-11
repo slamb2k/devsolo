@@ -146,10 +146,10 @@ export class ConfigManager {
   }
 
   private generateYamlWithComments(config: ConfigurationProfile): string {
-    const header = `# han-solo Configuration File
+    const header = `# devsolo Configuration File
 # Version: ${config.version}
 # Generated: ${new Date().toISOString()}
-# Documentation: https://github.com/hansolo/docs
+# Documentation: https://github.com/devsolo/docs
 
 `;
 

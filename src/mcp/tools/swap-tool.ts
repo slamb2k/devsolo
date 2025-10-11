@@ -74,7 +74,7 @@ export class SwapTool extends BaseMCPTool<SwapToolInput, SessionToolResult> {
         passed: false,
         message: `No session found for branch '${input.branchName}'`,
         level: 'error',
-        suggestions: ['Use hansolo_sessions to list available sessions'],
+        suggestions: ['Use devsolo_sessions to list available sessions'],
       };
 
     // Build result with custom check
@@ -113,7 +113,7 @@ export class SwapTool extends BaseMCPTool<SwapToolInput, SessionToolResult> {
         nextSteps: [
           `Switched to ${input.branchName}`,
           'Continue working on this feature',
-          'Use hansolo_status to check current state',
+          'Use devsolo_status to check current state',
         ],
       },
     };

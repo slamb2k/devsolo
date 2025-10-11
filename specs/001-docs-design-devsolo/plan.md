@@ -1,8 +1,8 @@
 
-# Implementation Plan: han-solo Git Workflow Automation
+# Implementation Plan: devsolo Git Workflow Automation
 
-**Branch**: `001-docs-design-hansolo` | **Date**: 2025-09-21 | **Spec**: [spec.md](./spec.md)
-**Input**: Feature specification from `/specs/001-docs-design-hansolo/spec.md`
+**Branch**: `001-docs-design-devsolo` | **Date**: 2025-09-21 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/001-docs-design-devsolo/spec.md`
 
 ## Execution Flow (/plan command scope)
 ```
@@ -31,7 +31,7 @@
 - Phase 3-4: Implementation execution (manual or via tools)
 
 ## Summary
-han-solo is a Git workflow automation tool that enforces linear history and prevents merge conflicts through a dual-layer architecture combining deterministic MCP server state machines with Claude Code AI assistance. The tool provides workflow commands for initialization, feature development, shipping code, and hotfix management while maintaining developer control over critical decisions.
+devsolo is a Git workflow automation tool that enforces linear history and prevents merge conflicts through a dual-layer architecture combining deterministic MCP server state machines with Claude Code AI assistance. The tool provides workflow commands for initialization, feature development, shipping code, and hotfix management while maintaining developer control over critical decisions.
 
 ## Technical Context
 **Language/Version**: TypeScript/Node.js 20+
@@ -47,7 +47,7 @@ han-solo is a Git workflow automation tool that enforces linear history and prev
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-### han-solo Specific Gates (from Constitution v4.0.0)
+### devsolo Specific Gates (from Constitution v4.0.0)
 
 1. **Hybrid Orchestration**: ✅ PASS
    - MCP Server for deterministic control
@@ -81,8 +81,8 @@ han-solo is a Git workflow automation tool that enforces linear history and prev
 
 7. **Initialization First**: ✅ PASS
    - Mandatory init before any command
-   - hansolo.yaml marks initialization
-   - Components in .hansolo/ directory
+   - devsolo.yaml marks initialization
+   - Components in .devsolo/ directory
 
 ## Project Structure
 
@@ -134,7 +134,7 @@ ios/ or android/
 └── [platform-specific structure]
 ```
 
-**Structure Decision**: Option 1 (Single project structure) - han-solo is a CLI tool with MCP server backend
+**Structure Decision**: Option 1 (Single project structure) - devsolo is a CLI tool with MCP server backend
 
 ## Phase 0: Outline & Research
 1. **Extract unknowns from Technical Context** above:
@@ -210,7 +210,7 @@ ios/ or android/
 6. Git operations wrapper
 7. GitHub/GitLab API integration
 8. Visual output system (colors, spinners, tables)
-9. Command handlers (/hansolo:* commands)
+9. Command handlers (/devsolo:* commands)
 10. Integration tests from quickstart scenarios
 
 **Ordering Strategy**:

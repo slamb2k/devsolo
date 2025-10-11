@@ -2,9 +2,9 @@
 
 ## Feature Description
 
-Migrate han-solo from its current MCP-based architecture to Claude Code's native plugin system using custom slash commands and specialized sub-agents. This migration will transform how han-solo integrates with Claude Code by:
+Migrate devsolo from its current MCP-based architecture to Claude Code's native plugin system using custom slash commands and specialized sub-agents. This migration will transform how devsolo integrates with Claude Code by:
 
-1. **Converting MCP prompts to native slash commands** - Move from MCP prompt handlers to `.claude/commands/hansolo/*.md` files
+1. **Converting MCP prompts to native slash commands** - Move from MCP prompt handlers to `.claude/commands/devsolo/*.md` files
 2. **Creating specialized sub-agents** - Introduce `git-droid` and `docs-droid` for coordinated operations
 3. **Simplifying MCP tools** - Reduce MCP tools to focused, single-purpose operations that report results
 4. **Moving orchestration to slash commands** - Shift multi-step workflow coordination from MCP tools to slash commands
@@ -13,7 +13,7 @@ This migration provides a cleaner architecture, better integration with Claude C
 
 ## User Story
 
-As a **han-solo user**
+As a **devsolo user**
 I want to **use native Claude Code slash commands for git workflows**
 So that **I have a more integrated, discoverable, and maintainable experience with better error messages and clearer workflow orchestration**
 
@@ -32,7 +32,7 @@ The current MCP-based architecture has several limitations:
 
 Adopt Claude Code's plugin architecture with:
 
-1. **Native slash commands** (`.claude/commands/hansolo/`) - User interface and high-level orchestration
+1. **Native slash commands** (`.claude/commands/devsolo/`) - User interface and high-level orchestration
 2. **Specialized sub-agents** (`git-droid`, `docs-droid`) - Git-aware coordination and smart features
 3. **Focused MCP tools** - Single-purpose operations that report check results (not elicit or orchestrate)
 4. **Clear separation** - Slash commands orchestrate, sub-agents coordinate, MCP tools execute
@@ -47,7 +47,7 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 ## Relevant Files
 
 ### Core MCP Server and Tools
-- **`src/mcp/hansolo-mcp-server.ts`** - MCP server that registers tools and prompts. Will be simplified to remove prompt handlers and elicitation logic.
+- **`src/mcp/devsolo-mcp-server.ts`** - MCP server that registers tools and prompts. Will be simplified to remove prompt handlers and elicitation logic.
 - **`src/mcp/tools/workflow-tool-base.ts`** - Base class for MCP tools with pre-flight/post-flight framework. Will be simplified to remove orchestration.
 - **`src/mcp/tools/launch-tool.ts`** - Launch workflow tool. Will be simplified to focus on creating branch/session only.
 - **`src/mcp/tools/ship-tool.ts`** - Ship workflow tool. Will be split into focused operations (push, create PR, merge, cleanup).
@@ -71,19 +71,19 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 - **`src/services/validation/post-flight-verification.ts`** - Post-flight validation. Will be enhanced to return structured results.
 
 ### Existing Slash Commands
-- **`.hansolo/commands/prime.md`** - Codebase priming command. Will be migrated to `.claude/commands/hansolo/prime.md`.
-- **`.hansolo/commands/doc.md`** - Documentation management command. Will be migrated to `.claude/commands/hansolo/doc.md` and enhanced with docs-droid.
+- **`.devsolo/commands/prime.md`** - Codebase priming command. Will be migrated to `.claude/commands/devsolo/prime.md`.
+- **`.devsolo/commands/doc.md`** - Documentation management command. Will be migrated to `.claude/commands/devsolo/doc.md` and enhanced with docs-droid.
 
 ### Documentation
 - **`docs/dev/plans/mcp-to-plugin-migration.md`** - The comprehensive migration plan with all architectural decisions.
 - **`docs/dev/system/pre-flight-checks.md`** - Pre-flight check specifications and patterns.
-- **`CLAUDE.md`** - Project guidelines including han-solo workflow detection and documentation rules.
+- **`CLAUDE.md`** - Project guidelines including devsolo workflow detection and documentation rules.
 - **`README.md`** - Project overview and user-facing documentation. Will be updated to reflect new architecture.
 
 ### New Files
 
-#### Slash Commands (`.claude/commands/hansolo/`)
-- **`init.md`** - Initialize han-solo (migrated from MCP prompt)
+#### Slash Commands (`.claude/commands/devsolo/`)
+- **`init.md`** - Initialize devsolo (migrated from MCP prompt)
 - **`launch.md`** - Start feature workflow (migrated from MCP prompt)
 - **`commit.md`** - Commit changes (migrated from MCP prompt)
 - **`ship.md`** - Ship complete workflow (migrated from MCP prompt)
@@ -94,8 +94,8 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 - **`cleanup.md`** - Cleanup sessions (migrated from MCP prompt)
 - **`hotfix.md`** - Hotfix workflow (migrated from MCP prompt)
 - **`status-line.md`** - Manage status line (migrated from MCP prompt)
-- **`prime.md`** - Prime codebase understanding (migrated from `.hansolo/commands/`)
-- **`doc.md`** - Documentation management (migrated from `.hansolo/commands/`)
+- **`prime.md`** - Prime codebase understanding (migrated from `.devsolo/commands/`)
+- **`doc.md`** - Documentation management (migrated from `.devsolo/commands/`)
 
 #### Sub-Agent Definitions
 - **`.claude/agents/git-droid.md`** - Git workflow coordination sub-agent definition
@@ -112,7 +112,7 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 **Goal:** Set up the slash command structure and migrate simplest commands first to validate the approach.
 
 **Tasks:**
-1. Create `.claude/commands/hansolo/` directory structure
+1. Create `.claude/commands/devsolo/` directory structure
 2. Migrate `prime.md` command (read-only, no MCP dependencies)
 3. Migrate `status.md` command (read-only, uses status-tool)
 4. Migrate `sessions.md` command (read-only, uses sessions-tool)
@@ -167,13 +167,13 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 **Sub-Phase 3B: Final Commands**
 1. Migrate `init.md` command
 2. Migrate `status-line.md` command
-3. Remove deprecated `.hansolo/commands/` directory
+3. Remove deprecated `.devsolo/commands/` directory
 4. Update MCP server to remove prompt handlers
 5. Clean up unused elicitation code from MCP tools
 
 **Sub-Phase 3C: Documentation Updates**
 1. Update `README.md` with new slash command usage
-2. Update `CLAUDE.md` han-solo section
+2. Update `CLAUDE.md` devsolo section
 3. Update all `docs/guides/*.md` files
 4. Create migration guide for existing users
 5. Archive old MCP prompt documentation
@@ -183,32 +183,32 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 ## Step by Step Tasks
 
 ### Step 1: Create Slash Command Directory Structure
-- Create `.claude/commands/hansolo/` directory
+- Create `.claude/commands/devsolo/` directory
 - Create `.claude/agents/` directory for sub-agent definitions
 - Create `.claude/output-styles/` directory for custom formatting
 - Verify directories are in correct locations per Claude Code plugin structure
 
 ### Step 2: Migrate Prime Command (Simple Read-Only)
-- Copy `.hansolo/commands/prime.md` to `.claude/commands/hansolo/prime.md`
+- Copy `.devsolo/commands/prime.md` to `.claude/commands/devsolo/prime.md`
 - Add proper front matter with description and arguments
-- Test `/hansolo prime` command in Claude Code
+- Test `/devsolo prime` command in Claude Code
 - Verify it reads files and summarizes codebase correctly
 - Document any differences in behavior
 
 ### Step 3: Migrate Status Command (Read-Only with MCP Tool)
-- Create `.claude/commands/hansolo/status.md`
+- Create `.claude/commands/devsolo/status.md`
 - Analyze current `status-tool.ts` behavior
-- Write slash command that calls `hansolo_status` MCP tool
+- Write slash command that calls `devsolo_status` MCP tool
 - Add proper argument specifications (none required)
-- Test `/hansolo status` command
+- Test `/devsolo status` command
 - Verify pre-flight checks display correctly
 
 ### Step 4: Migrate Sessions Command (Read-Only with MCP Tool)
-- Create `.claude/commands/hansolo/sessions.md`
+- Create `.claude/commands/devsolo/sessions.md`
 - Analyze current `sessions-tool.ts` behavior
-- Write slash command that calls `hansolo_sessions` MCP tool
+- Write slash command that calls `devsolo_sessions` MCP tool
 - Add argument specifications: `all`, `verbose`, `cleanup`
-- Test `/hansolo sessions` command with various arguments
+- Test `/devsolo sessions` command with various arguments
 - Verify session listing displays correctly
 
 ### Step 5: Define git-droid Sub-Agent
@@ -260,19 +260,19 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 - Add tests for simplified launch tool
 
 ### Step 11: Migrate commit.md Slash Command
-- Create `.claude/commands/hansolo/commit.md`
+- Create `.claude/commands/devsolo/commit.md`
 - Implement message generation logic:
   - Analyze git diff for changes
   - Generate conventional commit message (feat/fix/docs/refactor/etc)
   - Follow repository commit conventions
 - Handle missing session → guide user to launch first
-- Call `hansolo_commit` MCP tool with generated message
+- Call `devsolo_commit` MCP tool with generated message
 - Handle pre-flight check failures with actionable guidance
 - Add argument specifications: `message` (optional), `stagedOnly` (optional)
 - Test with various scenarios (staged files, all files, generated messages, custom messages)
 
 ### Step 12: Migrate launch.md Slash Command
-- Create `.claude/commands/hansolo/launch.md`
+- Create `.claude/commands/devsolo/launch.md`
 - Implement branch name generation logic:
   - From description if provided
   - From git changes if present
@@ -281,31 +281,31 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 - Handle uncommitted changes → offer to stash
 - Handle active session → offer to abort
 - Call git-droid to coordinate launch workflow
-- git-droid calls `hansolo_launch` MCP tool
+- git-droid calls `devsolo_launch` MCP tool
 - Handle pre-flight check failures with actionable guidance
 - Add argument specifications: `description`, `branchName`, `auto`
 - Test with various scenarios (clean state, uncommitted changes, existing session, branch name generation)
 
 ### Step 13: Migrate ship.md Slash Command
-- Create `.claude/commands/hansolo/ship.md`
+- Create `.claude/commands/devsolo/ship.md`
 - Implement PR description generation logic:
   - Analyze commits since main
   - Review changed files and diff stats
   - Generate structured PR description (Summary, Changes, Testing)
   - Follow repository PR conventions
-- Handle uncommitted changes → call `/hansolo commit` first (via SlashCommand tool)
-- Handle no session → call `/hansolo launch` first (via SlashCommand tool)
+- Handle uncommitted changes → call `/devsolo commit` first (via SlashCommand tool)
+- Handle no session → call `/devsolo launch` first (via SlashCommand tool)
 - Call git-droid to orchestrate ship workflow:
-  - git-droid calls `hansolo_commit` if needed
-  - git-droid calls `hansolo_ship` for push/PR/merge
-  - git-droid calls `hansolo_cleanup` for branches
+  - git-droid calls `devsolo_commit` if needed
+  - git-droid calls `devsolo_ship` for push/PR/merge
+  - git-droid calls `devsolo_cleanup` for branches
   - git-droid aggregates all check results
 - Handle pre-flight check failures with actionable guidance
 - Add argument specifications: `prDescription`, `push`, `createPR`, `merge`, `stagedOnly`
 - Test complete workflow end-to-end
 
 ### Step 14: Migrate abort.md Slash Command
-- Create `.claude/commands/hansolo/abort.md`
+- Create `.claude/commands/devsolo/abort.md`
 - Implement abort workflow logic:
   - Detect uncommitted changes → offer to stash
   - Confirm destructive actions
@@ -318,7 +318,7 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 - Test abort scenarios (with/without changes, with/without branch deletion)
 
 ### Step 15: Migrate swap.md Slash Command
-- Create `.claude/commands/hansolo/swap.md`
+- Create `.claude/commands/devsolo/swap.md`
 - Implement swap workflow logic:
   - Detect uncommitted changes → offer to stash
   - Validate target session exists
@@ -330,7 +330,7 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 - Test swap scenarios (clean swap, with stash, between multiple sessions)
 
 ### Step 16: Migrate cleanup.md Slash Command
-- Create `.claude/commands/hansolo/cleanup.md`
+- Create `.claude/commands/devsolo/cleanup.md`
 - Implement cleanup workflow logic:
   - Sync main branch first
   - Identify orphaned branches (branches without sessions)
@@ -342,7 +342,7 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 - Test cleanup scenarios (orphaned branches, stale sessions, complete cleanup)
 
 ### Step 17: Migrate hotfix.md Slash Command
-- Create `.claude/commands/hansolo/hotfix.md`
+- Create `.claude/commands/devsolo/hotfix.md`
 - Implement hotfix workflow logic:
   - Similar to launch but with hotfix/ prefix
   - Higher urgency handling
@@ -371,7 +371,7 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 - Test output style with sample documentation operations
 
 ### Step 20: Migrate doc.md Slash Command
-- Copy `.hansolo/commands/doc.md` to `.claude/commands/hansolo/doc.md`
+- Copy `.devsolo/commands/doc.md` to `.claude/commands/devsolo/doc.md`
 - Enhance AUDIT MODE to use docs-droid:
   - docs-droid scans all .md files
   - docs-droid validates naming and placement
@@ -386,23 +386,23 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 - Test doc command in both modes
 
 ### Step 21: Migrate init.md Slash Command
-- Create `.claude/commands/hansolo/init.md`
-- Keep logic simple: call `hansolo_init` MCP tool
+- Create `.claude/commands/devsolo/init.md`
+- Keep logic simple: call `devsolo_init` MCP tool
 - Handle initialization scope (project/user)
 - Handle force reinitialization
 - Add argument specifications: `scope`, `force`
 - Test init command
 
 ### Step 22: Migrate status-line.md Slash Command
-- Create `.claude/commands/hansolo/status-line.md`
-- Keep logic simple: call `hansolo_status_line` MCP tool
+- Create `.claude/commands/devsolo/status-line.md`
+- Keep logic simple: call `devsolo_status_line` MCP tool
 - Handle different actions (enable, disable, update, show)
 - Handle format customization
 - Add argument specifications: `action`, `format`, `showBranchInfo`, `showSessionInfo`, `showStateInfo`
 - Test status-line command
 
 ### Step 23: Remove MCP Prompt Handlers
-- Remove `setupPromptHandlers()` method from `src/mcp/hansolo-mcp-server.ts`
+- Remove `setupPromptHandlers()` method from `src/mcp/devsolo-mcp-server.ts`
 - Remove `ListPromptsRequestSchema` handler
 - Remove `GetPromptRequestSchema` handler
 - Remove prompt-related code from banner generation
@@ -416,10 +416,10 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 - Update all MCP tool tests to remove elicitation scenarios
 - Verify all tools report check results correctly
 
-### Step 25: Remove Deprecated .hansolo/commands Directory
-- Archive `.hansolo/commands/prime.md` (migrated to .claude/commands)
-- Archive `.hansolo/commands/doc.md` (migrated to .claude/commands)
-- Remove `.hansolo/commands/` directory
+### Step 25: Remove Deprecated .devsolo/commands Directory
+- Archive `.devsolo/commands/prime.md` (migrated to .claude/commands)
+- Archive `.devsolo/commands/doc.md` (migrated to .claude/commands)
+- Remove `.devsolo/commands/` directory
 - Update any references to old command location
 - Test that old commands no longer accessible
 
@@ -433,7 +433,7 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 - Test all examples in README
 
 ### Step 27: Update CLAUDE.md
-- Update han-solo workflow detection section
+- Update devsolo workflow detection section
 - Update references to MCP tools and prompts
 - Add section on slash commands and sub-agents
 - Update any migration guidance
@@ -450,7 +450,7 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 ### Step 29: Create Migration Guide
 - Create `docs/guides/migration-from-mcp-prompts.md`
 - Document changes for existing users:
-  - Old: `/hansolo:launch` → New: `/hansolo launch`
+  - Old: `/devsolo:launch` → New: `/devsolo launch`
   - Command syntax differences
   - New orchestration patterns
   - Sub-agent behavior
@@ -509,9 +509,9 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 ### Integration Tests
 
 **Slash Command → Sub-Agent → MCP Tool**
-- Test `/hansolo launch` full flow (generate name → create branch → create session)
-- Test `/hansolo commit` full flow (generate message → stage → commit)
-- Test `/hansolo ship` full flow (generate PR description → push → PR → merge → cleanup)
+- Test `/devsolo launch` full flow (generate name → create branch → create session)
+- Test `/devsolo commit` full flow (generate message → stage → commit)
+- Test `/devsolo ship` full flow (generate PR description → push → PR → merge → cleanup)
 - Test error handling at each layer (slash command errors, sub-agent coordination errors, MCP tool errors)
 
 **Sub-Agent Coordination**
@@ -633,42 +633,42 @@ Execute every command to validate the feature works correctly with zero regressi
 
 **End-to-End Workflow Tests (Manual)**
 - Test basic workflow:
-  1. `/hansolo init` - Initialize han-solo
-  2. `/hansolo launch` (without branch name) - Test branch name generation
+  1. `/devsolo init` - Initialize devsolo
+  2. `/devsolo launch` (without branch name) - Test branch name generation
   3. Make code changes
-  4. `/hansolo commit` (without message) - Test commit message generation
-  5. `/hansolo ship` (without PR description) - Test PR description generation
+  4. `/devsolo commit` (without message) - Test commit message generation
+  5. `/devsolo ship` (without PR description) - Test PR description generation
   6. Verify PR created, merged, branches deleted, on main
 
 - Test workflow with manual parameters:
-  1. `/hansolo launch "Add feature X" "feature/test-branch"` - Explicit parameters
+  1. `/devsolo launch "Add feature X" "feature/test-branch"` - Explicit parameters
   2. Make changes
-  3. `/hansolo commit "feat: add feature X"` - Explicit message
-  4. `/hansolo ship "PR for feature X"` - Explicit PR description
+  3. `/devsolo commit "feat: add feature X"` - Explicit message
+  4. `/devsolo ship "PR for feature X"` - Explicit PR description
   5. Verify workflow completes
 
 - Test error scenarios:
-  1. `/hansolo commit` on main - Should error
-  2. `/hansolo ship` with uncommitted changes - Should commit first
-  3. `/hansolo launch` with existing session - Should abort old session
+  1. `/devsolo commit` on main - Should error
+  2. `/devsolo ship` with uncommitted changes - Should commit first
+  3. `/devsolo launch` with existing session - Should abort old session
   4. Verify all errors have actionable messages
 
 - Test session management:
-  1. `/hansolo launch "Feature A" "feature/a"`
-  2. `/hansolo launch "Feature B" "feature/b"` - Creates second session
-  3. `/hansolo sessions` - Lists both sessions
-  4. `/hansolo swap "feature/a"` - Switches to first session
-  5. `/hansolo status` - Shows current session
-  6. `/hansolo abort` - Aborts current session
+  1. `/devsolo launch "Feature A" "feature/a"`
+  2. `/devsolo launch "Feature B" "feature/b"` - Creates second session
+  3. `/devsolo sessions` - Lists both sessions
+  4. `/devsolo swap "feature/a"` - Switches to first session
+  5. `/devsolo status` - Shows current session
+  6. `/devsolo abort` - Aborts current session
   7. Verify session state throughout
 
 - Test documentation management:
-  1. `/hansolo doc` - AUDIT MODE: scan and fix documentation
-  2. `/hansolo doc "test-doc" "# Test\nTest content"` - CREATE MODE: create doc
+  1. `/devsolo doc` - AUDIT MODE: scan and fix documentation
+  2. `/devsolo doc "test-doc" "# Test\nTest content"` - CREATE MODE: create doc
   3. Verify document created in correct location with correct naming
 
 - Test cleanup:
-  1. `/hansolo cleanup` - Clean up stale sessions and branches
+  1. `/devsolo cleanup` - Clean up stale sessions and branches
   2. Verify orphaned branches and sessions removed
 
 **Validation Success Criteria**
@@ -712,7 +712,7 @@ Execute every command to validate the feature works correctly with zero regressi
 **Risk: Data loss during migration**
 - Mitigation: No changes to session persistence
 - Mitigation: No changes to configuration storage
-- Mitigation: Backup .hansolo directory before migration
+- Mitigation: Backup .devsolo directory before migration
 
 **Risk: Performance regression**
 - Mitigation: Profile operations before and after
@@ -727,7 +727,7 @@ Execute every command to validate the feature works correctly with zero regressi
 ### Future Considerations
 
 **Plugin Packaging**
-- Consider packaging han-solo as a Claude Code plugin for distribution
+- Consider packaging devsolo as a Claude Code plugin for distribution
 - Investigate Claude Code plugin registry (if exists)
 - Create installation script for plugin directory structure
 

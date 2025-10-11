@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to han-solo will be documented in this file.
+All notable changes to devsolo will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -17,16 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - 11 MCP tools for complete workflow management:
-  - `hansolo_init`: Project initialization
-  - `hansolo_launch`: Feature branch creation
-  - `hansolo_ship`: Complete shipping workflow
-  - `hansolo_hotfix`: Emergency fixes
-  - `hansolo_status`: Workflow status
-  - `hansolo_sessions`: Session management
-  - `hansolo_swap`: Session switching
-  - `hansolo_abort`: Workflow cancellation
-  - `hansolo_commit`: Direct commits
-  - `hansolo_status_line`: Terminal awareness configuration
+  - `devsolo_init`: Project initialization
+  - `devsolo_launch`: Feature branch creation
+  - `devsolo_ship`: Complete shipping workflow
+  - `devsolo_hotfix`: Emergency fixes
+  - `devsolo_status`: Workflow status
+  - `devsolo_sessions`: Session management
+  - `devsolo_swap`: Session switching
+  - `devsolo_abort`: Workflow cancellation
+  - `devsolo_commit`: Direct commits
+  - `devsolo_status_line`: Terminal awareness configuration
 - Natural language interface via Claude Code
 - Prompt-based parameter collection for user-friendly interactions
 - Comprehensive user guides and MCP tools reference documentation
@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MCP architecture documentation
 
 ### Deprecated
-- CLI commands (hansolo launch, hansolo ship, etc.) - use MCP tools instead
+- CLI commands (devsolo launch, devsolo ship, etc.) - use MCP tools instead
 - npm installation workflow - use MCP server configuration
 - Slash commands - use natural language with Claude Code
 
@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2024-01-20
 
 ### Added
-- Initial release of han-solo
+- Initial release of devsolo
 - Core workflow automation with state machines
 - Linear history enforcement
 - Session management system
@@ -71,5 +71,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Secret scanning capabilities
 - User configuration validation
 
-[Unreleased]: https://github.com/slamb2k/hansolo/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/slamb2k/hansolo/releases/tag/v1.0.0
+[Unreleased]: https://github.com/slamb2k/devsolo/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/slamb2k/devsolo/releases/tag/v1.0.0

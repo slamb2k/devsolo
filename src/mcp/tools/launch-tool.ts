@@ -43,7 +43,7 @@ export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> 
     _githubIntegration: GitHubIntegration,
     private stashManager: StashManager,
     configManager: ConfigurationManager,
-    _basePath: string = '.hansolo',
+    _basePath: string = '.devsolo',
     server?: Server
   ) {
     super(configManager, server);
@@ -91,7 +91,7 @@ export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> 
             'If no description, analyze changed files to generate name',
             'OR ask the user what branch name they want to use',
             'Validate the name follows naming conventions',
-            'Call hansolo_launch again with branchName parameter',
+            'Call devsolo_launch again with branchName parameter',
           ],
         } as SessionToolResult,
       };
@@ -170,8 +170,8 @@ export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> 
         state: session.currentState,
         nextSteps: [
           'Make your code changes',
-          'Use hansolo_ship to commit, push, and create PR',
-          'Use hansolo_status to check current state',
+          'Use devsolo_ship to commit, push, and create PR',
+          'Use devsolo_status to check current state',
         ],
       },
     };

@@ -1,5 +1,5 @@
 I'm thinkingh that the unique swap scenario (perhaps where a dev has to context switch) would be best
-handled by a tracking mechanism like .hansolo/sessions where the stash id that is created can be tied to the
+handled by a tracking mechanism like .devsolo/sessions where the stash id that is created can be tied to the
 original session. The stash could be named in a particular way that it was damn obvious that it was a
 auto-generated stash from a swap or switch operation. Then when the user swapped back to another session
 which happened to have a stash associated with it, that could be popped and their previous state

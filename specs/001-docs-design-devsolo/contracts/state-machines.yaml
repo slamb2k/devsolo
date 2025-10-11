@@ -1,8 +1,8 @@
-# han-solo State Machine Contracts
+# devsolo State Machine Contracts
 # Defines the immutable state machines for all workflow types
 
 version: "1.0.0"
-description: "State machine definitions for han-solo workflows"
+description: "State machine definitions for devsolo workflows"
 
 workflows:
   launch:

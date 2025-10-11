@@ -1,4 +1,4 @@
-# han-solo Product Requirements Document
+# devsolo Product Requirements Document
 
 **Version**: 2.0.0  
 **Date**: September 21, 2025  
@@ -6,7 +6,7 @@
 
 ## 1. Executive Summary
 
-han-solo is an intelligent Git workflow automation tool that enforces linear history through a dual-layer architecture combining MCP server state machines with Claude Code intelligence. It prevents merge conflicts, automates repetitive tasks, and ensures consistent workflows across development teams while maintaining developer control over critical decisions.
+devsolo is an intelligent Git workflow automation tool that enforces linear history through a dual-layer architecture combining MCP server state machines with Claude Code intelligence. It prevents merge conflicts, automates repetitive tasks, and ensures consistent workflows across development teams while maintaining developer control over critical decisions.
 
 ## 2. Problem Statement
 
@@ -25,7 +25,7 @@ han-solo is an intelligent Git workflow automation tool that enforces linear his
 ## 3. Solution Overview
 
 ### Architecture
-han-solo uses a dual-layer architecture that separates control from intelligence:
+devsolo uses a dual-layer architecture that separates control from intelligence:
 
 - **MCP Server**: Deterministic state machine ensuring workflow integrity
 - **Claude Code**: AI-powered content generation and user interaction
@@ -78,22 +78,22 @@ han-solo uses a dual-layer architecture that separates control from intelligence
 
 ### 5.1 Installation Architecture
 
-han-solo uses MCP (Model Context Protocol) for integration with Claude Code:
-1. **MCP Server Installation**: Configure Claude Code to load han-solo MCP server
-2. **Project Initialization**: Use `hansolo_init` tool to configure Git repository
+devsolo uses MCP (Model Context Protocol) for integration with Claude Code:
+1. **MCP Server Installation**: Configure Claude Code to load devsolo MCP server
+2. **Project Initialization**: Use `devsolo_init` tool to configure Git repository
 3. **Natural Language Interface**: Access all features through Claude Code
 
 ### 5.2 Installation Methods
 
 #### Primary Method: MCP Configuration
-Add han-solo to your Claude Code MCP configuration:
+Add devsolo to your Claude Code MCP configuration:
 
 ```json
 {
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "command": "node",
-      "args": ["/path/to/hansolo/build/index.js"]
+      "args": ["/path/to/devsolo/build/index.js"]
     }
   }
 }
@@ -101,15 +101,15 @@ Add han-solo to your Claude Code MCP configuration:
 
 Then restart Claude Code and run:
 ```
-"Initialize han-solo in this project"
-→ Claude uses hansolo_init tool
+"Initialize devsolo in this project"
+→ Claude uses devsolo_init tool
 ```
 
 #### Development Mode
 ```bash
 # Clone repository
-git clone https://github.com/your-org/hansolo
-cd hansolo
+git clone https://github.com/your-org/devsolo
+cd devsolo
 
 # Install dependencies
 npm install
@@ -126,14 +126,14 @@ npm run build
 After configuring the MCP server in Claude Code, each project requires one-time initialization:
 
 ```
-User: "Initialize han-solo in this project"
+User: "Initialize devsolo in this project"
 
-Claude: Uses hansolo_init MCP tool
-→ Creates .hansolo/ directory
+Claude: Uses devsolo_init MCP tool
+→ Creates .devsolo/ directory
 → Sets up Git repository if needed
 → Creates GitHub/GitLab remote if requested
 → Installs Git hooks for safety
-→ Creates hansolo.yaml marker file
+→ Creates devsolo.yaml marker file
 → Configures branch protection
 ```
 
@@ -146,14 +146,14 @@ Claude: Uses hansolo_init MCP tool
 
 **Existing Project** (has Git repository):
 - Validates existing setup
-- Adds han-solo configuration
+- Adds devsolo configuration
 - Preserves existing Git configuration
 
 ### 5.4 Project Structure After Initialization
 
 ```
 project-root/
-├── .hansolo/
+├── .devsolo/
 │   ├── session.json              # Active session state
 │   └── sessions/                 # Session history
 │       └── {session-id}.json
@@ -161,7 +161,7 @@ project-root/
 │   └── hooks/                    # Safety hooks (if installed)
 │       ├── pre-commit
 │       └── pre-push
-├── hansolo.yaml                  # Project configuration
+├── devsolo.yaml                  # Project configuration
 └── CLAUDE.md                     # Claude Code instructions (updated)
 ```
 
@@ -171,16 +171,16 @@ project-root/
 
 | MCP Tool | Natural Language Triggers | Description | State Changes |
 |----------|---------------------------|-------------|---------------|
-| `hansolo_init` | "Initialize han-solo", "Set up han-solo" | Initialize project (MANDATORY FIRST) | N/A - Setup only |
-| `hansolo_launch` | "Launch a feature", "Start new feature", "Create branch" | Create feature branch safely | INIT → BRANCH_READY |
-| `hansolo_ship` | "Ship this feature", "Complete workflow", "Merge to main" | Complete shipping workflow | BRANCH_READY → COMPLETE |
-| `hansolo_hotfix` | "Emergency fix", "Hotfix", "Production fix" | Emergency production fix | HOTFIX_INIT → HOTFIX_COMPLETE |
-| `hansolo_status` | "Show status", "What's the current state" | Show all sessions and states | Read-only |
-| `hansolo_sessions` | "List sessions", "Show active work" | List active workflow sessions | Read-only |
-| `hansolo_swap` | "Switch to branch X", "Swap sessions" | Switch between sessions | Context switch |
-| `hansolo_abort` | "Cancel workflow", "Abort this work" | Cancel active workflow | * → INIT |
-| `hansolo_commit` | "Commit changes", "Create commit" | Commit with optional message | Updates session state |
-| `hansolo_status_line` | "Configure status line", "Setup terminal" | Configure terminal status line | N/A - Terminal UI |
+| `devsolo_init` | "Initialize devsolo", "Set up devsolo" | Initialize project (MANDATORY FIRST) | N/A - Setup only |
+| `devsolo_launch` | "Launch a feature", "Start new feature", "Create branch" | Create feature branch safely | INIT → BRANCH_READY |
+| `devsolo_ship` | "Ship this feature", "Complete workflow", "Merge to main" | Complete shipping workflow | BRANCH_READY → COMPLETE |
+| `devsolo_hotfix` | "Emergency fix", "Hotfix", "Production fix" | Emergency production fix | HOTFIX_INIT → HOTFIX_COMPLETE |
+| `devsolo_status` | "Show status", "What's the current state" | Show all sessions and states | Read-only |
+| `devsolo_sessions` | "List sessions", "Show active work" | List active workflow sessions | Read-only |
+| `devsolo_swap` | "Switch to branch X", "Swap sessions" | Switch between sessions | Context switch |
+| `devsolo_abort` | "Cancel workflow", "Abort this work" | Cancel active workflow | * → INIT |
+| `devsolo_commit` | "Commit changes", "Create commit" | Commit with optional message | Updates session state |
+| `devsolo_status_line` | "Configure status line", "Setup terminal" | Configure terminal status line | N/A - Terminal UI |
 
 **Usage**: All tools are accessed through natural language in Claude Code. Claude intelligently selects the appropriate MCP tool based on user intent.
 
@@ -211,11 +211,11 @@ When in init mode, this tool:
 - Detects if Git repository exists, creates if needed
 - Checks for remote, offers to create GitHub/GitLab repo if missing
 - Installs all hooks and templates
-- Creates `hansolo.yaml` marking project as initialized
+- Creates `devsolo.yaml` marking project as initialized
 - Sets up branch protection at platform level
 - Optionally configures status line
 
-All other tools check for `hansolo.yaml` presence before executing.
+All other tools check for `devsolo.yaml` presence before executing.
 
 **`manage_status_line`**
 Controls the terminal status line display for ambient awareness:
@@ -270,10 +270,10 @@ Controls the terminal status line display for ambient awareness:
 ### 7.1 Init: Complete Project Setup
 
 ```
-User: "Initialize han-solo in this project"
+User: "Initialize devsolo in this project"
 
 System: Detects no .git directory
-Claude: Uses hansolo_init tool with prompts
+Claude: Uses devsolo_init tool with prompts
 
 Tool executes initialization:
 1. Creates Git repository
@@ -283,9 +283,9 @@ Tool executes initialization:
    - Prompts for visibility (public/private)
    - Creates remote repository
    - Configures remote origin
-4. Creates .hansolo/ directory
+4. Creates .devsolo/ directory
 5. Installs Git hooks
-6. Creates hansolo.yaml marker
+6. Creates devsolo.yaml marker
 7. Updates CLAUDE.md with workflow instructions
 
 Result: Complete project setup ready for workflows
@@ -293,34 +293,34 @@ Result: Complete project setup ready for workflows
 
 ### 7.1.1 CLAUDE.md Configuration
 
-During initialization, han-solo updates the CLAUDE.md file with instructions for Claude Code integration:
+During initialization, devsolo updates the CLAUDE.md file with instructions for Claude Code integration:
 
 ```markdown
 # CLAUDE.md
 
 This file provides guidance to Claude Code when working with code in this repository.
 
-## Han-Solo Workflow System
+## DevSolo Workflow System
 
 <!-- DO NOT REMOVE OR MODIFY THIS SECTION - CRITICAL FOR WORKFLOW INTEGRITY -->
-**⚠️ MANDATORY - THIS PROJECT USES HAN-SOLO MCP SERVER ⚠️**
+**⚠️ MANDATORY - THIS PROJECT USES DEVSOLO MCP SERVER ⚠️**
 
-This repository is configured with han-solo, an intelligent Git workflow automation system that enforces linear history and prevents merge conflicts. You MUST use han-solo commands for all Git operations.
+This repository is configured with devsolo, an intelligent Git workflow automation system that enforces linear history and prevents merge conflicts. You MUST use devsolo commands for all Git operations.
 
 ### Available Commands
 
 **Primary Workflows:**
-- `/hansolo:init` - Initialize han-solo (already complete for this project)
-- `/hansolo:launch` - Create a new feature branch safely
-- `/hansolo:ship` - Complete workflow from commit to merge
-- `/hansolo:hotfix` - Emergency production fix
+- `/devsolo:init` - Initialize devsolo (already complete for this project)
+- `/devsolo:launch` - Create a new feature branch safely
+- `/devsolo:ship` - Complete workflow from commit to merge
+- `/devsolo:hotfix` - Emergency production fix
 
 **Status and Management:**
-- `/hansolo:status` - Show all sessions and current state
-- `/hansolo:sessions` - List active workflow sessions
-- `/hansolo:swap` - Switch between active sessions
-- `/hansolo:cleanup` - Clean up merged branches
-- `/hansolo:abort` - Cancel current workflow
+- `/devsolo:status` - Show all sessions and current state
+- `/devsolo:sessions` - List active workflow sessions
+- `/devsolo:swap` - Switch between active sessions
+- `/devsolo:cleanup` - Clean up merged branches
+- `/devsolo:abort` - Cancel current workflow
 
 **CRITICAL**: Always use these commands instead of manual Git operations. The MCP server handles all Git interactions through deterministic state machines.
 
@@ -329,14 +329,14 @@ This repository is configured with han-solo, an intelligent Git workflow automat
 <!-- DO NOT REMOVE - ENFORCED BY MCP SERVER AND HOOKS -->
 **⚠️ NEVER PERFORM MANUAL GIT OPERATIONS ⚠️**
 
-**PROHIBITED** - These operations are blocked and must go through han-solo:
-- Direct `git commit` - Use `/hansolo:ship` instead
-- Direct `git push` - Use `/hansolo:ship` instead
-- Direct `gh pr create` - Use `/hansolo:ship` instead
-- Manual PR creation - Use `/hansolo:ship` instead
-- Direct commits to main - Use `/hansolo:hotfix` for emergencies
+**PROHIBITED** - These operations are blocked and must go through devsolo:
+- Direct `git commit` - Use `/devsolo:ship` instead
+- Direct `git push` - Use `/devsolo:ship` instead
+- Direct `gh pr create` - Use `/devsolo:ship` instead
+- Manual PR creation - Use `/devsolo:ship` instead
+- Direct commits to main - Use `/devsolo:hotfix` for emergencies
 
-**EXCEPTION**: The han-solo MCP server handles all Git operations automatically when you use the commands above. Trust the workflow system.
+**EXCEPTION**: The devsolo MCP server handles all Git operations automatically when you use the commands above. Trust the workflow system.
 
 ## Workflow State Machine
 
@@ -348,7 +348,7 @@ The MCP server maintains strict state machines for all workflows. When you execu
 4. **Rollback on failure** - Failed operations automatically roll back to a safe state
 
 ### Ship Workflow States
-When you run `/hansolo:ship`, the MCP server will:
+When you run `/devsolo:ship`, the MCP server will:
 1. Check current branch and session state
 2. Request commit message (you generate options)
 3. Commit changes automatically
@@ -362,19 +362,19 @@ When you run `/hansolo:ship`, the MCP server will:
 
 ## Session Management
 
-Han-solo uses session-based workflows:
+DevSolo uses session-based workflows:
 - Each workflow creates a unique session ID
 - Sessions persist across Claude conversations
 - Multiple concurrent sessions are supported
-- Use `/hansolo:status` to see all active sessions
-- Use `/hansolo:swap` to switch between sessions
+- Use `/devsolo:status` to see all active sessions
+- Use `/devsolo:swap` to switch between sessions
 
 ## Command Execution Behavior
 
 <!-- CRITICAL FOR CORRECT MCP SERVER INTERACTION -->
 **⚠️ UNDERSTANDING MCP COMMAND EXECUTION ⚠️**
 
-### When a user requests a han-solo command:
+### When a user requests a devsolo command:
 
 1. **Execute it immediately** through the MCP server
 2. **Wait for the complete response** - The MCP server handles all operations
@@ -400,7 +400,7 @@ Han-solo uses session-based workflows:
 
 ## Status Line Integration
 
-If configured, the han-solo status line shows:
+If configured, the devsolo status line shows:
 - Current branch and session
 - Git statistics
 - PR status
@@ -418,11 +418,11 @@ When the MCP server returns an error:
 
 ## Best Practices
 
-1. **Always start with status**: Run `/hansolo:status` to understand current state
-2. **Use launch for new features**: `/hansolo:launch` creates branches safely
-3. **Ship completes everything**: `/hansolo:ship` handles the entire workflow
+1. **Always start with status**: Run `/devsolo:status` to understand current state
+2. **Use launch for new features**: `/devsolo:launch` creates branches safely
+3. **Ship completes everything**: `/devsolo:ship` handles the entire workflow
 4. **Trust the automation**: Don't try to "help" by doing manual operations
-5. **Check sessions when returning**: `/hansolo:sessions` shows work in progress
+5. **Check sessions when returning**: `/devsolo:sessions` shows work in progress
 
 ## Implementation Details
 
@@ -432,18 +432,18 @@ When the MCP server returns an error:
 - **Status Lines**: Provide real-time awareness
 - **Session Files**: Track workflow state
 
-**NOTE TO CLAUDE**: This project uses han-solo for ALL Git operations. Never bypass the MCP server or perform manual Git commands. The system is designed to prevent merge conflicts and maintain linear history. Trust the workflow automation.
+**NOTE TO CLAUDE**: This project uses devsolo for ALL Git operations. Never bypass the MCP server or perform manual Git commands. The system is designed to prevent merge conflicts and maintain linear history. Trust the workflow automation.
 ```
 
-This CLAUDE.md content is written to the project root during `/hansolo:init` and provides Claude Code with:
+This CLAUDE.md content is written to the project root during `/devsolo:init` and provides Claude Code with:
 1. Clear command documentation
 2. Workflow explanations
 3. Prohibition of manual Git operations
 4. Session management understanding
 5. Error handling guidance
-6. Best practices for using han-solo
+6. Best practices for using devsolo
 ```
-Developer: /hansolo:init
+Developer: /devsolo:init
 System: Detects no .git directory
 Claude: "No Git repository detected. Let's set everything up!
         
@@ -480,9 +480,9 @@ Claude: "✔ Git repository initialized
         - Auto-merge enabled by default
         - You maintain full control
         
-        Configuring han-solo...
-        [installs hooks, templates, creates hansolo.yaml]
-        ✔ han-solo ready! You can now use all commands."
+        Configuring devsolo...
+        [installs hooks, templates, creates devsolo.yaml]
+        ✔ devsolo ready! You can now use all commands."
         
 Result: Complete setup optimized for solo development
 ```
@@ -491,7 +491,7 @@ Result: Complete setup optimized for solo development
 ```
 User: "I want to start working on a new authentication feature"
 
-Claude: Uses hansolo_launch tool
+Claude: Uses devsolo_launch tool
 System: Detects 5 uncommitted files on main
 
 Claude prompts: "You have uncommitted changes. How should I handle them?"
@@ -524,7 +524,7 @@ Result:
 ```
 User: "Ship this feature to production"
 
-Claude: Uses hansolo_ship tool
+Claude: Uses devsolo_ship tool
 System executes workflow:
 1. Commits changes (prompts for message)
 2. Pushes to remote
@@ -545,7 +545,7 @@ Claude reports: "PR #456 created with auto-merge enabled.
 
 User: "Continue shipping the feature"
 
-Claude: Uses hansolo_ship tool again
+Claude: Uses devsolo_ship tool again
 System: Detects PR already merged via auto-merge
 
 Claude reports: "Great! PR #456 was auto-merged after all requirements passed.
@@ -562,7 +562,7 @@ Claude reports: "Great! PR #456 was auto-merged after all requirements passed.
 ```
 User: "What's the status of my work?"
 
-Claude: Uses hansolo_status tool
+Claude: Uses devsolo_status tool
 System: Queries all sessions and repository state
 
 Claude reports: "📊 Comprehensive Workflow Status
@@ -577,7 +577,7 @@ Claude reports: "📊 Comprehensive Workflow Status
         • PR #456: Needs 2 reviews
         • CI: All checks passed ✔
         • Blockers: Awaiting review from @john, @sarah
-        • Next: Get reviews, then run /hansolo:ship
+        • Next: Get reviews, then run /devsolo:ship
         
         fix/memory-leak (#b7d9)
         • State: CI_RUNNING
@@ -589,7 +589,7 @@ Claude reports: "📊 Comprehensive Workflow Status
         • State: BRANCH_READY
         • Changes: 5 uncommitted files
         • No PR created yet
-        • Next: Run /hansolo:ship when ready
+        • Next: Run /devsolo:ship when ready
         
         === REPOSITORY HEALTH ===
         • Main branch: Up to date ✔
@@ -632,7 +632,7 @@ The architecture enforces a "guard rails" approach:
 ### 8.2 MCP Server Structure
 
 ```
-hansolo/
+devsolo/
 ├── package.json              # Node.js project configuration
 ├── src/
 │   ├── index.ts             # MCP server entry point
@@ -665,15 +665,15 @@ Integration with Claude Code via MCP configuration
 ### 8.3 MCP Integration Flow
 
 #### One-Time MCP Server Setup
-1. Clone han-solo repository (or install via npm if published)
+1. Clone devsolo repository (or install via npm if published)
 2. Build the TypeScript project: `npm run build`
-3. Configure Claude Code to load han-solo MCP server:
+3. Configure Claude Code to load devsolo MCP server:
    ```json
    {
      "mcpServers": {
-       "hansolo": {
+       "devsolo": {
          "command": "node",
-         "args": ["/path/to/hansolo/build/index.js"]
+         "args": ["/path/to/devsolo/build/index.js"]
        }
      }
    }
@@ -682,8 +682,8 @@ Integration with Claude Code via MCP configuration
 5. MCP tools become available for natural language use
 
 #### Per-Project Initialization
-1. User requests initialization: "Initialize han-solo in this project"
-2. Claude invokes `hansolo_init` MCP tool
+1. User requests initialization: "Initialize devsolo in this project"
+2. Claude invokes `devsolo_init` MCP tool
 3. Tool creates project structure (see 8.4)
 4. Project is ready for workflow commands
 
@@ -692,7 +692,7 @@ Integration with Claude Code via MCP configuration
 **Project directory**:
 ```
 project-root/
-├── .hansolo/                    # Session and state management
+├── .devsolo/                    # Session and state management
 │   ├── session.json            # Current active session
 │   └── sessions/               # Session history
 │       └── {session-id}.json   # Individual session data
@@ -700,8 +700,8 @@ project-root/
 │   └── hooks/                  # Safety hooks (optional)
 │       ├── pre-commit
 │       └── pre-push
-├── hansolo.yaml                # Project configuration
-└── CLAUDE.md                   # Updated with han-solo instructions
+├── devsolo.yaml                # Project configuration
+└── CLAUDE.md                   # Updated with devsolo instructions
 ```
 
 **No user-level installation required** - MCP server is configured once in Claude Code and works across all projects.
@@ -715,27 +715,27 @@ project-root/
 
 ### 8.6 Initialization Enforcement
 
-When any han-solo command runs (except init), the MCP server:
+When any devsolo command runs (except init), the MCP server:
 
 ```javascript
 // MCP Server initialization check
 async function verifyInitialization() {
   // Check for project initialization
-  if (!fs.existsSync('./hansolo.yaml')) {
+  if (!fs.existsSync('./devsolo.yaml')) {
     return {
       error: 'NOT_INITIALIZED',
-      message: 'Project not initialized. Run /hansolo:init first'
+      message: 'Project not initialized. Run /devsolo:init first'
     };
   }
   
   // Check for installed components (either location)
-  const userComponents = fs.existsSync(os.homedir() + '/.hansolo/');
-  const projectComponents = fs.existsSync('./.hansolo/');
+  const userComponents = fs.existsSync(os.homedir() + '/.devsolo/');
+  const projectComponents = fs.existsSync('./.devsolo/');
   
   if (!userComponents && !projectComponents) {
     return {
       error: 'COMPONENTS_MISSING',
-      message: 'han-solo components not found. Run: npm install -g @hansolo/cli'
+      message: 'devsolo components not found. Run: npm install -g @devsolo/cli'
     };
   }
   
@@ -747,65 +747,65 @@ async function verifyInitialization() {
 
 ### 9.1 Overview
 
-The han-solo status line provides "ambient awareness" - constant, non-intrusive visibility of repository state in your terminal. This implements the Constitutional principle of Ambient Awareness (Section V).
+The devsolo status line provides "ambient awareness" - constant, non-intrusive visibility of repository state in your terminal. This implements the Constitutional principle of Ambient Awareness (Section V).
 
 ### 9.2 Installation Scope
 
-Status lines are installed by the npm installer to han-solo directories:
+Status lines are installed by the npm installer to devsolo directories:
 
-**User-level** (`~/.hansolo/status_lines/`):
-- Installed when running `npm install -g @hansolo/cli`
+**User-level** (`~/.devsolo/status_lines/`):
+- Installed when running `npm install -g @devsolo/cli`
 - Available across all projects
 - Referenced from `~/.claude/settings.local.json`
 
-**Project-level** (`./.hansolo/status_lines/`):
-- Installed when running `npm install --save-dev @hansolo/cli`
+**Project-level** (`./.devsolo/status_lines/`):
+- Installed when running `npm install --save-dev @devsolo/cli`
 - Only active in that specific project
 - Referenced from `./.claude/settings.local.json`
 
 ### 9.3 Status Line Types
 
-**Full Status Line** (`han-solo.sh`):
+**Full Status Line** (`devsolo.sh`):
 - Current working directory (basename)
 - Branch name with visual indicators for state
 - Git statistics: staged/modified/untracked files, lines added/removed
 - Sync status: ahead/behind/diverged from origin
 - PR status: if PR exists for current branch
-- Active session: han-solo workflow session ID and state
+- Active session: devsolo workflow session ID and state
 - Safety warnings: visual alerts when on main branch
 - Performance: < 100ms execution time
 
-**Minimal Status Line** (`han-solo-minimal.sh`):
+**Minimal Status Line** (`devsolo-minimal.sh`):
 - Branch name only
-- Session indicator: shows if han-solo session is active
+- Session indicator: shows if devsolo session is active
 - Main branch warning: simple indicator when on protected branch
 - Purpose: For integration with existing custom prompts
-- Usage: Can be embedded in PS1 as `$(~/.hansolo/status_lines/han-solo-minimal.sh)`
+- Usage: Can be embedded in PS1 as `$(~/.devsolo/status_lines/devsolo-minimal.sh)`
 
 ### 9.4 Manual Control via MCP Server
 
-The `/hansolo:status-line` command (provided by `manage_status_line` tool) allows runtime control:
+The `/devsolo:status-line` command (provided by `manage_status_line` tool) allows runtime control:
 
 ```bash
 # Enable full status line
-/hansolo:status-line enable
+/devsolo:status-line enable
 
 # Use minimal version
-/hansolo:status-line minimal
+/devsolo:status-line minimal
 
 # Disable status line
-/hansolo:status-line disable
+/devsolo:status-line disable
 
 # Show current configuration
-/hansolo:status-line current
+/devsolo:status-line current
 
 # Show help
-/hansolo:status-line help
+/devsolo:status-line help
 ```
 
 ## 10. Configuration
 
-### 10.1 Project Configuration (hansolo.yaml)
+### 10.1 Project Configuration (devsolo.yaml)
 ```yaml
 version: 1.0.0
 
@@ -975,7 +975,7 @@ const SHIP_CONTRACTS = {
       requiredConditions: [
         { type: 'NO_ACTIVE_SESSION', branch: getCurrentBranch() },
         { type: 'GIT_REPO_EXISTS' },
-        { type: 'HANSOLO_INITIALIZED' }
+        { type: 'DEVSOLO_INITIALIZED' }
       ],
       environmentChecks: [
         { check: 'hasUncommittedChanges', capture: 'diff' },
@@ -1422,7 +1422,7 @@ class ClaudeConstraintEnforcer {
 
 #### Example: Ship Command Consistency
 ```javascript
-// Every time /hansolo:ship runs:
+// Every time /devsolo:ship runs:
 1. MCP checks current state → determines valid actions
 2. Claude receives ONLY valid options
 3. Claude's choice is validated before execution
@@ -1434,7 +1434,7 @@ class ClaudeConstraintEnforcer {
 
 ## 16. Implementation Plan
 
-Since han-solo requires both MCP server and Claude Code integration, the development environment uses a multi-layered approach:
+Since devsolo requires both MCP server and Claude Code integration, the development environment uses a multi-layered approach:
 
 ```
 ┌─────────────────────────────────────┐
@@ -1467,8 +1467,8 @@ module.exports = {
     command: 'node',
     args: ['./lib/mcp-server.js'],
     env: {
-      HANSOLO_DEBUG: 'true',
-      HANSOLO_TEST_MODE: 'true'
+      DEVSOLO_DEBUG: 'true',
+      DEVSOLO_TEST_MODE: 'true'
     }
   },
   testScenarios: [
@@ -1616,12 +1616,12 @@ describe('Claude Integration E2E', () => {
   test('init command flow', async () => {
     // Use Claude Code test harness
     const claude = await ClaudeTestHarness.create({
-      commands: ['@hansolo/cli'],
+      commands: ['@devsolo/cli'],
       testRepo: './test-repos/empty'
     });
     
     // Simulate user command
-    const response = await claude.sendCommand('/hansolo:init');
+    const response = await claude.sendCommand('/devsolo:init');
     
     // Verify Claude's response
     expect(response).toContain('No Git repository detected');
@@ -1636,7 +1636,7 @@ describe('Claude Integration E2E', () => {
     expect(visibility).toContain('[s]olo');
     
     // Verify final state
-    expect(await fs.exists('./hansolo.yaml')).toBe(true);
+    expect(await fs.exists('./devsolo.yaml')).toBe(true);
     expect(await fs.exists('./.git')).toBe(true);
   });
 });
@@ -1763,7 +1763,7 @@ npm run validate:states
 
 ```yaml
 # .github/workflows/test.yml
-name: han-solo CI
+name: devsolo CI
 
 on: [push, pull_request]
 
@@ -1901,7 +1901,7 @@ describe('Performance Tests', () => {
 ### pre-commit.sh
 ```bash
 #!/bin/bash
-# han-solo pre-commit hook
+# devsolo pre-commit hook
 # Prevents accidental commits to main branch and enforces workflow
 
 set -e
@@ -1911,32 +1911,32 @@ BRANCH=$(git symbolic-ref HEAD 2>/dev/null | sed -e 's|^refs/heads/||')
 
 # Check if we're on main/master
 if [[ "$BRANCH" == "main" ]] || [[ "$BRANCH" == "master" ]]; then
-  # Check if we're in a han-solo workflow
-  if [[ -f ".hansolo/sessions/active" ]]; then
+  # Check if we're in a devsolo workflow
+  if [[ -f ".devsolo/sessions/active" ]]; then
     # Check if the active session allows main commits (hotfix workflow)
-    SESSION_TYPE=$(cat .hansolo/sessions/active | grep "type" | cut -d: -f2)
+    SESSION_TYPE=$(cat .devsolo/sessions/active | grep "type" | cut -d: -f2)
     if [[ "$SESSION_TYPE" == "hotfix" ]]; then
-      echo "✅ han-solo hotfix workflow - allowing main branch commit"
+      echo "✅ devsolo hotfix workflow - allowing main branch commit"
       exit 0
     fi
   fi
   
   # Check for override environment variable
-  if [[ "$HANSOLO_ALLOW_COMMIT" == "true" ]]; then
-    echo "✅ HANSOLO_ALLOW_COMMIT=true - allowing commit"
+  if [[ "$DEVSOLO_ALLOW_COMMIT" == "true" ]]; then
+    echo "✅ DEVSOLO_ALLOW_COMMIT=true - allowing commit"
     exit 0
   fi
   
   # Block the commit
   echo "❌ Direct commits to main branch are not allowed!"
   echo ""
-  echo "Please use han-solo workflows:"
-  echo "  /hansolo:launch - Start a new feature"
-  echo "  /hansolo:ship - Ship your changes"
-  echo "  /hansolo:hotfix - Emergency fix"
+  echo "Please use devsolo workflows:"
+  echo "  /devsolo:launch - Start a new feature"
+  echo "  /devsolo:ship - Ship your changes"
+  echo "  /devsolo:hotfix - Emergency fix"
   echo ""
   echo "To override (not recommended):"
-  echo "  HANSOLO_ALLOW_COMMIT=true git commit ..."
+  echo "  DEVSOLO_ALLOW_COMMIT=true git commit ..."
   exit 1
 fi
 
@@ -1962,7 +1962,7 @@ exit 0
 ### pre-push.sh
 ```bash
 #!/bin/bash
-# han-solo pre-push hook
+# devsolo pre-push hook
 # Prevents accidental pushes to main branch and enforces workflow
 
 set -e
@@ -1974,30 +1974,30 @@ while read local_ref local_sha remote_ref remote_sha; do
   
   # Check if pushing to main/master
   if [[ "$BRANCH" == "main" ]] || [[ "$BRANCH" == "master" ]]; then
-    # Check if we're in a han-solo workflow
-    if [[ -f ".hansolo/sessions/active" ]]; then
-      SESSION_TYPE=$(cat .hansolo/sessions/active | grep "type" | cut -d: -f2)
+    # Check if we're in a devsolo workflow
+    if [[ -f ".devsolo/sessions/active" ]]; then
+      SESSION_TYPE=$(cat .devsolo/sessions/active | grep "type" | cut -d: -f2)
       if [[ "$SESSION_TYPE" == "hotfix" ]]; then
-        echo "✅ han-solo hotfix workflow - allowing push to main"
+        echo "✅ devsolo hotfix workflow - allowing push to main"
         continue
       fi
     fi
     
     # Check for override environment variable
-    if [[ "$HANSOLO_ALLOW_PUSH" == "true" ]]; then
-      echo "✅ HANSOLO_ALLOW_PUSH=true - allowing push"
+    if [[ "$DEVSOLO_ALLOW_PUSH" == "true" ]]; then
+      echo "✅ DEVSOLO_ALLOW_PUSH=true - allowing push"
       continue
     fi
     
     # Block the push
     echo "❌ Direct pushes to main branch are not allowed!"
     echo ""
-    echo "Please use han-solo workflows:"
-    echo "  /hansolo:ship - Complete shipping workflow"
-    echo "  /hansolo:hotfix - Emergency production fix"
+    echo "Please use devsolo workflows:"
+    echo "  /devsolo:ship - Complete shipping workflow"
+    echo "  /devsolo:hotfix - Emergency production fix"
     echo ""
     echo "To override (not recommended):"
-    echo "  HANSOLO_ALLOW_PUSH=true git push ..."
+    echo "  DEVSOLO_ALLOW_PUSH=true git push ..."
     exit 1
   fi
   
@@ -2046,12 +2046,12 @@ exit 0
 
 These hooks are installed in two ways:
 
-1. **Via npm installer**: Copied to `.hansolo/hooks/` and referenced in Claude settings
-2. **Via /hansolo:init**: Installed directly to `.git/hooks/` in the project
+1. **Via npm installer**: Copied to `.devsolo/hooks/` and referenced in Claude settings
+2. **Via /devsolo:init**: Installed directly to `.git/hooks/` in the project
 
 The hooks provide multiple safety mechanisms:
 - **Branch protection**: Prevent direct commits/pushes to main
-- **Workflow integration**: Allow operations when part of han-solo workflows
+- **Workflow integration**: Allow operations when part of devsolo workflows
 - **Override capability**: Environment variables for emergency bypass
 - **Force push protection**: Warn before rewriting remote history
 - **Commit message validation**: Encourage conventional commit format
@@ -2063,8 +2063,8 @@ The hooks provide multiple safety mechanisms:
 #!/usr/bin/env node
 
 /**
- * Han-Solo CLI Installer
- * Installs han-solo components to .hansolo directory
+ * DevSolo CLI Installer
+ * Installs devsolo components to .devsolo directory
  * Configures Claude settings to reference components
  */
 
@@ -2077,13 +2077,13 @@ const boxen = require('boxen');
 const { execSync } = require('child_process');
 const os = require('os');
 
-const REPO_URL = 'https://github.com/hansolo/cli';
+const REPO_URL = 'https://github.com/devsolo/cli';
 
 const COMPONENTS = {
   status_lines: {
     name: 'Status Lines',
     description: 'Terminal awareness displays (full and minimal)',
-    files: ['han-solo.sh', 'han-solo-minimal.sh'],
+    files: ['devsolo.sh', 'devsolo-minimal.sh'],
     path: 'files/status_lines',
     selected: true
   },
@@ -2126,7 +2126,7 @@ const PROFILES = {
   }
 };
 
-class HanSoloInstaller {
+class DevSoloInstaller {
   constructor() {
     this.state = {
       scope: 'project',
@@ -2141,7 +2141,7 @@ class HanSoloInstaller {
     try {
       // Check if already installed (for npx case)
       if (await this.checkExistingInstallation()) {
-        console.log(chalk.green('✓ Han-Solo components already installed'));
+        console.log(chalk.green('✓ DevSolo components already installed'));
         process.exit(0);
       }
 
@@ -2163,8 +2163,8 @@ class HanSoloInstaller {
     const isTempDir = __dirname.includes('_npx') || __dirname.includes('_cacache');
     
     if (isNpx || isTempDir) {
-      const userInstall = path.join(os.homedir(), '.hansolo');
-      const projectInstall = path.join(process.cwd(), '.hansolo');
+      const userInstall = path.join(os.homedir(), '.devsolo');
+      const projectInstall = path.join(process.cwd(), '.devsolo');
       
       if (await fs.pathExists(userInstall)) {
         console.log(chalk.cyan('Found existing user-level installation'));
@@ -2191,7 +2191,7 @@ class HanSoloInstaller {
 
     // Fallback: download from GitHub
     spinner.text = 'Downloading from GitHub...';
-    const tempDir = path.join(os.tmpdir(), 'hansolo-install-' + Date.now());
+    const tempDir = path.join(os.tmpdir(), 'devsolo-install-' + Date.now());
     
     try {
       await fs.ensureDir(tempDir);
@@ -2202,7 +2202,7 @@ class HanSoloInstaller {
       spinner.succeed('Downloaded installation files');
     } catch (error) {
       spinner.fail('Failed to download files');
-      throw new Error('Could not download han-solo files');
+      throw new Error('Could not download devsolo files');
     }
   }
 
@@ -2220,15 +2220,15 @@ class HanSoloInstaller {
       {
         type: 'list',
         name: 'scope',
-        message: 'Where would you like to install han-solo components?',
+        message: 'Where would you like to install devsolo components?',
         choices: [
           {
-            name: 'User (~/.hansolo - available in all projects)',
+            name: 'User (~/.devsolo - available in all projects)',
             value: 'global',
             short: 'User'
           },
           {
-            name: 'Project (./.hansolo - this project only)',
+            name: 'Project (./.devsolo - this project only)',
             value: 'project',
             short: 'Project'
           }
@@ -2275,15 +2275,15 @@ class HanSoloInstaller {
 
     // Set install path
     this.state.installPath = this.state.scope === 'global'
-      ? path.join(os.homedir(), '.hansolo')
-      : path.join(process.cwd(), '.hansolo');
+      ? path.join(os.homedir(), '.devsolo')
+      : path.join(process.cwd(), '.devsolo');
   }
 
   async performInstallation() {
-    const spinner = ora('Installing han-solo components...').start();
+    const spinner = ora('Installing devsolo components...').start();
 
     try {
-      // Create han-solo directory
+      // Create devsolo directory
       await fs.ensureDir(this.state.installPath);
 
       // Copy each component
@@ -2344,7 +2344,7 @@ class HanSoloInstaller {
         const statusLinePath = path.join(
           this.state.installPath,
           'status_lines',
-          'han-solo.sh'
+          'devsolo.sh'
         );
         
         settings.statusLine = {
@@ -2362,7 +2362,7 @@ class HanSoloInstaller {
         const hookConfigs = [
           {
             matcher: 'Bash',
-            description: 'han-solo pre-commit validation',
+            description: 'devsolo pre-commit validation',
             hooks: [{
               type: 'command',
               command: path.join(this.state.installPath, 'hooks', 'pre-commit.sh')
@@ -2372,7 +2372,7 @@ class HanSoloInstaller {
           },
           {
             matcher: 'Bash',
-            description: 'han-solo pre-push validation',
+            description: 'devsolo pre-push validation',
             hooks: [{
               type: 'command',
               command: path.join(this.state.installPath, 'hooks', 'pre-push.sh')
@@ -2408,7 +2408,7 @@ class HanSoloInstaller {
   showSuccess() {
     const successBox = boxen(
       chalk.green.bold('✓ Installation Complete!\n\n') +
-      'han-solo components installed to:\n' +
+      'devsolo components installed to:\n' +
       chalk.cyan(this.state.installPath) + '\n\n' +
       'Claude settings configured at:\n' +
       chalk.cyan(this.state.scope === 'global' 
@@ -2416,8 +2416,8 @@ class HanSoloInstaller {
         : './.claude/settings.local.json') + '\n\n' +
       chalk.yellow.bold('Next Steps:\n') +
       '1. Restart Claude Code or reload window\n' +
-      '2. Run ' + chalk.cyan('/hansolo:init') + ' in your project\n' +
-      '3. Run ' + chalk.cyan('/hansolo:status-line help') + ' for status options\n\n' +
+      '2. Run ' + chalk.cyan('/devsolo:init') + ' in your project\n' +
+      '3. Run ' + chalk.cyan('/devsolo:status-line help') + ' for status options\n\n' +
       chalk.green('Happy shipping! 🚀'),
       {
         padding: 1,
@@ -2432,11 +2432,11 @@ class HanSoloInstaller {
 
 // Run installer
 if (require.main === module) {
-  const installer = new HanSoloInstaller();
+  const installer = new DevSoloInstaller();
   installer.run();
 }
 
-module.exports = HanSoloInstaller;
+module.exports = DevSoloInstaller;
 ```
 
 ## Appendix B: Glossary
@@ -2447,7 +2447,7 @@ module.exports = HanSoloInstaller;
 - **Rebase**: Update branch with main changes
 
 ## Appendix C: References
-- [han-solo Constitution](./constitution.md)
+- [devsolo Constitution](./constitution.md)
 - [Git Documentation](https://git-scm.com/doc)
 - [Claude Code Docs](https://claude.ai/docs)
 - [GitHub API](https://docs.github.com/api)

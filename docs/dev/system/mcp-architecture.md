@@ -2,7 +2,7 @@
 
 ## Overview
 
-han-solo v2.0.0 is built on a **pure MCP (Model Context Protocol)** architecture, designed exclusively for AI-native workflows via Claude Code.
+devsolo v2.0.0 is built on a **pure MCP (Model Context Protocol)** architecture, designed exclusively for AI-native workflows via Claude Code.
 
 This document explains the architecture, design decisions, and implementation details for developers.
 
@@ -48,7 +48,7 @@ This document explains the architecture, design decisions, and implementation de
                 ↓ JSON-RPC
 ┌─────────────────────────────────┐
 │       MCP Server                │
-│    (HanSoloMCPServer)           │
+│    (DevSoloMCPServer)           │
 └─────────────────────────────────┘
                 ↓
 ┌─────────────────────────────────┐
@@ -84,7 +84,7 @@ This document explains the architecture, design decisions, and implementation de
 
 ### 1. MCP Server Layer
 
-**File**: `src/mcp/hansolo-mcp-server.ts`
+**File**: `src/mcp/devsolo-mcp-server.ts`
 
 **Responsibilities**:
 - MCP protocol implementation
@@ -94,14 +94,14 @@ This document explains the architecture, design decisions, and implementation de
 
 **Key Components**:
 ```typescript
-export class HanSoloMCPServer {
+export class DevSoloMCPServer {
   private server: Server;
   private initTool: InitTool;
   private launchTool: LaunchTool;
   private shipTool: ShipTool;
   // ... 8 more tools
 
-  constructor(basePath: string = '.hansolo') {
+  constructor(basePath: string = '.devsolo') {
     // Initialize core services
     const gitOps = new GitOperations();
     const sessionRepo = new SessionRepository(basePath);
@@ -368,8 +368,8 @@ export class GitOperations {
 ### 5. Persistence Layer
 
 **Storage**:
-- `.hansolo/config.yaml` - Configuration
-- `.hansolo/sessions/*.json` - Workflow sessions
+- `.devsolo/config.yaml` - Configuration
+- `.devsolo/sessions/*.json` - Workflow sessions
 - `.git/` - Git repository (via simple-git)
 
 **No Database**: File-based storage for simplicity
@@ -481,8 +481,8 @@ export interface PreFlightCheckResult {
 | **Testing** | Complex (terminal mocking) | Simple (direct) |
 | **Results** | Terminal output | Structured JSON |
 | **Validation** | Ad-hoc | Comprehensive pre/post |
-| **Entry Points** | 2 (hansolo, hansolo-mcp) | 1 (hansolo-mcp) |
-| **Package Name** | @hansolo/cli | hansolo-mcp |
+| **Entry Points** | 2 (devsolo, devsolo-mcp) | 1 (devsolo-mcp) |
+| **Package Name** | @devsolo/cli | devsolo-mcp |
 | **Target Users** | Terminal + AI users | AI users only |
 
 ## Design Decisions
@@ -569,7 +569,7 @@ But not a priority - v2.0.0 focuses on AI-native workflows.
 2. **Define input interface**: `NewToolInput`
 3. **Implement MCPTool interface**: `execute(input): Promise<Result>`
 4. **Add validation**: Pre-flight and post-flight
-5. **Register in server**: `HanSoloMCPServer.constructor()`
+5. **Register in server**: `DevSoloMCPServer.constructor()`
 6. **Export from index**: `src/mcp/tools/index.ts`
 7. **Write tests**: Unit + integration
 8. **Document**: Update mcp-tools-reference.md
@@ -595,4 +595,4 @@ But not a priority - v2.0.0 focuses on AI-native workflows.
 
 ---
 
-**han-solo v2.0.0** - Pure MCP Architecture for AI-Native Workflows
+**devsolo v2.0.0** - Pure MCP Architecture for AI-Native Workflows

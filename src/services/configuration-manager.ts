@@ -9,7 +9,7 @@ export class ConfigurationManager {
   private config: Configuration | null = null;
   private fileWatcher: any | null = null;
 
-  constructor(basePath: string = '.hansolo') {
+  constructor(basePath: string = '.devsolo') {
     // Always resolve relative to current working directory
     const resolvedBasePath = path.resolve(process.cwd(), basePath);
     this.configPath = path.join(resolvedBasePath, 'config.yaml');
@@ -110,7 +110,7 @@ export class ConfigurationManager {
     const existingConfig = await this.exists();
 
     if (existingConfig) {
-      throw new Error('Configuration already exists. Use "hansolo config" to modify.');
+      throw new Error('Configuration already exists. Use "devsolo config" to modify.');
     }
 
     const config = new Configuration({
@@ -122,9 +122,9 @@ export class ConfigurationManager {
     await this.save(config);
 
     // Create marker file
-    const markerPath = path.join(path.dirname(this.configPath), 'hansolo.yaml');
-    await fs.writeFile(markerPath, `# han-solo project marker file
-# This file indicates that han-solo has been initialized in this project
+    const markerPath = path.join(path.dirname(this.configPath), 'devsolo.yaml');
+    await fs.writeFile(markerPath, `# devsolo project marker file
+# This file indicates that devsolo has been initialized in this project
 version: 1.0.0
 initialized: true
 created: ${new Date().toISOString()}
@@ -143,7 +143,7 @@ created: ${new Date().toISOString()}
   }
 
   async isInitialized(): Promise<boolean> {
-    const markerPath = path.join(path.dirname(this.configPath), 'hansolo.yaml');
+    const markerPath = path.join(path.dirname(this.configPath), 'devsolo.yaml');
     try {
       await fs.access(markerPath);
       return true;
@@ -154,7 +154,7 @@ created: ${new Date().toISOString()}
 
   async validate(): Promise<boolean> {
     if (!await this.isInitialized()) {
-      throw new Error('han-solo not initialized. Run "/hansolo:init" first.');
+      throw new Error('devsolo not initialized. Run "/devsolo:init" first.');
     }
 
     const config = await this.load();
@@ -220,7 +220,7 @@ created: ${new Date().toISOString()}
     const config = await this.load();
 
     if (component === 'mpcServer') {
-      throw new Error('Cannot disable MCP Server - it is required for han-solo to function');
+      throw new Error('Cannot disable MCP Server - it is required for devsolo to function');
     }
 
     config.components[component] = false;
@@ -277,14 +277,14 @@ created: ${new Date().toISOString()}
 
     // Pre-commit hook
     const preCommitHook = `#!/bin/bash
-# han-solo pre-commit hook
-# Enforces workflow when han-solo session is active
+# devsolo pre-commit hook
+# Enforces workflow when devsolo session is active
 
-# Check for active han-solo session
-if [ -f ".hansolo/session.json" ]; then
-  echo "❌ han-solo session active!"
-  echo "📝 Use 'hansolo ship' or '/hansolo:ship' to commit changes"
-  echo "   Or use 'hansolo abort' to exit the workflow"
+# Check for active devsolo session
+if [ -f ".devsolo/session.json" ]; then
+  echo "❌ devsolo session active!"
+  echo "📝 Use 'devsolo ship' or '/devsolo:ship' to commit changes"
+  echo "   Or use 'devsolo abort' to exit the workflow"
   exit 1
 fi
 
@@ -292,7 +292,7 @@ fi
 branch=$(git branch --show-current)
 if [[ "$branch" == "main" || "$branch" == "master" ]]; then
   echo "❌ Direct commits to $branch are not allowed!"
-  echo "Use '/hansolo:launch' to create a feature branch"
+  echo "Use '/devsolo:launch' to create a feature branch"
   exit 1
 fi
 
@@ -303,14 +303,14 @@ exit 0
 
     // Pre-push hook
     const prePushHook = `#!/bin/bash
-# han-solo pre-push hook
+# devsolo pre-push hook
 # Validates branch state before pushing
 
-# Check for active han-solo session
-if [ -f ".hansolo/session.json" ]; then
-  echo "❌ han-solo session active!"
-  echo "📝 Use 'hansolo ship --push' to push changes"
-  echo "   Or complete the workflow with 'hansolo ship'"
+# Check for active devsolo session
+if [ -f ".devsolo/session.json" ]; then
+  echo "❌ devsolo session active!"
+  echo "📝 Use 'devsolo ship --push' to push changes"
+  echo "   Or complete the workflow with 'devsolo ship'"
   exit 1
 fi
 
@@ -340,8 +340,8 @@ exit 0
   }
 
   async installClaudeGuidance(): Promise<void> {
-    const MARKER_START = '<!-- BEGIN HAN-SOLO MANAGED SECTION - DO NOT EDIT -->';
-    const MARKER_END = '<!-- END HAN-SOLO MANAGED SECTION -->';
+    const MARKER_START = '<!-- BEGIN DEVSOLO MANAGED SECTION - DO NOT EDIT -->';
+    const MARKER_END = '<!-- END DEVSOLO MANAGED SECTION -->';
 
     // Read existing CLAUDE.md if it exists
     let existingContent = '';
@@ -358,60 +358,60 @@ exit 0
       const after = existingContent.substring(existingContent.indexOf(MARKER_END) + MARKER_END.length);
 
       const updatedContent = `${before}${MARKER_START}
-${this.getHanSoloSection()}
+${this.getDevSoloSection()}
 ${MARKER_END}${after}`;
 
       await fs.writeFile('CLAUDE.md', updatedContent);
     } else {
       // Add marked section to existing content or create new file
       const newContent = existingContent
-        ? `${existingContent}\n\n${MARKER_START}\n${this.getHanSoloSection()}\n${MARKER_END}`
-        : `# CLAUDE.md\n\nThis file provides guidance to Claude Code when working with this repository.\n\n${MARKER_START}\n${this.getHanSoloSection()}\n${MARKER_END}`;
+        ? `${existingContent}\n\n${MARKER_START}\n${this.getDevSoloSection()}\n${MARKER_END}`
+        : `# CLAUDE.md\n\nThis file provides guidance to Claude Code when working with this repository.\n\n${MARKER_START}\n${this.getDevSoloSection()}\n${MARKER_END}`;
 
       await fs.writeFile('CLAUDE.md', newContent);
     }
   }
 
-  private getHanSoloSection(): string {
+  private getDevSoloSection(): string {
     return `
-## 🚀 han-solo Git Workflow Management
+## 🚀 devsolo Git Workflow Management
 
-This section is automatically managed by han-solo. Last updated: ${new Date().toISOString()}
+This section is automatically managed by devsolo. Last updated: ${new Date().toISOString()}
 
 ### Workflow Detection
 
-Before performing git operations, check for active han-solo session:
+Before performing git operations, check for active devsolo session:
 
 \`\`\`javascript
-// Check if han-solo is managing current work
-if (fs.existsSync('.hansolo/session.json')) {
-  // han-solo is active - MUST use MCP tools
-  return 'use-hansolo-mcp';
+// Check if devsolo is managing current work
+if (fs.existsSync('.devsolo/session.json')) {
+  // devsolo is active - MUST use MCP tools
+  return 'use-devsolo-mcp';
 } else {
   // No active session - can use standard git
   return 'use-standard-git';
 }
 \`\`\`
 
-### ⛔ When han-solo Session is Active
+### ⛔ When devsolo Session is Active
 
-If \`.hansolo/session.json\` exists, **NEVER** use these commands:
-- \`git commit\` → Use \`/hansolo:ship\` instead
-- \`git push\` → Use \`/hansolo:ship --push\` instead
-- \`gh pr create\` → Use \`/hansolo:ship --create-pr\` instead
-- \`git checkout -b\` → Use \`/hansolo:launch\` instead
-- \`git rebase\` → han-solo handles this automatically
+If \`.devsolo/session.json\` exists, **NEVER** use these commands:
+- \`git commit\` → Use \`/devsolo:ship\` instead
+- \`git push\` → Use \`/devsolo:ship --push\` instead
+- \`gh pr create\` → Use \`/devsolo:ship --create-pr\` instead
+- \`git checkout -b\` → Use \`/devsolo:launch\` instead
+- \`git rebase\` → devsolo handles this automatically
 
 ### ✅ When No Session Exists
 
-If no \`.hansolo/session.json\` file:
+If no \`.devsolo/session.json\` file:
 - Safe to use standard git commands
-- Can optionally start han-solo workflow with \`/hansolo:launch\`
-- Direct git operations won't conflict with han-solo
+- Can optionally start devsolo workflow with \`/devsolo:launch\`
+- Direct git operations won't conflict with devsolo
 
 ### Why This Enforcement?
 
-han-solo maintains a state machine tracking:
+devsolo maintains a state machine tracking:
 - Linear history enforcement
 - Automatic rebasing and conflict resolution
 - PR readiness validation
@@ -421,8 +421,8 @@ Direct git operations bypass this state tracking and will cause workflow corrupt
 
 ### Team Collaboration
 
-- **With han-solo**: Follow session-based rules above
-- **Without han-solo**: Use standard git workflow
+- **With devsolo**: Follow session-based rules above
+- **Without devsolo**: Use standard git workflow
 - **Mixed teams**: Both can work simultaneously using session detection
 
 ## 📚 Documentation Guidelines
@@ -464,11 +464,11 @@ For dated snapshots: \`repomix-2025-10-09.md\`, \`export-2025-01-15.md\`
 - **Product specs** → \`docs/specs/\`
 - **Completed/superseded docs** → \`docs/archive/\`
 
-### Using the /hansolo:doc Command
+### Using the /devsolo:doc Command
 
-The \`/hansolo:doc\` slash command has two modes:
+The \`/devsolo:doc\` slash command has two modes:
 
-**AUDIT MODE** (no arguments): \`/hansolo:doc\`
+**AUDIT MODE** (no arguments): \`/devsolo:doc\`
 - Scans all documentation for naming and placement issues
 - Checks for missing README.md entries
 - Identifies documents that should be archived
@@ -476,7 +476,7 @@ The \`/hansolo:doc\` slash command has two modes:
 - Updates all README.md files
 - Reports all findings and actions
 
-**CREATE MODE** (with content): \`/hansolo:doc <name> <content>\`
+**CREATE MODE** (with content): \`/devsolo:doc <name> <content>\`
 - Analyzes your content to determine correct placement
 - Applies naming conventions automatically
 - Updates relevant README.md files
@@ -485,7 +485,7 @@ The \`/hansolo:doc\` slash command has two modes:
 
 ### Priming Claude Code
 
-Use \`/hansolo:prime\` to quickly give Claude Code context about the codebase:
+Use \`/devsolo:prime\` to quickly give Claude Code context about the codebase:
 - Reads README.md and docs/README.md
 - Provides overview of project structure
 - Helps Claude Code understand documentation organization before making changes
@@ -502,8 +502,8 @@ When adding significant documentation:
   async removeClaudeGuidance(): Promise<void> {
     try {
       const content = await fs.readFile('CLAUDE.md', 'utf-8');
-      const MARKER_START = '<!-- BEGIN HAN-SOLO MANAGED SECTION - DO NOT EDIT -->';
-      const MARKER_END = '<!-- END HAN-SOLO MANAGED SECTION -->';
+      const MARKER_START = '<!-- BEGIN DEVSOLO MANAGED SECTION - DO NOT EDIT -->';
+      const MARKER_END = '<!-- END DEVSOLO MANAGED SECTION -->';
 
       if (content.includes(MARKER_START)) {
         const before = content.substring(0, content.indexOf(MARKER_START));
@@ -576,8 +576,8 @@ Closes #
 
     const statusLineScript = `#!/bin/bash
 
-# Han-Solo Status Line Script
-# Outputs current han-solo session status for Claude Code status line
+# DevSolo Status Line Script
+# Outputs current devsolo session status for Claude Code status line
 
 # ANSI Color Codes
 RED='\\033[0;31m'
@@ -609,8 +609,8 @@ fi
 # Read current git branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "no-branch")
 
-# Check for active han-solo session on current branch
-SESSION_DIR=".hansolo/sessions"
+# Check for active devsolo session on current branch
+SESSION_DIR=".devsolo/sessions"
 SESSION_FILE=""
 SESSION_ID=""
 SESSION_STATE=""
@@ -715,7 +715,7 @@ if [ -n "$SESSION_ID" ]; then
     CONTEXT_DISPLAY="\${GRAY}|\${RESET} \${CYAN}budget: \${TOKEN_BUDGET}\${RESET}"
   fi
 
-  echo -e "\${BOLD}[han-solo]\${RESET} $EMOJI \${GREEN}\${SHORT_ID}\${RESET} \${GRAY}|\${RESET} \${YELLOW}\${BRANCH}\${RESET} \${GRAY}|\${RESET} \${state_color}\${SESSION_STATE}\${RESET}\${CONTEXT_DISPLAY}"
+  echo -e "\${BOLD}[devsolo]\${RESET} $EMOJI \${GREEN}\${SHORT_ID}\${RESET} \${GRAY}|\${RESET} \${YELLOW}\${BRANCH}\${RESET} \${GRAY}|\${RESET} \${state_color}\${SESSION_STATE}\${RESET}\${CONTEXT_DISPLAY}"
 else
   # No active session
   # Build context window display if available
@@ -727,7 +727,7 @@ else
     CONTEXT_DISPLAY=" \${GRAY}|\${RESET} \${CYAN}budget: \${TOKEN_BUDGET}\${RESET}"
   fi
 
-  echo -e "\${BOLD}[han-solo]\${RESET} 📁 \${YELLOW}\${BRANCH}\${RESET} \${GRAY}|\${RESET} \${GRAY}no session\${RESET}\${CONTEXT_DISPLAY}"
+  echo -e "\${BOLD}[devsolo]\${RESET} 📁 \${YELLOW}\${BRANCH}\${RESET} \${GRAY}|\${RESET} \${GRAY}no session\${RESET}\${CONTEXT_DISPLAY}"
 fi
 `;
 

@@ -28,7 +28,7 @@ From `jest.config.js` testPathIgnorePatterns:
 - `/src/__tests__/state-machines/`
 - `/tests/integration/` (6 scenario tests)
 - `/tests/contracts/` (6 contract tests)
-- `/tests/mcp/hansolo-mcp-server.test.ts`
+- `/tests/mcp/devsolo-mcp-server.test.ts`
 - `/tests/models/audit-entry.test.ts`
 - `/tests/models/configuration.test.ts`
 - `/tests/models/state-transition.test.ts`
@@ -41,17 +41,17 @@ From `jest.config.js` testPathIgnorePatterns:
 **Total Source Lines**: 21,950 lines
 
 ### Large Command Files (>500 lines)
-- `hansolo-ship.ts`: 708 lines
-- `hansolo-status-line.ts`: 643 lines
-- `hansolo-validate.ts`: 580 lines
-- `hansolo-config.ts`: 578 lines
-- `hansolo-launch.ts`: 561 lines
-- `hansolo-hotfix.ts`: 544 lines
-- `hansolo-cleanup.ts`: 521 lines
+- `devsolo-ship.ts`: 708 lines
+- `devsolo-status-line.ts`: 643 lines
+- `devsolo-validate.ts`: 580 lines
+- `devsolo-config.ts`: 578 lines
+- `devsolo-launch.ts`: 561 lines
+- `devsolo-hotfix.ts`: 544 lines
+- `devsolo-cleanup.ts`: 521 lines
 
 ### Dead Code Identified
 - `src/mcp-server/` directory: ~2,595 lines (not used in production)
-- `bin/hansolo-mcp-enhanced`: Broken binary
+- `bin/devsolo-mcp-enhanced`: Broken binary
 - `package.json` scripts: `mcp:start` references non-existent file
 
 ## Build Status

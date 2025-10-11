@@ -52,13 +52,13 @@ export class PluginManager extends EventEmitter {
   private initializePluginPaths(): void {
     // Default plugin directories
     this.pluginPaths = [
-      path.join(process.cwd(), '.hansolo', 'plugins'),
-      path.join(process.env['HOME'] || '', '.hansolo', 'plugins'),
+      path.join(process.cwd(), '.devsolo', 'plugins'),
+      path.join(process.env['HOME'] || '', '.devsolo', 'plugins'),
       path.join(__dirname, '..', '..', 'plugins'),
     ];
 
     // Add custom plugin paths from environment
-    const customPath = process.env['HANSOLO_PLUGIN_PATH'];
+    const customPath = process.env['DEVSOLO_PLUGIN_PATH'];
     if (customPath) {
       this.pluginPaths.unshift(...customPath.split(':'));
     }
@@ -120,8 +120,8 @@ export class PluginManager extends EventEmitter {
         version: packageJson.version,
         description: packageJson.description || '',
         author: packageJson.author,
-        hooks: packageJson.hansolo?.hooks || [],
-        commands: packageJson.hansolo?.commands || [],
+        hooks: packageJson.devsolo?.hooks || [],
+        commands: packageJson.devsolo?.commands || [],
         dependencies: packageJson.dependencies || {},
       };
 

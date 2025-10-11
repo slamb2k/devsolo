@@ -10,7 +10,7 @@ export class SessionManager {
 
   constructor() {
     const home = process.env['HOME'] || process.env['USERPROFILE'] || '';
-    this.sessionDir = path.join(home, '.hansolo', 'sessions');
+    this.sessionDir = path.join(home, '.devsolo', 'sessions');
     this.sessionFile = path.join(this.sessionDir, 'installer.json');
 
     // Ensure session directory exists

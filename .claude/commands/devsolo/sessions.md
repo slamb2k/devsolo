@@ -18,7 +18,7 @@ List and manage workflow sessions.
 ░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░
 ```
 
-1. Use the `mcp__hansolo__hansolo_sessions` tool to query sessions
+1. Use the `mcp__devsolo__devsolo_sessions` tool to query sessions
 2. Pass along the provided arguments (`all`, `verbose`, `cleanup`)
 3. Display the sessions in a clear table format
 

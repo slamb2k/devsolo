@@ -1,20 +1,20 @@
-# han-solo Troubleshooting Guide
+# devsolo Troubleshooting Guide
 
 ## Common Issues
 
 ### Installation Issues
 
-#### Error: Command not found: hansolo
+#### Error: Command not found: devsolo
 
-**Cause**: han-solo is not in your PATH after installation.
+**Cause**: devsolo is not in your PATH after installation.
 
 **Solution**:
 ```bash
 # Check if installed globally
-npm list -g @hansolo/cli
+npm list -g @devsolo/cli
 
 # If not installed, install globally
-npm install -g @hansolo/cli
+npm install -g @devsolo/cli
 
 # If installed but not found, check npm bin path
 npm bin -g
@@ -33,7 +33,7 @@ export PATH="$(npm bin -g):$PATH"
 mkdir ~/.npm-global
 npm config set prefix '~/.npm-global'
 export PATH=~/.npm-global/bin:$PATH
-npm install -g @hansolo/cli
+npm install -g @devsolo/cli
 
 # Option 2: Fix npm permissions
 sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
@@ -41,35 +41,35 @@ sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
 # Option 3: Use a Node version manager (recommended)
 # Install nvm, then:
 nvm install node
-npm install -g @hansolo/cli
+npm install -g @devsolo/cli
 ```
 
 ### Initialization Issues
 
 #### Error: Not a git repository
 
-**Cause**: Running hansolo init outside a Git repository.
+**Cause**: Running devsolo init outside a Git repository.
 
 **Solution**:
 ```bash
 # Initialize git first
 git init
 
-# Then initialize han-solo
-hansolo init
+# Then initialize devsolo
+devsolo init
 ```
 
-#### Error: hansolo.yaml already exists
+#### Error: devsolo.yaml already exists
 
-**Cause**: Project already initialized with han-solo.
+**Cause**: Project already initialized with devsolo.
 
 **Solution**:
 ```bash
 # Force reinitialize (CAUTION: overwrites configuration)
-hansolo init --force
+devsolo init --force
 
-# Or manually edit hansolo.yaml
-vim .hansolo/hansolo.yaml
+# Or manually edit devsolo.yaml
+vim .devsolo/devsolo.yaml
 ```
 
 ### Workflow Issues
@@ -81,13 +81,13 @@ vim .hansolo/hansolo.yaml
 **Solution**:
 ```bash
 # Start a new workflow
-hansolo launch feature/my-feature
+devsolo launch feature/my-feature
 
 # Or check existing sessions
-hansolo sessions
+devsolo sessions
 
 # Resume an existing session
-hansolo swap <session-id>
+devsolo swap <session-id>
 ```
 
 #### Error: Cannot launch from dirty working directory
@@ -104,7 +104,7 @@ git commit -m "WIP: Save changes"
 git stash
 
 # Option 3: Force launch (not recommended)
-hansolo launch feature/new --force
+devsolo launch feature/new --force
 ```
 
 #### Error: Branch already exists
@@ -121,7 +121,7 @@ git branch -D feature/old-branch
 git push origin --delete feature/old-branch
 
 # Or use a different name
-hansolo launch feature/new-name
+devsolo launch feature/new-name
 ```
 
 ### State Machine Issues
@@ -133,14 +133,14 @@ hansolo launch feature/new-name
 **Solution**:
 ```bash
 # Check current state
-hansolo status
+devsolo status
 
 # Review valid transitions
-hansolo status --transitions
+devsolo status --transitions
 
 # Reset session if stuck (CAUTION: loses state)
-hansolo abort
-hansolo launch feature/branch
+devsolo abort
+devsolo launch feature/branch
 ```
 
 #### Error: Session corrupted
@@ -150,16 +150,16 @@ hansolo launch feature/branch
 **Solution**:
 ```bash
 # View session details
-hansolo sessions --verbose
+devsolo sessions --verbose
 
 # Export session for debugging
-hansolo debug export-session <session-id>
+devsolo debug export-session <session-id>
 
 # Remove corrupted session
-rm ~/.hansolo/sessions/<session-id>.json
+rm ~/.devsolo/sessions/<session-id>.json
 
 # Start fresh
-hansolo launch feature/new
+devsolo launch feature/new
 ```
 
 ### Git Operation Issues
@@ -178,7 +178,7 @@ git rebase --continue
 
 # Or abort and try different approach
 git rebase --abort
-hansolo abort
+devsolo abort
 ```
 
 #### Error: Cannot push to remote
@@ -210,14 +210,14 @@ git push --force-with-lease
 **Solution**:
 ```bash
 # Run cleanup which automatically syncs main
-hansolo cleanup
+devsolo cleanup
 
 # Or manually sync
 git checkout main
 git pull origin main
 ```
 
-**Prevention**: Always run `hansolo cleanup` after merging PRs on GitHub.
+**Prevention**: Always run `devsolo cleanup` after merging PRs on GitHub.
 
 #### Error: Cleanup not detecting merged branches
 
@@ -226,10 +226,10 @@ git pull origin main
 **Solution**:
 ```bash
 # Ensure main is synced (cleanup does this automatically)
-hansolo cleanup
+devsolo cleanup
 
 # If you used --no-sync, run again without it
-hansolo cleanup  # Will sync main first
+devsolo cleanup  # Will sync main first
 ```
 
 **Why**: Squash merges create new commits on remote that don't exist locally. Cleanup needs the latest main to determine which branches are truly merged.
@@ -248,10 +248,10 @@ git log origin/main..HEAD
 git reset --hard origin/main
 
 # Then run cleanup
-hansolo cleanup
+devsolo cleanup
 ```
 
-**Prevention**: Never commit directly to main. Always use `hansolo launch` for feature work.
+**Prevention**: Never commit directly to main. Always use `devsolo launch` for feature work.
 
 ### Platform Integration Issues
 
@@ -267,15 +267,15 @@ gh auth login
 # Option 2: Set GitHub token explicitly (for CI/CD)
 export GITHUB_TOKEN=ghp_your_token_here
 
-# Or configure in han-solo
-hansolo config --global platform.github.token ghp_xxx
+# Or configure in devsolo
+devsolo config --global platform.github.token ghp_xxx
 
 # Check rate limit status
 curl -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/rate_limit
 ```
 
-**Note**: han-solo automatically uses `gh` CLI authentication if available, so `gh auth login` is often sufficient.
+**Note**: devsolo automatically uses `gh` CLI authentication if available, so `gh auth login` is often sufficient.
 
 #### Error: GitLab authentication failed
 
@@ -303,16 +303,16 @@ curl --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
 **Solution**:
 ```bash
 # Check if MCP server is running
-ps aux | grep hansolo-mcp
+ps aux | grep devsolo-mcp
 
 # Start MCP server manually
-hansolo-mcp serve
+devsolo-mcp serve
 
 # Check port availability
 lsof -i :8080  # Default port
 
 # Use different port
-HANSOLO_MCP_PORT=8081 hansolo status
+DEVSOLO_MCP_PORT=8081 devsolo status
 ```
 
 #### Error: MCP server timeout
@@ -322,13 +322,13 @@ HANSOLO_MCP_PORT=8081 hansolo status
 **Solution**:
 ```bash
 # Increase timeout
-export HANSOLO_MCP_TIMEOUT=60000  # 60 seconds
+export DEVSOLO_MCP_TIMEOUT=60000  # 60 seconds
 
 # Or in config
-hansolo config mcp.timeout 60000
+devsolo config mcp.timeout 60000
 
 # Check server logs
-tail -f ~/.hansolo/logs/mcp-server.log
+tail -f ~/.devsolo/logs/mcp-server.log
 ```
 
 ### Performance Issues
@@ -338,7 +338,7 @@ tail -f ~/.hansolo/logs/mcp-server.log
 **Solution**:
 ```bash
 # Enable shallow clone
-hansolo config performance.shallowClone true
+devsolo config performance.shallowClone true
 
 # Use sparse checkout
 git sparse-checkout init --cone
@@ -354,10 +354,10 @@ git repack -Ad
 **Solution**:
 ```bash
 # Limit concurrent operations
-hansolo config sessions.maxConcurrent 3
+devsolo config sessions.maxConcurrent 3
 
 # Clear old sessions
-hansolo cleanup --all
+devsolo cleanup --all
 
 # Reduce git memory usage
 git config pack.windowMemory "100m"
@@ -370,12 +370,12 @@ git config pack.packSizeLimit "100m"
 
 ```bash
 # Show environment and versions
-hansolo doctor
+devsolo doctor
 
 # Output:
 # ✓ Node.js: v20.0.0
 # ✓ Git: 2.40.0
-# ✓ han-solo: 1.0.0
+# ✓ devsolo: 1.0.0
 # ✓ Platform: darwin
 # ✗ GitHub token: not set
 ```
@@ -384,26 +384,26 @@ hansolo doctor
 
 ```bash
 # Enable debug output
-HANSOLO_DEBUG=1 hansolo status
+DEVSOLO_DEBUG=1 devsolo status
 
 # Or verbose mode
-hansolo status --verbose
+devsolo status --verbose
 
 # Log to file
-HANSOLO_LOG_FILE=debug.log hansolo ship
+DEVSOLO_LOG_FILE=debug.log devsolo ship
 ```
 
 ### Session Debugging
 
 ```bash
 # Export session for analysis
-hansolo debug export-session <session-id> > session.json
+devsolo debug export-session <session-id> > session.json
 
 # Validate session file
-hansolo debug validate-session session.json
+devsolo debug validate-session session.json
 
 # Replay session
-hansolo debug replay-session session.json
+devsolo debug replay-session session.json
 ```
 
 ## Recovery Procedures
@@ -412,33 +412,33 @@ hansolo debug replay-session session.json
 
 ```bash
 # Check last known state
-hansolo sessions --all
+devsolo sessions --all
 
 # Find your branch
 git branch | grep feature/
 
 # Create new session from branch
 git checkout feature/your-branch
-hansolo recover
+devsolo recover
 
 # Continue workflow
-hansolo ship
+devsolo ship
 ```
 
-### Reset han-solo Completely
+### Reset devsolo Completely
 
 ```bash
 # WARNING: Loses all sessions and configuration
 
 # Backup current state
-cp -r ~/.hansolo ~/.hansolo.backup
+cp -r ~/.devsolo ~/.devsolo.backup
 
-# Remove han-solo data
-rm -rf ~/.hansolo
-rm -rf ./.hansolo
+# Remove devsolo data
+rm -rf ~/.devsolo
+rm -rf ./.devsolo
 
 # Reinitialize
-hansolo init
+devsolo init
 ```
 
 ### Manual State Recovery
@@ -451,14 +451,14 @@ git status
 git branch
 
 # 2. Find session file
-ls ~/.hansolo/sessions/
+ls ~/.devsolo/sessions/
 
 # 3. Manually edit state
-vim ~/.hansolo/sessions/<session-id>.json
+vim ~/.devsolo/sessions/<session-id>.json
 # Change "state": "ERROR" to last known good state
 
 # 4. Resume
-hansolo status
+devsolo status
 ```
 
 ## Getting Help
@@ -467,33 +467,33 @@ hansolo status
 
 ```bash
 # General help
-hansolo --help
+devsolo --help
 
 # Command-specific help
-hansolo launch --help
-hansolo ship --help
+devsolo launch --help
+devsolo ship --help
 
 # Show examples
-hansolo examples
+devsolo examples
 ```
 
 ### Logs and Debugging
 
 ```bash
 # View logs
-tail -f ~/.hansolo/logs/hansolo.log
+tail -f ~/.devsolo/logs/devsolo.log
 
 # Enable trace logging
-HANSOLO_LOG_LEVEL=trace hansolo status
+DEVSOLO_LOG_LEVEL=trace devsolo status
 
 # MCP server logs
-tail -f ~/.hansolo/logs/mcp-server.log
+tail -f ~/.devsolo/logs/mcp-server.log
 ```
 
 ### Community Support
 
-1. **GitHub Issues**: https://github.com/yourusername/hansolo/issues
-2. **Documentation**: https://github.com/yourusername/hansolo/wiki
+1. **GitHub Issues**: https://github.com/yourusername/devsolo/issues
+2. **Documentation**: https://github.com/yourusername/devsolo/wiki
 3. **Discord**: Join our Discord server for real-time help
 
 ### Reporting Bugs
@@ -502,7 +502,7 @@ When reporting bugs, include:
 
 ```bash
 # Generate bug report
-hansolo debug report > bug-report.txt
+devsolo debug report > bug-report.txt
 
 # Includes:
 # - System information
@@ -514,33 +514,33 @@ hansolo debug report > bug-report.txt
 
 ## Prevention Tips
 
-1. **Always run `hansolo validate` after configuration changes**
-2. **Keep han-solo updated**: `npm update -g @hansolo/cli`
-3. **Regular cleanup**: `hansolo cleanup --old`
-4. **Use `--dry-run` for testing**: `hansolo ship --dry-run`
+1. **Always run `devsolo validate` after configuration changes**
+2. **Keep devsolo updated**: `npm update -g @devsolo/cli`
+3. **Regular cleanup**: `devsolo cleanup --old`
+4. **Use `--dry-run` for testing**: `devsolo ship --dry-run`
 5. **Enable verbose mode when troubleshooting**: `--verbose`
-6. **Check status before operations**: `hansolo status`
+6. **Check status before operations**: `devsolo status`
 7. **Backup sessions before major operations**
 
 ## FAQ
 
-**Q: Can I use han-solo with existing Git workflows?**
-A: Yes, han-solo is additive and doesn't break existing workflows.
+**Q: Can I use devsolo with existing Git workflows?**
+A: Yes, devsolo is additive and doesn't break existing workflows.
 
-**Q: What happens if han-solo crashes mid-operation?**
-A: Session state is preserved. Run `hansolo recover` to continue.
+**Q: What happens if devsolo crashes mid-operation?**
+A: Session state is preserved. Run `devsolo recover` to continue.
 
 **Q: Can I disable specific features?**
 A: Yes, most features can be disabled in configuration.
 
 **Q: How do I migrate from git-flow?**
-A: Run `hansolo migrate git-flow` for automatic migration.
+A: Run `devsolo migrate git-flow` for automatic migration.
 
 **Q: My local main is out of sync after merging PR on GitHub. How do I fix this?**
-A: Run `hansolo cleanup` which automatically syncs main with remote before cleaning up branches. This ensures your local main has the squashed PR commits.
+A: Run `devsolo cleanup` which automatically syncs main with remote before cleaning up branches. This ensures your local main has the squashed PR commits.
 
 **Q: Why does cleanup want to sync main before cleaning branches?**
 A: When PRs are merged on GitHub with squash merge, the squashed commit only exists on the remote. Your local main needs to pull this commit before cleanup can properly detect which branches have been merged. Skipping this step (with `--no-sync`) may result in cleanup not detecting merged branches.
 
-**Q: Is han-solo compatible with CI/CD?**
-A: Yes, use `HANSOLO_AUTO_YES=1` for non-interactive mode.
+**Q: Is devsolo compatible with CI/CD?**
+A: Yes, use `DEVSOLO_AUTO_YES=1` for non-interactive mode.

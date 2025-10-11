@@ -18,7 +18,7 @@ describe('ConfigManager', () => {
   describe('load', () => {
     it('should load configuration from file', async () => {
       const context = new InstallationContext();
-      context.globalPath = '/home/user/.hansolo';
+      context.globalPath = '/home/user/.devsolo';
 
       const configData = {
         version: '1.0.0',
@@ -70,7 +70,7 @@ describe('ConfigManager', () => {
   describe('save', () => {
     it('should save configuration with defaults', async () => {
       const context = new InstallationContext();
-      context.globalPath = '/home/user/.hansolo';
+      context.globalPath = '/home/user/.devsolo';
       context.installationType = 'global';
       context.hasGitHub = true;
 
@@ -96,7 +96,7 @@ describe('ConfigManager', () => {
 
     it('should create directory if it does not exist', async () => {
       const context = new InstallationContext();
-      context.localPath = '/project/.hansolo';
+      context.localPath = '/project/.devsolo';
 
       mockFs.existsSync.mockReturnValue(false);
       mockFs.mkdirSync.mockImplementation(() => undefined as any);
@@ -106,7 +106,7 @@ describe('ConfigManager', () => {
       await configManager.save({}, context);
 
       expect(mockFs.mkdirSync).toHaveBeenCalledWith(
-        expect.stringContaining('.hansolo'),
+        expect.stringContaining('.devsolo'),
         { recursive: true }
       );
     });
@@ -189,31 +189,31 @@ describe('ConfigManager', () => {
     it('should return global path for global installation', () => {
       const context = new InstallationContext();
       context.installationType = 'global';
-      context.globalPath = '/home/user/.hansolo';
+      context.globalPath = '/home/user/.devsolo';
 
       const path = configManager.getConfigPath(context);
 
-      expect(path).toBe('/home/user/.hansolo/config.yaml');
+      expect(path).toBe('/home/user/.devsolo/config.yaml');
     });
 
     it('should return local path for local installation', () => {
       const context = new InstallationContext();
       context.installationType = 'local';
-      context.localPath = '/project/.hansolo';
+      context.localPath = '/project/.devsolo';
 
       const path = configManager.getConfigPath(context);
 
-      expect(path).toBe('/project/.hansolo/config.yaml');
+      expect(path).toBe('/project/.devsolo/config.yaml');
     });
 
     it('should return local path for npx installation', () => {
       const context = new InstallationContext();
       context.installationType = 'npx';
-      context.localPath = '/tmp/.hansolo';
+      context.localPath = '/tmp/.devsolo';
 
       const path = configManager.getConfigPath(context);
 
-      expect(path).toBe('/tmp/.hansolo/config.yaml');
+      expect(path).toBe('/tmp/.devsolo/config.yaml');
     });
   });
 });

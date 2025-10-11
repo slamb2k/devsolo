@@ -1,19 +1,19 @@
 {
-  "name": "hansolo",
-  "displayName": "han-solo",
+  "name": "devsolo",
+  "displayName": "devsolo",
   "description": "AI-native Git workflow automation for Claude Code",
   "version": "2.0.0",
-  "author": "han-solo contributors",
+  "author": "devsolo contributors",
   "license": "MIT",
-  "homepage": "https://github.com/slamb2k/hansolo",
+  "homepage": "https://github.com/slamb2k/devsolo",
   "repository": {
     "type": "git",
-    "url": "https://github.com/slamb2k/hansolo.git"
+    "url": "https://github.com/slamb2k/devsolo.git"
   },
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/mcp/hansolo-mcp-server.js"],
+      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/mcp/devsolo-mcp-server.js"],
       "env": {}
     }
   }

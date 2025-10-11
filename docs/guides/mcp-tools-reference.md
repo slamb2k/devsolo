@@ -1,10 +1,10 @@
-# han-solo MCP Tools Reference
+# devsolo MCP Tools Reference
 
-Complete reference for all han-solo MCP tools in v2.0.0.
+Complete reference for all devsolo MCP tools in v2.0.0.
 
 ## Overview
 
-han-solo exposes 11 MCP tools for Git workflow automation via Claude Code. Each tool provides:
+devsolo exposes 11 MCP tools for Git workflow automation via Claude Code. Each tool provides:
 - **Structured JSON results** for programmatic handling
 - **Pre-flight checks** to validate prerequisites
 - **Post-flight verifications** to confirm success
@@ -14,13 +14,13 @@ han-solo exposes 11 MCP tools for Git workflow automation via Claude Code. Each 
 
 | Category | Tools | Purpose |
 |----------|-------|---------|
-| **Setup** | `hansolo_init` | Initialize han-solo in project |
-| **Workflow** | `hansolo_launch`, `hansolo_commit`, `hansolo_ship` | Core development cycle |
-| **Emergency** | `hansolo_hotfix` | Production hotfixes |
-| **Management** | `hansolo_sessions`, `hansolo_swap`, `hansolo_abort` | Session management |
-| **Info** | `hansolo_status` | Current state inspection |
-| **Maintenance** | `hansolo_cleanup` | Clean up old sessions/branches |
-| **UI** | `hansolo_status_line` | Claude Code status line |
+| **Setup** | `devsolo_init` | Initialize devsolo in project |
+| **Workflow** | `devsolo_launch`, `devsolo_commit`, `devsolo_ship` | Core development cycle |
+| **Emergency** | `devsolo_hotfix` | Production hotfixes |
+| **Management** | `devsolo_sessions`, `devsolo_swap`, `devsolo_abort` | Session management |
+| **Info** | `devsolo_status` | Current state inspection |
+| **Maintenance** | `devsolo_cleanup` | Clean up old sessions/branches |
+| **UI** | `devsolo_status_line` | Claude Code status line |
 
 ## Common Result Types
 
@@ -82,11 +82,11 @@ han-solo exposes 11 MCP tools for Git workflow automation via Claude Code. Each 
 
 ## Tool Reference
 
-### 1. hansolo_init
+### 1. devsolo_init
 
-Initialize han-solo in your project.
+Initialize devsolo in your project.
 
-**Purpose**: Creates `.hansolo` directory, configuration, and session storage.
+**Purpose**: Creates `.devsolo` directory, configuration, and session storage.
 
 #### Input Parameters
 ```typescript
@@ -111,14 +111,14 @@ None (initialization is the first step)
 
 **Natural language**:
 ```
-Initialize han-solo in this project
-Set up han-solo with user-level configuration
+Initialize devsolo in this project
+Set up devsolo with user-level configuration
 ```
 
 **Direct invocation**:
 ```
-Use hansolo_init
-Use hansolo_init with scope "user" and force true
+Use devsolo_init
+Use devsolo_init with scope "user" and force true
 ```
 
 #### Common Errors
@@ -128,7 +128,7 @@ Use hansolo_init with scope "user" and force true
 
 ---
 
-### 2. hansolo_launch
+### 2. devsolo_launch
 
 Start a new feature workflow.
 
@@ -173,10 +173,10 @@ Create a new branch with description "Add payment processing"
 
 **Direct invocation**:
 ```
-Use hansolo_launch
-Use hansolo_launch with branchName "feature/auth"
-Use hansolo_launch with description "OAuth implementation"
-Use hansolo_launch with branchName "feature/payments" and description "Stripe integration"
+Use devsolo_launch
+Use devsolo_launch with branchName "feature/auth"
+Use devsolo_launch with description "OAuth implementation"
+Use devsolo_launch with branchName "feature/payments" and description "Stripe integration"
 ```
 
 #### Common Errors
@@ -187,7 +187,7 @@ Use hansolo_launch with branchName "feature/payments" and description "Stripe in
 
 ---
 
-### 3. hansolo_commit
+### 3. devsolo_commit
 
 Commit changes to the current feature branch.
 
@@ -224,8 +224,8 @@ Commit only staged files with message "fix: resolve login bug"
 
 **Direct invocation**:
 ```
-Use hansolo_commit with message "feat: add feature"
-Use hansolo_commit with message "fix: bug fix" and stagedOnly true
+Use devsolo_commit with message "feat: add feature"
+Use devsolo_commit with message "fix: bug fix" and stagedOnly true
 ```
 
 #### Common Errors
@@ -236,7 +236,7 @@ Use hansolo_commit with message "fix: bug fix" and stagedOnly true
 
 ---
 
-### 4. hansolo_ship
+### 4. devsolo_ship
 
 Complete workflow: push, create PR, wait for CI, merge, cleanup.
 
@@ -281,9 +281,9 @@ Push and create PR but don't merge yet
 
 **Direct invocation**:
 ```
-Use hansolo_ship with prDescription "Add new feature"
-Use hansolo_ship with prDescription "Bug fix" and merge false
-Use hansolo_ship with force true (override checks)
+Use devsolo_ship with prDescription "Add new feature"
+Use devsolo_ship with prDescription "Bug fix" and merge false
+Use devsolo_ship with force true (override checks)
 ```
 
 #### What It Does
@@ -305,7 +305,7 @@ Use hansolo_ship with force true (override checks)
 
 ---
 
-### 5. hansolo_hotfix
+### 5. devsolo_hotfix
 
 Create emergency production hotfix workflow.
 
@@ -348,8 +348,8 @@ Create high-severity hotfix for payment processing failure
 
 **Direct invocation**:
 ```
-Use hansolo_hotfix with issue "CVE-2024-1234" and severity "critical"
-Use hansolo_hotfix with issue "Bug #456" and skipTests true
+Use devsolo_hotfix with issue "CVE-2024-1234" and severity "critical"
+Use devsolo_hotfix with issue "Bug #456" and skipTests true
 ```
 
 #### Common Errors
@@ -359,7 +359,7 @@ Use hansolo_hotfix with issue "Bug #456" and skipTests true
 
 ---
 
-### 6. hansolo_sessions
+### 6. devsolo_sessions
 
 List and manage workflow sessions.
 
@@ -408,10 +408,10 @@ Clean up old expired sessions
 
 **Direct invocation**:
 ```
-Use hansolo_sessions
-Use hansolo_sessions with all true
-Use hansolo_sessions with verbose true
-Use hansolo_sessions with cleanup true
+Use devsolo_sessions
+Use devsolo_sessions with all true
+Use devsolo_sessions with verbose true
+Use devsolo_sessions with cleanup true
 ```
 
 #### Common Errors
@@ -420,7 +420,7 @@ Use hansolo_sessions with cleanup true
 
 ---
 
-### 7. hansolo_swap
+### 7. devsolo_swap
 
 Switch between workflow sessions/branches.
 
@@ -459,9 +459,9 @@ Go back to the feature/dashboard branch
 
 **Direct invocation**:
 ```
-Use hansolo_swap with branchName "feature/auth"
-Use hansolo_swap with branchName "main" and stash true
-Use hansolo_swap with branchName "feature/test" and force true
+Use devsolo_swap with branchName "feature/auth"
+Use devsolo_swap with branchName "main" and stash true
+Use devsolo_swap with branchName "feature/test" and force true
 ```
 
 #### Common Errors
@@ -471,7 +471,7 @@ Use hansolo_swap with branchName "feature/test" and force true
 
 ---
 
-### 8. hansolo_abort
+### 8. devsolo_abort
 
 Cancel an active workflow session.
 
@@ -510,9 +510,9 @@ Cancel my current work and clean up
 
 **Direct invocation**:
 ```
-Use hansolo_abort
-Use hansolo_abort with deleteBranch true
-Use hansolo_abort with branchName "feature/test" and deleteBranch true
+Use devsolo_abort
+Use devsolo_abort with deleteBranch true
+Use devsolo_abort with branchName "feature/test" and deleteBranch true
 ```
 
 #### Common Errors
@@ -522,7 +522,7 @@ Use hansolo_abort with branchName "feature/test" and deleteBranch true
 
 ---
 
-### 9. hansolo_status
+### 9. devsolo_status
 
 Show current workflow status.
 
@@ -569,15 +569,15 @@ Check if I have an active session
 
 **Direct invocation**:
 ```
-Use hansolo_status
+Use devsolo_status
 ```
 
 #### Common Errors
-- Not initialized (no .hansolo directory)
+- Not initialized (no .devsolo directory)
 
 ---
 
-### 10. hansolo_cleanup
+### 10. devsolo_cleanup
 
 Clean up expired sessions and stale branches.
 
@@ -615,9 +615,9 @@ Remove expired sessions forcefully
 
 **Direct invocation**:
 ```
-Use hansolo_cleanup
-Use hansolo_cleanup with deleteBranches true
-Use hansolo_cleanup with deleteBranches true and force true
+Use devsolo_cleanup
+Use devsolo_cleanup with deleteBranches true
+Use devsolo_cleanup with deleteBranches true and force true
 ```
 
 #### Common Errors
@@ -627,7 +627,7 @@ Use hansolo_cleanup with deleteBranches true and force true
 
 ---
 
-### 11. hansolo_status_line
+### 11. devsolo_status_line
 
 Manage Claude Code status line display.
 
@@ -665,11 +665,11 @@ Update status line to show branch and state
 
 **Direct invocation**:
 ```
-Use hansolo_status_line with action "enable"
-Use hansolo_status_line with action "disable"
-Use hansolo_status_line with action "show"
-Use hansolo_status_line with action "update" and showBranchInfo true
-Use hansolo_status_line with action "update" and format "{icon} {branch} | {state}"
+Use devsolo_status_line with action "enable"
+Use devsolo_status_line with action "disable"
+Use devsolo_status_line with action "show"
+Use devsolo_status_line with action "update" and showBranchInfo true
+Use devsolo_status_line with action "update" and format "{icon} {branch} | {state}"
 ```
 
 #### Common Errors
@@ -734,13 +734,13 @@ All tools return structured errors:
 
 **Initialization errors**:
 ```
-han-solo is not initialized. Run hansolo_init first.
+devsolo is not initialized. Run devsolo_init first.
 ```
 
 **Session errors**:
 ```
-No workflow session found for branch 'main'. Use hansolo_launch to start a workflow.
-Active session exists. Use hansolo_abort to cancel it first.
+No workflow session found for branch 'main'. Use devsolo_launch to start a workflow.
+Active session exists. Use devsolo_abort to cancel it first.
 ```
 
 **Validation errors**:
@@ -760,7 +760,7 @@ Failed to merge PR via GitHub API
 
 ### 1. Always Check Status First
 ```
-Use hansolo_status
+Use devsolo_status
 ```
 Understand current state before operations.
 
@@ -774,7 +774,7 @@ Let Claude interpret intent:
 ```
 vs explicit:
 ```
-Use hansolo_launch with branchName "feature/oauth-2.0-integration" and description "Implement OAuth 2.0 authentication flow with Google and GitHub providers"
+Use devsolo_launch with branchName "feature/oauth-2.0-integration" and description "Implement OAuth 2.0 authentication flow with Google and GitHub providers"
 ```
 
 ### 4. Review Structured Results
@@ -788,8 +788,8 @@ Errors include suggestions:
   "errors": ["Uncommitted changes detected"],
   "warnings": [
     "Run git status to see changes",
-    "Use hansolo_commit to commit",
-    "Then run hansolo_ship again"
+    "Use devsolo_commit to commit",
+    "Then run devsolo_ship again"
   ]
 }
 ```
@@ -804,4 +804,4 @@ Errors include suggestions:
 
 ---
 
-**han-solo v2.0.0** - AI-native Git workflow automation 🤖
+**devsolo v2.0.0** - AI-native Git workflow automation 🤖

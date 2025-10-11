@@ -27,7 +27,7 @@ Cancel the current workflow session and optionally delete the feature branch.
 ░▀░▀░▀▀░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀░
 ```
 
-   - Call `mcp__hansolo__hansolo_abort` with parameters
+   - Call `mcp__devsolo__devsolo_abort` with parameters
    - Switch to main branch
    - Optionally delete the feature branch
    - Mark session as aborted
@@ -67,19 +67,19 @@ Cancel the current workflow session and optionally delete the feature branch.
 
 ```
 # Abort current session (prompts for confirmation)
-/hansolo abort
+/devsolo abort
 
 # Abort and delete branch
-/hansolo abort --deleteBranch
+/devsolo abort --deleteBranch
 
 # Abort specific branch
-/hansolo abort --branchName="feature/old-work" --deleteBranch
+/devsolo abort --branchName="feature/old-work" --deleteBranch
 
 # Force abort without prompts (loses uncommitted changes)
-/hansolo abort --force --yes
+/devsolo abort --force --yes
 
 # Abort with stashing
-/hansolo abort --deleteBranch
+/devsolo abort --deleteBranch
 # (will prompt to stash if uncommitted changes present)
 ```
 
@@ -106,7 +106,7 @@ Cancel the current workflow session and optionally delete the feature branch.
 ```
 # You started a feature but want to work on something else first
 # Keep the branch and work for later
-/hansolo abort
+/devsolo abort
 # Branch exists, session aborted, can resume later
 ```
 
@@ -114,22 +114,22 @@ Cancel the current workflow session and optionally delete the feature branch.
 ```
 # You started a feature but decided not to continue
 # Remove everything
-/hansolo abort --deleteBranch
+/devsolo abort --deleteBranch
 # Branch deleted, session aborted, clean state
 ```
 
 ### Scenario 3: Emergency Switch
 ```
 # Need to switch to hotfix immediately
-/hansolo abort --yes
+/devsolo abort --yes
 # Quick abort without prompts
-/hansolo hotfix --issue="critical-bug"
+/devsolo hotfix --issue="critical-bug"
 ```
 
 ### Scenario 4: Cleanup Old Branch
 ```
 # Abort old work and remove branch
-/hansolo abort --branchName="feature/old-experiment" --deleteBranch --yes
+/devsolo abort --branchName="feature/old-experiment" --deleteBranch --yes
 ```
 
 ## Notes
@@ -137,6 +137,6 @@ Cancel the current workflow session and optionally delete the feature branch.
 - Destructive operation - be careful!
 - Uncommitted changes will be lost unless stashed
 - Session can be resumed later if branch not deleted
-- Use /hansolo swap to switch between sessions without aborting
+- Use /devsolo swap to switch between sessions without aborting
 - Aborted sessions remain in history for audit trail
-- Can view aborted sessions with /hansolo sessions --all
+- Can view aborted sessions with /devsolo sessions --all

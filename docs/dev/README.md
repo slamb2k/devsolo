@@ -1,6 +1,6 @@
 # Development Documentation
 
-This folder contains documentation for developers working on han-solo itself.
+This folder contains documentation for developers working on devsolo itself.
 
 ## Structure
 
@@ -21,7 +21,7 @@ Reusable patterns, coding strategies, testing approaches, naming conventions, an
 
 ## Who This Is For
 
-- Contributors developing han-solo features
+- Contributors developing devsolo features
 - Maintainers reviewing code and architecture
 - Developers learning from past decisions
 

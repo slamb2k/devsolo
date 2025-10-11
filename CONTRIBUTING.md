@@ -1,6 +1,6 @@
-# Contributing to han-solo
+# Contributing to devsolo
 
-Thank you for your interest in contributing to han-solo! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to devsolo! This document provides guidelines and instructions for contributing to the project.
 
 ## Code of Conduct
 
@@ -15,8 +15,8 @@ By participating in this project, you agree to abide by our Code of Conduct:
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/YOUR-USERNAME/hansolo.git
-   cd hansolo
+   git clone https://github.com/YOUR-USERNAME/devsolo.git
+   cd devsolo
    ```
 
 3. Install dependencies:
@@ -26,28 +26,28 @@ By participating in this project, you agree to abide by our Code of Conduct:
 
 4. Create a feature branch:
    ```bash
-   # Use han-solo itself!
+   # Use devsolo itself!
    npm link
-   hansolo launch --branch feature/your-feature
+   devsolo launch --branch feature/your-feature
    ```
 
 ## Development Workflow
 
-### Using han-solo for Development
+### Using devsolo for Development
 
-We eat our own dog food! Use han-solo via Claude Code to manage your contribution:
+We eat our own dog food! Use devsolo via Claude Code to manage your contribution:
 
-1. **Configure han-solo MCP server** in Claude Code (see Installation below)
+1. **Configure devsolo MCP server** in Claude Code (see Installation below)
 2. **Use natural language** to manage your workflow:
    ```
    "Launch a new feature for amazing functionality"
-   → Claude uses hansolo_launch tool
+   → Claude uses devsolo_launch tool
 
    "Ship this feature"
-   → Claude uses hansolo_ship tool
+   → Claude uses devsolo_ship tool
 
    "Create an emergency hotfix"
-   → Claude uses hansolo_hotfix tool
+   → Claude uses devsolo_hotfix tool
    ```
 
 ### Manual Git Workflow
@@ -77,13 +77,13 @@ If you prefer the traditional Git approach:
    npm run build
    ```
 
-2. **Configure Claude Code** to load han-solo MCP server:
+2. **Configure Claude Code** to load devsolo MCP server:
    ```json
    {
      "mcpServers": {
-       "hansolo": {
+       "devsolo": {
          "command": "node",
-         "args": ["/path/to/hansolo/build/index.js"]
+         "args": ["/path/to/devsolo/build/index.js"]
        }
      }
    }
@@ -91,7 +91,7 @@ If you prefer the traditional Git approach:
 
 3. **Restart Claude Code** to load the MCP tools
 
-4. **Test via natural language**: "Show han-solo status"
+4. **Test via natural language**: "Show devsolo status"
 
 ### Running Tests
 
@@ -167,7 +167,7 @@ test: add unit tests for SessionRepository
 ## Project Structure
 
 ```
-hansolo/
+devsolo/
 ├── src/
 │   ├── index.ts           # MCP server entry point
 │   ├── tools/             # MCP tool implementations
@@ -271,9 +271,9 @@ This will:
 
 ## Getting Help
 
-- **Discord**: [Join our Discord](https://discord.gg/hansolo)
-- **Issues**: [GitHub Issues](https://github.com/slamb2k/hansolo/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/slamb2k/hansolo/discussions)
+- **Discord**: [Join our Discord](https://discord.gg/devsolo)
+- **Issues**: [GitHub Issues](https://github.com/slamb2k/devsolo/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/slamb2k/devsolo/discussions)
 
 ## Recognition
 

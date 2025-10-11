@@ -32,8 +32,8 @@ export class MCPConfigService {
     if (options.installationType === 'npx') {
       console.log('📦 Running via npx - MCP configuration not available');
       console.log('To enable MCP integration:');
-      console.log('  • Global: npm install -g hansolo-cli');
-      console.log('  • Project: npm install --save-dev hansolo-cli');
+      console.log('  • Global: npm install -g devsolo-cli');
+      console.log('  • Project: npm install --save-dev devsolo-cli');
       return;
     }
 
@@ -96,25 +96,25 @@ export class MCPConfigService {
       config.mcpServers = {};
     }
 
-    // Check if han-solo is already configured
-    if (config.mcpServers['hansolo'] && !force) {
-      console.log('✅ han-solo MCP server already configured in user settings');
+    // Check if devsolo is already configured
+    if (config.mcpServers['devsolo'] && !force) {
+      console.log('✅ devsolo MCP server already configured in user settings');
       return;
     }
 
-    // Add han-solo configuration
-    config.mcpServers['hansolo'] = {
+    // Add devsolo configuration
+    config.mcpServers['devsolo'] = {
       type: 'stdio',
       command: mcpCommand.command,
       args: mcpCommand.args,
       env: {
-        HANSOLO_BASE_PATH: '${HANSOLO_BASE_PATH:-.hansolo}',
+        DEVSOLO_BASE_PATH: '${DEVSOLO_BASE_PATH:-.devsolo}',
       },
     };
 
     // Write the updated configuration
     await fs.writeFile(configPath, JSON.stringify(config, null, 2));
-    console.log(`✅ Configured han-solo MCP server in ${configPath}`);
+    console.log(`✅ Configured devsolo MCP server in ${configPath}`);
     console.log('   Restart Claude Code to activate the MCP server');
   }
 
@@ -143,19 +143,19 @@ export class MCPConfigService {
       config.mcpServers = {};
     }
 
-    // Check if han-solo is already configured
-    if (config.mcpServers['hansolo'] && !force) {
-      console.log('✅ han-solo MCP server already configured in .mcp.json');
+    // Check if devsolo is already configured
+    if (config.mcpServers['devsolo'] && !force) {
+      console.log('✅ devsolo MCP server already configured in .mcp.json');
       return;
     }
 
-    // Add han-solo configuration
-    config.mcpServers['hansolo'] = {
+    // Add devsolo configuration
+    config.mcpServers['devsolo'] = {
       type: 'stdio',
       command: mcpCommand.command,
       args: mcpCommand.args,
       env: {
-        HANSOLO_BASE_PATH: '${HANSOLO_BASE_PATH:-.hansolo}',
+        DEVSOLO_BASE_PATH: '${DEVSOLO_BASE_PATH:-.devsolo}',
       },
     };
 
@@ -176,12 +176,12 @@ export class MCPConfigService {
 
     const config: MCPConfigFile = {
       mcpServers: {
-        hansolo: {
+        devsolo: {
           type: 'stdio',
           command: mcpCommand.command,
           args: mcpCommand.args,
           env: {
-            HANSOLO_BASE_PATH: '${HANSOLO_BASE_PATH:-.hansolo}',
+            DEVSOLO_BASE_PATH: '${DEVSOLO_BASE_PATH:-.devsolo}',
             ...personalSettings,
           },
         },
@@ -197,7 +197,7 @@ export class MCPConfigService {
   }
 
   /**
-   * Remove han-solo MCP configuration
+   * Remove devsolo MCP configuration
    */
   async removeMCPConfig(scope: 'user' | 'project' | 'both' = 'both'): Promise<void> {
     if (scope === 'user' || scope === 'both') {
@@ -206,10 +206,10 @@ export class MCPConfigService {
         const content = await fs.readFile(userConfigPath, 'utf-8');
         const config = JSON.parse(content);
 
-        if (config.mcpServers?.hansolo) {
-          delete config.mcpServers.hansolo;
+        if (config.mcpServers?.devsolo) {
+          delete config.mcpServers.devsolo;
           await fs.writeFile(userConfigPath, JSON.stringify(config, null, 2));
-          console.log('✅ Removed han-solo from user MCP configuration');
+          console.log('✅ Removed devsolo from user MCP configuration');
         }
       } catch (error) {
         // Config doesn't exist or is invalid, nothing to remove
@@ -222,8 +222,8 @@ export class MCPConfigService {
         const content = await fs.readFile(projectConfigPath, 'utf-8');
         const config = JSON.parse(content);
 
-        if (config.mcpServers?.hansolo) {
-          delete config.mcpServers.hansolo;
+        if (config.mcpServers?.devsolo) {
+          delete config.mcpServers.devsolo;
 
           // If no other servers, remove the file
           if (Object.keys(config.mcpServers).length === 0) {
@@ -231,7 +231,7 @@ export class MCPConfigService {
             console.log('✅ Removed .mcp.json (no other servers configured)');
           } else {
             await fs.writeFile(projectConfigPath, JSON.stringify(config, null, 2));
-            console.log('✅ Removed han-solo from .mcp.json');
+            console.log('✅ Removed devsolo from .mcp.json');
           }
         }
       } catch (error) {
@@ -252,7 +252,7 @@ export class MCPConfigService {
       const userConfigPath = this.installationStrategy.getUserMCPConfigPath();
       const content = await fs.readFile(userConfigPath, 'utf-8');
       const config = JSON.parse(content);
-      userConfigured = !!config.mcpServers?.hansolo;
+      userConfigured = !!config.mcpServers?.devsolo;
     } catch {
       // Not configured
     }
@@ -262,7 +262,7 @@ export class MCPConfigService {
       const projectConfigPath = this.installationStrategy.getProjectMCPConfigPath();
       const content = await fs.readFile(projectConfigPath, 'utf-8');
       const config = JSON.parse(content);
-      projectConfigured = !!config.mcpServers?.hansolo;
+      projectConfigured = !!config.mcpServers?.devsolo;
     } catch {
       // Not configured
     }
@@ -280,12 +280,12 @@ export class MCPConfigService {
       let content = await fs.readFile(gitignorePath, 'utf-8');
 
       if (!content.includes(filename)) {
-        content += `\n# han-solo personal configuration\n${filename}\n`;
+        content += `\n# devsolo personal configuration\n${filename}\n`;
         await fs.writeFile(gitignorePath, content);
       }
     } catch {
       // No .gitignore, create one
-      const content = `# han-solo personal configuration\n${filename}\n`;
+      const content = `# devsolo personal configuration\n${filename}\n`;
       await fs.writeFile(gitignorePath, content);
     }
   }

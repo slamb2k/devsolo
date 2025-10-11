@@ -66,7 +66,7 @@ if (!input.message) {
     nextSteps: [
       "Review the changed files",
       "Generate a conventional commit message",
-      "Call hansolo_commit again with the generated message",
+      "Call devsolo_commit again with the generated message",
     ],
   };
 }
@@ -132,7 +132,7 @@ if (!input.message) {
       "Option 1: I can analyze the changes and generate a commit message",
       "Option 2: You can provide a commit message directly",
       "Option 3: I can suggest a message and you can modify it",
-      "Call hansolo_commit with your chosen message",
+      "Call devsolo_commit with your chosen message",
     ],
   };
 }
@@ -151,7 +151,7 @@ Claude: I see you've modified 3 files related to authentication.
 
 User: I'll provide it: "feat: integrate Auth0 for SSO login"
 
-Claude: [Calls hansolo_commit with message "feat: integrate Auth0 for SSO login"]
+Claude: [Calls devsolo_commit with message "feat: integrate Auth0 for SSO login"]
         Committed successfully with your message!
 ```
 
@@ -177,7 +177,7 @@ Claude: I've analyzed your changes. Here's what I suggest:
 
 User: Make it more specific: "feat: add OAuth2 authentication with Google and GitHub providers"
 
-Claude: [Calls hansolo_commit with the modified message]
+Claude: [Calls devsolo_commit with the modified message]
         Committed with your updated message!
 ```
 
@@ -327,7 +327,7 @@ async execute(input: CommitToolInput): Promise<SessionToolResult> {
       nextSteps: [
         "Analyze the code changes",
         "Generate a conventional commit message (e.g., 'feat:', 'fix:', 'docs:')",
-        "Call hansolo_commit with the generated message",
+        "Call devsolo_commit with the generated message",
       ],
     };
   }
@@ -348,7 +348,7 @@ Claude: I'll analyze your changes to generate an appropriate commit message.
 Claude: Based on your changes, I'll commit with this message:
 "feat: add user authentication with OAuth2 support"
 
-[Claude calls hansolo_commit with the generated message]
+[Claude calls devsolo_commit with the generated message]
 
 Claude: Changes committed successfully!
 ```
@@ -394,7 +394,7 @@ async execute(input: ShipToolInput): Promise<GitHubToolResult> {
         "Review the commit history",
         "Analyze the overall changes",
         "Generate a structured PR description with Summary, Changes, and Testing sections",
-        "Call hansolo_ship with the generated PR description",
+        "Call devsolo_ship with the generated PR description",
       ],
     };
   }
@@ -429,7 +429,7 @@ Adds user authentication system with OAuth2 integration and JWT tokens.
 - Integration tests for auth flow
 - Manual testing with both OAuth providers
 
-[Claude calls hansolo_ship with the generated PR description]
+[Claude calls devsolo_ship with the generated PR description]
 
 Claude: Feature shipped successfully! 🚀
        PR #42 created, CI passed, and merged to main.
@@ -461,7 +461,7 @@ async execute(input: LaunchToolInput): Promise<SessionToolResult> {
       nextSteps: [
         `Confirm the branch name: ${generatedBranch}`,
         `Or provide a custom branch name`,
-        `Call hansolo_launch with the chosen branch name`,
+        `Call devsolo_launch with the chosen branch name`,
       ],
     };
   }
@@ -478,7 +478,7 @@ User: Start a new feature for user profiles
 Claude: I'll start a new feature branch for user profiles.
         Generated branch name: feature/user-profiles
 
-[Claude calls hansolo_launch with branchName "feature/user-profiles"]
+[Claude calls devsolo_launch with branchName "feature/user-profiles"]
 
 Claude: Feature branch created successfully!
         Branch: feature/user-profiles
@@ -554,13 +554,13 @@ Instead of error → retry cycle:
 ### Parameter Classification
 
 **Tier 1: AI-Generatable** (Use prompt pattern)
-- `message` in `hansolo_commit` - Claude can analyze diff
-- `prDescription` in `hansolo_ship` - Claude can analyze commits
-- `branchName` in `hansolo_launch` - Claude can generate from description
+- `message` in `devsolo_commit` - Claude can analyze diff
+- `prDescription` in `devsolo_ship` - Claude can analyze commits
+- `branchName` in `devsolo_launch` - Claude can generate from description
 
 **Tier 2: Inferrable with Context** (Use prompt pattern)
-- `description` in `hansolo_launch` - Claude can ask for clarification
-- `issue` in `hansolo_hotfix` - Claude can prompt for details
+- `description` in `devsolo_launch` - Claude can ask for clarification
+- `issue` in `devsolo_hotfix` - Claude can prompt for details
 
 **Tier 3: User Decision** (Don't use prompt pattern, use defaults)
 - `force` - Boolean flag, default to false
@@ -600,7 +600,7 @@ interface PromptResponse {
   nextSteps: [
     "Analyze the code changes to understand the purpose",
     "Generate a conventional commit message (feat/fix/docs/etc)",
-    "Call hansolo_commit with the generated message"
+    "Call devsolo_commit with the generated message"
   ]
 }
 ```
@@ -647,7 +647,7 @@ nextSteps: [
   "Generate a conventional commit message following the format: <type>: <description>",
 
   // 3. How to retry
-  "Call hansolo_commit with the generated message"
+  "Call devsolo_commit with the generated message"
 ]
 ```
 

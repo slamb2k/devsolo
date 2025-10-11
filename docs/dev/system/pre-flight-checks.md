@@ -1,6 +1,6 @@
 # Pre-Flight and Post-Flight Checks
 
-All han-solo commands implement comprehensive pre-flight and post-flight checks to ensure safe, predictable operations.
+All devsolo commands implement comprehensive pre-flight and post-flight checks to ensure safe, predictable operations.
 
 ## Philosophy
 
@@ -128,7 +128,7 @@ Enforces single PR per branch lifecycle:
 | Check | Purpose | Failure Action |
 |-------|---------|----------------|
 | **Git repository** | Valid git repository | Block |
-| **Han-solo initialized** | .hansolo directory exists | Block |
+| **DevSolo initialized** | .devsolo directory exists | Block |
 
 ### Post-Flight Verifications
 
@@ -202,7 +202,7 @@ Enforces single PR per branch lifecycle:
 | Check | Purpose | Failure Action |
 |-------|---------|----------------|
 | **Git repository** | Valid git repository | Block |
-| **Han-solo initialized** | .hansolo directory exists | Block |
+| **DevSolo initialized** | .devsolo directory exists | Block |
 
 **Output:** Read-only status display, no post-flight checks needed.
 
@@ -214,7 +214,7 @@ Enforces single PR per branch lifecycle:
 
 | Check | Purpose | Failure Action |
 |-------|---------|----------------|
-| **Han-solo initialized** | .hansolo directory exists | Block |
+| **DevSolo initialized** | .devsolo directory exists | Block |
 
 **Output:** Read-only session list, no post-flight checks needed.
 

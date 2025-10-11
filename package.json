@@ -1,10 +1,10 @@
 {
-  "name": "hansolo-mcp",
+  "name": "devsolo-mcp",
   "version": "2.0.0",
   "description": "AI-native git workflow automation via Model Context Protocol (MCP) for Claude Code",
   "main": "dist/index.js",
   "bin": {
-    "hansolo-mcp": "./bin/hansolo-mcp"
+    "devsolo-mcp": "./bin/devsolo-mcp"
   },
   "scripts": {
     "build": "tsc",
@@ -27,14 +27,14 @@
     "typecheck": "tsc --noEmit",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "changelog:full": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "mcp:start": "node dist/mcp/hansolo-mcp-server.js",
+    "mcp:start": "node dist/mcp/devsolo-mcp-server.js",
     "mcp:test": "npm run build:mcp && npm run test:mcp",
     "postinstall": "node scripts/postinstall.js",
     "prepack": "npm run clean && npm run build && npm run build:mcp",
     "prepublishOnly": "npm run test && npm run lint && npm run build",
     "package": "npm run build && npm pack",
-    "docker:build": "docker build -t hansolo:latest .",
-    "docker:run": "docker run -it --rm -v $(pwd):/workspace hansolo:latest"
+    "docker:build": "docker build -t devsolo:latest .",
+    "docker:run": "docker run -it --rm -v $(pwd):/workspace devsolo:latest"
   },
   "keywords": [
     "git",
@@ -50,7 +50,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hansolo/cli.git"
+    "url": "git+https://github.com/devsolo/cli.git"
   },
   "publishConfig": {
     "access": "public",
@@ -65,7 +65,7 @@
     "bin",
     "templates",
     "scripts",
-    ".hansolo/commands",
+    ".devsolo/commands",
     ".claude-plugin",
     "README.md",
     "LICENSE"

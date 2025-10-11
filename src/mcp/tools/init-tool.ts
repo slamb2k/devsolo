@@ -17,7 +17,7 @@ export interface InitToolInput extends WorkflowToolInput {
 }
 
 /**
- * Init tool - Initializes han-solo in the project
+ * Init tool - Initializes devsolo in the project
  */
 export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
   constructor(
@@ -45,7 +45,7 @@ export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
     const isInitialized = await this.configManager.isInitialized();
 
     if (isInitialized && !input.auto) {
-      throw new Error('han-solo is already initialized. Use auto: true to reinitialize.');
+      throw new Error('devsolo is already initialized. Use auto: true to reinitialize.');
     }
 
     // Check if in a git repository
@@ -89,9 +89,9 @@ export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
     return {
       success: true,
       warnings: [
-        'han-solo initialized successfully!',
+        'devsolo initialized successfully!',
         `Scope: ${config.scope}`,
-        'Use hansolo_launch to start a new workflow',
+        'Use devsolo_launch to start a new workflow',
       ],
     };
   }

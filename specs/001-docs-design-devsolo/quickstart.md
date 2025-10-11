@@ -1,6 +1,6 @@
-# Quickstart: han-solo Git Workflow Automation
+# Quickstart: devsolo Git Workflow Automation
 
-This quickstart validates the han-solo implementation by walking through the primary user scenarios from the specification.
+This quickstart validates the devsolo implementation by walking through the primary user scenarios from the specification.
 
 ## Prerequisites
 
@@ -11,8 +11,8 @@ This quickstart validates the han-solo implementation by walking through the pri
 ## Installation
 
 ```bash
-# Install han-solo globally
-npm install -g @hansolo/cli
+# Install devsolo globally
+npm install -g @devsolo/cli
 
 # The interactive installer will launch automatically
 # Choose your profile:
@@ -25,32 +25,32 @@ npm install -g @hansolo/cli
 
 **Given**: A new project without Git initialization
 **When**: Developer runs initialization command
-**Then**: System creates Git repository and configures han-solo
+**Then**: System creates Git repository and configures devsolo
 
 ```bash
 # Create a new project directory
 mkdir my-awesome-project
 cd my-awesome-project
 
-# Initialize han-solo (MANDATORY first step)
-/hansolo:init
+# Initialize devsolo (MANDATORY first step)
+/devsolo:init
 
 # Expected output:
-# 🚀 Initializing han-solo...
+# 🚀 Initializing devsolo...
 # ✅ Git repository created
 # ✅ Remote repository created on GitHub
-# ✅ Hooks installed to .hansolo/hooks/
+# ✅ Hooks installed to .devsolo/hooks/
 # ✅ Status line configured
-# ✅ Project marked as initialized (hansolo.yaml)
+# ✅ Project marked as initialized (devsolo.yaml)
 #
-# Ready to use han-solo commands!
+# Ready to use devsolo commands!
 ```
 
 **Validation**:
 - [ ] Git repository exists (.git directory)
 - [ ] Remote repository created (if requested)
-- [ ] hansolo.yaml file exists
-- [ ] Hooks installed in .hansolo/hooks/
+- [ ] devsolo.yaml file exists
+- [ ] Hooks installed in .devsolo/hooks/
 - [ ] Status line appears in terminal
 
 ## Scenario 2: Create and Develop a Feature
@@ -61,7 +61,7 @@ cd my-awesome-project
 
 ```bash
 # Start a new feature workflow
-/hansolo:launch
+/devsolo:launch
 
 # System prompts for branch name or auto-generates
 # Example: feature/add-user-authentication
@@ -70,10 +70,10 @@ cd my-awesome-project
 echo "// New feature code" >> feature.js
 
 # Check workflow status
-/hansolo:status
+/devsolo:status
 
 # Expected output:
-# 📊 han-solo Status
+# 📊 devsolo Status
 # ┌─────────────────────────────────────┐
 # │ Active Session                      │
 # ├─────────────────────────────────────┤
@@ -98,7 +98,7 @@ echo "// New feature code" >> feature.js
 
 ```bash
 # Ship your feature
-/hansolo:ship
+/devsolo:ship
 
 # System workflow:
 # 1. Prompts for commit message (or generates with AI)
@@ -143,7 +143,7 @@ echo "// New feature code" >> feature.js
 
 ```bash
 # Start emergency hotfix
-/hansolo:hotfix
+/devsolo:hotfix
 
 # System creates hotfix branch from main
 # Example: hotfix/fix-critical-bug
@@ -152,7 +152,7 @@ echo "// New feature code" >> feature.js
 echo "// Bug fix" >> bugfix.js
 
 # Continue hotfix workflow
-/hansolo:ship
+/devsolo:ship
 
 # System fast-tracks the hotfix:
 # - Validates changes
@@ -175,15 +175,15 @@ echo "// Bug fix" >> bugfix.js
 
 ```bash
 # Start first feature
-/hansolo:launch
+/devsolo:launch
 # Branch: feature/feature-one
 
 # Start second feature (switches automatically)
-/hansolo:launch
+/devsolo:launch
 # Branch: feature/feature-two
 
 # List all sessions
-/hansolo:sessions
+/devsolo:sessions
 
 # Expected output:
 # 📋 Active Sessions
@@ -195,7 +195,7 @@ echo "// Bug fix" >> bugfix.js
 # └──────┴─────────────────────┴──────────────┘
 
 # Switch back to first feature
-/hansolo:swap feature/feature-one
+/devsolo:swap feature/feature-one
 
 # Continue work on first feature
 ```
@@ -214,10 +214,10 @@ echo "// Bug fix" >> bugfix.js
 
 ```bash
 # Disable AI for testing
-export HANSOLO_AI_ENABLED=false
+export DEVSOLO_AI_ENABLED=false
 
 # Continue workflow
-/hansolo:ship
+/devsolo:ship
 
 # System prompts for manual input:
 # > Enter commit message manually: Fixed user authentication
@@ -238,26 +238,26 @@ export HANSOLO_AI_ENABLED=false
 ### Merge Conflict Handling
 ```bash
 # Create a conflict scenario
-/hansolo:launch
+/devsolo:launch
 # Make changes that will conflict with main
 # Someone else merges conflicting changes to main
 
-/hansolo:ship
+/devsolo:ship
 # System detects conflict during rebase
 # > Conflict detected! Please resolve manually
 # > Files with conflicts: [file1.js, file2.js]
-# > Run '/hansolo:ship' again when resolved
+# > Run '/devsolo:ship' again when resolved
 ```
 
 ### Interrupted Workflow Recovery
 ```bash
 # Start a workflow
-/hansolo:launch
+/devsolo:launch
 
 # Simulate terminal crash (Ctrl+C or close terminal)
 # Open new terminal
 
-/hansolo:status
+/devsolo:status
 # System shows interrupted session and offers recovery
 # > Found interrupted session on branch: feature/xxx
 # > Resume workflow? (y/n): y
@@ -266,7 +266,7 @@ export HANSOLO_AI_ENABLED=false
 ### No Remote Repository
 ```bash
 # In a local-only repository
-/hansolo:init
+/devsolo:init
 
 # System detects no remote
 # > No remote repository found
@@ -308,20 +308,20 @@ Run these tests to validate performance requirements:
 
 ```bash
 # Test 1: Command response time
-time /hansolo:status
+time /devsolo:status
 # Expected: <100ms
 
 # Test 2: Multiple session handling
 for i in {1..10}; do
-  /hansolo:launch --branch "test-$i" &
+  /devsolo:launch --branch "test-$i" &
 done
 wait
-/hansolo:sessions
+/devsolo:sessions
 # Expected: All 10 sessions tracked correctly
 
 # Test 3: Large repository handling
 # In a repository with 10,000+ files
-/hansolo:ship
+/devsolo:ship
 # Expected: No performance degradation
 ```
 
@@ -329,17 +329,17 @@ wait
 
 ### Common Issues
 
-**"hansolo.yaml not found"**
-- Run `/hansolo:init` first
+**"devsolo.yaml not found"**
+- Run `/devsolo:init` first
 - This is mandatory before any other command
 
 **"Git hooks not executing"**
-- Check hook permissions: `ls -la .hansolo/hooks/`
-- Reinstall hooks: `/hansolo:config --reinstall-hooks`
+- Check hook permissions: `ls -la .devsolo/hooks/`
+- Reinstall hooks: `/devsolo:config --reinstall-hooks`
 
 **"Session state corrupted"**
-- Run `/hansolo:validate` to check integrity
-- Use `/hansolo:abort` to clean up if needed
+- Run `/devsolo:validate` to check integrity
+- Use `/devsolo:abort` to clean up if needed
 
 **"Cannot create remote repository"**
 - Verify API token is configured
@@ -360,7 +360,7 @@ The implementation is considered successful when:
 ## Next Steps
 
 After validation:
-1. Configure team settings: `/hansolo:config --team`
+1. Configure team settings: `/devsolo:config --team`
 2. Set up CI/CD integration
 3. Train team on workflows
 4. Monitor metrics dashboard
@@ -368,4 +368,4 @@ After validation:
 
 ---
 
-*This quickstart is part of the han-solo implementation validation suite.*
+*This quickstart is part of the devsolo implementation validation suite.*

@@ -83,7 +83,7 @@ export class CommitTool extends BaseMCPTool<CommitToolInput, SessionToolResult> 
             'Analyze the diff to understand what changed',
             'Generate a conventional commit message (feat/fix/docs/refactor/etc)',
             'OR ask the user what commit message they want to use',
-            'Call hansolo_commit again with the message parameter',
+            'Call devsolo_commit again with the message parameter',
           ],
         } as SessionToolResult,
       };
@@ -139,7 +139,7 @@ export class CommitTool extends BaseMCPTool<CommitToolInput, SessionToolResult> 
         sessionId: session.id,
         branchName: session.branchName,
         state: session.currentState,
-        nextSteps: ['Use hansolo_ship to push, create PR, and merge'],
+        nextSteps: ['Use devsolo_ship to push, create PR, and merge'],
       },
     };
   }

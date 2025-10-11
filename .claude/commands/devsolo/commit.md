@@ -12,7 +12,7 @@ Commit changes to the current feature branch with an auto-generated or custom me
 
 1. **Invoke git-droid sub-agent** to coordinate the commit workflow
 2. git-droid will:
-   - Verify active session exists (guide to /hansolo launch if not)
+   - Verify active session exists (guide to /devsolo launch if not)
    - Verify there are changes to commit
    - Generate commit message if not provided:
      - Analyze `git diff` to understand changes
@@ -28,7 +28,7 @@ Commit changes to the current feature branch with an auto-generated or custom me
 ░▀▀▀░▀▀▀░▀░░░▀░▀░░░▀░▀▀▀░░▀░░
 ```
 
-   - Call `mcp__hansolo__hansolo_commit` with message and stagedOnly flag
+   - Call `mcp__devsolo__devsolo_commit` with message and stagedOnly flag
    - Report results following git-droid output style
 
 ## Commit Message Generation Rules
@@ -73,23 +73,23 @@ Generated message: feat(auth): implement user authentication system
 ### Usage examples:
 ```
 # Commit with auto-generated message
-/hansolo commit
+/devsolo commit
 
 # Commit with custom message
-/hansolo commit --message="feat(auth): add OAuth2 support"
+/devsolo commit --message="feat(auth): add OAuth2 support"
 
 # Commit only staged files
-/hansolo commit --stagedOnly
+/devsolo commit --stagedOnly
 
 # Commit staged files with custom message
-/hansolo commit --message="fix(auth): resolve token expiry bug" --stagedOnly
+/devsolo commit --message="fix(auth): resolve token expiry bug" --stagedOnly
 ```
 
 ## Notes
 
-- Requires an active han-solo session (use /hansolo launch first)
+- Requires an active devsolo session (use /devsolo launch first)
 - Updates session state to CHANGES_COMMITTED
 - When stagedOnly=true, only commits files added with `git add`
 - When stagedOnly=false (default), stages and commits all changes
 - Follows repository commit conventions
-- Adds han-solo footer to commit automatically
+- Adds devsolo footer to commit automatically

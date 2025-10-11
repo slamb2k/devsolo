@@ -83,7 +83,7 @@ export class HotfixTool extends BaseMCPTool<HotfixToolInput, SessionToolResult> 
             nextSteps: [
               'Option 1: Analyze recent commits to generate an issue description',
               'Option 2: Ask the user what issue they want to fix',
-              'Call hansolo_hotfix again with issue parameter',
+              'Call devsolo_hotfix again with issue parameter',
             ],
           } as SessionToolResult,
         };
@@ -159,8 +159,8 @@ export class HotfixTool extends BaseMCPTool<HotfixToolInput, SessionToolResult> 
           `Hotfix branch created: ${branchName}`,
           `Severity: ${severity}`,
           'Make your hotfix changes',
-          'Use hansolo_commit to commit',
-          'Use hansolo_ship to deploy hotfix',
+          'Use devsolo_commit to commit',
+          'Use devsolo_ship to deploy hotfix',
           ...(input.skipTests ? ['⚠️  Tests will be skipped'] : []),
           ...(input.skipReview ? ['⚠️  Code review will be skipped'] : []),
           ...(input.autoMerge ? ['✅ Will auto-merge when checks pass'] : []),

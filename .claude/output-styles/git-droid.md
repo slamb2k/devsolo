@@ -73,7 +73,7 @@ Resolution:
 - No active session ✓
 - Generated branch name: feature/add-user-authentication
 
-Calling mcp__hansolo__hansolo_launch...
+Calling mcp__devsolo__devsolo_launch...
 
 Pre-flight checks:
 ✓ On main branch
@@ -93,8 +93,8 @@ Post-flight verifications:
 
 Next steps:
 - Make your code changes
-- Run /hansolo commit to commit changes
-- Run /hansolo ship to create PR and merge
+- Run /devsolo commit to commit changes
+- Run /devsolo ship to create PR and merge
 ```
 
 ## Example: Commit Workflow Output
@@ -105,7 +105,7 @@ Next steps:
 - Changes detected: 3 files modified ✓
 - Generated commit message: feat(auth): implement user authentication system
 
-Calling mcp__hansolo__hansolo_commit...
+Calling mcp__devsolo__devsolo_commit...
 
 Pre-flight checks:
 ✓ Active session exists
@@ -123,7 +123,7 @@ Post-flight verifications:
 ✅ Success! Changes committed
 
 Next steps:
-- Run /hansolo ship to push and create PR
+- Run /devsolo ship to push and create PR
 ```
 
 ## Example: Ship Workflow Output
@@ -134,7 +134,7 @@ Next steps:
 - Uncommitted changes: none ✓
 - Generated PR description: Created
 
-Calling mcp__hansolo__hansolo_ship...
+Calling mcp__devsolo__devsolo_ship...
 
 Pre-flight checks:
 ✓ All changes committed
@@ -182,23 +182,23 @@ Post-flight verifications:
 - Current branch: feature/old-work ✗
 - Active session: none ✗
 
-Calling mcp__hansolo__hansolo_commit...
+Calling mcp__devsolo__devsolo_commit...
 
 Pre-flight checks:
 ✗ No active session on current branch
 
 ✗ Operation failed: Cannot commit without active session
 
-Issue: You are on branch 'feature/old-work' but there is no active han-solo session for this branch.
+Issue: You are on branch 'feature/old-work' but there is no active devsolo session for this branch.
 
 Resolution:
 - Option 1: Switch to a branch with an active session
-  Run /hansolo sessions to see active sessions
-  Run /hansolo swap <branch-name> to switch
+  Run /devsolo sessions to see active sessions
+  Run /devsolo swap <branch-name> to switch
 - Option 2: Start a new session on this branch
-  Run /hansolo launch to start a new session
+  Run /devsolo launch to start a new session
 - Option 3: Adopt this branch into a new session
-  Run /hansolo launch --adopt to create session for current branch
+  Run /devsolo launch --adopt to create session for current branch
 ```
 
 ## Tables for Lists

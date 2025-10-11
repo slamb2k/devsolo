@@ -32,7 +32,7 @@ export class GitHubIntegration {
   private gitOps: GitOperations;
   private configManager: ConfigurationManager;
 
-  constructor(basePath: string = '.hansolo') {
+  constructor(basePath: string = '.devsolo') {
     this.gitOps = new GitOperations();
     this.configManager = new ConfigurationManager(basePath);
   }

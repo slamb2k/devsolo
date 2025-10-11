@@ -26,7 +26,7 @@ export class OptimizedSessionRepository {
   private readonly INDEX_FILE = 'session-index.json';
   private readonly SESSION_DIR = 'sessions';
 
-  constructor(basePath: string = '.hansolo') {
+  constructor(basePath: string = '.devsolo') {
     this.basePath = basePath;
     this.sessionCache = new LRUCache<WorkflowSession>(20, 300000); // 5 min TTL
     this.parallelExecutor = new ParallelExecutor(4);

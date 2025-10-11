@@ -1,5 +1,5 @@
 #!/bin/bash
-# han-solo commit-msg hook
+# devsolo commit-msg hook
 # Enforces conventional commit messages
 
 COMMIT_MSG_FILE=$1

@@ -1,10 +1,10 @@
-# Data Model: han-solo Git Workflow Automation
+# Data Model: devsolo Git Workflow Automation
 
 **Generated**: 2025-09-21
 **Status**: Complete
 
 ## Overview
-This document defines the data entities, their relationships, and state management for the han-solo Git workflow automation tool.
+This document defines the data entities, their relationships, and state management for the devsolo Git workflow automation tool.
 
 ## Core Entities
 
@@ -78,11 +78,11 @@ Represents user and project preferences.
 interface Configuration {
   version: string;              // Config schema version
   scope: 'user' | 'project';
-  initialized: boolean;         // hansolo.yaml exists
+  initialized: boolean;         // devsolo.yaml exists
   components: ComponentConfig;
   preferences: UserPreferences;
   gitPlatform: GitPlatform;
-  installPath: string;          // .hansolo directory location
+  installPath: string;          // .devsolo directory location
 }
 
 interface ComponentConfig {
@@ -108,7 +108,7 @@ interface UserPreferences {
 - installPath must exist and be writable
 
 ### 4. GitBranch
-Represents a Git branch with han-solo metadata.
+Represents a Git branch with devsolo metadata.
 
 **Fields**:
 ```typescript
@@ -146,7 +146,7 @@ interface AuditEntry {
 }
 
 interface AuditDetails {
-  command: string;              // han-solo command executed
+  command: string;              // devsolo command executed
   gitOperation?: string;        // Underlying Git command
   stateTransition?: {
     from: StateName;
@@ -299,7 +299,7 @@ states:
 
 ### File Structure
 ```
-.hansolo/
+.devsolo/
 ├── config.yaml                 # Configuration
 ├── sessions/
 │   ├── {session-id}.json      # Session state
@@ -321,7 +321,7 @@ states:
 
 ### Migration Strategy
 - Version field in all persisted entities
-- Migration scripts in .hansolo/migrations/
+- Migration scripts in .devsolo/migrations/
 - Automatic backup before migration
 - Rollback capability for failed migrations
 
@@ -379,7 +379,7 @@ const sessionSchema = {
 
 ## Conclusion
 
-This data model provides a robust foundation for the han-solo Git workflow automation tool. The design emphasizes:
+This data model provides a robust foundation for the devsolo Git workflow automation tool. The design emphasizes:
 - **Immutability**: State transitions and audit logs are append-only
 - **Recoverability**: Complete state history enables resumption
 - **Performance**: Efficient lookups and minimal I/O

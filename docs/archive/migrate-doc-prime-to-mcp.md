@@ -2,12 +2,12 @@
 
 ## Feature Description
 
-Migrate the `/doc` and `/prime` slash commands from local `.claude/commands/` directory to han-solo managed `.hansolo/commands/` directory and expose them as MCP prompts. This will:
+Migrate the `/doc` and `/prime` slash commands from local `.claude/commands/` directory to devsolo managed `.devsolo/commands/` directory and expose them as MCP prompts. This will:
 
-1. Prevent duplicate slash commands when working in the han-solo repository itself (where both local slash commands and MCP prompts would otherwise appear)
-2. Make documentation management and codebase priming capabilities available to all han-solo users via the MCP server
-3. Establish `.hansolo/commands/` as the standard location for han-solo-managed custom slash commands
-4. Extend `hansolo init` to automatically add documentation guidelines to CLAUDE.md
+1. Prevent duplicate slash commands when working in the devsolo repository itself (where both local slash commands and MCP prompts would otherwise appear)
+2. Make documentation management and codebase priming capabilities available to all devsolo users via the MCP server
+3. Establish `.devsolo/commands/` as the standard location for devsolo-managed custom slash commands
+4. Extend `devsolo init` to automatically add documentation guidelines to CLAUDE.md
 
 The `/doc` command provides comprehensive documentation management in two modes:
 - **Audit mode**: Scans for naming convention issues, placement problems, missing README entries, and archival candidates
@@ -17,46 +17,46 @@ The `/prime` command helps Claude Code understand a codebase by reading core doc
 
 ## User Story
 
-As a developer using han-solo
+As a developer using devsolo
 I want access to documentation management and codebase priming commands
 So that I can maintain consistent documentation across my projects and quickly onboard AI assistants
 
-As a han-solo contributor
+As a devsolo contributor
 I want slash commands to be exposed only through MCP
-So that I don't see duplicate commands when working in the han-solo repository itself
+So that I don't see duplicate commands when working in the devsolo repository itself
 
 ## Problem Statement
 
 Currently:
-1. The `/doc` command exists in `.claude/commands/doc.md` - only available locally in the han-solo repo
+1. The `/doc` command exists in `.claude/commands/doc.md` - only available locally in the devsolo repo
 2. The `/prime` command exists in `.claude/commands/disler/prime.md` - only available locally
-3. When working in the han-solo repository, developers would see commands twice: once from local slash commands and once from the MCP server (if both were registered)
-4. Users of han-solo in other projects don't have access to these useful documentation and priming capabilities
-5. The `hansolo init` command adds git workflow guidance to CLAUDE.md but doesn't add documentation structure guidance
-6. The `.hansolo/` directory isn't included in the published npm package
+3. When working in the devsolo repository, developers would see commands twice: once from local slash commands and once from the MCP server (if both were registered)
+4. Users of devsolo in other projects don't have access to these useful documentation and priming capabilities
+5. The `devsolo init` command adds git workflow guidance to CLAUDE.md but doesn't add documentation structure guidance
+6. The `.devsolo/` directory isn't included in the published npm package
 
 ## Solution Statement
 
-1. **Move commands to han-solo managed location**:
-   - Move `.claude/commands/doc.md` → `.hansolo/commands/doc.md`
-   - Move `.claude/commands/disler/prime.md` → `.hansolo/commands/prime.md`
+1. **Move commands to devsolo managed location**:
+   - Move `.claude/commands/doc.md` → `.devsolo/commands/doc.md`
+   - Move `.claude/commands/disler/prime.md` → `.devsolo/commands/prime.md`
 
 2. **Expose via MCP prompts**:
    - Extend the MCP server's `ListPromptsRequestSchema` handler to include `doc` and `prime`
-   - Implement dynamic prompt loading from `.hansolo/commands/*.md` in `GetPromptRequestSchema` handler
+   - Implement dynamic prompt loading from `.devsolo/commands/*.md` in `GetPromptRequestSchema` handler
    - Support `$ARGUMENTS` placeholder substitution in markdown command files
 
-3. **Update hansolo init**:
+3. **Update devsolo init**:
    - Extend `installClaudeGuidance()` in `ConfigurationManager` to add a documentation guidelines section
-   - Include folder structure, naming conventions, placement rules, and references to `/hansolo:doc` and `/hansolo:prime`
+   - Include folder structure, naming conventions, placement rules, and references to `/devsolo:doc` and `/devsolo:prime`
 
 4. **Update package distribution**:
-   - Add `.hansolo/commands` to the `files` array in package.json to include commands in published package (excluding runtime data like session.json)
+   - Add `.devsolo/commands` to the `files` array in package.json to include commands in published package (excluding runtime data like session.json)
 
 This approach:
-- Eliminates duplicate commands in the han-solo repository
-- Makes documentation tools available to all han-solo users
-- Establishes a clear pattern for future han-solo-managed slash commands
+- Eliminates duplicate commands in the devsolo repository
+- Makes documentation tools available to all devsolo users
+- Establishes a clear pattern for future devsolo-managed slash commands
 - Integrates documentation guidance into the init workflow
 
 ## Relevant Files
@@ -65,21 +65,21 @@ This approach:
 
 - **.claude/commands/doc.md**
   - Current location of documentation management command
-  - Will be moved to `.hansolo/commands/doc.md`
+  - Will be moved to `.devsolo/commands/doc.md`
   - Contains comprehensive audit and create mode logic
 
 - **.claude/commands/disler/prime.md**
   - Current location of codebase priming command
-  - Will be moved to `.hansolo/commands/prime.md`
+  - Will be moved to `.devsolo/commands/prime.md`
   - Simple command that reads README.md and docs/README.md
 
-- **src/mcp/hansolo-mcp-server.ts** (lines 340-494)
+- **src/mcp/devsolo-mcp-server.ts** (lines 340-494)
   - Contains `ListPromptsRequestSchema` handler (lists available prompts)
   - Contains `GetPromptRequestSchema` handler (returns prompt content)
   - Need to add `doc` and `prime` to the prompts list
   - Need to implement dynamic markdown file reading and $ARGUMENTS substitution
 
-- **src/commands/hansolo-init.ts** (lines 145-148)
+- **src/commands/devsolo-init.ts** (lines 145-148)
   - Contains initialization workflow
   - Calls `configManager.installClaudeGuidance()`
   - Already adds git workflow section to CLAUDE.md
@@ -91,16 +91,16 @@ This approach:
 
 - **package.json**
   - `files` array currently: `["dist", "bin", "templates", "scripts", "README.md", "LICENSE"]`
-  - Need to add `.hansolo/commands` to distribute command files (not entire `.hansolo/` since it contains runtime data)
+  - Need to add `.devsolo/commands` to distribute command files (not entire `.devsolo/` since it contains runtime data)
 
 - **.gitignore**
-  - Currently ignores all of `.hansolo/` but un-ignores `.hansolo/templates/` and `.hansolo/hooks/`
-  - Need to add `!.hansolo/commands/` so command files are tracked in git
+  - Currently ignores all of `.devsolo/` but un-ignores `.devsolo/templates/` and `.devsolo/hooks/`
+  - Need to add `!.devsolo/commands/` so command files are tracked in git
   - Runtime files (session.json, config.json) should remain ignored
 
 - **docs/guides/claude-code-commands.md**
   - Documents how MCP commands work in Claude Code
-  - Need to add `/hansolo:doc` and `/hansolo:prime` to the command list
+  - Need to add `/devsolo:doc` and `/devsolo:prime` to the command list
 
 - **docs/README.md**
   - Main documentation overview
@@ -108,24 +108,24 @@ This approach:
 
 - **CLAUDE.md**
   - Repository-level Claude Code instructions
-  - Will receive new documentation guidelines section via `hansolo init`
+  - Will receive new documentation guidelines section via `devsolo init`
 
 ### New Files
 
-- **.hansolo/commands/doc.md**
+- **.devsolo/commands/doc.md**
   - Moved from `.claude/commands/doc.md`
   - No content changes, just new location
 
-- **.hansolo/commands/prime.md**
+- **.devsolo/commands/prime.md**
   - Moved from `.claude/commands/disler/prime.md`
   - No content changes, just new location
 
 ## Implementation Plan
 
 ### Phase 1: Foundation
-1. Create `.hansolo/commands/` directory structure
+1. Create `.devsolo/commands/` directory structure
 2. Move command files to new location
-3. Update package.json to include `.hansolo/` in distributed files
+3. Update package.json to include `.devsolo/` in distributed files
 4. Verify command files have correct markdown structure for MCP prompt handling
 
 ### Phase 2: Core Implementation
@@ -137,42 +137,42 @@ This approach:
 ### Phase 3: Integration
 1. Extend `installClaudeGuidance()` to add documentation guidelines section to CLAUDE.md
 2. Update documentation (claude-code-commands.md, docs/README.md)
-3. Test end-to-end: `hansolo init` → CLAUDE.md contains both git and documentation guidance
+3. Test end-to-end: `devsolo init` → CLAUDE.md contains both git and documentation guidance
 4. Test MCP commands work correctly in Claude Code
-5. Verify no duplicate commands appear when working in han-solo repository
+5. Verify no duplicate commands appear when working in devsolo repository
 
 ## Step by Step Tasks
 
 ### Step 1: Create Directory and Move Command Files
 
-- [ ] Create `.hansolo/commands/` directory
-- [ ] Move `.claude/commands/doc.md` to `.hansolo/commands/doc.md`
-- [ ] Move `.claude/commands/disler/prime.md` to `.hansolo/commands/prime.md`
+- [ ] Create `.devsolo/commands/` directory
+- [ ] Move `.claude/commands/doc.md` to `.devsolo/commands/doc.md`
+- [ ] Move `.claude/commands/disler/prime.md` to `.devsolo/commands/prime.md`
 - [ ] Verify markdown structure is compatible with MCP prompt handling
 - [ ] Remove empty `.claude/commands/disler/` directory if no other files remain
 
 ### Step 2: Update Package Distribution and Git Tracking
 
 - [ ] Edit `package.json`
-- [ ] Add `.hansolo/commands` to the `files` array
-- [ ] Verify change: `files: ["dist", "bin", "templates", "scripts", ".hansolo/commands", "README.md", "LICENSE"]`
+- [ ] Add `.devsolo/commands` to the `files` array
+- [ ] Verify change: `files: ["dist", "bin", "templates", "scripts", ".devsolo/commands", "README.md", "LICENSE"]`
 - [ ] This excludes runtime data (session.json, config.json) while including command files
 
 - [ ] Edit `.gitignore`
-- [ ] Add `!.hansolo/commands/` after the `.hansolo/` ignore rule
+- [ ] Add `!.devsolo/commands/` after the `.devsolo/` ignore rule
 - [ ] This ensures command files are tracked in git while runtime files remain ignored
 - [ ] Verify the pattern:
   ```
-  # han-solo runtime files
-  .hansolo/
-  !.hansolo/templates/
-  !.hansolo/hooks/
-  !.hansolo/commands/
+  # devsolo runtime files
+  .devsolo/
+  !.devsolo/templates/
+  !.devsolo/hooks/
+  !.devsolo/commands/
   ```
 
 ### Step 3: Extend MCP Server - List Prompts Handler
 
-- [ ] Open `src/mcp/hansolo-mcp-server.ts`
+- [ ] Open `src/mcp/devsolo-mcp-server.ts`
 - [ ] Locate `ListPromptsRequestSchema` handler (around line 340)
 - [ ] Add `doc` prompt registration after existing prompts:
   ```typescript
@@ -205,10 +205,10 @@ This approach:
 ### Step 4: Implement Dynamic Markdown File Reading
 
 - [ ] In `GetPromptRequestSchema` handler (around line 497)
-- [ ] Create helper function to read markdown files from `.hansolo/commands/`:
+- [ ] Create helper function to read markdown files from `.devsolo/commands/`:
   ```typescript
   const readCommandMarkdown = async (commandName: string): Promise<string> => {
-    const commandPath = path.join(process.cwd(), '.hansolo', 'commands', `${commandName}.md`);
+    const commandPath = path.join(process.cwd(), '.devsolo', 'commands', `${commandName}.md`);
     if (!fs.existsSync(commandPath)) {
       throw new Error(`Command file not found: ${commandPath}`);
     }
@@ -334,26 +334,26 @@ This approach:
 - [ ] Run `npm run build` to compile TypeScript changes
 - [ ] Run `npm run build:mcp` to build MCP server specifically
 - [ ] Verify no TypeScript compilation errors
-- [ ] Check that `.hansolo/commands/` files are included in the build output
+- [ ] Check that `.devsolo/commands/` files are included in the build output
 
 ### Step 8: Update Documentation
 
 - [ ] Open `docs/guides/claude-code-commands.md`
-- [ ] Add `/hansolo:doc` command to the command list with description and examples
-- [ ] Add `/hansolo:prime` command to the command list
+- [ ] Add `/devsolo:doc` command to the command list with description and examples
+- [ ] Add `/devsolo:prime` command to the command list
 - [ ] Include usage examples for both audit and create modes of /doc
 
 - [ ] Open `docs/README.md`
 - [ ] Verify the documentation structure description is current
-- [ ] Add note about `/hansolo:doc` command for creating documentation
+- [ ] Add note about `/devsolo:doc` command for creating documentation
 
 - [ ] Update main `README.md` if necessary to reference new commands
 
-### Step 9: Test hansolo init - Documentation Guidance
+### Step 9: Test devsolo init - Documentation Guidance
 
 - [ ] Create a temporary test directory
 - [ ] Initialize git: `git init`
-- [ ] Run `hansolo init` (project scope)
+- [ ] Run `devsolo init` (project scope)
 - [ ] Verify CLAUDE.md is created
 - [ ] Verify CLAUDE.md contains both:
   - Git workflow management section (existing)
@@ -363,20 +363,20 @@ This approach:
 
 ### Step 10: Test MCP Commands in Claude Code
 
-- [ ] Configure han-solo MCP server in Claude Desktop config
+- [ ] Configure devsolo MCP server in Claude Desktop config
 - [ ] Restart Claude Desktop to load updated MCP server
-- [ ] In Claude Code, type `/hansolo:doc` and verify command appears
-- [ ] Test audit mode: `/hansolo:doc` with no arguments
-- [ ] Test create mode: `/hansolo:doc test-doc "# Test\nThis is a test document"`
-- [ ] Type `/hansolo:prime` and verify command appears
+- [ ] In Claude Code, type `/devsolo:doc` and verify command appears
+- [ ] Test audit mode: `/devsolo:doc` with no arguments
+- [ ] Test create mode: `/devsolo:doc test-doc "# Test\nThis is a test document"`
+- [ ] Type `/devsolo:prime` and verify command appears
 - [ ] Test prime command executes correctly (reads README files)
 
 ### Step 11: Verify No Duplicate Commands
 
-- [ ] Open Claude Code in the han-solo repository itself
+- [ ] Open Claude Code in the devsolo repository itself
 - [ ] Type `/` and check command list
-- [ ] Verify `/hansolo:doc` appears only once (from MCP, not local)
-- [ ] Verify `/hansolo:prime` appears only once (from MCP, not local)
+- [ ] Verify `/devsolo:doc` appears only once (from MCP, not local)
+- [ ] Verify `/devsolo:prime` appears only once (from MCP, not local)
 - [ ] Confirm no `/doc` or `/prime` local commands appear
 
 ### Step 12: Run All Validation Commands
@@ -416,16 +416,16 @@ Execute every validation command below to ensure zero regressions.
   - Test `GetPromptRequestSchema` with `prime` command
   - Verify returned markdown contains substituted arguments
 
-- **End-to-End hansolo init**
-  - Run `hansolo init` in a fresh repository
+- **End-to-End devsolo init**
+  - Run `devsolo init` in a fresh repository
   - Verify CLAUDE.md creation with complete content
-  - Verify `.hansolo/` directory structure is created
+  - Verify `.devsolo/` directory structure is created
   - Verify all initialization steps complete successfully
 
 ### Edge Cases
 
 - **Missing Command Files**
-  - What happens if `.hansolo/commands/doc.md` is deleted?
+  - What happens if `.devsolo/commands/doc.md` is deleted?
   - Should return helpful error message
 
 - **Malformed Arguments**
@@ -434,32 +434,32 @@ Execute every validation command below to ensure zero regressions.
 
 - **Existing CLAUDE.md with Custom Content**
   - User has custom sections in CLAUDE.md
-  - Should preserve custom content and append han-solo sections
+  - Should preserve custom content and append devsolo sections
 
 - **Package Distribution**
-  - Verify `.hansolo/commands/` files are included in `npm pack` output
+  - Verify `.devsolo/commands/` files are included in `npm pack` output
   - Test installation of package in another project includes command files
 
 - **MCP Server Restart**
-  - Modify `.hansolo/commands/doc.md` content while MCP server is running
+  - Modify `.devsolo/commands/doc.md` content while MCP server is running
   - Restart MCP server
   - Verify changes are reflected in prompt execution
 
 ## Acceptance Criteria
 
-- [ ] `.hansolo/commands/doc.md` exists and contains complete documentation management logic
-- [ ] `.hansolo/commands/prime.md` exists and contains codebase priming logic
+- [ ] `.devsolo/commands/doc.md` exists and contains complete documentation management logic
+- [ ] `.devsolo/commands/prime.md` exists and contains codebase priming logic
 - [ ] `.claude/commands/doc.md` and `.claude/commands/disler/prime.md` are removed
-- [ ] `package.json` includes `.hansolo/commands` in files array (not entire `.hansolo/` directory)
-- [ ] `.gitignore` un-ignores `.hansolo/commands/` so command files are tracked in git
-- [ ] Runtime files (.hansolo/session.json, .hansolo/config.json) remain git-ignored
+- [ ] `package.json` includes `.devsolo/commands` in files array (not entire `.devsolo/` directory)
+- [ ] `.gitignore` un-ignores `.devsolo/commands/` so command files are tracked in git
+- [ ] Runtime files (.devsolo/session.json, .devsolo/config.json) remain git-ignored
 - [ ] MCP server's `ListPromptsRequestSchema` returns `doc` and `prime` prompts
 - [ ] MCP server's `GetPromptRequestSchema` correctly reads markdown files and substitutes arguments
-- [ ] `hansolo init` creates CLAUDE.md with both git workflow and documentation guidelines sections
-- [ ] `/hansolo:doc` command works in Claude Code (audit mode)
-- [ ] `/hansolo:doc <name> <content>` command works in Claude Code (create mode)
-- [ ] `/hansolo:prime` command works in Claude Code
-- [ ] When working in han-solo repository, commands appear only once (via MCP)
+- [ ] `devsolo init` creates CLAUDE.md with both git workflow and documentation guidelines sections
+- [ ] `/devsolo:doc` command works in Claude Code (audit mode)
+- [ ] `/devsolo:doc <name> <content>` command works in Claude Code (create mode)
+- [ ] `/devsolo:prime` command works in Claude Code
+- [ ] When working in devsolo repository, commands appear only once (via MCP)
 - [ ] Documentation is updated to reflect new commands
 - [ ] All existing tests pass
 - [ ] No TypeScript compilation errors
@@ -472,35 +472,35 @@ Execute every command to validate the feature works correctly with zero regressi
 - `npm run build` - Verify TypeScript compilation succeeds
 - `npm run build:mcp` - Verify MCP server builds successfully
 - `npm run test` - Run all existing tests to ensure no regressions
-- `npm pack` - Create package tarball and verify `.hansolo/commands/` is included (but not `.hansolo/session.json` or other runtime data)
+- `npm pack` - Create package tarball and verify `.devsolo/commands/` is included (but not `.devsolo/session.json` or other runtime data)
 - `npm run lint` - Verify code style compliance
 - `git status` - Ensure only intended files are changed
-- Create test repository and run `hansolo init` - Verify CLAUDE.md generation
-- In Claude Code, test `/hansolo:doc` (audit mode) - Verify command executes
-- In Claude Code, test `/hansolo:doc test "# Test"` (create mode) - Verify document creation
-- In Claude Code, test `/hansolo:prime` - Verify codebase priming
-- In han-solo repo, verify `/hansolo:doc` appears only once in command list
+- Create test repository and run `devsolo init` - Verify CLAUDE.md generation
+- In Claude Code, test `/devsolo:doc` (audit mode) - Verify command executes
+- In Claude Code, test `/devsolo:doc test "# Test"` (create mode) - Verify document creation
+- In Claude Code, test `/devsolo:prime` - Verify codebase priming
+- In devsolo repo, verify `/devsolo:doc` appears only once in command list
 - Restart Claude Desktop and verify commands are still available
 
 ## Notes
 
 ### Future Enhancements
 
-1. **Additional Commands**: `.hansolo/commands/` can become the home for other han-solo-managed slash commands like `/feature`, `/tasks`, `/plan`, etc.
+1. **Additional Commands**: `.devsolo/commands/` can become the home for other devsolo-managed slash commands like `/feature`, `/tasks`, `/plan`, etc.
 
-2. **Command Discovery**: Could implement automatic discovery of all `.md` files in `.hansolo/commands/` and register them as MCP prompts dynamically
+2. **Command Discovery**: Could implement automatic discovery of all `.md` files in `.devsolo/commands/` and register them as MCP prompts dynamically
 
 3. **Argument Validation**: Could add schema validation for command arguments based on patterns in the markdown files
 
-4. **Command Templates**: Could provide templates for creating new slash commands in `.hansolo/commands/`
+4. **Command Templates**: Could provide templates for creating new slash commands in `.devsolo/commands/`
 
 ### Design Decisions
 
-- **Why .hansolo/commands/ instead of .claude/commands/?**
-  - Prevents duplicate commands when working in han-solo repository
-  - Clearly separates han-solo-managed commands from user/project commands
-  - Enables distribution via npm package (only `.hansolo/commands/` is published, not runtime data)
-  - When dogfooding han-solo to build han-solo, `.hansolo/` contains session.json and other runtime state that should not be published
+- **Why .devsolo/commands/ instead of .claude/commands/?**
+  - Prevents duplicate commands when working in devsolo repository
+  - Clearly separates devsolo-managed commands from user/project commands
+  - Enables distribution via npm package (only `.devsolo/commands/` is published, not runtime data)
+  - When dogfooding devsolo to build devsolo, `.devsolo/` contains session.json and other runtime state that should not be published
 
 - **Why MCP prompts instead of MCP tools?**
   - Prompts preserve the markdown format and instructions
@@ -508,7 +508,7 @@ Execute every command to validate the feature works correctly with zero regressi
   - Easier to maintain and update
   - Better matches the nature of these commands (instructions to Claude)
 
-- **Why extend hansolo init with documentation guidance?**
+- **Why extend devsolo init with documentation guidance?**
   - Provides a complete onboarding experience
   - Ensures consistent documentation practices across projects
   - Makes documentation structure discoverable

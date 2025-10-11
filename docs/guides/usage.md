@@ -1,6 +1,6 @@
-# han-solo Usage Guide
+# devsolo Usage Guide
 
-Practical examples and best practices for using han-solo with Claude Code in real-world development scenarios.
+Practical examples and best practices for using devsolo with Claude Code in real-world development scenarios.
 
 ## Table of Contents
 
@@ -29,19 +29,19 @@ The most common workflow: develop a feature with Claude Code and ship it.
 **With Direct MCP Tools:**
 
 ```
-Use hansolo_launch with description "Improve search functionality"
+Use devsolo_launch with description "Improve search functionality"
 # Generated branch: feature/improve-search-functionality
 
 *implement the feature*
 
-Use hansolo_commit with message "feat: improve search with fuzzy matching"
+Use devsolo_commit with message "feat: improve search with fuzzy matching"
 
-Use hansolo_ship with createPR true, merge true, and prDescription "Improve search with fuzzy matching algorithm"
+Use devsolo_ship with createPR true, merge true, and prDescription "Improve search with fuzzy matching algorithm"
 ```
 
 **Timeline**: ~2 minutes from launch to merged PR (excluding CI time)
 
-**What han-solo does automatically:**
+**What devsolo does automatically:**
 - ✅ Creates feature branch
 - ✅ Tracks workflow state
 - ✅ Commits changes
@@ -68,11 +68,11 @@ When you want a specific branch name:
 **Direct Tools:**
 
 ```
-Use hansolo_launch with branchName "feature/user-authentication" and description "OAuth2 authentication system"
+Use devsolo_launch with branchName "feature/user-authentication" and description "OAuth2 authentication system"
 
-Use hansolo_commit with message "feat: implement OAuth2 authentication"
+Use devsolo_commit with message "feat: implement OAuth2 authentication"
 
-Use hansolo_ship with createPR true and merge true
+Use devsolo_ship with createPR true and merge true
 ```
 
 ### Quick Hotfix
@@ -91,18 +91,18 @@ For urgent bug fixes:
 **Direct Tools:**
 
 ```
-Use hansolo_hotfix with issue "security vulnerability in auth module" and severity "critical"
+Use devsolo_hotfix with issue "security vulnerability in auth module" and severity "critical"
 
-Use hansolo_commit with message "fix: patch critical security vulnerability in auth"
+Use devsolo_commit with message "fix: patch critical security vulnerability in auth"
 
-Use hansolo_ship with merge true and force true
+Use devsolo_ship with merge true and force true
 ```
 
 ## Team Collaboration
 
 ### Working with Multiple Developers
 
-han-solo prevents conflicts when multiple developers work on different features.
+devsolo prevents conflicts when multiple developers work on different features.
 
 **Developer A:**
 
@@ -127,11 +127,11 @@ han-solo prevents conflicts when multiple developers work on different features.
 - No stepping on each other's toes
 - Linear history maintained automatically
 - No merge commits cluttering history
-- han-solo handles rebasing automatically
+- devsolo handles rebasing automatically
 
 ### Code Review Workflow
 
-Integrate han-solo with your team's review process:
+Integrate devsolo with your team's review process:
 
 **Initial Implementation:**
 
@@ -145,7 +145,7 @@ Integrate han-solo with your team's review process:
 **With direct tools:**
 
 ```
-Use hansolo_ship with push true, createPR true, merge false
+Use devsolo_ship with push true, createPR true, merge false
 ```
 
 **After Review Feedback:**
@@ -159,8 +159,8 @@ Use hansolo_ship with push true, createPR true, merge false
 **With direct tools:**
 
 ```
-Use hansolo_commit with message "fix: address code review feedback"
-Use hansolo_ship with push true
+Use devsolo_commit with message "fix: address code review feedback"
+Use devsolo_ship with push true
 ```
 
 ### Pair Programming
@@ -228,30 +228,30 @@ Work on multiple features and switch between them:
 **With Direct Tools:**
 
 ```
-Use hansolo_launch with branchName "feature/database-migration"
-Use hansolo_commit with message "feat: add initial migration scripts"
+Use devsolo_launch with branchName "feature/database-migration"
+Use devsolo_commit with message "feat: add initial migration scripts"
 
-Use hansolo_launch with branchName "feature/api-docs"
-Use hansolo_commit with message "docs: add comprehensive API documentation"
+Use devsolo_launch with branchName "feature/api-docs"
+Use devsolo_commit with message "docs: add comprehensive API documentation"
 
-Use hansolo_swap with branchName "feature/database-migration"
-Use hansolo_commit with message "feat: add remaining migrations"
-Use hansolo_ship with merge true
+Use devsolo_swap with branchName "feature/database-migration"
+Use devsolo_commit with message "feat: add remaining migrations"
+Use devsolo_ship with merge true
 
-Use hansolo_swap with branchName "feature/api-docs"
-Use hansolo_ship with merge true
+Use devsolo_swap with branchName "feature/api-docs"
+Use devsolo_ship with merge true
 ```
 
 **View All Sessions:**
 
 ```
-"Show me all my active han-solo sessions"
+"Show me all my active devsolo sessions"
 ```
 
 Or:
 
 ```
-Use hansolo_sessions with verbose true
+Use devsolo_sessions with verbose true
 ```
 
 ### Long-Running Feature Branches
@@ -290,11 +290,11 @@ git pull  # Get latest if working from different machine
 "Ship this feature with PR description: Major service layer refactoring with improved error handling and test coverage"
 ```
 
-han-solo automatically rebases on latest main when shipping.
+devsolo automatically rebases on latest main when shipping.
 
 ### Handling Merge Conflicts
 
-han-solo automates rebasing, but conflicts may still occur:
+devsolo automates rebasing, but conflicts may still occur:
 
 **When Shipping:**
 
@@ -302,7 +302,7 @@ han-solo automates rebasing, but conflicts may still occur:
 "Ship this feature"
 ```
 
-If conflicts occur during rebase, han-solo will report them. Then:
+If conflicts occur during rebase, devsolo will report them. Then:
 
 ```bash
 # 1. Check conflicted files
@@ -324,7 +324,7 @@ Then in Claude Code:
 
 ### Feature Flags Integration
 
-Combine han-solo with feature flags for gradual rollouts:
+Combine devsolo with feature flags for gradual rollouts:
 
 **Implement Behind Feature Flag:**
 
@@ -361,18 +361,18 @@ if (BETA_UI) {
 
 ### 1. Always Launch Before Starting Work
 
-**❌ Bad (breaks han-solo tracking):**
+**❌ Bad (breaks devsolo tracking):**
 
 ```bash
 git checkout -b feature/my-feature
-# han-solo doesn't know about this!
+# devsolo doesn't know about this!
 ```
 
 **✅ Good:**
 
 ```
 "Start a new feature for my awesome feature"
-# han-solo tracks everything
+# devsolo tracks everything
 ```
 
 ### 2. Use Descriptive Branch Names and Descriptions
@@ -394,7 +394,7 @@ git checkout -b feature/my-feature
 Or with explicit name:
 
 ```
-Use hansolo_launch with branchName "feature/oauth2-integration" and description "OAuth2 authentication system"
+Use devsolo_launch with branchName "feature/oauth2-integration" and description "OAuth2 authentication system"
 ```
 
 **Branch Naming Rules:**
@@ -429,18 +429,18 @@ Use hansolo_launch with branchName "feature/oauth2-integration" and description 
 After merging PRs or finishing features:
 
 ```
-"Clean up old han-solo sessions and merged branches"
+"Clean up old devsolo sessions and merged branches"
 ```
 
 Or with direct tools:
 
 ```
-Use hansolo_cleanup with deleteBranches true
+Use devsolo_cleanup with deleteBranches true
 ```
 
-### 5. Let han-solo Handle Git Operations
+### 5. Let devsolo Handle Git Operations
 
-During an active han-solo session, avoid direct git commands:
+During an active devsolo session, avoid direct git commands:
 
 **❌ Avoid during active sessions:**
 
@@ -450,14 +450,14 @@ git push origin feature/my-branch
 gh pr create
 ```
 
-**✅ Use han-solo tools instead:**
+**✅ Use devsolo tools instead:**
 
 ```
 "Commit these changes with message 'feat: my changes'"
 "Ship this feature"
 ```
 
-**Why?** han-solo maintains a state machine that tracks your workflow. Direct git operations bypass this tracking and can cause workflow corruption.
+**Why?** devsolo maintains a state machine that tracks your workflow. Direct git operations bypass this tracking and can cause workflow corruption.
 
 ### 6. Commit Incrementally, Ship When Ready
 
@@ -494,9 +494,9 @@ Claude Code understands your intent:
 **Also valid (more explicit):**
 
 ```
-Use hansolo_launch with description "Shopping cart functionality"
-Use hansolo_commit with message "feat: add shopping cart with item management"
-Use hansolo_ship with createPR true and merge true
+Use devsolo_launch with description "Shopping cart functionality"
+Use devsolo_commit with message "feat: add shopping cart with item management"
+Use devsolo_ship with createPR true and merge true
 ```
 
 ### 8. Enable Status Line for Visibility
@@ -504,13 +504,13 @@ Use hansolo_ship with createPR true and merge true
 See your workflow state at all times:
 
 ```
-"Enable the han-solo status line in Claude Code"
+"Enable the devsolo status line in Claude Code"
 ```
 
 You'll see:
 
 ```
-[han-solo] 📝 0c2a20a7 | feature/user-auth | CHANGES_COMMITTED
+[devsolo] 📝 0c2a20a7 | feature/user-auth | CHANGES_COMMITTED
 ```
 
 This helps you always know:
@@ -522,7 +522,7 @@ This helps you always know:
 
 ### Scenario 1: Forgot to Launch
 
-You started coding without launching a han-solo workflow:
+You started coding without launching a devsolo workflow:
 
 ```bash
 # You have uncommitted changes on main
@@ -560,13 +560,13 @@ Started a feature but decided not to continue:
 **Abort but keep branch for later:**
 
 ```
-Use hansolo_abort with deleteBranch false
+Use devsolo_abort with deleteBranch false
 ```
 
 **Abort and delete everything:**
 
 ```
-Use hansolo_abort with deleteBranch true
+Use devsolo_abort with deleteBranch true
 ```
 
 ### Scenario 3: CI Failed
@@ -579,7 +579,7 @@ Your CI checks failed after shipping:
 "Ship again to update the PR"
 ```
 
-han-solo updates the existing PR instead of creating a new one.
+devsolo updates the existing PR instead of creating a new one.
 
 ### Scenario 4: Need to Update Dependencies
 
@@ -628,7 +628,7 @@ git checkout feature/mobile-app-redesign
 "Ship when done"
 ```
 
-han-solo automatically detects the existing session.
+devsolo automatically detects the existing session.
 
 ### Scenario 6: Emergency Rollback
 
@@ -649,8 +649,8 @@ git revert HEAD~1  # Revert the problematic commit
 Or:
 
 ```
-Use hansolo_hotfix with issue "rollback problematic feature" and severity "critical"
-Use hansolo_ship with force true
+Use devsolo_hotfix with issue "rollback problematic feature" and severity "critical"
+Use devsolo_ship with force true
 ```
 
 ### Scenario 7: Want to See All Sessions
@@ -658,19 +658,19 @@ Use hansolo_ship with force true
 Check what workflows you have active:
 
 ```
-"Show me all my active han-solo sessions"
+"Show me all my active devsolo sessions"
 ```
 
 **With details:**
 
 ```
-Use hansolo_sessions with verbose true
+Use devsolo_sessions with verbose true
 ```
 
 **Including completed:**
 
 ```
-Use hansolo_sessions with all true
+Use devsolo_sessions with all true
 ```
 
 ## Tips for Different Team Sizes
@@ -707,15 +707,15 @@ Use hansolo_sessions with all true
 "Start a feature called feature/JIRA-456-oauth-integration for OAuth integration"
 
 # Integrate with project management
-Use hansolo_launch with branchName "feature/TICKET-123-user-dashboard" and description "Implement user dashboard per TICKET-123"
+Use devsolo_launch with branchName "feature/TICKET-123-user-dashboard" and description "Implement user dashboard per TICKET-123"
 
 # Regular automated cleanup
-Use hansolo_cleanup with deleteBranches true  # Daily via automation
+Use devsolo_cleanup with deleteBranches true  # Daily via automation
 ```
 
 ## Understanding Workflow States
 
-han-solo tracks your progress through these states:
+devsolo tracks your progress through these states:
 
 | State | Meaning | What You Can Do |
 |-------|---------|-----------------|
@@ -736,7 +736,7 @@ Ask Claude anytime:
 
 ## Natural Language vs Direct Tools
 
-han-solo supports both interaction styles:
+devsolo supports both interaction styles:
 
 ### Natural Language (Recommended)
 
@@ -766,10 +766,10 @@ han-solo supports both interaction styles:
 **Examples:**
 
 ```
-Use hansolo_launch with branchName "feature/user-profile" and description "User profile page implementation"
-Use hansolo_commit with message "feat: add user profile page" and stagedOnly false
-Use hansolo_ship with push true, createPR true, merge true, and prDescription "Add user profile page with edit functionality"
-Use hansolo_cleanup with deleteBranches true
+Use devsolo_launch with branchName "feature/user-profile" and description "User profile page implementation"
+Use devsolo_commit with message "feat: add user profile page" and stagedOnly false
+Use devsolo_ship with push true, createPR true, merge true, and prDescription "Add user profile page with edit functionality"
+Use devsolo_cleanup with deleteBranches true
 ```
 
 ### Hybrid Approach (Best of Both)
@@ -779,7 +779,7 @@ Mix both styles as needed:
 ```
 "Start a feature for the payment integration"
 *work on implementation*
-Use hansolo_commit with message "feat: add Stripe payment integration" and stagedOnly false
+Use devsolo_commit with message "feat: add Stripe payment integration" and stagedOnly false
 "Ship this feature when ready with a detailed PR description"
 ```
 
@@ -788,13 +788,13 @@ Use hansolo_commit with message "feat: add Stripe payment integration" and stage
 ### Check Current State
 
 ```
-"What's my current han-solo status?"
+"What's my current devsolo status?"
 ```
 
 ### View Detailed Session Info
 
 ```
-Use hansolo_sessions with verbose true
+Use devsolo_sessions with verbose true
 ```
 
 ### Fix Stuck Workflow
@@ -807,20 +807,20 @@ Use hansolo_sessions with verbose true
 ### Verify MCP Server
 
 ```
-"Test the han-solo connection"
+"Test the devsolo connection"
 ```
 
 If issues persist, see the [Troubleshooting Guide](troubleshooting.md).
 
 ## Conclusion
 
-han-solo with Claude Code makes Git workflows effortless through AI-native interaction. The key principles:
+devsolo with Claude Code makes Git workflows effortless through AI-native interaction. The key principles:
 
 1. **Always launch** before starting work
 2. **Commit incrementally** as you make changes
 3. **Ship when ready** to push, PR, merge, and cleanup
 4. **Clean up regularly** to remove old sessions
-5. **Let han-solo handle Git complexity** while you focus on code
+5. **Let devsolo handle Git complexity** while you focus on code
 6. **Use natural language** for intuitive interaction
 7. **Enable status line** for constant workflow visibility
 

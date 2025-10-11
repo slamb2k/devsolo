@@ -1,10 +1,10 @@
-# Research: han-solo Git Workflow Automation
+# Research: devsolo Git Workflow Automation
 
 **Generated**: 2025-09-21
 **Status**: Complete
 
 ## Overview
-This document resolves technical unknowns and documents architectural decisions for the han-solo Git workflow automation tool implementation.
+This document resolves technical unknowns and documents architectural decisions for the devsolo Git workflow automation tool implementation.
 
 ## Resolved Clarifications
 
@@ -42,7 +42,7 @@ This document resolves technical unknowns and documents architectural decisions 
 - Unit tests for every state transition
 
 ### 2. State Persistence
-**Decision**: JSON files in .hansolo/sessions/ directory
+**Decision**: JSON files in .devsolo/sessions/ directory
 **Rationale**:
 - Simple, portable, version-controllable
 - No external database dependencies
@@ -114,7 +114,7 @@ This document resolves technical unknowns and documents architectural decisions 
 - Node.js runner allows TypeScript logic
 - Cross-platform compatibility
 **Best Practices**:
-- Hooks check for han-solo initialization
+- Hooks check for devsolo initialization
 - Fast-fail with clear error messages
 - Bypass mechanism for emergencies
 

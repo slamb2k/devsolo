@@ -1,13 +1,13 @@
-# han-solo 🚀
+# devsolo 🚀
 
 > AI-native Git workflow automation via Model Context Protocol (MCP) and native slash commands for Claude Code
 
-han-solo is a powerful Claude Code plugin that streamlines Git workflows while maintaining clean, linear commit history. It provides structured validation, automated PR management, and seamless integration with GitHub through native slash commands and specialized sub-agents.
+devsolo is a powerful Claude Code plugin that streamlines Git workflows while maintaining clean, linear commit history. It provides structured validation, automated PR management, and seamless integration with GitHub through native slash commands and specialized sub-agents.
 
 ## Features
 
 - **🤖 AI-Native Design**: Built exclusively for Claude Code with native plugin architecture
-- **⚡ Slash Commands**: Quick access via `/hansolo` commands in Claude Code
+- **⚡ Slash Commands**: Quick access via `/devsolo` commands in Claude Code
 - **🚀 One-Command Workflow**: Ship entire features in a single MCP tool call
 - **🛡️ Structured Validation**: Pre/post-flight checks with JSON results (no UI dependencies)
 - **🚫 Branch Reuse Prevention**: Blocks reusing branch names after merge
@@ -28,7 +28,7 @@ han-solo is a powerful Claude Code plugin that streamlines Git workflows while m
 When the Claude Code marketplace becomes available, you'll be able to install with a single command:
 
 ```bash
-/plugin install hansolo
+/plugin install devsolo
 ```
 
 This automatically:
@@ -43,10 +43,10 @@ For testing or development, see [Plugin Installation Guide](./docs/guides/plugin
 
 If you prefer manual control or are testing local changes:
 
-1. **Clone and build** the han-solo repository:
+1. **Clone and build** the devsolo repository:
    ```bash
-   git clone https://github.com/slamb2k/hansolo.git
-   cd hansolo
+   git clone https://github.com/slamb2k/devsolo.git
+   cd devsolo
    npm install
    npm run build
    ```
@@ -56,9 +56,9 @@ If you prefer manual control or are testing local changes:
    ```json
    {
      "mcpServers": {
-       "hansolo": {
+       "devsolo": {
          "command": "node",
-         "args": ["/path/to/hansolo/dist/mcp/hansolo-mcp-server.js"]
+         "args": ["/path/to/devsolo/dist/mcp/devsolo-mcp-server.js"]
        }
      }
    }
@@ -68,53 +68,53 @@ If you prefer manual control or are testing local changes:
 
 4. **Initialize in your project** using natural language:
    ```
-   "Initialize han-solo in this project"
+   "Initialize devsolo in this project"
    ```
-   Claude will invoke the `hansolo_init` tool automatically.
+   Claude will invoke the `devsolo_init` tool automatically.
 
 For detailed installation instructions, see the [Installation Guide](./docs/guides/installation.md).
 
 ## Quick Start
 
-> **New to han-solo?** Follow these steps to get started with Claude Code.
+> **New to devsolo?** Follow these steps to get started with Claude Code.
 
-### Two Ways to Use han-solo
+### Two Ways to Use devsolo
 
-han-solo provides both **native slash commands** and **direct MCP tool calls** for maximum flexibility:
+devsolo provides both **native slash commands** and **direct MCP tool calls** for maximum flexibility:
 
 **Option 1: Slash Commands (Recommended)** 🎯
 ```
-/hansolo:init       - Initialize han-solo
-/hansolo:launch     - Start a new feature
-/hansolo:commit     - Commit changes
-/hansolo:ship       - Ship your changes (full workflow)
-/hansolo:status     - Check current status
+/devsolo:init       - Initialize devsolo
+/devsolo:launch     - Start a new feature
+/devsolo:commit     - Commit changes
+/devsolo:ship       - Ship your changes (full workflow)
+/devsolo:status     - Check current status
 ```
 
 **Option 2: Natural Language (Direct MCP Tool Calls)**
 ```
-"Use hansolo_init to initialize han-solo in this project"
-"Use hansolo_launch to start a new feature for authentication"
-"Use hansolo_ship to commit, push, create PR, and merge"
+"Use devsolo_init to initialize devsolo in this project"
+"Use devsolo_launch to start a new feature for authentication"
+"Use devsolo_ship to commit, push, create PR, and merge"
 ```
 
 Slash commands provide better integration, auto-completion, and coordinated workflows via specialized sub-agents (git-droid, docs-droid)!
 
 ---
 
-### 1. Initialize han-solo in your project
+### 1. Initialize devsolo in your project
 
 **Using slash command:**
 ```
-/hansolo:init
+/devsolo:init
 ```
 
 **Or using natural language:**
 ```
-Use hansolo_init to initialize han-solo in this project
+Use devsolo_init to initialize devsolo in this project
 ```
 
-This creates a `.hansolo` directory with configuration and session storage.
+This creates a `.devsolo` directory with configuration and session storage.
 
 ### 2. (Optional) Set up GitHub authentication
 
@@ -130,35 +130,35 @@ export GITHUB_TOKEN=ghp_your_token_here
 
 **Using slash command:**
 ```
-/hansolo:launch
+/devsolo:launch
 ```
 
 **Or using natural language:**
 ```
-Use hansolo_launch to start a new feature for [your feature description]
+Use devsolo_launch to start a new feature for [your feature description]
 ```
 
 This creates a new feature branch and starts tracking your workflow.
 
 ### 4. Make your changes
 
-Work on your feature as normal. han-solo tracks your session automatically.
+Work on your feature as normal. devsolo tracks your session automatically.
 
 **Check status:**
 ```
-/hansolo:status
+/devsolo:status
 ```
 
 ### 5. Ship your changes (One Command! 🚀)
 
 **Using slash command:**
 ```
-/hansolo:ship
+/devsolo:ship
 ```
 
 **Or using natural language:**
 ```
-Use hansolo_ship to commit, push, create PR, and merge this feature
+Use devsolo_ship to commit, push, create PR, and merge this feature
 ```
 
 That's it! This single MCP tool call:
@@ -179,36 +179,36 @@ That's it! This single MCP tool call:
 
 For always-visible workflow status in Claude Code:
 ```
-/hansolo:status-line
+/devsolo:status-line
 ```
 
 ---
 
 ## Slash Commands
 
-han-solo provides native Claude Code slash commands for all functionality. Type `/hansolo` in Claude Code to see the full list.
+devsolo provides native Claude Code slash commands for all functionality. Type `/devsolo` in Claude Code to see the full list.
 
 ### Available Commands
 
 | Command | Description | Example |
 |--------|-------------|---------|
-| `/hansolo:init` | Initialize han-solo in your project | `/hansolo:init` |
-| `/hansolo:launch` | Start a new feature workflow | `/hansolo:launch` |
-| `/hansolo:commit` | Commit changes with a message | `/hansolo:commit` |
-| `/hansolo:ship` | Complete workflow (commit, push, PR, merge) | `/hansolo:ship` |
-| `/hansolo:swap` | Switch between workflow sessions | `/hansolo:swap feature/other-branch` |
-| `/hansolo:abort` | Abort current workflow session | `/hansolo:abort` |
-| `/hansolo:sessions` | List all workflow sessions | `/hansolo:sessions` |
-| `/hansolo:status` | Show current workflow status | `/hansolo:status` |
-| `/hansolo:cleanup` | Clean up expired sessions | `/hansolo:cleanup` |
-| `/hansolo:hotfix` | Create emergency hotfix workflow | `/hansolo:hotfix` |
-| `/hansolo:status-line` | Manage Claude Code status line | `/hansolo:status-line` |
-| `/hansolo:prime` | Prime understanding of codebase | `/hansolo:prime` |
-| `/hansolo:doc` | Manage documentation | `/hansolo:doc` |
+| `/devsolo:init` | Initialize devsolo in your project | `/devsolo:init` |
+| `/devsolo:launch` | Start a new feature workflow | `/devsolo:launch` |
+| `/devsolo:commit` | Commit changes with a message | `/devsolo:commit` |
+| `/devsolo:ship` | Complete workflow (commit, push, PR, merge) | `/devsolo:ship` |
+| `/devsolo:swap` | Switch between workflow sessions | `/devsolo:swap feature/other-branch` |
+| `/devsolo:abort` | Abort current workflow session | `/devsolo:abort` |
+| `/devsolo:sessions` | List all workflow sessions | `/devsolo:sessions` |
+| `/devsolo:status` | Show current workflow status | `/devsolo:status` |
+| `/devsolo:cleanup` | Clean up expired sessions | `/devsolo:cleanup` |
+| `/devsolo:hotfix` | Create emergency hotfix workflow | `/devsolo:hotfix` |
+| `/devsolo:status-line` | Manage Claude Code status line | `/devsolo:status-line` |
+| `/devsolo:prime` | Prime understanding of codebase | `/devsolo:prime` |
+| `/devsolo:doc` | Manage documentation | `/devsolo:doc` |
 
 ### How Slash Commands Work
 
-When you use a slash command like `/hansolo:launch`, Claude Code:
+When you use a slash command like `/devsolo:launch`, Claude Code:
 1. Displays the unique ASCII art banner for immediate visual feedback
 2. Orchestrates the workflow using specialized sub-agents (git-droid, docs-droid)
 3. Invokes the appropriate MCP tools for execution
@@ -225,7 +225,7 @@ When you use a slash command like `/hansolo:launch`, Claude Code:
 
 ## Architecture
 
-han-solo uses a plugin architecture with clear separation of concerns:
+devsolo uses a plugin architecture with clear separation of concerns:
 
 ```
 User → Slash Command → Sub-Agent → MCP Tools → Git/GitHub
@@ -235,7 +235,7 @@ User → Slash Command → Sub-Agent → MCP Tools → Git/GitHub
 
 ### Sub-Agents
 
-han-solo includes specialized sub-agents for intelligent coordination:
+devsolo includes specialized sub-agents for intelligent coordination:
 
 - **git-droid** 🤖 - Git workflow coordination and automation
   - Manages branch creation and cleanup
@@ -262,10 +262,10 @@ This architecture ensures maintainability, testability, and a great user experie
 
 ## Core MCP Tools
 
-All han-solo functionality is exposed through MCP tools that Claude Code can invoke.
+All devsolo functionality is exposed through MCP tools that Claude Code can invoke.
 
-### `hansolo_init`
-Initialize han-solo in your project. Creates configuration and session storage.
+### `devsolo_init`
+Initialize devsolo in your project. Creates configuration and session storage.
 
 **Input:**
 - `scope` (optional): Installation scope - "project" or "user" (default: "project")
@@ -273,7 +273,7 @@ Initialize han-solo in your project. Creates configuration and session storage.
 
 **Returns:** Structured result with success status and initialization details
 
-### `hansolo_launch`
+### `devsolo_launch`
 Start a new feature workflow with automatic branch creation.
 
 **Input:**
@@ -285,7 +285,7 @@ Start a new feature workflow with automatic branch creation.
 
 **Returns:** SessionToolResult with pre/post-flight check results
 
-### `hansolo_commit`
+### `devsolo_commit`
 Commit changes to the current feature branch.
 
 **Input:**
@@ -294,7 +294,7 @@ Commit changes to the current feature branch.
 
 **Returns:** SessionToolResult with commit details
 
-### `hansolo_ship`
+### `devsolo_ship`
 **COMPLETE WORKFLOW:** Complete the entire workflow automatically in a single command!
 
 Ship handles everything: push → PR → CI wait → merge → cleanup
@@ -319,7 +319,7 @@ Ship handles everything: push → PR → CI wait → merge → cleanup
 
 **Returns:** GitHubToolResult with PR number, URL, and merge status
 
-### `hansolo_sessions`
+### `devsolo_sessions`
 List and manage active workflow sessions.
 
 **Input:**
@@ -329,7 +329,7 @@ List and manage active workflow sessions.
 
 **Returns:** QueryToolResult with session list
 
-### `hansolo_swap`
+### `devsolo_swap`
 Switch between active workflow sessions.
 
 **Input:**
@@ -339,7 +339,7 @@ Switch between active workflow sessions.
 
 **Returns:** SessionToolResult with swap details
 
-### `hansolo_abort`
+### `devsolo_abort`
 Cancel an active workflow session.
 
 **Input:**
@@ -350,14 +350,14 @@ Cancel an active workflow session.
 
 **Returns:** SessionToolResult with abort details
 
-### `hansolo_status`
+### `devsolo_status`
 Show current workflow status and session information.
 
 **Input:** None required
 
 **Returns:** QueryToolResult with current status
 
-### `hansolo_status_line`
+### `devsolo_status_line`
 Manage Claude Code status line display.
 
 **Input:**
@@ -369,7 +369,7 @@ Manage Claude Code status line display.
 
 **Returns:** QueryToolResult with status line configuration
 
-### `hansolo_hotfix`
+### `devsolo_hotfix`
 Create emergency hotfix workflow.
 
 **Input:**
@@ -461,7 +461,7 @@ See docs/guides/validation.md for complete documentation.
 
 ## Workflow States
 
-han-solo uses a deterministic state machine to manage workflows:
+devsolo uses a deterministic state machine to manage workflows:
 
 ```
 INIT → BRANCH_READY → CHANGES_COMMITTED → PUSHED →
@@ -472,7 +472,7 @@ Each state has specific allowed transitions and validations to ensure workflow i
 
 ## GitHub Integration
 
-han-solo integrates with GitHub API for automated PR management.
+devsolo integrates with GitHub API for automated PR management.
 
 ### Setup
 
@@ -488,7 +488,7 @@ export GITHUB_TOKEN=your_github_token
 export GH_TOKEN=your_github_token
 ```
 
-han-solo automatically detects and uses `gh` CLI authentication if available.
+devsolo automatically detects and uses `gh` CLI authentication if available.
 
 ### Features
 - Automatic PR creation with generated descriptions
@@ -502,7 +502,7 @@ han-solo automatically detects and uses `gh` CLI authentication if available.
 The status line provides at-a-glance workflow information directly in Claude Code:
 
 ```
-[han-solo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY
+[devsolo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY
 ```
 
 **Status Line Components:**
@@ -512,15 +512,15 @@ The status line provides at-a-glance workflow information directly in Claude Cod
 
 **Managing the Status Line:**
 ```
-Use hansolo_status_line with action "enable"
-Use hansolo_status_line with action "disable"
-Use hansolo_status_line with action "show"
-Use hansolo_status_line with action "update" and showBranchInfo true
+Use devsolo_status_line with action "enable"
+Use devsolo_status_line with action "disable"
+Use devsolo_status_line with action "show"
+Use devsolo_status_line with action "update" and showBranchInfo true
 ```
 
 ## Session Management
 
-Sessions are stored in `.hansolo/sessions/` with automatic persistence:
+Sessions are stored in `.devsolo/sessions/` with automatic persistence:
 
 - Each workflow creates a unique session ID
 - Sessions track state history and transitions
@@ -529,7 +529,7 @@ Sessions are stored in `.hansolo/sessions/` with automatic persistence:
 
 ## Configuration
 
-Configuration is stored in `.hansolo/config.yaml`:
+Configuration is stored in `.devsolo/config.yaml`:
 
 ```yaml
 initialized: true
@@ -542,12 +542,12 @@ preferences:
   defaultBranchPrefix: feature/
   autoCleanup: true
   prTemplate:
-    footer: "🤖 Generated with han-solo"
+    footer: "🤖 Generated with devsolo"
 ```
 
 ## Architecture
 
-han-solo follows a pure MCP architecture:
+devsolo follows a pure MCP architecture:
 
 ```
 ┌─────────────────────────────────┐
@@ -557,7 +557,7 @@ han-solo follows a pure MCP architecture:
                 ↓ JSON-RPC
 ┌─────────────────────────────────┐
 │       MCP Server                │
-│    (HanSoloMCPServer)           │
+│    (DevSoloMCPServer)           │
 └─────────────────────────────────┘
                 ↓
 ┌─────────────────────────────────┐
@@ -586,8 +586,8 @@ han-solo follows a pure MCP architecture:
 ### Building from Source
 ```bash
 # Clone the repository
-git clone https://github.com/slamb2k/hansolo.git
-cd hansolo
+git clone https://github.com/slamb2k/devsolo.git
+cd devsolo
 
 # Install dependencies
 npm install
@@ -616,7 +616,7 @@ npm run test:mcp
 
 ## Testing
 
-han-solo includes comprehensive tests for all components:
+devsolo includes comprehensive tests for all components:
 
 ```bash
 # Run all tests
@@ -663,11 +663,11 @@ npm run test:mcp
 Contributions are welcome! Please see our Contributing Guide for details.
 
 1. Fork the repository
-2. Start a new workflow (Use hansolo_launch via Claude Code)
+2. Start a new workflow (Use devsolo_launch via Claude Code)
 3. Make your changes
 4. Add tests for new functionality
 5. Run tests and linting
-6. Ship your changes (Use hansolo_ship via Claude Code)
+6. Ship your changes (Use devsolo_ship via Claude Code)
 7. Create a pull request
 
 ## License
@@ -676,8 +676,8 @@ MIT License - see LICENSE file for details
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/slamb2k/hansolo/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/slamb2k/hansolo/discussions)
+- **Issues**: [GitHub Issues](https://github.com/slamb2k/devsolo/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/slamb2k/devsolo/discussions)
 
 ## Acknowledgments
 
@@ -688,5 +688,5 @@ MIT License - see LICENSE file for details
 
 ---
 
-**han-solo v2.0** - *AI-native Git workflow automation for Claude Code* 🤖
+**devsolo v2.0** - *AI-native Git workflow automation for Claude Code* 🤖
 

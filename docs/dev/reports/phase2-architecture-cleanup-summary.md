@@ -65,13 +65,13 @@ Phase 2 focused on fixing the test suite and improving code quality. Most of the
 - Multiple days of careful work
 
 **Current State**: Large command files remain:
-- `hansolo-ship.ts`: 708 lines
-- `hansolo-status-line.ts`: 643 lines
-- `hansolo-validate.ts`: 580 lines
-- `hansolo-config.ts`: 578 lines
-- `hansolo-launch.ts`: 561 lines
-- `hansolo-hotfix.ts`: 544 lines
-- `hansolo-cleanup.ts`: 521 lines
+- `devsolo-ship.ts`: 708 lines
+- `devsolo-status-line.ts`: 643 lines
+- `devsolo-validate.ts`: 580 lines
+- `devsolo-config.ts`: 578 lines
+- `devsolo-launch.ts`: 561 lines
+- `devsolo-hotfix.ts`: 544 lines
+- `devsolo-cleanup.ts`: 521 lines
 
 **Recommendation**: Address in Phase 3 with proper planning and incremental refactoring
 
@@ -134,7 +134,7 @@ Phase 2 focused on fixing the test suite and improving code quality. Most of the
    - Or refactor code to lazy-load ESM dependencies
 
 2. **Command Refactoring**:
-   - Start with `hansolo-ship.ts` (most critical, 708 lines)
+   - Start with `devsolo-ship.ts` (most critical, 708 lines)
    - Extract business logic to service layer
    - Create comprehensive tests before refactoring
    - Use gradual, incremental approach

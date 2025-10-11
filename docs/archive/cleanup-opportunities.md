@@ -18,7 +18,7 @@ This document tracked cleanup tasks identified after the v2 architecture simplif
 - Removed `abortAll()` method from AbortCommand docs (now CLI-only via `--all` flag)
 - Removed `resume()` method from LaunchCommand docs (replaced by swap command)
 - Removed `session_resumed` from AuditAction type
-- Cleaned up `docs/design/hansolo-prd.md` - removed `auto_resume` and `resume_on_merge` config options
+- Cleaned up `docs/design/devsolo-prd.md` - removed `auto_resume` and `resume_on_merge` config options
 - Cleaned up `docs/BANNER_CONSOLIDATION.md` - removed resume investigation sections
 
 ### ✅ 3. Cleaned Up Stale Documentation
@@ -31,7 +31,7 @@ This document tracked cleanup tasks identified after the v2 architecture simplif
 All commands now follow a consistent pattern:
 ```typescript
 export class CommandName implements CommandHandler {
-  name = 'hansolo:commandname';
+  name = 'devsolo:commandname';
   description = 'Command description';
 
   async execute(args: string[]): Promise<void> {

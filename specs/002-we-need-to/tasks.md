@@ -42,10 +42,10 @@
 
 ## Phase 3.1: Setup
 - [ ] T001 Create npm package structure with package.json at repository root
-- [ ] T002 Configure package.json with @hansolo/cli name, version 1.0.0, and npm publishing settings
+- [ ] T002 Configure package.json with @devsolo/cli name, version 1.0.0, and npm publishing settings
 - [ ] T003 Add dependencies: inquirer@9.x, chalk@5.x, ora@6.x, commander@11.x to package.json
 - [ ] T004 Add dev dependencies: jest@29.x, @types/node@18.x, @types/inquirer@9.x, typescript@5.x
-- [ ] T005 Create bin/hansolo.js as main CLI entry point with shebang and commander setup
+- [ ] T005 Create bin/devsolo.js as main CLI entry point with shebang and commander setup
 - [ ] T006 Configure postinstall script in package.json to trigger installer
 - [ ] T007 [P] Create TypeScript config (tsconfig.json) for Node.js 18+ target
 - [ ] T008 [P] Setup Jest configuration (jest.config.js) for unit and integration tests
@@ -151,7 +151,7 @@
 - [ ] T077 Test all three installation methods (global, local, npx)
 - [ ] T078 Validate CI/CD mode in GitHub Actions
 - [ ] T079 Cross-platform testing (Linux, macOS, Windows)
-- [ ] T080 Publish to npm registry as @hansolo/cli v1.0.0
+- [ ] T080 Publish to npm registry as @devsolo/cli v1.0.0
 
 ## Dependencies
 - Setup (T001-T010) must complete first

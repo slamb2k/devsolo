@@ -1,25 +1,25 @@
 # Installation Guide
 
-This guide covers various installation methods for han-solo.
+This guide covers various installation methods for devsolo.
 
 ## Quick Install
 
 ### npm (Recommended)
 
 ```bash
-npm install -g @hansolo/cli
+npm install -g @devsolo/cli
 ```
 
 ### Yarn
 
 ```bash
-yarn global add @hansolo/cli
+yarn global add @devsolo/cli
 ```
 
 ### pnpm
 
 ```bash
-pnpm add -g @hansolo/cli
+pnpm add -g @devsolo/cli
 ```
 
 ## From Source
@@ -34,8 +34,8 @@ pnpm add -g @hansolo/cli
 
 ```bash
 # Clone the repository
-git clone https://github.com/slamb2k/hansolo.git
-cd hansolo
+git clone https://github.com/slamb2k/devsolo.git
+cd devsolo
 
 # Install dependencies
 npm install
@@ -47,7 +47,7 @@ npm run build
 npm link
 
 # Verify installation
-hansolo --version
+devsolo --version
 ```
 
 ## Docker Installation
@@ -55,32 +55,32 @@ hansolo --version
 ### Using Docker Hub
 
 ```bash
-docker pull slamb2k/hansolo:latest
-docker run -it --rm -v $(pwd):/workspace slamb2k/hansolo
+docker pull slamb2k/devsolo:latest
+docker run -it --rm -v $(pwd):/workspace slamb2k/devsolo
 ```
 
 ### Building Locally
 
 ```bash
 # Clone the repository
-git clone https://github.com/slamb2k/hansolo.git
-cd hansolo
+git clone https://github.com/slamb2k/devsolo.git
+cd devsolo
 
 # Build Docker image
-docker build -t hansolo:latest .
+docker build -t devsolo:latest .
 
 # Run container
-docker run -it --rm -v $(pwd):/workspace hansolo:latest
+docker run -it --rm -v $(pwd):/workspace devsolo:latest
 ```
 
 ### Docker Compose
 
 ```bash
 # Using docker-compose
-docker-compose run hansolo
+docker-compose run devsolo
 
 # Or with specific command
-docker-compose run hansolo status
+docker-compose run devsolo status
 ```
 
 ## Platform-Specific Instructions
@@ -90,8 +90,8 @@ docker-compose run hansolo status
 #### Homebrew (Coming Soon)
 
 ```bash
-brew tap slamb2k/hansolo
-brew install hansolo
+brew tap slamb2k/devsolo
+brew install devsolo
 ```
 
 #### Manual Installation
@@ -101,9 +101,9 @@ brew install hansolo
    brew install node
    ```
 
-2. Install han-solo globally:
+2. Install devsolo globally:
    ```bash
-   npm install -g @hansolo/cli
+   npm install -g @devsolo/cli
    ```
 
 ### Linux
@@ -115,8 +115,8 @@ brew install hansolo
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# Install han-solo
-npm install -g @hansolo/cli
+# Install devsolo
+npm install -g @devsolo/cli
 ```
 
 #### Fedora/RHEL/CentOS
@@ -125,8 +125,8 @@ npm install -g @hansolo/cli
 # Install Node.js
 sudo dnf module install nodejs:20
 
-# Install han-solo
-npm install -g @hansolo/cli
+# Install devsolo
+npm install -g @devsolo/cli
 ```
 
 #### Arch Linux
@@ -135,8 +135,8 @@ npm install -g @hansolo/cli
 # Install Node.js
 sudo pacman -S nodejs npm
 
-# Install han-solo
-npm install -g @hansolo/cli
+# Install devsolo
+npm install -g @devsolo/cli
 ```
 
 ### Windows
@@ -145,9 +145,9 @@ npm install -g @hansolo/cli
 
 1. Download and install Node.js from [nodejs.org](https://nodejs.org/)
 2. Open PowerShell or Command Prompt
-3. Install han-solo:
+3. Install devsolo:
    ```powershell
-   npm install -g @hansolo/cli
+   npm install -g @devsolo/cli
    ```
 
 #### Using WSL2
@@ -161,56 +161,56 @@ npm install -g @hansolo/cli
 
 ```bash
 # Add to ~/.bashrc
-source /path/to/hansolo/completions/hansolo.bash
+source /path/to/devsolo/completions/devsolo.bash
 
 # Or copy to system completions
-sudo cp completions/hansolo.bash /etc/bash_completion.d/
+sudo cp completions/devsolo.bash /etc/bash_completion.d/
 ```
 
 ### ZSH
 
 ```bash
 # Add to ~/.zshrc
-fpath=(/path/to/hansolo/completions $fpath)
+fpath=(/path/to/devsolo/completions $fpath)
 autoload -U compinit && compinit
 
 # Or copy to system completions
-cp completions/hansolo.zsh /usr/local/share/zsh/site-functions/_hansolo
+cp completions/devsolo.zsh /usr/local/share/zsh/site-functions/_devsolo
 ```
 
 ### Fish
 
 ```fish
 # Copy completion file
-cp completions/hansolo.fish ~/.config/fish/completions/
+cp completions/devsolo.fish ~/.config/fish/completions/
 ```
 
 ## Git Hooks Installation
 
-After installing han-solo, set up Git hooks in your project:
+After installing devsolo, set up Git hooks in your project:
 
 ```bash
 # Navigate to your project
 cd /path/to/your/project
 
 # Install hooks
-hansolo init
+devsolo init
 
 # Or manually install hooks
-sh /path/to/hansolo/hooks/install.sh
+sh /path/to/devsolo/hooks/install.sh
 ```
 
 ## Man Page Installation
 
 ```bash
 # Copy man page to system location
-sudo cp man/hansolo.1 /usr/local/share/man/man1/
+sudo cp man/devsolo.1 /usr/local/share/man/man1/
 
 # Update man database
 sudo mandb
 
 # View man page
-man hansolo
+man devsolo
 ```
 
 ## Post-Installation Setup
@@ -219,11 +219,11 @@ man hansolo
 
 ```bash
 cd /path/to/your/project
-hansolo init
+devsolo init
 ```
 
 This will:
-- Create `.hansolo` directory with configuration
+- Create `.devsolo` directory with configuration
 - Install Git hooks (pre-commit, pre-push)
 - Set up session storage
 - Install status line script for Claude Code
@@ -262,46 +262,46 @@ echo 'export GITHUB_TOKEN="ghp_your_token_here"' >> ~/.bashrc
 
 ### 4. Claude Code Integration (Optional but Recommended)
 
-If you have Claude Code installed, han-solo integrates seamlessly.
+If you have Claude Code installed, devsolo integrates seamlessly.
 
-**Automatic Setup (via hansolo init):**
+**Automatic Setup (via devsolo init):**
 ```bash
-hansolo init
+devsolo init
 # Automatically detects Claude Code and configures MCP server
 ```
 
 **Manual MCP Configuration:**
 ```bash
 # For project-level (team shares configuration)
-hansolo init --scope project
+devsolo init --scope project
 
 # For user-level (just you)
-hansolo init --scope user
+devsolo init --scope user
 ```
 
 **Enable Status Line:**
 ```bash
 # After initialization, enable the status line in Claude Code
 # This shows workflow status directly in Claude Code's interface
-/hansolo:status-line enable
+/devsolo:status-line enable
 ```
 
 **Verify Integration:**
 ```bash
 # In Claude Code, try:
-/hansolo:status
+/devsolo:status
 
 # Or from terminal:
-hansolo status
+devsolo status
 ```
 
 ### 5. Create Configuration File (Optional)
 
 ```bash
 # Copy example configuration
-cp .hansolo/config.yaml .hansolo/config.custom.yaml
+cp .devsolo/config.yaml .devsolo/config.custom.yaml
 # Edit to customize
-vim .hansolo/config.custom.yaml
+vim .devsolo/config.custom.yaml
 ```
 
 ## Verification
@@ -310,13 +310,13 @@ Verify your installation:
 
 ```bash
 # Check version
-hansolo --version
+devsolo --version
 
 # Run demo
-hansolo demo
+devsolo demo
 
 # Check status
-hansolo status
+devsolo status
 ```
 
 ## Troubleshooting
@@ -327,20 +327,20 @@ If you get permission errors during global installation:
 
 ```bash
 # Option 1: Use npx
-npx @hansolo/cli
+npx @devsolo/cli
 
 # Option 2: Change npm prefix
 npm config set prefix ~/.npm
 export PATH="$HOME/.npm/bin:$PATH"
-npm install -g @hansolo/cli
+npm install -g @devsolo/cli
 
 # Option 3: Use sudo (not recommended)
-sudo npm install -g @hansolo/cli
+sudo npm install -g @devsolo/cli
 ```
 
 ### Command Not Found
 
-If `hansolo` command is not found:
+If `devsolo` command is not found:
 
 1. Check npm global bin directory:
    ```bash
@@ -372,21 +372,21 @@ nvm use 20
 ### npm
 
 ```bash
-npm uninstall -g @hansolo/cli
+npm uninstall -g @devsolo/cli
 ```
 
 ### Docker
 
 ```bash
-docker rmi slamb2k/hansolo
+docker rmi slamb2k/devsolo
 ```
 
 ### Manual Cleanup
 
 ```bash
 # Remove configuration
-rm -rf ~/.hansolo
-rm -f .hansolo.yaml
+rm -rf ~/.devsolo
+rm -f .devsolo.yaml
 
 # Remove Git hooks
 rm -f .git/hooks/pre-commit
@@ -396,7 +396,7 @@ rm -f .git/hooks/commit-msg
 
 ## Getting Help
 
-- Documentation: [GitHub Wiki](https://github.com/slamb2k/hansolo/wiki)
-- Issues: [GitHub Issues](https://github.com/slamb2k/hansolo/issues)
-- Discord: [Join our Discord](https://discord.gg/hansolo)
-- Email: support@hansolo.dev
+- Documentation: [GitHub Wiki](https://github.com/slamb2k/devsolo/wiki)
+- Issues: [GitHub Issues](https://github.com/slamb2k/devsolo/issues)
+- Discord: [Join our Discord](https://discord.gg/devsolo)
+- Email: support@devsolo.dev

@@ -6,7 +6,7 @@
 
 ## Overview
 
-Migrate han-solo from MCP-based architecture to Claude Code's native plugin system using custom slash commands and specialized sub-agents. This migration will provide a cleaner architecture, better integration with Claude Code, and improved maintainability.
+Migrate devsolo from MCP-based architecture to Claude Code's native plugin system using custom slash commands and specialized sub-agents. This migration will provide a cleaner architecture, better integration with Claude Code, and improved maintainability.
 
 ## Guiding Principles
 
@@ -18,19 +18,19 @@ Refer to official Claude Code documentation for format and best practices of str
 
 ### Objective
 
-Migrate all MCP prompts to custom slash commands stored in `.claude/commands/hansolo/`.
+Migrate all MCP prompts to custom slash commands stored in `.claude/commands/devsolo/`.
 
 ### Reference Format
 
-Use existing slash commands in `.hansolo/commands/` as format references:
+Use existing slash commands in `.devsolo/commands/` as format references:
 
-**`.hansolo/commands/prime.md`** - Simple command example:
+**`.devsolo/commands/prime.md`** - Simple command example:
 - Minimal front matter (title and description)
 - Clear instructions with sections
 - Direct tool usage (Run bash commands, Read files)
 - Simple execution flow
 
-**`.hansolo/commands/doc.md`** - Complex command example:
+**`.devsolo/commands/doc.md`** - Complex command example:
 - Mode detection based on arguments
 - Detailed step-by-step workflows
 - Decision trees for logic branching
@@ -55,7 +55,7 @@ More detailed instructions
 Summary section for results
 ```
 
-**Target Location:** All new slash commands go in `.claude/commands/hansolo/` to match Claude Code plugin structure.
+**Target Location:** All new slash commands go in `.claude/commands/devsolo/` to match Claude Code plugin structure.
 
 ### Slash Command Requirements
 
@@ -111,7 +111,7 @@ arguments:
 - No branch name → Slash command generates from description/changes
 
 #### 4. **State Machine Rules**
-- Understand state machine rules from MCP prompts and hansolo constitution
+- Understand state machine rules from MCP prompts and devsolo constitution
 - Reference: `docs/dev/system/pre-flight-checks.md`
 - Enforce same state transitions and validations
 - Maintain session state integrity
@@ -204,11 +204,11 @@ MCP tools should be focused and single-purpose. Orchestration moves to slash com
 
 **Pattern 1: Slash Command Orchestration**
 ```
-/hansolo ship
+/devsolo ship
   ↓ (slash command checks state)
 Has uncommitted changes?
   ↓ YES
-Call /hansolo commit (via SlashCommand tool)
+Call /devsolo commit (via SlashCommand tool)
   ↓ (commit completes)
 Call git-droid ship
   ↓ (ship completes)
@@ -224,7 +224,7 @@ git-droid ship workflow
 Check pre-flight (via mcp commit tool)
   ↓ (uncommitted changes detected)
 Request commit first (return to slash command)
-  ↓ (slash command calls /hansolo commit)
+  ↓ (slash command calls /devsolo commit)
 Re-invoke ship workflow
   ↓
 Call mcp ship tool (push, PR, merge)
@@ -239,14 +239,14 @@ Return aggregated results
 When orchestration requires calling other slash commands:
 
 ```markdown
-# In /hansolo ship slash command
+# In /devsolo ship slash command
 
 Check if session exists:
-  - No session? Call `/hansolo launch` using SlashCommand tool
+  - No session? Call `/devsolo launch` using SlashCommand tool
   - Session exists? Continue
 
 Check for uncommitted changes:
-  - Has changes? Call `/hansolo commit` using SlashCommand tool
+  - Has changes? Call `/devsolo commit` using SlashCommand tool
   - No changes? Continue
 
 Invoke git-droid ship workflow:
@@ -259,17 +259,17 @@ Invoke git-droid ship workflow:
 ```typescript
 // In slash command logic
 if (!session) {
-  // Call /hansolo launch to create session
+  // Call /devsolo launch to create session
   await slashCommandTool({
-    command: "/hansolo launch",
+    command: "/devsolo launch",
     args: { description: featureDescription }
   });
 }
 
 if (hasUncommittedChanges) {
-  // Call /hansolo commit to commit changes
+  // Call /devsolo commit to commit changes
   await slashCommandTool({
-    command: "/hansolo commit",
+    command: "/devsolo commit",
     args: { message: generatedCommitMessage }
   });
 }
@@ -289,29 +289,29 @@ await gitDroid.ship({ prDescription });
 ### Commands to Migrate
 
 **From MCP Prompts:**
-1. `/hansolo:init` → `/hansolo init`
-2. `/hansolo:launch` → `/hansolo launch`
-3. `/hansolo:commit` → `/hansolo commit`
-4. `/hansolo:ship` → `/hansolo ship`
-5. `/hansolo:status` → `/hansolo status`
-6. `/hansolo:sessions` → `/hansolo sessions`
-7. `/hansolo:swap` → `/hansolo swap`
-8. `/hansolo:abort` → `/hansolo abort`
-9. `/hansolo:cleanup` → `/hansolo cleanup`
-10. `/hansolo:hotfix` → `/hansolo hotfix`
-11. `/hansolo:status-line` → `/hansolo status-line`
+1. `/devsolo:init` → `/devsolo init`
+2. `/devsolo:launch` → `/devsolo launch`
+3. `/devsolo:commit` → `/devsolo commit`
+4. `/devsolo:ship` → `/devsolo ship`
+5. `/devsolo:status` → `/devsolo status`
+6. `/devsolo:sessions` → `/devsolo sessions`
+7. `/devsolo:swap` → `/devsolo swap`
+8. `/devsolo:abort` → `/devsolo abort`
+9. `/devsolo:cleanup` → `/devsolo cleanup`
+10. `/devsolo:hotfix` → `/devsolo hotfix`
+11. `/devsolo:status-line` → `/devsolo status-line`
 
-**From Existing .hansolo/commands (already slash commands, migrate to .claude/commands/hansolo/):**
-1. `.hansolo/commands/doc.md` → `.claude/commands/hansolo/doc.md`
-2. `.hansolo/commands/prime.md` → `.claude/commands/hansolo/prime.md`
+**From Existing .devsolo/commands (already slash commands, migrate to .claude/commands/devsolo/):**
+1. `.devsolo/commands/doc.md` → `.claude/commands/devsolo/doc.md`
+2. `.devsolo/commands/prime.md` → `.claude/commands/devsolo/prime.md`
 
-**Note:** The `.hansolo/commands/` files already use slash command format and should be used as reference examples for migrating MCP prompts.
+**Note:** The `.devsolo/commands/` files already use slash command format and should be used as reference examples for migrating MCP prompts.
 
 ### Migration Checklist per Command
 
 **For MCP Prompts → Slash Commands:**
-- [ ] Create slash command file in `.claude/commands/hansolo/`
-- [ ] Use `.hansolo/commands/doc.md` and `prime.md` as format references
+- [ ] Create slash command file in `.claude/commands/devsolo/`
+- [ ] Use `.devsolo/commands/doc.md` and `prime.md` as format references
 - [ ] Migrate argument specifications with full descriptions in front matter
 - [ ] Migrate state detection and generation logic
 - [ ] Implement orchestration logic (call other slash commands via SlashCommand tool)
@@ -321,8 +321,8 @@ await gitDroid.ship({ prDescription });
 - [ ] Test with git-droid integration
 - [ ] Update documentation
 
-**For Existing .hansolo/commands → .claude/commands/hansolo:**
-- [ ] Copy command file to `.claude/commands/hansolo/`
+**For Existing .devsolo/commands → .claude/commands/devsolo:**
+- [ ] Copy command file to `.claude/commands/devsolo/`
 - [ ] Update any MCP-specific references to use new architecture
 - [ ] Integrate with git-droid or docs-droid as appropriate
 - [ ] Test functionality in new location
@@ -341,11 +341,11 @@ await gitDroid.ship({ prDescription });
 
 ### Objective
 
-Migrate the `prime` command from `.hansolo/commands/prime.md` to `.claude/commands/hansolo/prime.md`.
+Migrate the `prime` command from `.devsolo/commands/prime.md` to `.claude/commands/devsolo/prime.md`.
 
 ### Source Reference
 
-**Current:** `.hansolo/commands/prime.md`
+**Current:** `.devsolo/commands/prime.md`
 ```markdown
 # Prime
 > Execute the following sections to understand the codebase then summarize your understanding.
@@ -361,7 +361,7 @@ docs/README.md
 ### Migration Strategy
 
 **Step 1: Direct Copy**
-- Copy `.hansolo/commands/prime.md` to `.claude/commands/hansolo/prime.md`
+- Copy `.devsolo/commands/prime.md` to `.claude/commands/devsolo/prime.md`
 - Provides immediate codebase priming functionality in new location
 
 **Step 2: Enhancement (Optional)**
@@ -371,19 +371,19 @@ docs/README.md
 - Include recent change summaries
 
 **Purpose:**
-The prime command helps Claude quickly understand the hansolo codebase structure by:
+The prime command helps Claude quickly understand the devsolo codebase structure by:
 - Listing all files in the repository
 - Reading core documentation (README, docs structure)
 - Providing foundation for working with the codebase
 
 **Usage:**
-- `/hansolo prime` - Prime understanding of hansolo codebase
+- `/devsolo prime` - Prime understanding of devsolo codebase
 
 ## Phase 2: Git Management Sub-Agent
 
 ### Objective
 
-Create a specialized `git-droid` sub-agent to handle all git operations for han-solo.
+Create a specialized `git-droid` sub-agent to handle all git operations for devsolo.
 
 ### Sub-Agent Principles
 
@@ -439,7 +439,7 @@ The git-droid should understand and enforce:
 ### Usage Pattern
 
 ```
-User → /hansolo launch "Add user authentication"
+User → /devsolo launch "Add user authentication"
   ↓
 Slash Command → git-droid: create branch with smart name
   ↓
@@ -500,8 +500,8 @@ Create custom output style for git-droid that displays:
 
 **git-droid → Slash Commands (via SlashCommand tool):**
 - Call other slash commands when workflow requires it
-- Example: ship workflow needs commit → calls `/hansolo commit`
-- Example: commit workflow needs session → calls `/hansolo launch`
+- Example: ship workflow needs commit → calls `/devsolo commit`
+- Example: commit workflow needs session → calls `/devsolo launch`
 - Maintains clean separation and reusability
 
 **git-droid → Output:**
@@ -521,9 +521,9 @@ await gitOps.commit(message);
 
 **Target git-droid Pattern:**
 ```
-/hansolo ship
+/devsolo ship
   ↓ (slash command detects uncommitted changes)
-Call /hansolo commit (via SlashCommand tool)
+Call /devsolo commit (via SlashCommand tool)
   ↓ (commit slash command)
 git-droid: commit workflow
   ↓ (sub-agent orchestrates)
@@ -552,19 +552,19 @@ Migrate documentation management to slash commands and create a specialized `doc
 
 ### Slash Command Migration
 
-**Current:** `.hansolo/commands/doc.md` - Existing slash command for documentation management
+**Current:** `.devsolo/commands/doc.md` - Existing slash command for documentation management
 
-**Source Reference:** `.hansolo/commands/doc.md`
+**Source Reference:** `.devsolo/commands/doc.md`
 - Already implements AUDIT MODE (no arguments) and CREATE MODE (with arguments)
-- Follows han-solo documentation structure and conventions
+- Follows devsolo documentation structure and conventions
 - Comprehensive workflow for checking, fixing, and creating documentation
 - Directly calls file operations (Read, Write, Edit tools)
-- Should be migrated to `.claude/commands/hansolo/doc.md`
+- Should be migrated to `.claude/commands/devsolo/doc.md`
 
 **Migration Strategy:**
 
 **Step 1: Direct Copy**
-- Copy `.hansolo/commands/doc.md` to `.claude/commands/hansolo/doc.md`
+- Copy `.devsolo/commands/doc.md` to `.claude/commands/devsolo/doc.md`
 - This provides immediate functionality in new location
 
 **Step 2: Integration with docs-droid**
@@ -578,7 +578,7 @@ Migrate documentation management to slash commands and create a specialized `doc
 - Update any MCP-specific references
 
 **Current Capabilities:**
-- `/hansolo doc` (no args) - AUDIT MODE: Check existing documentation for issues and fix them
+- `/devsolo doc` (no args) - AUDIT MODE: Check existing documentation for issues and fix them
   - Scans all `.md` files in `docs/` directory
   - Checks naming conventions (`lowercase-with-hyphens.md`)
   - Validates placement per `docs/README.md` guidelines
@@ -588,7 +588,7 @@ Migrate documentation management to slash commands and create a specialized `doc
   - Updates all README.md files
   - Archives outdated documentation
 
-- `/hansolo doc <name> <content>` - CREATE MODE: Create new documentation from provided content
+- `/devsolo doc <name> <content>` - CREATE MODE: Create new documentation from provided content
   - Analyzes content to determine placement
   - Applies naming conventions
   - Checks for superseded documents
@@ -597,8 +597,8 @@ Migrate documentation management to slash commands and create a specialized `doc
   - Archives old versions if needed
 
 **Planned Extensions:**
-- `/hansolo doc update <file>` - Update existing documentation
-- `/hansolo doc archive <file>` - Archive specific documentation (currently part of audit mode)
+- `/devsolo doc update <file>` - Update existing documentation
+- `/devsolo doc archive <file>` - Archive specific documentation (currently part of audit mode)
 
 ### Docs-Droid Principles
 
@@ -649,7 +649,7 @@ The docs-droid should maintain:
 ### Usage Pattern
 
 ```
-User → /hansolo doc create "API Guide" <content>
+User → /devsolo doc create "API Guide" <content>
   ↓
 Slash Command → docs-droid: analyze and place document
   ↓

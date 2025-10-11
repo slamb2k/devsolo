@@ -6,7 +6,7 @@ Successfully implemented an adapter layer to integrate v2 commands with the exis
 
 ## Problem Statement
 
-The v1 `hansolo ship` command had a critical bug:
+The v1 `devsolo ship` command had a critical bug:
 - PR merges through GitHub UI/auto-merge didn't trigger cleanup
 - Users were left on feature branches with orphaned remote branches
 - Manual cleanup was required after every external PR merge
@@ -43,7 +43,7 @@ Created adapters that wrap v2 commands while maintaining v1 API compatibility.
 6. **sessions-adapter.ts** - Wraps SessionsCommandV2
    - Provides helper methods: `getActiveCount()`, `getCurrentSession()`, `listBranchesWithSessions()`
 
-7. **cleanup-adapter.ts** - Wraps HansoloCleanupCommandV2
+7. **cleanup-adapter.ts** - Wraps DevSoloCleanupCommandV2
    - Implements `CommandHandler` interface
    - Maps args to options for v2 command
 
@@ -55,7 +55,7 @@ Created adapters that wrap v2 commands while maintaining v1 API compatibility.
    - Changed imports from v1 commands to adapter commands
    - Now uses: `import { LaunchCommand, ShipCommand, ... } from './commands/adapters'`
 
-2. **src/mcp/hansolo-mcp-server.ts**
+2. **src/mcp/devsolo-mcp-server.ts**
    - Changed imports from v1 commands to adapter commands
    - MCP server now uses v2 implementation through adapters
 
@@ -65,13 +65,13 @@ Created adapters that wrap v2 commands while maintaining v1 API compatibility.
 
 4. **src/commands/command-registry.ts**
    - Updated import path to `./command-adapters`
-   - Added CleanupCommand and HansoloStatusCommand adapters
+   - Added CleanupCommand and DevSoloStatusCommand adapters
 
 ## How It Works
 
 ### Before (V1)
 ```typescript
-// User runs: hansolo ship --create-pr
+// User runs: devsolo ship --create-pr
 // Result: PR created, but if merged externally, cleanup never runs
 
 ship() {
@@ -84,7 +84,7 @@ ship() {
 
 ### After (V2 via Adapter)
 ```typescript
-// User runs: hansolo ship
+// User runs: devsolo ship
 // Result: Complete workflow runs automatically
 
 execute(options) {
@@ -110,7 +110,7 @@ async executeCompleteWorkflow() {
 
 1. **Automatic Cleanup**: v2's ship workflow always runs cleanup after PR merge
 2. **No Breaking Changes**: Adapters maintain v1 API, so existing scripts/workflows continue working
-3. **Single Command**: Users run `hansolo ship` once instead of multiple invocations with flags
+3. **Single Command**: Users run `devsolo ship` once instead of multiple invocations with flags
 4. **External Merge Detection**: v2 waits for PR to merge (even if merged externally) then runs cleanup
 5. **Better State Tracking**: Session state properly transitions to COMPLETE after cleanup
 
@@ -127,14 +127,14 @@ async executeCompleteWorkflow() {
 
 ```bash
 # Start fresh feature
-hansolo launch "test-adapter-integration"
+devsolo launch "test-adapter-integration"
 
 # Make changes
 echo "test" > test.txt
 git add test.txt
 
 # Ship (should do everything automatically)
-hansolo ship
+devsolo ship
 
 # Expected result:
 # ✅ Changes committed
@@ -153,7 +153,7 @@ hansolo ship
 
 ```bash
 # Start feature
-hansolo launch "test-external-merge"
+devsolo launch "test-external-merge"
 echo "test" > test.txt
 git add test.txt
 
@@ -171,7 +171,7 @@ PR_NUM=$(gh pr list --json number --jq '.[0].number')
 gh pr merge $PR_NUM --squash --auto
 
 # Now run ship - should detect merge and run cleanup
-hansolo ship
+devsolo ship
 
 # Expected result:
 # ✅ Detects PR already merged
@@ -186,7 +186,7 @@ hansolo ship
 ### No Action Required
 
 - Existing workflows continue working
-- `hansolo ship --push`, `hansolo ship --create-pr`, etc. still work
+- `devsolo ship --push`, `devsolo ship --create-pr`, etc. still work
 - All commands now delegate to v2's robust implementation
 
 ### Recommended Update
@@ -195,16 +195,16 @@ Users should simplify their workflows:
 
 **Before:**
 ```bash
-hansolo ship
-hansolo ship --push
-hansolo ship --create-pr
+devsolo ship
+devsolo ship --push
+devsolo ship --create-pr
 # Manual merge on GitHub
 # Manual cleanup required
 ```
 
 **After:**
 ```bash
-hansolo ship
+devsolo ship
 # Done! Everything automatic including cleanup
 ```
 
@@ -256,7 +256,7 @@ V2 commands include comprehensive validation:
 
 ### Modified (5 files)
 - `src/cli.ts` - Import adapters instead of v1 commands
-- `src/mcp/hansolo-mcp-server.ts` - Import adapters instead of v1 commands
+- `src/mcp/devsolo-mcp-server.ts` - Import adapters instead of v1 commands
 - `src/commands/command-adapters.ts` - Import from adapter directory
 - `src/commands/command-registry.ts` - Use adapter commands
 - `ADAPTER-LAYER-IMPLEMENTATION.md` - This document

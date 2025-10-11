@@ -1,6 +1,6 @@
-# Installing han-solo Dev Version
+# Installing devsolo Dev Version
 
-**Audience**: Developers working on han-solo itself
+**Audience**: Developers working on devsolo itself
 
 **Purpose**: System-level installation guide for development and testing
 
@@ -8,7 +8,7 @@
 
 ---
 
-This guide explains how to install the development version of han-solo v2.0.0 (pure MCP) for testing and development.
+This guide explains how to install the development version of devsolo v2.0.0 (pure MCP) for testing and development.
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ This guide explains how to install the development version of han-solo v2.0.0 (p
 
 ## Architecture Note
 
-han-solo v2.0.0 is **pure MCP-only** with no standalone CLI. All functionality is exposed through MCP tools that Claude Code calls. The development setup focuses on:
+devsolo v2.0.0 is **pure MCP-only** with no standalone CLI. All functionality is exposed through MCP tools that Claude Code calls. The development setup focuses on:
 - Building the MCP server
 - Testing MCP tools
 - Developing new tools/features
@@ -31,8 +31,8 @@ han-solo v2.0.0 is **pure MCP-only** with no standalone CLI. All functionality i
 For active development with immediate reflection of changes:
 
 ```bash
-# 1. Clone and navigate to han-solo directory
-cd /path/to/hansolo
+# 1. Clone and navigate to devsolo directory
+cd /path/to/devsolo
 
 # 2. Install dependencies
 npm install
@@ -44,8 +44,8 @@ npm run build
 npm run build:mcp
 
 # 5. Verify MCP server exists
-ls -la bin/hansolo-mcp
-# Should show: bin/hansolo-mcp (executable)
+ls -la bin/devsolo-mcp
+# Should show: bin/devsolo-mcp (executable)
 ```
 
 ### Method 2: Global Link (Testing in Other Projects)
@@ -53,15 +53,15 @@ ls -la bin/hansolo-mcp
 Create a symbolic link for testing in other projects:
 
 ```bash
-# In han-solo directory
+# In devsolo directory
 npm link
 
 # Verify link
-which hansolo-mcp
+which devsolo-mcp
 # Should show global bin path
 
 # In another project
-npm link hansolo-mcp
+npm link devsolo-mcp
 ```
 
 ### Method 3: Pack and Install (Production-like)
@@ -69,13 +69,13 @@ npm link hansolo-mcp
 Test as if installed from npm:
 
 ```bash
-# In han-solo directory
+# In devsolo directory
 npm pack
-# Creates: hansolo-mcp-2.0.0.tgz
+# Creates: devsolo-mcp-2.0.0.tgz
 
 # Install in test project
 cd /path/to/test/project
-npm install /path/to/hansolo-mcp-2.0.0.tgz
+npm install /path/to/devsolo-mcp-2.0.0.tgz
 ```
 
 ## Setting Up MCP Server for Development
@@ -91,13 +91,13 @@ Configure Claude Code to use your development MCP server:
 ```json
 {
   "mcpServers": {
-    "hansolo-dev": {
+    "devsolo-dev": {
       "command": "node",
-      "args": ["/absolute/path/to/hansolo/bin/hansolo-mcp"],
+      "args": ["/absolute/path/to/devsolo/bin/devsolo-mcp"],
       "cwd": "${workspaceFolder}",
       "env": {
         "NODE_ENV": "development",
-        "HANSOLO_DEBUG": "true"
+        "DEVSOLO_DEBUG": "true"
       }
     }
   }
@@ -110,16 +110,16 @@ Configure Claude Code to use your development MCP server:
 
 ```bash
 # Start in foreground (see all output)
-node bin/hansolo-mcp
+node bin/devsolo-mcp
 
 # Start with debug logging
-HANSOLO_DEBUG=1 node bin/hansolo-mcp
+DEVSOLO_DEBUG=1 node bin/devsolo-mcp
 
 # Start with Node inspector (for debugging)
-node --inspect bin/hansolo-mcp
+node --inspect bin/devsolo-mcp
 
 # Start with breakpoints
-node --inspect-brk bin/hansolo-mcp
+node --inspect-brk bin/devsolo-mcp
 ```
 
 The MCP server communicates via stdio (not HTTP), so manual testing requires an MCP client like Claude Code.
@@ -183,11 +183,11 @@ ls -la dist/
 # Should contain compiled TypeScript
 
 # Check MCP server build
-ls -la bin/hansolo-mcp
+ls -la bin/devsolo-mcp
 # Should be executable
 
 # Check MCP server is valid Node script
-head -n 1 bin/hansolo-mcp
+head -n 1 bin/devsolo-mcp
 # Should show: #!/usr/bin/env node
 ```
 
@@ -195,7 +195,7 @@ head -n 1 bin/hansolo-mcp
 
 ```bash
 # Run MCP server with test input
-echo '{"jsonrpc":"2.0","method":"initialize","params":{},"id":1}' | node bin/hansolo-mcp
+echo '{"jsonrpc":"2.0","method":"initialize","params":{},"id":1}' | node bin/devsolo-mcp
 # Should respond with JSON-RPC response
 ```
 
@@ -203,8 +203,8 @@ echo '{"jsonrpc":"2.0","method":"initialize","params":{},"id":1}' | node bin/han
 
 1. Configure Claude Code (see above)
 2. Restart Claude Code
-3. Ask Claude: `"Show me han-solo status"`
-4. Claude should call `hansolo_status` tool
+3. Ask Claude: `"Show me devsolo status"`
+4. Claude should call `devsolo_status` tool
 
 ## Using in Test Projects
 
@@ -212,15 +212,15 @@ echo '{"jsonrpc":"2.0","method":"initialize","params":{},"id":1}' | node bin/han
 
 ```bash
 # Create test project
-mkdir test-hansolo && cd test-hansolo
+mkdir test-devsolo && cd test-devsolo
 git init
 git remote add origin https://github.com/yourname/test-repo.git
 
 # In Claude Code, ask:
-# "Initialize han-solo in this project"
+# "Initialize devsolo in this project"
 
-# Verify .hansolo directory created
-ls -la .hansolo/
+# Verify .devsolo directory created
+ls -la .devsolo/
 ```
 
 ### Test Full Workflow
@@ -238,13 +238,13 @@ git remote -v
 
 ## Development Environment Variables
 
-Configure han-solo behavior during development:
+Configure devsolo behavior during development:
 
 ```bash
 export NODE_ENV=development        # Development mode
-export HANSOLO_DEBUG=1            # Enable debug output
-export HANSOLO_LOG_LEVEL=debug    # Detailed logging
-export HANSOLO_TEST_MODE=1        # Enable test mode features
+export DEVSOLO_DEBUG=1            # Enable debug output
+export DEVSOLO_LOG_LEVEL=debug    # Detailed logging
+export DEVSOLO_TEST_MODE=1        # Enable test mode features
 export GITHUB_TOKEN=ghp_xxx       # GitHub API token (or use 'gh auth login')
 ```
 
@@ -254,7 +254,7 @@ export GITHUB_TOKEN=ghp_xxx       # GitHub API token (or use 'gh auth login')
 
 ```bash
 # Start with Node inspector
-node --inspect-brk bin/hansolo-mcp
+node --inspect-brk bin/devsolo-mcp
 
 # In Chrome: chrome://inspect
 # Click "inspect" under Remote Target
@@ -278,15 +278,15 @@ async execute(input: CommitToolInput): Promise<SessionToolResult> {
 
 ```bash
 # Enable MCP protocol logging
-HANSOLO_DEBUG_MCP=1 node bin/hansolo-mcp
+DEVSOLO_DEBUG_MCP=1 node bin/devsolo-mcp
 ```
 
-This logs all JSON-RPC messages between Claude Code and han-solo.
+This logs all JSON-RPC messages between Claude Code and devsolo.
 
 ### Check Tool Registration
 
 ```typescript
-// In bin/hansolo-mcp or src/mcp/server.ts
+// In bin/devsolo-mcp or src/mcp/server.ts
 console.log('Registered tools:', Array.from(server.tools.keys()));
 ```
 
@@ -296,13 +296,13 @@ console.log('Registered tools:', Array.from(server.tools.keys()));
 
 ```bash
 # Check file exists
-ls -la /path/to/hansolo/bin/hansolo-mcp
+ls -la /path/to/devsolo/bin/devsolo-mcp
 
 # Check executable bit
-chmod +x /path/to/hansolo/bin/hansolo-mcp
+chmod +x /path/to/devsolo/bin/devsolo-mcp
 
 # Check shebang
-head -n 1 /path/to/hansolo/bin/hansolo-mcp
+head -n 1 /path/to/devsolo/bin/devsolo-mcp
 # Should be: #!/usr/bin/env node
 ```
 
@@ -327,10 +327,10 @@ npm run build:mcp
 
 ```bash
 # Check tool is registered
-grep -r "hansolo_mytool" src/mcp/
+grep -r "devsolo_mytool" src/mcp/
 
 # Check tool is exported in server
-grep "MyTool" bin/hansolo-mcp
+grep "MyTool" bin/devsolo-mcp
 
 # Verify build included new tool
 npm run build:mcp
@@ -367,7 +367,7 @@ npm test -- src/mcp/tools/commit-tool.test.ts
 
 ```bash
 # Clean build
-rm -rf dist/ bin/hansolo-mcp
+rm -rf dist/ bin/devsolo-mcp
 
 # Install production dependencies only
 npm ci --production
@@ -377,7 +377,7 @@ npm run build
 npm run build:mcp
 
 # Test the build
-node bin/hansolo-mcp
+node bin/devsolo-mcp
 ```
 
 ### Create Package
@@ -387,15 +387,15 @@ node bin/hansolo-mcp
 npm pack
 
 # Test installation from tarball
-npm install -g hansolo-mcp-2.0.0.tgz
+npm install -g devsolo-mcp-2.0.0.tgz
 ```
 
 ## Project Structure (for Developers)
 
 ```
-hansolo/
+devsolo/
 ├── bin/
-│   └── hansolo-mcp          # Built MCP server executable
+│   └── devsolo-mcp          # Built MCP server executable
 ├── src/
 │   ├── mcp/
 │   │   ├── server.ts        # MCP server implementation
@@ -482,4 +482,4 @@ npm run ci
 
 **Last Updated**: 2025-10-10
 
-**Target Audience**: han-solo developers and contributors
+**Target Audience**: devsolo developers and contributors

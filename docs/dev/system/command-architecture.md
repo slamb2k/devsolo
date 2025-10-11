@@ -2,7 +2,7 @@
 
 ## Overview
 
-Han-solo commands are implemented as MCP tools that follow a standardized workflow pattern. This document describes the architecture, execution flow, validation checks, and result types for each command.
+DevSolo commands are implemented as MCP tools that follow a standardized workflow pattern. This document describes the architecture, execution flow, validation checks, and result types for each command.
 
 ## Architecture Components
 
@@ -86,9 +86,9 @@ Returns `success: false` with error messages.
 
 ## Command Details
 
-### hansolo_init
+### devsolo_init
 
-**Purpose:** Initialize han-solo in a project
+**Purpose:** Initialize devsolo in a project
 
 **Type:** Setup command
 
@@ -99,7 +99,7 @@ Returns `success: false` with error messages.
 **Elicitation Scenarios:**
 - Already initialized (if not `auto: true`)
   - Level: Error
-  - Message: "han-solo is already initialized. Use auto: true to reinitialize."
+  - Message: "devsolo is already initialized. Use auto: true to reinitialize."
 
 **Error Scenarios:**
 - Not a git repository
@@ -113,7 +113,7 @@ Returns `success: false` with error messages.
 
 ---
 
-### hansolo_launch
+### devsolo_launch
 
 **Purpose:** Start a new feature workflow
 
@@ -166,7 +166,7 @@ Returns `success: false` with error messages.
 
 ---
 
-### hansolo_commit
+### devsolo_commit
 
 **Purpose:** Commit changes with a message
 
@@ -176,7 +176,7 @@ Returns `success: false` with error messages.
 1. `sessionExists` (error)
    - **Pass:** Active session found
    - **Fail (error):** No active session
-     - Suggestion: Start a session with hansolo_launch
+     - Suggestion: Start a session with devsolo_launch
 
 2. `hasUncommittedChanges` (warning)
    - **Pass:** Changes to commit exist
@@ -189,7 +189,7 @@ Returns `success: false` with error messages.
 - Missing commit message
   - Returns diff and changed files for Claude to analyze
   - Claude generates conventional commit message
-  - NextSteps: "Analyze diff", "Generate commit message", "Call hansolo_commit with message"
+  - NextSteps: "Analyze diff", "Generate commit message", "Call devsolo_commit with message"
 
 - No changes to commit (in parameter collection phase)
   - Returns early with warning
@@ -204,7 +204,7 @@ Returns `success: false` with error messages.
 
 ---
 
-### hansolo_ship
+### devsolo_ship
 
 **Purpose:** Push, create PR, merge, and cleanup
 
@@ -214,17 +214,17 @@ Returns `success: false` with error messages.
 1. `sessionExists` (error)
    - **Pass:** Active session found
    - **Fail (error):** No active session
-     - Suggestion: Start a session with hansolo_launch
+     - Suggestion: Start a session with devsolo_launch
 
 2. `onFeatureBranch` (error)
    - **Pass:** On feature branch (not main)
    - **Fail (error):** On main branch
-     - Suggestion: Create feature branch with hansolo_launch
+     - Suggestion: Create feature branch with devsolo_launch
 
 3. `noUncommittedChanges` (error) ⭐
    - **Pass:** All changes committed
    - **Fail (error):** Uncommitted changes detected
-     - Suggestion: Commit changes first using hansolo_commit
+     - Suggestion: Commit changes first using devsolo_commit
 
 4. `hasCommitsToShip` (warning)
    - **Pass:** Commits ready to ship
@@ -258,7 +258,7 @@ Returns `success: false` with error messages.
 - Missing PR description (for new PR creation)
   - Returns commits, changed files, and diff stats
   - Claude analyzes and generates PR description
-  - NextSteps: "Analyze changes", "Generate PR description", "Call hansolo_ship with prDescription"
+  - NextSteps: "Analyze changes", "Generate PR description", "Call devsolo_ship with prDescription"
 
 **Error Scenarios:**
 - Pre-flight check failures (see above)
@@ -285,7 +285,7 @@ Returns `success: false` with error messages.
 
 ---
 
-### hansolo_status
+### devsolo_status
 
 **Purpose:** Show current workflow status
 
@@ -309,7 +309,7 @@ Returns `success: false` with error messages.
 
 ---
 
-### hansolo_sessions
+### devsolo_sessions
 
 **Purpose:** List workflow sessions
 
@@ -334,7 +334,7 @@ Returns `success: false` with error messages.
 
 ---
 
-### hansolo_swap
+### devsolo_swap
 
 **Purpose:** Switch between workflow sessions
 
@@ -344,7 +344,7 @@ Returns `success: false` with error messages.
 1. Custom `Target Session Exists` (error)
    - **Pass:** Session found for target branch
    - **Fail (error):** No session found for target branch
-     - Suggestion: Use hansolo_sessions to list available sessions
+     - Suggestion: Use devsolo_sessions to list available sessions
 
 **Post-flight Checks:** None
 
@@ -365,7 +365,7 @@ Returns `success: false` with error messages.
 
 ---
 
-### hansolo_abort
+### devsolo_abort
 
 **Purpose:** Abort a workflow session
 
@@ -375,7 +375,7 @@ Returns `success: false` with error messages.
 1. Custom `Session Exists` (error)
    - **Pass:** Session found for branch
    - **Fail (error):** No session found
-     - Suggestion: Use hansolo_sessions to list available sessions
+     - Suggestion: Use devsolo_sessions to list available sessions
 
 2. Custom `Session Active` (error, if not `auto: true`)
    - **Pass:** Session is active
@@ -404,7 +404,7 @@ Returns `success: false` with error messages.
 
 ---
 
-### hansolo_cleanup
+### devsolo_cleanup
 
 **Purpose:** Clean up expired sessions and stale branches
 
@@ -430,7 +430,7 @@ Returns `success: false` with error messages.
 
 ---
 
-### hansolo_hotfix
+### devsolo_hotfix
 
 **Purpose:** Create emergency hotfix workflow
 
@@ -450,7 +450,7 @@ Returns `success: false` with error messages.
 
 ---
 
-### hansolo_status_line
+### devsolo_status_line
 
 **Purpose:** Manage Claude Code status line display
 
@@ -565,7 +565,7 @@ Located in `src/ui/banners.ts`:
 
 **Phase 1 (Initialization Check):**
 - Returns early with error if not initialized
-- Suggests running `hansolo_init`
+- Suggests running `devsolo_init`
 
 **Phase 3 (Pre-flight Checks):**
 - `level: 'error'` → Halts execution, returns error result

@@ -1,6 +1,6 @@
 # Launch
 
-Start a new feature workflow. Creates a feature branch and han-solo session.
+Start a new feature workflow. Creates a feature branch and devsolo session.
 
 ## Arguments
 
@@ -15,10 +15,10 @@ Start a new feature workflow. Creates a feature branch and han-solo session.
    - Analyze current git state (check if on main, clean working directory)
    - Handle uncommitted changes:
      - If present: Ask user "You have uncommitted changes. Would you like to: (a) commit them first, (b) stash them, (c) cancel?"
-     - If (a) commit: Use SlashCommand tool to invoke `/hansolo:commit`
+     - If (a) commit: Use SlashCommand tool to invoke `/devsolo:commit`
      - If (b) stash: Stash changes with descriptive message
      - If (c) cancel: Exit without launching
-   - Handle existing session (offer to abort using SlashCommand tool to invoke `/hansolo:abort`)
+   - Handle existing session (offer to abort using SlashCommand tool to invoke `/devsolo:abort`)
    - Generate branch name if not provided:
      - From description → convert to kebab-case with appropriate prefix (feature/, fix/, docs/, etc)
      - From uncommitted changes → analyze diff to infer purpose
@@ -31,7 +31,7 @@ Start a new feature workflow. Creates a feature branch and han-solo session.
 ░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░
 ```
 
-   - Call `mcp__hansolo__hansolo_launch` with appropriate parameters
+   - Call `mcp__devsolo__devsolo_launch` with appropriate parameters
    - Report results following git-droid output style
 
 ## Branch Name Generation Rules
@@ -54,18 +54,18 @@ Examples:
 
 ```
 # Launch with explicit branch name
-/hansolo launch --branchName="feature/my-feature"
+/devsolo launch --branchName="feature/my-feature"
 
 # Launch with description (branch name auto-generated)
-/hansolo launch --description="Add user authentication system"
+/devsolo launch --description="Add user authentication system"
 
 # Launch with auto mode (no prompts)
-/hansolo launch --description="Fix login bug" --auto
+/devsolo launch --description="Fix login bug" --auto
 ```
 
 ## Notes
 
 - Requires being on main branch with clean working directory (or will guide you to fix)
 - Will abort any existing session on current branch
-- Creates both git branch and han-solo session
+- Creates both git branch and devsolo session
 - Checks out to the new branch automatically

@@ -79,7 +79,7 @@ export class GitOperations {
   }
 
   async stashChanges(message?: string): Promise<{ stashRef: string }> {
-    const stashMessage = message || `han-solo stash ${new Date().toISOString()}`;
+    const stashMessage = message || `devsolo stash ${new Date().toISOString()}`;
     await this.git.stash(['push', '-m', stashMessage]);
 
     // Get the SHA of the stash we just created (it's always stash@{0} immediately after creation)

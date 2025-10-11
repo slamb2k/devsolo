@@ -1,53 +1,53 @@
 /**
- * Text block letter-style ASCII art banners for han-solo commands
+ * Text block letter-style ASCII art banners for devsolo commands
  * Used consistently across MCP, CLI, and command execution
  */
 
 // ASCII Art Banners for each command
 export const BANNERS: Record<string, string> = {
-  hansolo_init: `░▀█▀░█▀█░▀█▀░▀█▀░▀█▀░█▀█░█░░░▀█▀░█▀▀░▀█▀░█▀█░█▀▀░
+  devsolo_init: `░▀█▀░█▀█░▀█▀░▀█▀░▀█▀░█▀█░█░░░▀█▀░█▀▀░▀█▀░█▀█░█▀▀░
 ░░█░░█░█░░█░░░█░░░█░░█▀█░█░░░░█░░▀▀█░░█░░█░█░█░█░
 ░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_launch: `░█░░░█▀█░█░█░█▀█░█▀▀░█░█░▀█▀░█▀█░█▀▀░
+  devsolo_launch: `░█░░░█▀█░█░█░█▀█░█▀▀░█░█░▀█▀░█▀█░█▀▀░
 ░█░░░█▀█░█░█░█░█░█░░░█▀█░░█░░█░█░█░█░
 ░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_ship: `░█▀▀░█░█░▀█▀░█▀█░█▀█░▀█▀░█▀█░█▀▀░
+  devsolo_ship: `░█▀▀░█░█░▀█▀░█▀█░█▀█░▀█▀░█▀█░█▀▀░
 ░▀▀█░█▀█░░█░░█▀▀░█▀▀░░█░░█░█░█░█░
 ░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_swap: `░█▀▀░█░█░█▀█░█▀█░█▀█░▀█▀░█▀█░█▀▀░
+  devsolo_swap: `░█▀▀░█░█░█▀█░█▀█░█▀█░▀█▀░█▀█░█▀▀░
 ░▀▀█░█▄█░█▀█░█▀▀░█▀▀░░█░░█░█░█░█░
 ░▀▀▀░▀░▀░▀░▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_abort: `░█▀█░█▀▄░█▀█░█▀▄░▀█▀░▀█▀░█▀█░█▀▀░
+  devsolo_abort: `░█▀█░█▀▄░█▀█░█▀▄░▀█▀░▀█▀░█▀█░█▀▀░
 ░█▀█░█▀▄░█░█░█▀▄░░█░░░█░░█░█░█░█░
 ░▀░▀░▀▀░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_sessions: `░█▀▀░█▀▀░█▀▀░█▀▀░▀█▀░█▀█░█▀█░█▀▀░
+  devsolo_sessions: `░█▀▀░█▀▀░█▀▀░█▀▀░▀█▀░█▀█░█▀█░█▀▀░
 ░▀▀█░█▀▀░▀▀█░▀▀█░░█░░█░█░█░█░▀▀█░
 ░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_status: `░█▀▀░▀█▀░█▀█░▀█▀░█░█░█▀▀░
+  devsolo_status: `░█▀▀░▀█▀░█▀█░▀█▀░█░█░█▀▀░
 ░▀▀█░░█░░█▀█░░█░░█░█░▀▀█░
 ░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀░`,
-  hansolo_status_line: `░█▀▀░▀█▀░█▀█░▀█▀░█░█░█▀▀░░░█░░░▀█▀░█▀█░█▀▀░
+  devsolo_status_line: `░█▀▀░▀█▀░█▀█░▀█▀░█░█░█▀▀░░░█░░░▀█▀░█▀█░█▀▀░
 ░▀▀█░░█░░█▀█░░█░░█░█░▀▀█░░░█░░░░█░░█░█░█▀▀░
 ░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀░░░▀▀▀░▀▀▀░▀░▀░▀▀▀░`,
-  hansolo_hotfix: `░█░█░█▀█░▀█▀░█▀▀░▀█▀░█░█░
+  devsolo_hotfix: `░█░█░█▀█░▀█▀░█▀▀░▀█▀░█░█░
 ░█▀█░█░█░░█░░█▀▀░░█░░▄▀▄░
 ░▀░▀░▀▀▀░░▀░░▀░░░▀▀▀░▀░▀░`,
-  hansolo_cleanup: `░█▀▀░█░░░█▀▀░█▀█░█▀█░█░█░█▀█░
+  devsolo_cleanup: `░█▀▀░█░░░█▀▀░█▀█░█▀█░█░█░█▀█░
 ░█░░░█░░░█▀▀░█▀█░█░█░█░█░█▀▀░
 ░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀░░░`,
-  hansolo_commit: `░█▀▀░█▀█░█▀▄▀█░█▀▄▀█░▀█▀░▀█▀░
+  devsolo_commit: `░█▀▀░█▀█░█▀▄▀█░█▀▄▀█░▀█▀░▀█▀░
 ░█░░░█░█░█░▀░█░█░▀░█░░█░░░█░░
 ░▀▀▀░▀▀▀░▀░░░▀░▀░░░▀░▀▀▀░░▀░░`,
 };
 
 /**
  * Get banner for a command
- * @param command - Command name (e.g., 'init', 'launch', or 'hansolo_init')
+ * @param command - Command name (e.g., 'init', 'launch', or 'devsolo_init')
  * @returns Banner string or empty string if not found
  */
 export function getBanner(command: string): string {
-  // Normalize command name to include 'hansolo_' prefix
-  const key = command.startsWith('hansolo_') ? command : `hansolo_${command}`;
+  // Normalize command name to include 'devsolo_' prefix
+  const key = command.startsWith('devsolo_') ? command : `devsolo_${command}`;
   return BANNERS[key] || '';
 }
 

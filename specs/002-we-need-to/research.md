@@ -8,15 +8,15 @@ Research conducted to resolve technical uncertainties for the npm package publis
 ## Research Areas
 
 ### 1. NPM Package Naming
-**Decision**: `@hansolo/cli`
+**Decision**: `@devsolo/cli`
 **Rationale**:
 - Scoped packages provide namespace protection and brand identity
 - Follows npm best practices for organization-owned packages
-- Allows future expansion (@hansolo/server, @hansolo/hooks, etc.)
+- Allows future expansion (@devsolo/server, @devsolo/hooks, etc.)
 - Clear, memorable, and professional
 **Alternatives Considered**:
-- `hansolo` - Simple but may conflict with existing packages
-- `han-solo-cli` - Hyphenated names less preferred in npm ecosystem
+- `devsolo` - Simple but may conflict with existing packages
+- `devsolo-cli` - Hyphenated names less preferred in npm ecosystem
 - `@han/solo` - Split namespace confusing
 
 ### 2. CLI Framework Selection
@@ -36,8 +36,8 @@ Research conducted to resolve technical uncertainties for the npm package publis
 ### 3. Configuration Storage Location
 **Decision**: Dual-location strategy based on installation type
 **Rationale**:
-- Global install: `~/.hansolo/config.json` - User-level preferences
-- Local install: `./.hansolo/config.json` - Project-specific settings
+- Global install: `~/.devsolo/config.json` - User-level preferences
+- Local install: `./.devsolo/config.json` - Project-specific settings
 - Project config takes precedence over user config when both exist
 - Follows established CLI patterns (npm, git, etc.)
 **Alternatives Considered**:
@@ -65,7 +65,7 @@ Research conducted to resolve technical uncertainties for the npm package publis
 **Decision**: Progressive enhancement approach
 **Rationale**: Beautiful when possible, functional everywhere
 **Implementation**:
-- ASCII art banner with han-solo branding
+- ASCII art banner with devsolo branding
 - Color-coded status messages (success=green, warning=yellow, error=red)
 - Animated spinners during async operations
 - Progress bars for multi-step processes
@@ -114,7 +114,7 @@ Research conducted to resolve technical uncertainties for the npm package publis
 - Detect installation context (global vs local vs npx)
 - Check for `--ignore-scripts` flag
 - Graceful failure if installer can't run
-- Option to re-run: `npx @hansolo/cli configure`
+- Option to re-run: `npx @devsolo/cli configure`
 **Alternatives Considered**:
 - Manual setup only - Poor developer experience
 - Binary wrapper - Complex distribution
@@ -122,17 +122,17 @@ Research conducted to resolve technical uncertainties for the npm package publis
 ## Technical Specifications
 
 ### Installation Contexts
-1. **Global**: `npm install -g @hansolo/cli`
-   - Config: `~/.hansolo/config.json`
+1. **Global**: `npm install -g @devsolo/cli`
+   - Config: `~/.devsolo/config.json`
    - Binary: System PATH
    - Updates: Manual via npm update
 
-2. **Local**: `npm install @hansolo/cli`
-   - Config: `./.hansolo/config.json`
-   - Binary: `./node_modules/.bin/hansolo`
+2. **Local**: `npm install @devsolo/cli`
+   - Config: `./.devsolo/config.json`
+   - Binary: `./node_modules/.bin/devsolo`
    - Updates: Via package.json
 
-3. **npx**: `npx @hansolo/cli`
+3. **npx**: `npx @devsolo/cli`
    - Config: Temporary or prompt to save
    - Binary: Cached temporarily
    - Updates: Always latest
@@ -162,7 +162,7 @@ Research conducted to resolve technical uncertainties for the npm package publis
 ## Resolved Clarifications
 
 All NEEDS CLARIFICATION items from the specification have been resolved:
-1. **Package name**: `@hansolo/cli`
+1. **Package name**: `@devsolo/cli`
 2. **CLI framework**: inquirer + chalk + ora
 3. **Config location**: Dual-location based on install type
 4. **Workflow options**: Comprehensive list defined

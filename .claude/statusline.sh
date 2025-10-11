@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Han-Solo Status Line Script
-# Outputs current han-solo session status for Claude Code status line
+# DevSolo Status Line Script
+# Outputs current devsolo session status for Claude Code status line
 
 # ANSI Color Codes
 RED='\033[0;31m'
@@ -33,8 +33,8 @@ fi
 # Read current git branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "no-branch")
 
-# Check for active han-solo session on current branch
-SESSION_DIR=".hansolo/sessions"
+# Check for active devsolo session on current branch
+SESSION_DIR=".devsolo/sessions"
 SESSION_FILE=""
 SESSION_ID=""
 SESSION_STATE=""
@@ -139,7 +139,7 @@ if [ -n "$SESSION_ID" ]; then
     CONTEXT_DISPLAY="${GRAY}|${RESET} ${CYAN}budget: ${TOKEN_BUDGET}${RESET}"
   fi
 
-  echo -e "${BOLD}[han-solo]${RESET} $EMOJI ${GREEN}${SHORT_ID}${RESET} ${GRAY}|${RESET} ${YELLOW}${BRANCH}${RESET} ${GRAY}|${RESET} ${state_color}${SESSION_STATE}${RESET}${CONTEXT_DISPLAY}"
+  echo -e "${BOLD}[devsolo]${RESET} $EMOJI ${GREEN}${SHORT_ID}${RESET} ${GRAY}|${RESET} ${YELLOW}${BRANCH}${RESET} ${GRAY}|${RESET} ${state_color}${SESSION_STATE}${RESET}${CONTEXT_DISPLAY}"
 else
   # No active session
   # Build context window display if available
@@ -151,5 +151,5 @@ else
     CONTEXT_DISPLAY=" ${GRAY}|${RESET} ${CYAN}budget: ${TOKEN_BUDGET}${RESET}"
   fi
 
-  echo -e "${BOLD}[han-solo]${RESET} 📁 ${YELLOW}${BRANCH}${RESET} ${GRAY}|${RESET} ${GRAY}no session${RESET}${CONTEXT_DISPLAY}"
+  echo -e "${BOLD}[devsolo]${RESET} 📁 ${YELLOW}${BRANCH}${RESET} ${GRAY}|${RESET} ${GRAY}no session${RESET}${CONTEXT_DISPLAY}"
 fi

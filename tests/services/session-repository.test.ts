@@ -12,7 +12,7 @@ describe('SessionRepository', () => {
 
   beforeEach(() => {
     // Create temporary directory for tests
-    tempDir = mkdtempSync(path.join(tmpdir(), 'hansolo-test-'));
+    tempDir = mkdtempSync(path.join(tmpdir(), 'devsolo-test-'));
     repository = new SessionRepository(tempDir);
   });
 

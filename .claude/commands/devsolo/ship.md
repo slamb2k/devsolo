@@ -20,7 +20,7 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
    - Check for uncommitted changes using `git status`
    - If present: Invoke the commit slash command using SlashCommand tool:
      ```
-     SlashCommand with command="/hansolo:commit"
+     SlashCommand with command="/devsolo:commit"
      ```
    - This delegates to the commit slash command which handles:
      - Message generation (if not provided)
@@ -55,7 +55,7 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
      ░▀▀█░█▀█░░█░░█▀▀░█▀▀░░█░░█░█░█░█░
      ░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
      ```
-   - Call `mcp__hansolo__hansolo_ship` with all parameters
+   - Call `mcp__devsolo__devsolo_ship` with all parameters
    - This single tool call handles:
      - Push to remote
      - Create or update GitHub PR
@@ -99,10 +99,10 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 
 ```
 # Ship with auto-generated PR description
-/hansolo ship
+/devsolo ship
 
 # Ship with custom PR description
-/hansolo ship --prDescription="Add OAuth2 authentication
+/devsolo ship --prDescription="Add OAuth2 authentication
 
 This PR implements OAuth2 support for user authentication.
 
@@ -119,13 +119,13 @@ This PR implements OAuth2 support for user authentication.
 Fixes #42"
 
 # Ship but don't merge (for manual review)
-/hansolo ship --merge=false
+/devsolo ship --merge=false
 
 # Ship only staged changes
-/hansolo ship --stagedOnly
+/devsolo ship --stagedOnly
 
 # Push and create PR, but don't merge
-/hansolo ship --createPR --merge=false
+/devsolo ship --createPR --merge=false
 ```
 
 ## What Happens During Ship
@@ -145,7 +145,7 @@ Fixes #42"
    - Create or update pull request
    - Set title from first commit
    - Set description (auto-generated or custom)
-   - Add han-solo footer
+   - Add devsolo footer
 
 4. CI Wait:
    - Monitor CI check status
@@ -176,20 +176,20 @@ Fixes #42"
 
 ## Notes
 
-- Requires an active han-solo session
+- Requires an active devsolo session
 - Requires GitHub authentication (gh CLI or GITHUB_TOKEN)
 - Will commit any uncommitted changes automatically
 - Waits up to 20 minutes for CI checks
 - Uses squash merge to maintain linear history
 - Prevents branch reuse after merge
-- Adds han-solo footer to PR automatically
+- Adds devsolo footer to PR automatically
 - Reports PR URL for easy access
 
 ## Error Handling
 
 git-droid will handle common errors and provide guidance:
 
-- **No active session**: Guide to /hansolo launch
+- **No active session**: Guide to /devsolo launch
 - **GitHub auth missing**: Guide to run `gh auth login`
 - **CI checks failing**: Report which checks failed with logs
 - **Merge conflict**: Guide to resolve conflicts manually

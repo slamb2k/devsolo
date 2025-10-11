@@ -5,7 +5,7 @@
 ## Entity Definitions
 
 ### 1. InstallationContext
-**Purpose**: Represents the environment and mode of han-solo installation
+**Purpose**: Represents the environment and mode of devsolo installation
 **Fields**:
 - `type`: enum ['global', 'local', 'npx'] - Installation method used
 - `npmVersion`: string - NPM version for compatibility checks
@@ -13,7 +13,7 @@
 - `platform`: enum ['darwin', 'linux', 'win32'] - Operating system
 - `isCI`: boolean - Whether running in CI/CD environment
 - `isTTY`: boolean - Whether terminal is interactive
-- `installPath`: string - Absolute path where han-solo is installed
+- `installPath`: string - Absolute path where devsolo is installed
 - `timestamp`: Date - When installation occurred
 
 **Validation Rules**:
@@ -22,7 +22,7 @@
 - installPath must be valid directory path
 
 ### 2. ConfigurationProfile
-**Purpose**: User's workflow preferences and settings for han-solo
+**Purpose**: User's workflow preferences and settings for devsolo
 **Fields**:
 - `version`: string - Config schema version for migrations
 - `workflow`: WorkflowSettings - Git workflow preferences
@@ -79,8 +79,8 @@
 **Fields**:
 - `createdAt`: Date - Initial configuration date
 - `updatedAt`: Date - Last modification date
-- `createdBy`: string - han-solo version that created config
-- `lastModifiedBy`: string - han-solo version that last modified
+- `createdBy`: string - devsolo version that created config
+- `lastModifiedBy`: string - devsolo version that last modified
 - `installationId`: string - Unique installation identifier (UUID)
 
 **Validation Rules**:
@@ -121,7 +121,7 @@
 ### 9. PackageManifest
 **Purpose**: NPM package configuration for publishing
 **Fields**:
-- `name`: string - Package name (@hansolo/cli)
+- `name`: string - Package name (@devsolo/cli)
 - `version`: string - Semantic version
 - `description`: string - Package description
 - `bin`: Map<string, string> - Executable commands

@@ -1,10 +1,10 @@
 # Internal System Documentation
 
-This folder contains internal system documentation that serves as the **source of truth** for han-solo. These documents describe how the system works internally and are used to generate user-facing documentation.
+This folder contains internal system documentation that serves as the **source of truth** for devsolo. These documents describe how the system works internally and are used to generate user-facing documentation.
 
 ## Purpose
 
-The `dev/system/` folder is for **comprehensive technical documentation** about han-solo's internal workings. This is where developers working on han-solo come to understand:
+The `dev/system/` folder is for **comprehensive technical documentation** about devsolo's internal workings. This is where developers working on devsolo come to understand:
 - Complete API surfaces and interfaces
 - All available commands with implementation details
 - Full configuration schema and settings
@@ -56,7 +56,7 @@ The `dev/system/` folder is for **comprehensive technical documentation** about 
 
 ## Who This Is For
 
-- **han-solo contributors** developing new features
+- **devsolo contributors** developing new features
 - **Maintainers** reviewing implementation details
 - **AI assistants** generating user-facing documentation from system specs
 - **Technical writers** creating simplified guides
@@ -72,7 +72,7 @@ Documents in this folder are **detailed technical specifications**. When creatin
 
 **Example**:
 - `dev/system/configuration.md` → Complete YAML schema (all 50+ settings)
-- `guides/configuration.md` → "How to configure han-solo" (10 most common settings)
+- `guides/configuration.md` → "How to configure devsolo" (10 most common settings)
 
 ## Naming Conventions
 

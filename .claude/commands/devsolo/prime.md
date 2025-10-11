@@ -4,7 +4,7 @@ Prime Claude's understanding of the codebase by analyzing project structure and 
 
 ## Purpose
 
-This command helps Claude build a comprehensive mental model of the han-solo project by:
+This command helps Claude build a comprehensive mental model of the devsolo project by:
 - Exploring the file structure
 - Reading core documentation
 - Understanding the architecture and conventions
@@ -42,7 +42,7 @@ Use this at the start of a session or when you need to refresh context about the
 
 ```
 # Prime understanding of the codebase
-/hansolo:prime
+/devsolo:prime
 
 Claude will explore the project structure, read key documentation,
 and provide a summary of the codebase's architecture and conventions.

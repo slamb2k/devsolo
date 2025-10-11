@@ -31,12 +31,12 @@
 - Phase 3-4: Implementation execution (manual or via tools)
 
 ## Summary
-Publishing han-solo to npm with an interactive post-install wizard that guides users through configuration options tailored to their development workflow. The installer must work across npm install (local), npm install -g (global), and npx execution modes while providing a beautiful CLI experience with clear progress feedback and actionable next steps.
+Publishing devsolo to npm with an interactive post-install wizard that guides users through configuration options tailored to their development workflow. The installer must work across npm install (local), npm install -g (global), and npx execution modes while providing a beautiful CLI experience with clear progress feedback and actionable next steps.
 
 ## Technical Context
 **Language/Version**: Node.js 18+ (LTS)
 **Primary Dependencies**: npm registry, cli-prompts library (NEEDS CLARIFICATION: specific CLI framework - inquirer, prompts, or custom?), chalk for colors, ora for spinners
-**Storage**: Configuration files in `.hansolo/` directory (project or user level based on installation type)
+**Storage**: Configuration files in `.devsolo/` directory (project or user level based on installation type)
 **Testing**: Jest for unit tests, integration tests for installer flows
 **Target Platform**: Cross-platform CLI (Linux, macOS, Windows with terminal emulator)
 **Project Type**: single - CLI tool with installer
@@ -54,13 +54,13 @@ Publishing han-solo to npm with an interactive post-install wizard that guides u
 - [x] **User Sovereignty**: Explicit permission for each configuration choice, skippable installer
 - [x] **Ambient Awareness**: Visual feedback with progress bars, colors, and clear status
 - [x] **AI-Assisted, Not AI-Dependent**: Installer works without AI, manual input for all options
-- [x] **Initialization First**: Installer sets up initial `.hansolo/` configuration structure
+- [x] **Initialization First**: Installer sets up initial `.devsolo/` configuration structure
 
 ### Quality Gates
 - [x] **Non-Interactive Support**: Must detect and handle CI/CD environments
 - [x] **Cross-Platform Compatibility**: Works on all major operating systems
 - [x] **Graceful Degradation**: Falls back when terminal features unavailable
-- [x] **Configuration Persistence**: Settings saved to appropriate `.hansolo/` directory
+- [x] **Configuration Persistence**: Settings saved to appropriate `.devsolo/` directory
 - [x] **Error Recovery**: Clear error messages with actionable recovery steps
 
 ## Project Structure

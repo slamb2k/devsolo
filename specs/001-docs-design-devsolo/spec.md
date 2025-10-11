@@ -1,9 +1,9 @@
-# Feature Specification: han-solo Git Workflow Automation
+# Feature Specification: devsolo Git Workflow Automation
 
-**Feature Branch**: `001-docs-design-hansolo`
+**Feature Branch**: `001-docs-design-devsolo`
 **Created**: 2025-09-21
 **Status**: Draft
-**Input**: User description: "@docs/design/hansolo-prd.md @docs/design/hansolo-product-brief.md"
+**Input**: User description: "@docs/design/devsolo-prd.md @docs/design/devsolo-product-brief.md"
 
 ## Execution Flow (main)
 ```
@@ -58,7 +58,7 @@ When creating this spec from a user prompt:
 As a developer working on a project, I need an automated Git workflow tool that enforces best practices, prevents merge conflicts, and maintains linear history while reducing the time I spend on repetitive Git operations. The tool should work for both solo developers and teams, adapting to organizational constraints while maintaining developer control over critical decisions.
 
 ### Acceptance Scenarios
-1. **Given** a new project without Git initialization, **When** developer runs initialization command, **Then** system creates Git repository, sets up remote repository if needed, configures hooks, and marks project as ready for han-solo workflows
+1. **Given** a new project without Git initialization, **When** developer runs initialization command, **Then** system creates Git repository, sets up remote repository if needed, configures hooks, and marks project as ready for devsolo workflows
 2. **Given** an initialized project, **When** developer starts a new feature workflow, **Then** system creates a feature branch from updated main, tracks session state, and provides visual feedback of workflow progress
 3. **Given** changes ready to ship, **When** developer runs ship command, **Then** system validates changes, generates commit messages, creates pull request, and guides through merge process while maintaining linear history
 4. **Given** a critical production issue, **When** developer initiates hotfix workflow, **Then** system creates hotfix branch, applies fix, and backports to appropriate branches with automatic validation
@@ -88,7 +88,7 @@ As a developer working on a project, I need an automated Git workflow tool that 
 - **FR-011**: System MUST validate all state transitions before execution
 - **FR-012**: System MUST allow workflow abortion at any non-irreversible stage
 - **FR-013**: System MUST automatically create GitHub/GitLab repositories during initialization if none exist
-- **FR-014**: System MUST install to .hansolo/ directory to maintain separation from other tools
+- **FR-014**: System MUST install to .devsolo/ directory to maintain separation from other tools
 - **FR-015**: System MUST provide comprehensive audit trail with timestamps for all operations
 - **FR-016**: System MUST support both user-level and project-level component installation
 - **FR-017**: System MUST clean up stale sessions after [NEEDS CLARIFICATION: timeout period not specified - 7 days, 30 days?]

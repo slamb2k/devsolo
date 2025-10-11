@@ -100,7 +100,7 @@ export class ContextDetector {
 
   private getGlobalPath(): string {
     const home = process.env['HOME'] || process.env['USERPROFILE'] || '';
-    return path.join(home, '.hansolo');
+    return path.join(home, '.devsolo');
   }
 
   private getLocalPath(): string {
@@ -108,11 +108,11 @@ export class ContextDetector {
     let dir = process.cwd();
     while (dir !== path.dirname(dir)) {
       if (fs.existsSync(path.join(dir, 'package.json'))) {
-        return path.join(dir, '.hansolo');
+        return path.join(dir, '.devsolo');
       }
       dir = path.dirname(dir);
     }
-    return path.join(process.cwd(), '.hansolo');
+    return path.join(process.cwd(), '.devsolo');
   }
 
   private detectExistingInstallation(): boolean {

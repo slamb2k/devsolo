@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "han-solo MCP Server Tools Contract",
-  "description": "Defines the tools exposed by the han-solo MCP server",
+  "title": "devsolo MCP Server Tools Contract",
+  "description": "Defines the tools exposed by the devsolo MCP server",
   "type": "object",
   "properties": {
     "tools": {
@@ -53,7 +53,7 @@
   "examples": [
     {
       "name": "configure_workflow",
-      "description": "Initialize han-solo in a project or update configuration",
+      "description": "Initialize devsolo in a project or update configuration",
       "inputSchema": {
         "type": "object",
         "properties": {

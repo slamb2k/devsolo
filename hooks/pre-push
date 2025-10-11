@@ -1,5 +1,5 @@
 #!/bin/bash
-# han-solo pre-push hook
+# devsolo pre-push hook
 # Validates workflow state before pushing
 
 PROTECTED_BRANCHES="main master develop production"
@@ -20,21 +20,21 @@ while read LOCAL_REF LOCAL_SHA REMOTE_REF REMOTE_SHA; do
   done
 done
 
-# Check han-solo session state
-if command -v hansolo &> /dev/null; then
+# Check devsolo session state
+if command -v devsolo &> /dev/null; then
   # Verify session is in correct state for push
-  HANSOLO_STATE=$(hansolo status 2>/dev/null | grep "Current state:" | awk '{print $3}')
+  DEVSOLO_STATE=$(devsolo status 2>/dev/null | grep "Current state:" | awk '{print $3}')
 
-  case "$HANSOLO_STATE" in
+  case "$DEVSOLO_STATE" in
     "CHANGES_COMMITTED"|"PUSHED"|"PR_CREATED"|"REBASING"|"MERGING")
-      echo "✅ han-solo session in valid state for push: $HANSOLO_STATE"
+      echo "✅ devsolo session in valid state for push: $DEVSOLO_STATE"
       ;;
     "")
-      echo "⚠️  No active han-solo session. Proceeding with manual push."
+      echo "⚠️  No active devsolo session. Proceeding with manual push."
       ;;
     *)
-      echo "⚠️  han-solo session in state: $HANSOLO_STATE"
-      echo "Consider using 'hansolo ship' for managed workflow."
+      echo "⚠️  devsolo session in state: $DEVSOLO_STATE"
+      echo "Consider using 'devsolo ship' for managed workflow."
       ;;
   esac
 fi
@@ -61,7 +61,7 @@ fi
 # Verify no merge commits (enforce linear history)
 MERGE_COMMITS=$(git log --merges origin/$CURRENT_BRANCH..$CURRENT_BRANCH 2>/dev/null | wc -l)
 if [ $MERGE_COMMITS -gt 0 ]; then
-  echo "❌ Merge commits detected! han-solo enforces linear history."
+  echo "❌ Merge commits detected! devsolo enforces linear history."
   echo "Please rebase instead of merging."
   exit 1
 fi

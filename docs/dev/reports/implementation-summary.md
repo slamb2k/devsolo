@@ -1,4 +1,4 @@
-# Han-Solo Simplified Workflow Implementation Summary
+# DevSolo Simplified Workflow Implementation Summary
 
 ## Completed Work
 
@@ -35,7 +35,7 @@ Created `ShipCommandV2` that does everything automatically:
 
 **New Behavior:**
 ```bash
-/hansolo:ship  # Single command does:
+/devsolo:ship  # Single command does:
 # 1. Commit changes
 # 2. Push to remote
 # 3. Create/update PR
@@ -92,8 +92,8 @@ Created `LaunchCommandV2` with comprehensive checks:
 1. ✅ `src/services/validation/pre-flight-checks.ts`
 2. ✅ `src/services/validation/branch-validator.ts`
 3. ✅ `src/services/validation/pr-validator.ts`
-4. ✅ `src/commands/hansolo-ship-v2.ts`
-5. ✅ `src/commands/hansolo-launch-v2.ts`
+4. ✅ `src/commands/devsolo-ship-v2.ts`
+5. ✅ `src/commands/devsolo-launch-v2.ts`
 
 ### Files Modified:
 1. ✅ `src/models/types.ts` - Added `pr.merged`, `pr.mergedAt`, and `branch` fields to SessionMetadata
@@ -109,17 +109,17 @@ Created `LaunchCommandV2` with comprehensive checks:
 
 ### 1. Replace Old Commands (Breaking Change - v2.0.0)
 Once ready for release:
-- Backup `src/commands/hansolo-ship.ts` → `hansolo-ship-v1.ts.bak`
-- Rename `hansolo-ship-v2.ts` → `hansolo-ship.ts`
-- Backup `src/commands/hansolo-launch.ts` → `hansolo-launch-v1.ts.bak`
-- Rename `hansolo-launch-v2.ts` → `hansolo-launch.ts`
+- Backup `src/commands/devsolo-ship.ts` → `devsolo-ship-v1.ts.bak`
+- Rename `devsolo-ship-v2.ts` → `devsolo-ship.ts`
+- Backup `src/commands/devsolo-launch.ts` → `devsolo-launch-v1.ts.bak`
+- Rename `devsolo-launch-v2.ts` → `devsolo-launch.ts`
 - Update imports in `src/index.ts` and other command files
 
 ### 2. Update MCP Server
-Update `src/mcp/hansolo-mcp-server.ts`:
+Update `src/mcp/devsolo-mcp-server.ts`:
 ```typescript
 {
-  name: 'hansolo_ship',
+  name: 'devsolo_ship',
   description: 'Complete workflow automatically (commit, push, PR, merge, cleanup)',
   inputSchema: {
     type: 'object',
@@ -138,8 +138,8 @@ Create comprehensive tests:
 - `tests/services/validation/branch-validator.test.ts`
 - `tests/services/validation/pr-validator.test.ts`
 - `tests/services/validation/pre-flight-checks.test.ts`
-- `tests/commands/hansolo-ship-v2.test.ts`
-- `tests/commands/hansolo-launch-v2.test.ts`
+- `tests/commands/devsolo-ship-v2.test.ts`
+- `tests/commands/devsolo-launch-v2.test.ts`
 
 ### 4. Update Documentation
 
@@ -148,10 +148,10 @@ Create comprehensive tests:
 ## Simplified Workflow
 
 ### Start Feature
-/hansolo:launch "add-user-auth"
+/devsolo:launch "add-user-auth"
 
 ### Ship Feature (One Command!)
-/hansolo:ship
+/devsolo:ship
 # Automatically:
 # - Commits changes
 # - Pushes to remote
@@ -294,15 +294,15 @@ Migration guide from v1 → v2 for users relying on old flags
 ### Migration:
 **Before (v1):**
 ```bash
-/hansolo:ship            # Commit
-/hansolo:ship --push     # Push
-/hansolo:ship --create-pr # Create PR
-/hansolo:ship --merge    # Merge
+/devsolo:ship            # Commit
+/devsolo:ship --push     # Push
+/devsolo:ship --create-pr # Create PR
+/devsolo:ship --merge    # Merge
 ```
 
 **After (v2):**
 ```bash
-/hansolo:ship  # Does everything
+/devsolo:ship  # Does everything
 ```
 
 ## Defensive Guarantees

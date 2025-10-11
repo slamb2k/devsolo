@@ -30,8 +30,8 @@ Phase 2 of the codebase optimization plan focuses on architectural improvements 
 - `src/mcp-server/tools/*.ts` (11 files) - Old tool implementations
 - **Why relevant**: Dead code that only exists for tests, creates confusion, uses 96KB
 
-**bin/hansolo-mcp-enhanced** - Broken binary
-- References non-existent `dist/mcp/hansolo-mcp-server-enhanced.js`
+**bin/devsolo-mcp-enhanced** - Broken binary
+- References non-existent `dist/mcp/devsolo-mcp-server-enhanced.js`
 - **Why relevant**: Non-functional binary that should be removed
 
 **Tests importing old server** (12 files):
@@ -47,14 +47,14 @@ Phase 2 of the codebase optimization plan focuses on architectural improvements 
 - `tests/integration/scenario-4-hotfix.test.ts`
 - `tests/integration/scenario-5-multi-session.test.ts`
 - `tests/integration/scenario-6-no-ai-fallback.test.ts`
-- **Why relevant**: All import from dead `mcp-server/server`, need to be updated to use `mcp/hansolo-mcp-server`
+- **Why relevant**: All import from dead `mcp-server/server`, need to be updated to use `mcp/devsolo-mcp-server`
 
 ### Production MCP Server (Keep)
 
-**src/mcp/hansolo-mcp-server.ts** (1,180 lines)
-- **Why relevant**: This is the ACTUAL production server used by `bin/hansolo-mcp`
+**src/mcp/devsolo-mcp-server.ts** (1,180 lines)
+- **Why relevant**: This is the ACTUAL production server used by `bin/devsolo-mcp`
 
-**bin/hansolo-mcp**
+**bin/devsolo-mcp**
 - **Why relevant**: Working binary that uses correct server, should be kept
 
 ### Test Configuration
@@ -71,7 +71,7 @@ Phase 2 of the codebase optimization plan focuses on architectural improvements 
 /src/__tests__/state-machines/
 /tests/integration/                              (all 6 scenario tests)
 /tests/contracts/                                (all 6 contract tests)
-/tests/mcp/hansolo-mcp-server.test.ts
+/tests/mcp/devsolo-mcp-server.test.ts
 /tests/models/audit-entry.test.ts
 /tests/models/configuration.test.ts
 /tests/models/state-transition.test.ts
@@ -84,20 +84,20 @@ Phase 2 of the codebase optimization plan focuses on architectural improvements 
 ### Large Command Files (For Refactoring)
 
 **High Priority** (>500 lines):
-- `src/commands/hansolo-ship.ts` (708 lines) - Ship workflow orchestration
-- `src/commands/hansolo-status-line.ts` (643 lines) - Status line management
-- `src/commands/hansolo-validate.ts` (580 lines) - Validation command
-- `src/commands/hansolo-config.ts` (578 lines) - Configuration management
-- `src/commands/hansolo-launch.ts` (561 lines) - Launch workflow
-- `src/commands/hansolo-hotfix.ts` (544 lines) - Hotfix workflow
-- `src/commands/hansolo-cleanup.ts` (521 lines) - Cleanup operations
+- `src/commands/devsolo-ship.ts` (708 lines) - Ship workflow orchestration
+- `src/commands/devsolo-status-line.ts` (643 lines) - Status line management
+- `src/commands/devsolo-validate.ts` (580 lines) - Validation command
+- `src/commands/devsolo-config.ts` (578 lines) - Configuration management
+- `src/commands/devsolo-launch.ts` (561 lines) - Launch workflow
+- `src/commands/devsolo-hotfix.ts` (544 lines) - Hotfix workflow
+- `src/commands/devsolo-cleanup.ts` (521 lines) - Cleanup operations
 
 **Why relevant**: Violate single responsibility principle, mix business logic with CLI concerns, difficult to test and maintain
 
 ### Package Configuration
 
 **package.json**
-- `bin.hansolo-mcp-enhanced` - Broken binary to remove
+- `bin.devsolo-mcp-enhanced` - Broken binary to remove
 - `scripts.mcp:start` - References non-existent file
 - **Why relevant**: Need to clean up broken binaries and scripts
 
@@ -134,8 +134,8 @@ IMPORTANT: Execute every step in order, top to bottom.
 
 ### Step 3: Remove Broken Binary and Scripts
 
-- Delete broken binary: `rm bin/hansolo-mcp-enhanced`
-- Update package.json to remove `hansolo-mcp-enhanced` from bin section
+- Delete broken binary: `rm bin/devsolo-mcp-enhanced`
+- Update package.json to remove `devsolo-mcp-enhanced` from bin section
 - Update package.json scripts:
   - Remove `mcp:start` (references non-existent file)
   - Rename `mcp:start:legacy` to `mcp:start` (this is the real one)
@@ -151,8 +151,8 @@ Update all 6 contract tests to import from production server:
 
 **For each test in tests/contracts/:**
 - Change: `import { MCPServer } from '../../src/mcp-server/server';`
-- To: `import { HanSoloMCPServer } from '../../src/mcp/hansolo-mcp-server';`
-- Update test setup to use `HanSoloMCPServer` class
+- To: `import { DevSoloMCPServer } from '../../src/mcp/devsolo-mcp-server';`
+- Update test setup to use `DevSoloMCPServer` class
 - Update test expectations to match production server API (may differ from old server)
 
 **Files to update:**
@@ -170,8 +170,8 @@ Update all 6 contract tests to import from production server:
 Update all 6 integration scenario tests similarly:
 
 **For each test in tests/integration/:**
-- Change import from `mcp-server/server` to `mcp/hansolo-mcp-server`
-- Update instantiation to use `HanSoloMCPServer`
+- Change import from `mcp-server/server` to `mcp/devsolo-mcp-server`
+- Update instantiation to use `DevSoloMCPServer`
 - Fix any API differences between old and new server
 - Verify test scenarios still make sense
 
@@ -218,11 +218,11 @@ Re-enable and fix state machine tests:
 - Verify state transitions test correctly
 - Ensure all state machine paths are tested
 
-**Rationale**: State machines are core to han-solo's workflow management.
+**Rationale**: State machines are core to devsolo's workflow management.
 
 ### Step 8: Fix ESM Module Issues for MCP Server Test
 
-Re-enable tests/mcp/hansolo-mcp-server.test.ts:
+Re-enable tests/mcp/devsolo-mcp-server.test.ts:
 
 **Issue**: Test fails due to ESM module handling for chalk/boxen
 
@@ -280,7 +280,7 @@ Update test configuration to reflect fixed tests:
 
 **Rationale**: Verify test suite is fully functional before proceeding.
 
-### Step 12: Refactor hansolo-ship.ts (Highest Priority)
+### Step 12: Refactor devsolo-ship.ts (Highest Priority)
 
 **Current**: 708 lines, mixes business logic with CLI concerns
 
@@ -297,7 +297,7 @@ Update test configuration to reflect fixed tests:
 
 **Rationale**: Separation of concerns, easier to test, easier to understand.
 
-### Step 13: Refactor hansolo-status-line.ts
+### Step 13: Refactor devsolo-status-line.ts
 
 **Current**: 643 lines
 
@@ -310,7 +310,7 @@ Update test configuration to reflect fixed tests:
 
 **Rationale**: Status line logic is reusable, should be in service layer.
 
-### Step 14: Refactor hansolo-validate.ts
+### Step 14: Refactor devsolo-validate.ts
 
 **Current**: 580 lines
 
@@ -326,10 +326,10 @@ Update test configuration to reflect fixed tests:
 ### Step 15: Consider Refactoring Other Large Commands
 
 **If time permits**, apply same pattern to:
-- hansolo-config.ts (578 lines)
-- hansolo-launch.ts (561 lines)
-- hansolo-hotfix.ts (544 lines)
-- hansolo-cleanup.ts (521 lines)
+- devsolo-config.ts (578 lines)
+- devsolo-launch.ts (561 lines)
+- devsolo-hotfix.ts (544 lines)
+- devsolo-cleanup.ts (521 lines)
 
 **If not enough time**, document plan for future work and move on.
 
@@ -377,7 +377,7 @@ Execute every command to validate the chore is complete with zero regressions.
 
 **Functionality Verification:**
 - `node dist/index.js --help` - Verify CLI works
-- `node dist/mcp/hansolo-mcp-server.js --help` - Verify MCP server starts (should error or show help)
+- `node dist/mcp/devsolo-mcp-server.js --help` - Verify MCP server starts (should error or show help)
 - `npm run mcp:start` - Verify MCP start script works (kill after startup)
 
 **Code Quality:**
@@ -389,7 +389,7 @@ Execute every command to validate the chore is complete with zero regressions.
 **Package Integrity:**
 - `npm ls` - Verify no broken dependencies
 - `npm audit` - Check for security issues (fix if introduced)
-- `cat package.json | grep hansolo-mcp-enhanced` - Verify broken binary removed (should return nothing)
+- `cat package.json | grep devsolo-mcp-enhanced` - Verify broken binary removed (should return nothing)
 
 **Git Status:**
 - `git status` - Should show only intended changes

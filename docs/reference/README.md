@@ -10,7 +10,7 @@ The `reference/` folder stores materials from **external sources** that provide 
 - Reference implementations from other projects
 - External technical specifications
 
-**Important**: This folder is for **external** materials only. Internal han-solo documentation belongs in `dev/system/`.
+**Important**: This folder is for **external** materials only. Internal devsolo documentation belongs in `dev/system/`.
 
 ## What Belongs Here
 
@@ -74,7 +74,7 @@ To generate a new repomix snapshot:
 npm install -g repomix
 
 # Generate snapshot from project root
-cd /home/slamb2k/work/hansolo
+cd /home/slamb2k/work/devsolo
 repomix
 
 # Move to this folder with appropriate name
@@ -97,7 +97,7 @@ mv repomix-output.xml docs/reference/repomix-$(date +%Y-%m-%d).md
 
 ## What Does NOT Belong Here
 
-❌ **Internal han-solo documentation** → Use `dev/system/`
+❌ **Internal devsolo documentation** → Use `dev/system/`
 - API documentation
 - Command references
 - Configuration schemas

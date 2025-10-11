@@ -1,5 +1,5 @@
-# Example han-solo configuration file
-# Copy to .hansolo.yaml and customize for your project
+# Example devsolo configuration file
+# Copy to .devsolo.yaml and customize for your project
 
 # Workflow Configuration
 workflow:
@@ -83,7 +83,7 @@ sessions:
   autoSave: true
 
   # Session storage location
-  storagePath: .hansolo/sessions
+  storagePath: .devsolo/sessions
 
 # Hotfix Configuration
 hotfix:

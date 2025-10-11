@@ -126,7 +126,7 @@ implements MCPTool<TInput, TResult> {
     if (!isInitialized) {
       return {
         success: false,
-        errors: ['han-solo is not initialized. Run hansolo_init first.'],
+        errors: ['devsolo is not initialized. Run devsolo_init first.'],
       };
     }
     return { success: true };
