@@ -11,6 +11,16 @@ Cancel the current workflow session and optionally delete the feature branch.
 
 ## Workflow
 
+**Display the following banner immediately before doing anything else:**
+
+```
+░█▀█░█▀▄░█▀█░█▀▄░▀█▀░▀█▀░█▀█░█▀▀░
+░█▀█░█▀▄░█░█░█▀▄░░█░░░█░░█░█░█░█░
+░▀░▀░▀▀░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀░
+```
+
+Once displayed, continue with the following steps:
+
 1. **Invoke git-droid sub-agent** to coordinate the abort workflow
 2. git-droid will:
    - Verify session exists for the target branch

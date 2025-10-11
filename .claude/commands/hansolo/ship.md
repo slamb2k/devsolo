@@ -13,6 +13,16 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 
 ## Workflow
 
+**Display the following banner immediately before doing anything else:**
+
+```
+░█▀▀░█░█░▀█▀░█▀█░█▀█░▀█▀░█▀█░█▀▀░
+░▀▀█░█▀█░░█░░█▀▀░█▀▀░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
+```
+
+Once displayed, continue with the following steps:
+
 1. **Invoke git-droid sub-agent** to orchestrate the complete ship workflow
 2. git-droid will:
 

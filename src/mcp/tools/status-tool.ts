@@ -77,9 +77,7 @@ export class StatusTool extends BaseMCPTool<StatusToolInput, QueryToolResult> {
   protected createFinalResult(
     workflowResult: WorkflowExecutionResult,
     _preFlightResult: any = null,
-    _postFlightResult: any = null,
-    viaPrompt: boolean = false,
-    banner: string | null = null
+    _postFlightResult: any = null
   ): QueryToolResult {
     const result: QueryToolResult = {
       success: workflowResult.success,
@@ -89,11 +87,7 @@ export class StatusTool extends BaseMCPTool<StatusToolInput, QueryToolResult> {
       warnings: workflowResult.warnings || [],
     };
 
-    // Include banner in warnings if NOT called via prompt (to show with tool result)
-    if (!viaPrompt && banner) {
-      result.warnings = result.warnings || [];
-      result.warnings.unshift(banner);
-    }
+    // Note: Banner display is now handled by slash commands
 
     return result;
   }

@@ -10,6 +10,16 @@ Commit changes to the current feature branch with an auto-generated or custom me
 
 ## Workflow
 
+**Display the following banner immediately before doing anything else:**
+
+```
+░█▀▀░█▀█░█▀▄▀█░█▀▄▀█░▀█▀░▀█▀░
+░█░░░█░█░█░▀░█░█░▀░█░░█░░░█░░
+░▀▀▀░▀▀▀░▀░░░▀░▀░░░▀░▀▀▀░░▀░░
+```
+
+Once displayed, continue with the following steps:
+
 1. **Invoke git-droid sub-agent** to coordinate the commit workflow
 2. git-droid will:
    - Verify active session exists (guide to /hansolo launch if not)

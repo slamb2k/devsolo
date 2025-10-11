@@ -13,6 +13,16 @@ Create an emergency hotfix workflow with higher priority and optional fast-track
 
 ## Workflow
 
+**Display the following banner immediately before doing anything else:**
+
+```
+░█░█░█▀█░▀█▀░█▀▀░▀█▀░█░█░
+░█▀█░█░█░░█░░█▀▀░░█░░▄▀▄░
+░▀░▀░▀▀▀░░▀░░▀░░░▀▀▀░▀░▀░
+```
+
+Once displayed, continue with the following steps:
+
 1. **Invoke git-droid sub-agent** to coordinate the hotfix workflow
 2. git-droid will:
    - Validate severity level and adjust behavior accordingly
