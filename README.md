@@ -21,7 +21,27 @@ han-solo is a powerful Claude Code plugin that streamlines Git workflows while m
 
 ## Installation
 
-### MCP Server Setup
+### Option 1: Plugin Installation (Recommended) 🎯
+
+**Status**: Coming soon - awaiting Claude Code marketplace
+
+When the Claude Code marketplace becomes available, you'll be able to install with a single command:
+
+```bash
+/plugin install hansolo
+```
+
+This automatically:
+- Installs the MCP server
+- Registers all 13 slash commands
+- Configures the sub-agents (git-droid, docs-droid)
+- No manual configuration required!
+
+For testing or development, see [Plugin Installation Guide](./docs/guides/plugin-installation.md).
+
+### Option 2: Manual MCP Setup (Alternative)
+
+If you prefer manual control or are testing local changes:
 
 1. **Clone and build** the han-solo repository:
    ```bash
@@ -38,7 +58,7 @@ han-solo is a powerful Claude Code plugin that streamlines Git workflows while m
      "mcpServers": {
        "hansolo": {
          "command": "node",
-         "args": ["/path/to/hansolo/build/index.js"]
+         "args": ["/path/to/hansolo/dist/mcp/hansolo-mcp-server.js"]
        }
      }
    }
@@ -51,6 +71,8 @@ han-solo is a powerful Claude Code plugin that streamlines Git workflows while m
    "Initialize han-solo in this project"
    ```
    Claude will invoke the `hansolo_init` tool automatically.
+
+For detailed installation instructions, see the [Installation Guide](./docs/guides/installation.md).
 
 ## Quick Start
 

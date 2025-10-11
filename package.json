@@ -9,7 +9,10 @@
   "scripts": {
     "build": "tsc",
     "build:mcp": "tsc -p tsconfig.mcp.json",
-    "clean": "rimraf dist coverage",
+    "build:plugin": "node scripts/build-plugin.js",
+    "package:plugin": "node scripts/package-plugin.js",
+    "test:plugin": "node scripts/test-plugin.js",
+    "clean": "rimraf dist coverage dist-plugin",
     "dev": "tsc --watch",
     "dev:mcp": "tsc --watch -p tsconfig.mcp.json",
     "test": "jest",
@@ -58,10 +61,12 @@
   },
   "files": [
     "dist",
+    "dist-plugin",
     "bin",
     "templates",
     "scripts",
     ".hansolo/commands",
+    ".claude-plugin",
     "README.md",
     "LICENSE"
   ],
