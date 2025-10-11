@@ -133,8 +133,11 @@ When coordinating multiple tool calls:
 ```
 1. Check for uncommitted changes
    - If present: offer to stash or commit
+   - If user chooses commit: Use SlashCommand tool to invoke `/hansolo:commit`
+   - If user chooses stash: Stash with descriptive message
 2. Check for existing session
    - If present: offer to abort old session
+   - If user confirms: Use SlashCommand tool to invoke `/hansolo:abort`
 3. Generate branch name (if not provided)
    - From description → feature/user-auth
    - From timestamp → feature/2025-10-12-011345
@@ -158,9 +161,10 @@ When coordinating multiple tool calls:
 ### Ship Workflow
 ```
 1. Check for uncommitted changes
-   - If present: call commit workflow first
+   - If present: Use SlashCommand tool to invoke `/hansolo:commit`
+   - Wait for commit to complete before proceeding
 2. Check for active session
-   - If none: guide to launch first
+   - If none: guide user to use `/hansolo:launch` first
 3. Generate PR description (if not provided)
    - Analyze commits since main
    - Review changed files
@@ -292,7 +296,7 @@ git-droid analysis:
 - Uncommitted changes detected ⚠
 - Will commit first before shipping
 
-Calling /hansolo commit...
+Using SlashCommand tool to invoke `/hansolo:commit`...
 [commit workflow output]
 
 Calling mcp__hansolo__hansolo_ship...

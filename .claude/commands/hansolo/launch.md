@@ -13,8 +13,12 @@ Start a new feature workflow. Creates a feature branch and han-solo session.
 1. **Invoke git-droid sub-agent** to coordinate the launch workflow
 2. git-droid will:
    - Analyze current git state (check if on main, clean working directory)
-   - Handle uncommitted changes (offer to stash or commit)
-   - Handle existing session (offer to abort)
+   - Handle uncommitted changes:
+     - If present: Ask user "You have uncommitted changes. Would you like to: (a) commit them first, (b) stash them, (c) cancel?"
+     - If (a) commit: Use SlashCommand tool to invoke `/hansolo:commit`
+     - If (b) stash: Stash changes with descriptive message
+     - If (c) cancel: Exit without launching
+   - Handle existing session (offer to abort using SlashCommand tool to invoke `/hansolo:abort`)
    - Generate branch name if not provided:
      - From description → convert to kebab-case with appropriate prefix (feature/, fix/, docs/, etc)
      - From uncommitted changes → analyze diff to infer purpose
