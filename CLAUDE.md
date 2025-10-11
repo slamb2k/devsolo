@@ -51,8 +51,8 @@ if (fs.existsSync('.hansolo/session.json')) {
 
 If `.hansolo/session.json` exists, **NEVER** use these commands:
 - `git commit` → Use `/hansolo:ship` instead
-- `git push` → Use `/hansolo:ship --push` instead
-- `gh pr create` → Use `/hansolo:ship --create-pr` instead
+- `git push` → Use `/hansolo:ship` instead
+- `gh pr create` → Use `/hansolo:ship` instead
 - `git checkout -b` → Use `/hansolo:launch` instead
 - `git rebase` → han-solo handles this automatically
 
@@ -120,11 +120,11 @@ For dated snapshots: `repomix-2025-10-09.md`, `export-2025-01-15.md`
 - **Product specs** → `docs/specs/`
 - **Completed/superseded docs** → `docs/archive/`
 
-### Using the /doc Command
+### Using the /hansolo:doc Command
 
-The `/doc` slash command has two modes:
+The `/hansolo:doc` slash command has two modes:
 
-**AUDIT MODE** (no arguments): `/doc`
+**AUDIT MODE** (no arguments): `/hansolo:doc`
 - Scans all documentation for naming and placement issues
 - Checks for missing README.md entries
 - Identifies documents that should be archived
@@ -132,7 +132,7 @@ The `/doc` slash command has two modes:
 - Updates all README.md files
 - Reports all findings and actions
 
-**CREATE MODE** (with content): `/doc <name> <content>`
+**CREATE MODE** (with content): `/hansolo:doc <name> <content>`
 - Analyzes your content to determine correct placement
 - Applies naming conventions automatically
 - Updates relevant README.md files

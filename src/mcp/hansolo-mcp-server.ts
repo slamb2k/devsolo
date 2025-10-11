@@ -3,11 +3,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-  ListPromptsRequestSchema,
-  GetPromptRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { getBanner } from '../ui/banners';
 
 // Import MCP tools (no CLI/UI dependencies!)
 import {
@@ -37,7 +34,6 @@ import { StashManager } from '../services/stash-manager';
 const InitSchema = z.object({
   scope: z.enum(['project', 'user']).optional(),
   auto: z.boolean().optional(),
-  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const LaunchSchema = z.object({
@@ -46,7 +42,6 @@ const LaunchSchema = z.object({
   auto: z.boolean().optional(),
   stashRef: z.string().optional(),
   popStash: z.boolean().optional(),
-  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const SessionsSchema = z.object({
@@ -54,28 +49,24 @@ const SessionsSchema = z.object({
   verbose: z.boolean().optional(),
   cleanup: z.boolean().optional(),
   auto: z.boolean().optional(),
-  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const SwapSchema = z.object({
   branchName: z.string(),
   auto: z.boolean().optional(),
   stash: z.boolean().optional(),
-  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const AbortSchema = z.object({
   branchName: z.string().optional(),
   auto: z.boolean().optional(),
   deleteBranch: z.boolean().optional(),
-  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const CommitSchema = z.object({
   message: z.string().optional(),
   auto: z.boolean().optional(),
   stagedOnly: z.boolean().optional(),
-  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const ShipSchema = z.object({
@@ -85,7 +76,6 @@ const ShipSchema = z.object({
   merge: z.boolean().optional(),
   auto: z.boolean().optional(),
   stagedOnly: z.boolean().optional(),
-  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const HotfixSchema = z.object({
@@ -95,7 +85,6 @@ const HotfixSchema = z.object({
   skipReview: z.boolean().optional(),
   autoMerge: z.boolean().optional(),
   auto: z.boolean().optional(),
-  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const StatusLineSchema = z.object({
@@ -105,17 +94,14 @@ const StatusLineSchema = z.object({
   showBranchInfo: z.boolean().optional(),
   showStateInfo: z.boolean().optional(),
   auto: z.boolean().optional(),
-  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const CleanupSchema = z.object({
   deleteBranches: z.boolean().optional(),
   auto: z.boolean().optional(),
-  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 const StatusSchema = z.object({
-  _via_prompt: z.boolean().optional(), // Hidden: validates call is via MCP prompt
 });
 
 export class HanSoloMCPServer {
@@ -143,7 +129,6 @@ export class HanSoloMCPServer {
       {
         capabilities: {
           tools: {},
-          prompts: {},
         },
       }
     );
@@ -189,7 +174,6 @@ export class HanSoloMCPServer {
     this.statusLineTool = new StatusLineTool(configManager, this.server);
 
     this.setupHandlers();
-    this.setupPromptHandlers();
   }
 
   private setupHandlers(): void {
@@ -765,289 +749,6 @@ export class HanSoloMCPServer {
     return lines.join('\n');
   }
 
-  private setupPromptHandlers(): void {
-    // List available prompts
-    this.server.setRequestHandler(ListPromptsRequestSchema, async () => {
-      return {
-        prompts: [
-          {
-            name: 'init',
-            description: '🚀 Initialize han-solo in your project',
-            arguments: [
-              {
-                name: 'scope',
-                description: 'Installation scope (project or user)',
-                required: false,
-              },
-              {
-                name: 'force',
-                description: 'Force reinitialization',
-                required: false,
-              },
-            ],
-          },
-          {
-            name: 'launch',
-            description: '🌟 Start a new feature workflow',
-            arguments: [
-              {
-                name: 'description',
-                description: 'Description of the feature',
-                required: false,
-              },
-              {
-                name: 'branchName',
-                description: 'Name for the feature branch',
-                required: false,
-              },
-              {
-                name: 'auto',
-                description: 'Automatically choose recommended options for prompts',
-                required: false,
-              },
-            ],
-          },
-          {
-            name: 'commit',
-            description: '💾 Commit changes with a message',
-            arguments: [
-              {
-                name: 'message',
-                description: 'Commit message',
-                required: true,
-              },
-              {
-                name: 'stagedOnly',
-                description: 'Only commit staged files',
-                required: false,
-              },
-            ],
-          },
-          {
-            name: 'ship',
-            description: '🚢 Ship your changes (commit, push, PR, merge)',
-            arguments: [
-              {
-                name: 'prDescription',
-                description: 'Pull request description',
-                required: false,
-              },
-              {
-                name: 'push',
-                description: 'Push to remote',
-                required: false,
-              },
-              {
-                name: 'createPR',
-                description: 'Create pull request',
-                required: false,
-              },
-              {
-                name: 'merge',
-                description: 'Merge pull request',
-                required: false,
-              },
-              {
-                name: 'stagedOnly',
-                description: 'Only commit staged files',
-                required: false,
-              },
-            ],
-          },
-          {
-            name: 'swap',
-            description: '🔄 Switch between workflow sessions',
-            arguments: [
-              {
-                name: 'branchName',
-                description: 'Branch to swap to',
-                required: true,
-              },
-              {
-                name: 'stash',
-                description: 'Stash changes before swapping',
-                required: false,
-              },
-            ],
-          },
-          {
-            name: 'abort',
-            description: '❌ Abort workflow session',
-            arguments: [
-              {
-                name: 'branchName',
-                description: 'Branch to abort (current if not specified)',
-                required: false,
-              },
-              {
-                name: 'deleteBranch',
-                description: 'Delete the branch after aborting',
-                required: false,
-              },
-            ],
-          },
-          {
-            name: 'sessions',
-            description: '📋 List workflow sessions',
-            arguments: [
-              {
-                name: 'all',
-                description: 'Show all sessions including completed',
-                required: false,
-              },
-              {
-                name: 'verbose',
-                description: 'Show detailed session information',
-                required: false,
-              },
-            ],
-          },
-          {
-            name: 'status',
-            description: '📊 Show current workflow status',
-            arguments: [],
-          },
-          {
-            name: 'cleanup',
-            description: '🧹 Clean up expired sessions',
-            arguments: [
-              {
-                name: 'deleteBranches',
-                description: 'Delete stale branches',
-                required: false,
-              },
-            ],
-          },
-          {
-            name: 'hotfix',
-            description: '🔥 Create emergency hotfix workflow',
-            arguments: [
-              {
-                name: 'issue',
-                description: 'Issue number or description',
-                required: true,
-              },
-              {
-                name: 'severity',
-                description: 'Severity level (critical, high, medium)',
-                required: false,
-              },
-            ],
-          },
-          {
-            name: 'status-line',
-            description: '📍 Manage Claude Code status line display',
-            arguments: [
-              {
-                name: 'action',
-                description: 'Action to perform (enable, disable, update, show)',
-                required: true,
-              },
-            ],
-          },
-        ],
-      };
-    });
-
-    // Handle prompt requests
-    this.server.setRequestHandler(GetPromptRequestSchema, async (request) => {
-      const { name, arguments: args } = request.params;
-
-      // Map prompt names to tool names and their argument hints
-      const toolMap: Record<string, { toolName: string; argumentHint?: string }> = {
-        'init': {
-          toolName: 'hansolo_init',
-          argumentHint: '[scope] [force]',
-        },
-        'launch': {
-          toolName: 'hansolo_launch',
-          argumentHint: '[description] [branchName] [auto]',
-        },
-        'commit': {
-          toolName: 'hansolo_commit',
-          argumentHint: '[message] [stagedOnly]',
-        },
-        'ship': {
-          toolName: 'hansolo_ship',
-          argumentHint: '[prDescription] [push] [createPR] [merge] [stagedOnly]',
-        },
-        'swap': {
-          toolName: 'hansolo_swap',
-          argumentHint: '[branchName] [stash]',
-        },
-        'abort': {
-          toolName: 'hansolo_abort',
-          argumentHint: '[branchName] [deleteBranch]',
-        },
-        'sessions': {
-          toolName: 'hansolo_sessions',
-          argumentHint: '[all] [verbose]',
-        },
-        'status': {
-          toolName: 'hansolo_status',
-        },
-        'cleanup': {
-          toolName: 'hansolo_cleanup',
-          argumentHint: '[deleteBranches]',
-        },
-        'hotfix': {
-          toolName: 'hansolo_hotfix',
-          argumentHint: '[issue] [severity]',
-        },
-        'status-line': {
-          toolName: 'hansolo_status_line',
-          argumentHint: '[action]',
-        },
-      };
-
-      const toolConfig = toolMap[name];
-      if (!toolConfig) {
-        throw new Error(`Unknown prompt: ${name}`);
-      }
-
-      // Get banner for immediate display
-      const banner = getBanner(toolConfig.toolName);
-
-      // Build tool call parameters string
-      const params = args || {};
-
-      // Generate prompt message with banner and optional argument hint frontmatter
-      const frontmatter = toolConfig.argumentHint
-        ? `---\nargument-hint: ${toolConfig.argumentHint}\n---`
-        : '';
-
-      // Add _via_prompt token to parameters
-      const paramsWithToken = { ...params, _via_prompt: true };
-      const paramsStr = Object.keys(params).length > 0
-        ? ` with parameters: ${JSON.stringify(params, null, 2)}`
-        : '';
-
-      const message = `${frontmatter}
-
-      Display the following text immediately before you do anything else:
-
-      ${banner}
-
-      Only when that has been shown, execute the han-solo ${name} command${paramsStr}
-
-      Use the MCP tool: ${toolConfig.toolName}
-      IMPORTANT: You MUST pass this exact parameter object: ${JSON.stringify(paramsWithToken, null, 2)}`;
-
-      return {
-        description: `Execute han-solo ${name} command`,
-        messages: [
-          {
-            role: 'user',
-            content: {
-              type: 'text',
-              text: message,
-            },
-          },
-        ],
-      };
-    });
-  }
-
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
@@ -1061,7 +762,7 @@ export class HanSoloMCPServer {
     });
 
     // Log to stderr (stdout is used for MCP protocol)
-    console.error('han-solo MCP server v2.0.0 running (Pure MCP Architecture)');
+    console.error('han-solo MCP server v2.0.0 running (Plugin Architecture - Tools Only)');
 
     // Keep the async function from returning by waiting on a promise
     // that resolves when the transport closes
