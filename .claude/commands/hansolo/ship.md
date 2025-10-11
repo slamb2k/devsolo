@@ -17,9 +17,16 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 2. git-droid will:
 
    **Step 1: Handle Uncommitted Changes**
-   - Check for uncommitted changes
-   - If present: call `/hansolo commit` to commit them first
-   - Use SlashCommand tool to invoke commit slash command
+   - Check for uncommitted changes using `git status`
+   - If present: Invoke the commit slash command using SlashCommand tool:
+     ```
+     SlashCommand with command="/hansolo:commit"
+     ```
+   - This delegates to the commit slash command which handles:
+     - Message generation (if not provided)
+     - Staging files
+     - Creating the commit
+   - Wait for commit slash command to complete before proceeding
 
    **Step 2: Generate PR Description** (if not provided)
    - Analyze all commits since main branch using `git log main..HEAD`
