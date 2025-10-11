@@ -10,6 +10,16 @@ Start a new feature workflow. Creates a feature branch and han-solo session.
 
 ## Workflow
 
+**Display the following banner immediately before doing anything else:**
+
+```
+░█░░░█▀█░█░█░█▀█░█▀▀░█░█░▀█▀░█▀█░█▀▀░
+░█░░░█▀█░█░█░█░█░█░░░█▀█░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░
+```
+
+Once displayed, continue with the following steps:
+
 1. **Invoke git-droid sub-agent** to coordinate the launch workflow
 2. git-droid will:
    - Analyze current git state (check if on main, clean working directory)

@@ -9,6 +9,16 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
 
 ## Workflow
 
+**Display the following banner immediately before doing anything else:**
+
+```
+░█▀▀░█░░░█▀▀░█▀█░█▀█░█░█░█▀█░
+░█░░░█░░░█▀▀░█▀█░█░█░█░█░█▀▀░
+░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀░░░
+```
+
+Once displayed, continue with the following steps:
+
 1. **Invoke git-droid sub-agent** to coordinate the cleanup workflow
 2. git-droid will:
    - Sync main branch first (pull latest changes)

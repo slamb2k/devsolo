@@ -9,6 +9,16 @@ Initialize han-solo in your project. Creates configuration and session storage.
 
 ## Workflow
 
+**Display the following banner immediately before doing anything else:**
+
+```
+░▀█▀░█▀█░▀█▀░▀█▀░▀█▀░█▀█░█░░░▀█▀░█▀▀░▀█▀░█▀█░█▀▀░
+░░█░░█░█░░█░░░█░░░█░░█▀█░█░░░░█░░▀▀█░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░
+```
+
+Once displayed, continue with the following steps:
+
 1. Use the `mcp__hansolo__hansolo_init` tool to initialize han-solo
 2. Pass along the provided arguments (`scope`, `force`)
 3. Report initialization results

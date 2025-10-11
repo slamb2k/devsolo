@@ -205,9 +205,7 @@ export class ShipTool extends BaseMCPTool<ShipToolInput, GitHubToolResult> {
   protected createFinalResult(
     workflowResult: WorkflowExecutionResult,
     preFlightResult: PreFlightVerificationResult | null,
-    postFlightResult: PostFlightVerificationResult | null,
-    viaPrompt: boolean = false,
-    banner: string | null = null
+    postFlightResult: PostFlightVerificationResult | null
   ): GitHubToolResult {
     const result: any = {
       success: postFlightResult ? postFlightResult.failedCount === 0 : workflowResult.success,
@@ -216,10 +214,7 @@ export class ShipTool extends BaseMCPTool<ShipToolInput, GitHubToolResult> {
       warnings: [...(workflowResult.warnings || [])],
     };
 
-    // Include banner in warnings if NOT called via prompt (to show with tool result)
-    if (!viaPrompt && banner) {
-      result.warnings.unshift(banner);
-    }
+    // Note: Banner display is now handled by slash commands
 
     // Merge pre-flight results
     if (preFlightResult) {
