@@ -2,7 +2,7 @@
 
 ## Issue Summary
 
-The v1 `hansolo ship` command has a critical workflow bug that leaves repositories in an inconsistent state after PR merges. This is the exact problem that v2 was designed to solve.
+The v1 `devsolo ship` command has a critical workflow bug that leaves repositories in an inconsistent state after PR merges. This is the exact problem that v2 was designed to solve.
 
 ## What Happened
 
@@ -61,7 +61,7 @@ $ gh pr view 17 --json mergedAt,state
 $ git branch --show-current
 feature/v2-implementation  # ❌ Still on feature branch!
 
-$ hansolo status
+$ devsolo status
 Session: feature/v2-implementation
 State: BRANCH_READY  # ❌ Should be COMPLETE!
 
@@ -92,7 +92,7 @@ c294a53 feat: implement v2 with pre/post-flight checks  # ❌ Remote branch stil
 V2 fixes this with a single automated command:
 
 ```typescript
-// From hansolo-ship-v2.ts
+// From devsolo-ship-v2.ts
 async executeCompleteWorkflow(session, options) {
   // 1. Commit changes (if any)
   if (await this.gitOps.hasUncommittedChanges()) {
@@ -194,16 +194,16 @@ Until v2 is integrated, users must manually run cleanup:
 git checkout main
 git pull origin main
 git branch -d feature/branch-name
-hansolo cleanup  # Or manual git push origin --delete feature/branch-name
+devsolo cleanup  # Or manual git push origin --delete feature/branch-name
 ```
 
 ## Test Case for V2
 
 ```bash
 # This should work end-to-end without manual intervention
-hansolo launch "test-feature"
+devsolo launch "test-feature"
 # ... make changes ...
-hansolo ship
+devsolo ship
 # After CI passes:
 # ✅ Should be on main
 # ✅ Session should be COMPLETE

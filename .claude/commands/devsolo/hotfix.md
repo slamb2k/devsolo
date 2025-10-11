@@ -29,7 +29,7 @@ Create an emergency hotfix workflow with higher priority and optional fast-track
 ░▀░▀░▀▀▀░░▀░░▀░░░▀▀▀░▀░▀░
 ```
 
-   - Call `mcp__hansolo__hansolo_hotfix` with parameters
+   - Call `mcp__devsolo__devsolo_hotfix` with parameters
    - Create hotfix branch from main
    - Create session with HOTFIX workflow type
    - Guide through rapid hotfix process
@@ -117,26 +117,26 @@ Behavior:
 
 ```
 # Critical hotfix with issue number
-/hansolo hotfix --issue="123" --severity="critical" --skipReview --autoMerge
+/devsolo hotfix --issue="123" --severity="critical" --skipReview --autoMerge
 
 # High severity hotfix with description
-/hansolo hotfix --issue="Fix login authentication bug" --severity="high"
+/devsolo hotfix --issue="Fix login authentication bug" --severity="high"
 
 # Medium hotfix (normal process)
-/hansolo hotfix --issue="456" --severity="medium"
+/devsolo hotfix --issue="456" --severity="medium"
 
 # Critical hotfix, skip everything (use only in emergencies!)
-/hansolo hotfix --issue="production-down" --severity="critical" --skipTests --skipReview --autoMerge
+/devsolo hotfix --issue="production-down" --severity="critical" --skipTests --skipReview --autoMerge
 
 # Auto mode for critical hotfix
-/hansolo hotfix --issue="789" --severity="critical" --auto
+/devsolo hotfix --issue="789" --severity="critical" --auto
 ```
 
 ## Complete Hotfix Workflow Example
 
 ```
 # 1. Start hotfix
-/hansolo hotfix --issue="critical-auth-bypass" --severity="critical"
+/devsolo hotfix --issue="critical-auth-bypass" --severity="critical"
 
 git-droid output:
 🔍 Analysis:
@@ -161,16 +161,16 @@ Operation: Creating HOTFIX session...
 Next steps:
 1. Make MINIMAL changes to fix the issue
 2. Test the fix locally
-3. Run /hansolo commit to commit changes
-4. Run /hansolo ship to deploy immediately
+3. Run /devsolo commit to commit changes
+4. Run /devsolo ship to deploy immediately
 
 # 2. Make the fix (your code changes)
 
 # 3. Commit the fix
-/hansolo commit --message="hotfix: fix critical authentication bypass vulnerability"
+/devsolo commit --message="hotfix: fix critical authentication bypass vulnerability"
 
 # 4. Ship immediately
-/hansolo ship --auto
+/devsolo ship --auto
 # Auto-merge enabled, will merge as soon as CI passes
 ```
 

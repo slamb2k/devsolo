@@ -1,6 +1,6 @@
-# Tasks: han-solo Git Workflow Automation
+# Tasks: devsolo Git Workflow Automation
 
-**Input**: Design documents from `/specs/001-docs-design-hansolo/`
+**Input**: Design documents from `/specs/001-docs-design-devsolo/`
 **Prerequisites**: plan.md (required), research.md, data-model.md, contracts/
 
 ## Execution Flow (main)
@@ -44,7 +44,7 @@
 
 ## Phase 3.1: Setup
 - [X] T001 Create TypeScript project structure with src/, tests/, and config directories
-- [X] T002 Initialize npm project with package.json including name @hansolo/cli
+- [X] T002 Initialize npm project with package.json including name @devsolo/cli
 - [X] T003 [P] Configure TypeScript with tsconfig.json for Node.js 20+ target
 - [X] T004 [P] Configure Jest with jest.config.js for unit and integration tests
 - [X] T005 [P] Configure ESLint with .eslintrc.js for TypeScript linting
@@ -52,7 +52,7 @@
 - [X] T007 Install Git/API dependencies: simple-git, @octokit/rest, @gitbeaker/node
 - [X] T008 Install visual dependencies: chalk, ora, boxen, cli-table3
 - [X] T009 Install testing dependencies: jest, @types/jest, playwright
-- [X] T010 [P] Create .gitignore with node_modules, dist, .hansolo, coverage
+- [X] T010 [P] Create .gitignore with node_modules, dist, .devsolo, coverage
 
 ## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
 
@@ -144,18 +144,18 @@
 - [X] T073 Create src/ui/box-formatter.ts with boxen for banners
 
 ### Command Handlers
-- [X] T074 Create src/commands/hansolo-init.ts for /hansolo:init command
-- [X] T075 Create src/commands/hansolo-launch.ts for /hansolo:launch command
-- [X] T076 Create src/commands/hansolo-ship.ts for /hansolo:ship command
-- [X] T077 Create src/commands/hansolo-hotfix.ts for /hansolo:hotfix command
-- [X] T078 Create src/commands/hansolo-status.ts for /hansolo:status command
-- [X] T079 Create src/commands/hansolo-sessions.ts for /hansolo:sessions command
-- [X] T080 Create src/commands/hansolo-swap.ts for /hansolo:swap command
-- [X] T081 Create src/commands/hansolo-abort.ts for /hansolo:abort command
-- [X] T082 Create src/commands/hansolo-cleanup.ts for /hansolo:cleanup command
-- [X] T083 Create src/commands/hansolo-validate.ts for /hansolo:validate command
-- [X] T084 Create src/commands/hansolo-config.ts for /hansolo:config command
-- [X] T085 Create src/commands/hansolo-status-line.ts for /hansolo:status-line command
+- [X] T074 Create src/commands/devsolo-init.ts for /devsolo:init command
+- [X] T075 Create src/commands/devsolo-launch.ts for /devsolo:launch command
+- [X] T076 Create src/commands/devsolo-ship.ts for /devsolo:ship command
+- [X] T077 Create src/commands/devsolo-hotfix.ts for /devsolo:hotfix command
+- [X] T078 Create src/commands/devsolo-status.ts for /devsolo:status command
+- [X] T079 Create src/commands/devsolo-sessions.ts for /devsolo:sessions command
+- [X] T080 Create src/commands/devsolo-swap.ts for /devsolo:swap command
+- [X] T081 Create src/commands/devsolo-abort.ts for /devsolo:abort command
+- [X] T082 Create src/commands/devsolo-cleanup.ts for /devsolo:cleanup command
+- [X] T083 Create src/commands/devsolo-validate.ts for /devsolo:validate command
+- [X] T084 Create src/commands/devsolo-config.ts for /devsolo:config command
+- [X] T085 Create src/commands/devsolo-status-line.ts for /devsolo:status-line command
 - [X] T086 Create src/commands/command-registry.ts registering all commands
 
 ### Hooks and Templates
@@ -178,7 +178,7 @@
 ### CLI Entry Points
 - [X] T098 Create src/cli.ts as main CLI entry point with command parsing
 - [X] T099 Create src/index.ts exporting public API
-- [X] T100 Create bin/hansolo.js as executable script
+- [X] T100 Create bin/devsolo.js as executable script
 
 ### Build and Package
 - [X] T101 Configure package.json scripts: build, test, lint, package
@@ -229,7 +229,7 @@ Task agent run T093 T094 T095 T096 T097
 - [x] All 6 entities have model tests and implementations (T022-T027, T037-T043)
 - [x] All 3 workflow state machines tested and implemented (T028-T030, T044-T048)
 - [x] All 6 quickstart scenarios have integration tests (T031-T036)
-- [x] All 12 /hansolo: commands implemented (T074-T085)
+- [x] All 12 /devsolo: commands implemented (T074-T085)
 - [x] Visual output system complete (T070-T073)
 - [x] Git platform integration for GitHub/GitLab (T067-T069)
 - [x] Performance tests for requirements (T109-T110)
@@ -242,4 +242,4 @@ Task agent run T093 T094 T095 T096 T097
 
 ---
 
-*Generated from han-solo implementation plan and design documents*
+*Generated from devsolo implementation plan and design documents*

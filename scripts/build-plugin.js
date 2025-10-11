@@ -64,7 +64,7 @@ function main() {
   const rootDir = path.resolve(__dirname, '..');
   const distPluginDir = path.join(rootDir, 'dist-plugin');
 
-  log('\n🚀 Building Claude Code Plugin for han-solo\n', colors.bright);
+  log('\n🚀 Building Claude Code Plugin for devsolo\n', colors.bright);
 
   // Step 1: Clean previous build
   info('Step 1: Cleaning previous plugin build...');
@@ -104,8 +104,8 @@ function main() {
 
   // Step 5: Copy compiled MCP server
   info('Step 5: Copying compiled MCP server...');
-  const mcpServerSrc = path.join(rootDir, 'dist', 'mcp', 'hansolo-mcp-server.js');
-  const mcpServerDest = path.join(distPluginDir, 'dist', 'mcp', 'hansolo-mcp-server.js');
+  const mcpServerSrc = path.join(rootDir, 'dist', 'mcp', 'devsolo-mcp-server.js');
+  const mcpServerDest = path.join(distPluginDir, 'dist', 'mcp', 'devsolo-mcp-server.js');
   if (!fs.existsSync(mcpServerSrc)) {
     error('MCP server not found. Did TypeScript build complete?');
   }
@@ -116,10 +116,10 @@ function main() {
 
   // Step 6: Copy slash commands
   info('Step 6: Copying slash commands...');
-  const commandsSrc = path.join(rootDir, '.claude', 'commands', 'hansolo');
+  const commandsSrc = path.join(rootDir, '.claude', 'commands', 'devsolo');
   const commandsDest = path.join(distPluginDir, 'commands');
   if (!fs.existsSync(commandsSrc)) {
-    error('Slash commands not found at .claude/commands/hansolo/');
+    error('Slash commands not found at .claude/commands/devsolo/');
   }
   copyRecursive(commandsSrc, commandsDest);
   const commandCount = fs.readdirSync(commandsDest).length;

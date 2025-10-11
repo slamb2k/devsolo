@@ -1,8 +1,8 @@
 // Entry point for running MCP server directly with node
-import { HanSoloMCPServer } from './hansolo-mcp-server';
+import { DevSoloMCPServer } from './devsolo-mcp-server';
 
-const server = new HanSoloMCPServer();
+const server = new DevSoloMCPServer();
 server.run().catch((error) => {
-  console.error('[hansolo-mcp] Server error:', error);
+  console.error('[devsolo-mcp] Server error:', error);
   process.exit(1);
 });

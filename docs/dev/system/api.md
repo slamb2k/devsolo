@@ -1,4 +1,4 @@
-# han-solo API Documentation
+# devsolo API Documentation
 
 ## Table of Contents
 - [Commands](#commands)
@@ -11,7 +11,7 @@
 
 ### InitCommand
 
-Initialize han-solo in a project.
+Initialize devsolo in a project.
 
 ```typescript
 class InitCommand {
@@ -424,12 +424,12 @@ class LaunchWorkflowStateMachine extends BaseStateMachine<StateName, TransitionT
 
 ## MCP Server
 
-### HanSoloMCPServer
+### DevSoloMCPServer
 
 Model Context Protocol server for Claude Code integration.
 
 ```typescript
-class HanSoloMCPServer {
+class DevSoloMCPServer {
   constructor(basePath?: string)
 
   run(): Promise<void>
@@ -440,12 +440,12 @@ class HanSoloMCPServer {
 
 Available tools exposed to Claude Code:
 
-#### hansolo_init
-Initialize han-solo in project.
+#### devsolo_init
+Initialize devsolo in project.
 
 ```json
 {
-  "name": "hansolo_init",
+  "name": "devsolo_init",
   "input": {
     "scope": "project" | "user",
     "force": boolean
@@ -453,12 +453,12 @@ Initialize han-solo in project.
 }
 ```
 
-#### hansolo_launch
+#### devsolo_launch
 Start new feature workflow.
 
 ```json
 {
-  "name": "hansolo_launch",
+  "name": "devsolo_launch",
   "input": {
     "branchName": string,
     "description": string,
@@ -467,12 +467,12 @@ Start new feature workflow.
 }
 ```
 
-#### hansolo_sessions
+#### devsolo_sessions
 List workflow sessions.
 
 ```json
 {
-  "name": "hansolo_sessions",
+  "name": "devsolo_sessions",
   "input": {
     "all": boolean,
     "verbose": boolean,
@@ -481,12 +481,12 @@ List workflow sessions.
 }
 ```
 
-#### hansolo_swap
+#### devsolo_swap
 Switch between sessions.
 
 ```json
 {
-  "name": "hansolo_swap",
+  "name": "devsolo_swap",
   "input": {
     "branchName": string,
     "force": boolean,
@@ -495,12 +495,12 @@ Switch between sessions.
 }
 ```
 
-#### hansolo_abort
+#### devsolo_abort
 Abort workflow session.
 
 ```json
 {
-  "name": "hansolo_abort",
+  "name": "devsolo_abort",
   "input": {
     "branchName": string,
     "force": boolean,
@@ -510,12 +510,12 @@ Abort workflow session.
 }
 ```
 
-#### hansolo_ship
+#### devsolo_ship
 Complete workflow stages.
 
 ```json
 {
-  "name": "hansolo_ship",
+  "name": "devsolo_ship",
   "input": {
     "message": string,
     "push": boolean,
@@ -527,12 +527,12 @@ Complete workflow stages.
 }
 ```
 
-#### hansolo_status
+#### devsolo_status
 Get current workflow status.
 
 ```json
 {
-  "name": "hansolo_status",
+  "name": "devsolo_status",
   "input": {}
 }
 ```

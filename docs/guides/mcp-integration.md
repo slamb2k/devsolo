@@ -1,12 +1,12 @@
-# han-solo MCP Integration Guide
+# devsolo MCP Integration Guide
 
 ## Overview
 
-han-solo v2.0.0 is a pure Model Context Protocol (MCP) server that integrates with Claude Code for AI-native Git workflow automation. This guide covers setup, usage patterns, and best practices for the MCP integration.
+devsolo v2.0.0 is a pure Model Context Protocol (MCP) server that integrates with Claude Code for AI-native Git workflow automation. This guide covers setup, usage patterns, and best practices for the MCP integration.
 
 ## Architecture
 
-han-solo v2.0.0 operates exclusively through MCP - there is no standalone CLI. All interactions happen through Claude Code using two supported patterns:
+devsolo v2.0.0 operates exclusively through MCP - there is no standalone CLI. All interactions happen through Claude Code using two supported patterns:
 
 1. **Natural Language** (Recommended): Conversational requests that Claude interprets
 2. **Direct MCP Tool Calls**: Explicit tool invocation with parameters
@@ -16,9 +16,9 @@ han-solo v2.0.0 operates exclusively through MCP - there is no standalone CLI. A
 ### 1. Build the MCP Server
 
 ```bash
-# Clone and build han-solo
-git clone https://github.com/slamb2k/hansolo.git
-cd hansolo
+# Clone and build devsolo
+git clone https://github.com/slamb2k/devsolo.git
+cd devsolo
 
 # Install dependencies
 npm install
@@ -28,11 +28,11 @@ npm run build
 npm run build:mcp
 ```
 
-This creates the MCP server at `bin/hansolo-mcp`.
+This creates the MCP server at `bin/devsolo-mcp`.
 
 ### 2. Configure Claude Code
 
-Add han-solo to your Claude Code MCP configuration:
+Add devsolo to your Claude Code MCP configuration:
 
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
@@ -45,30 +45,30 @@ Add han-solo to your Claude Code MCP configuration:
 ```json
 {
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "command": "node",
-      "args": ["/absolute/path/to/hansolo/bin/hansolo-mcp"],
+      "args": ["/absolute/path/to/devsolo/bin/devsolo-mcp"],
       "cwd": "${workspaceFolder}"
     }
   }
 }
 ```
 
-**Important**: Replace `/absolute/path/to/hansolo` with your actual installation path.
+**Important**: Replace `/absolute/path/to/devsolo` with your actual installation path.
 
 ### 3. Restart Claude Code
 
-Restart Claude Code to load the han-solo MCP server.
+Restart Claude Code to load the devsolo MCP server.
 
 ### 4. Verify Installation
 
 In Claude Code, navigate to any project and ask:
 
 ```
-Show me the han-solo status
+Show me the devsolo status
 ```
 
-You should see either "han-solo is not initialized" (normal) or current workflow status.
+You should see either "devsolo is not initialized" (normal) or current workflow status.
 
 ## Usage Patterns
 
@@ -79,23 +79,23 @@ Ask Claude to perform Git workflow tasks conversationally. Claude understands in
 **Examples**:
 
 ```
-"Initialize han-solo in this project"
-→ Claude calls hansolo_init
+"Initialize devsolo in this project"
+→ Claude calls devsolo_init
 
 "Start a new feature branch for user authentication"
-→ Claude calls hansolo_launch with description
+→ Claude calls devsolo_launch with description
 
 "Show me all my active workflow sessions"
-→ Claude calls hansolo_sessions
+→ Claude calls devsolo_sessions
 
 "Commit these changes with message 'feat: add login page'"
-→ Claude calls hansolo_commit
+→ Claude calls devsolo_commit
 
 "Ship this feature to production"
-→ Claude calls hansolo_ship
+→ Claude calls devsolo_ship
 
 "Abort the current workflow"
-→ Claude calls hansolo_abort
+→ Claude calls devsolo_abort
 ```
 
 **Advantages**:
@@ -105,7 +105,7 @@ Ask Claude to perform Git workflow tasks conversationally. Claude understands in
 - Claude generates good commit messages and PR descriptions
 
 **Best For**:
-- Learning han-solo
+- Learning devsolo
 - Complex workflows
 - When you're unsure of exact parameters
 - Letting Claude assist with Git best practices
@@ -117,17 +117,17 @@ Explicitly invoke MCP tools with specific parameters for precise control.
 **Examples**:
 
 ```
-Use hansolo_init to set up han-solo
+Use devsolo_init to set up devsolo
 
-Use hansolo_launch with branchName "feature/oauth" and description "OAuth2 authentication"
+Use devsolo_launch with branchName "feature/oauth" and description "OAuth2 authentication"
 
-Use hansolo_sessions with verbose true
+Use devsolo_sessions with verbose true
 
-Use hansolo_commit with message "feat: add OAuth support" and stagedOnly false
+Use devsolo_commit with message "feat: add OAuth support" and stagedOnly false
 
-Use hansolo_ship with push true, createPR true, merge true, and prDescription "Add OAuth authentication system"
+Use devsolo_ship with push true, createPR true, merge true, and prDescription "Add OAuth authentication system"
 
-Use hansolo_abort with deleteBranch true
+Use devsolo_abort with deleteBranch true
 ```
 
 **Advantages**:
@@ -149,27 +149,27 @@ Combine both patterns as needed:
 ```
 "Start a new feature for payment integration"
 *work on implementation*
-Use hansolo_commit with message "feat: add Stripe integration" and stagedOnly false
+Use devsolo_commit with message "feat: add Stripe integration" and stagedOnly false
 "Ship this feature when ready"
 ```
 
 ## Available MCP Tools
 
-han-solo v2.0.0 provides 11 MCP tools:
+devsolo v2.0.0 provides 11 MCP tools:
 
 | Tool | Purpose | Type |
 |------|---------|------|
-| `hansolo_init` | Initialize han-solo in project | Configuration |
-| `hansolo_launch` | Start new feature workflow | Workflow |
-| `hansolo_commit` | Commit changes | Workflow |
-| `hansolo_ship` | Push, create PR, merge | Workflow |
-| `hansolo_swap` | Switch between workflows | Workflow |
-| `hansolo_abort` | Cancel workflow | Workflow |
-| `hansolo_hotfix` | Create emergency hotfix | Workflow |
-| `hansolo_cleanup` | Clean up old sessions | Workflow |
-| `hansolo_status` | Show current status | Query |
-| `hansolo_sessions` | List all sessions | Query |
-| `hansolo_status_line` | Manage status display | Configuration |
+| `devsolo_init` | Initialize devsolo in project | Configuration |
+| `devsolo_launch` | Start new feature workflow | Workflow |
+| `devsolo_commit` | Commit changes | Workflow |
+| `devsolo_ship` | Push, create PR, merge | Workflow |
+| `devsolo_swap` | Switch between workflows | Workflow |
+| `devsolo_abort` | Cancel workflow | Workflow |
+| `devsolo_hotfix` | Create emergency hotfix | Workflow |
+| `devsolo_cleanup` | Clean up old sessions | Workflow |
+| `devsolo_status` | Show current status | Query |
+| `devsolo_sessions` | List all sessions | Query |
+| `devsolo_status_line` | Manage status display | Configuration |
 
 See [MCP Tools Reference](mcp-tools-reference.md) for complete documentation of each tool.
 
@@ -184,7 +184,7 @@ See [MCP Tools Reference](mcp-tools-reference.md) for complete documentation of 
 
 **Direct Tool**:
 ```
-Use hansolo_launch with branchName "feature/user-profile" and description "User profile CRUD operations"
+Use devsolo_launch with branchName "feature/user-profile" and description "User profile CRUD operations"
 ```
 
 **What happens**:
@@ -203,7 +203,7 @@ Use hansolo_launch with branchName "feature/user-profile" and description "User 
 
 **Direct Tool**:
 ```
-Use hansolo_commit with message "feat: add profile API endpoints" and stagedOnly false
+Use devsolo_commit with message "feat: add profile API endpoints" and stagedOnly false
 ```
 
 **What happens**:
@@ -222,7 +222,7 @@ Use hansolo_commit with message "feat: add profile API endpoints" and stagedOnly
 
 **Direct Tool**:
 ```
-Use hansolo_ship with push true, createPR true, merge true, and prDescription "Add user profile management system"
+Use devsolo_ship with push true, createPR true, merge true, and prDescription "Add user profile management system"
 ```
 
 **What happens**:
@@ -245,8 +245,8 @@ Use hansolo_ship with push true, createPR true, merge true, and prDescription "A
 
 **Direct Tools**:
 ```
-Use hansolo_sessions with verbose true
-Use hansolo_swap with branchName "feature/authentication"
+Use devsolo_sessions with verbose true
+Use devsolo_swap with branchName "feature/authentication"
 ```
 
 **What happens**:
@@ -264,7 +264,7 @@ Use hansolo_swap with branchName "feature/authentication"
 
 **Direct Tool**:
 ```
-Use hansolo_abort with deleteBranch true
+Use devsolo_abort with deleteBranch true
 ```
 
 **What happens**:
@@ -281,13 +281,13 @@ Every MCP tool implements comprehensive validation:
 ### Pre-Flight Checks
 
 **Run before operation executes**:
-- Verify han-solo is initialized
+- Verify devsolo is initialized
 - Check Git repository state
 - Validate session state
 - Verify branch conditions
 - Check GitHub authentication (when needed)
 
-**Example pre-flight checks** for `hansolo_launch`:
+**Example pre-flight checks** for `devsolo_launch`:
 ```javascript
 {
   name: "on-main-branch",
@@ -315,7 +315,7 @@ Every MCP tool implements comprehensive validation:
 - Validate session state
 - Check branch existence/state
 
-**Example post-flight verifications** for `hansolo_launch`:
+**Example post-flight verifications** for `devsolo_launch`:
 ```javascript
 {
   name: "session-created",
@@ -342,7 +342,7 @@ Every MCP tool implements comprehensive validation:
 Most tools support `force: true` to bypass pre-flight check failures (use cautiously):
 
 ```
-Use hansolo_launch with force true and description "Emergency fix"
+Use devsolo_launch with force true and description "Emergency fix"
 ```
 
 ## Error Handling
@@ -374,7 +374,7 @@ MCP tools provide detailed, actionable error messages.
 
 ### Common Error Categories
 
-1. **Initialization Errors**: han-solo not initialized in project
+1. **Initialization Errors**: devsolo not initialized in project
 2. **Pre-Flight Failures**: Validation checks failed
 3. **Execution Errors**: Core operation failed
 4. **Post-Flight Failures**: Operation completed but verification failed
@@ -383,7 +383,7 @@ MCP tools provide detailed, actionable error messages.
 
 **For initialization errors**:
 ```
-"Initialize han-solo in this project"
+"Initialize devsolo in this project"
 ```
 
 **For validation failures**:
@@ -394,36 +394,36 @@ MCP tools provide detailed, actionable error messages.
 **For execution errors**:
 - Check error message for specific issue
 - Verify Git/GitHub configuration
-- Check session state with `hansolo_status`
+- Check session state with `devsolo_status`
 
 ## Troubleshooting
 
 ### MCP Server Not Detected
 
-**Problem**: Claude Code can't find han-solo
+**Problem**: Claude Code can't find devsolo
 
 **Solutions**:
 1. Verify path in `claude_desktop_config.json` is absolute
-2. Check file exists: `ls /path/to/hansolo/bin/hansolo-mcp`
-3. Make executable: `chmod +x /path/to/hansolo/bin/hansolo-mcp`
+2. Check file exists: `ls /path/to/devsolo/bin/devsolo-mcp`
+3. Make executable: `chmod +x /path/to/devsolo/bin/devsolo-mcp`
 4. Restart Claude Code after config changes
 
 ### Tools Not Working
 
-**Problem**: han-solo tools fail or aren't available
+**Problem**: devsolo tools fail or aren't available
 
 **Solutions**:
-1. Initialize han-solo: `"Initialize han-solo in this project"`
+1. Initialize devsolo: `"Initialize devsolo in this project"`
 2. Check you're in a Git repository: `git status`
 3. Verify Git remote: `git remote -v`
-4. Check status: `"Show me han-solo status"`
+4. Check status: `"Show me devsolo status"`
 
 ### Permission Errors
 
 **Problem**: Permission denied errors
 
 **Solutions**:
-1. Ensure read/write access to `.hansolo` directory
+1. Ensure read/write access to `.devsolo` directory
 2. Check Git credentials configured: `gh auth status`
 3. Verify SSH keys or personal access token
 
@@ -443,7 +443,7 @@ MCP tools provide detailed, actionable error messages.
 "Switch to main branch"
 
 # Or force if intentional
-Use hansolo_launch with force true and description "Feature from feature branch"
+Use devsolo_launch with force true and description "Feature from feature branch"
 ```
 
 ### Session State Issues
@@ -469,9 +469,9 @@ Pass environment variables to the MCP server:
 ```json
 {
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "command": "node",
-      "args": ["/path/to/hansolo/bin/hansolo-mcp"],
+      "args": ["/path/to/devsolo/bin/devsolo-mcp"],
       "cwd": "${workspaceFolder}",
       "env": {
         "NODE_ENV": "production",
@@ -484,7 +484,7 @@ Pass environment variables to the MCP server:
 
 ### Project Configuration
 
-Configure defaults in `.hansolo/config.yaml`:
+Configure defaults in `.devsolo/config.yaml`:
 
 ```yaml
 git:
@@ -523,17 +523,17 @@ github:
 ```
 
 Claude orchestrates multiple tools:
-1. `hansolo_hotfix` - Creates hotfix workflow
-2. `hansolo_commit` - Commits the fix
-3. `hansolo_ship` - Ships with expedited merge
+1. `devsolo_hotfix` - Creates hotfix workflow
+2. `devsolo_commit` - Commits the fix
+3. `devsolo_ship` - Ships with expedited merge
 
 ### 2. Use Direct Tools for Repetitive Tasks
 
 ```
-Use hansolo_launch with description "Daily standup notes"
+Use devsolo_launch with description "Daily standup notes"
 # ... make changes
-Use hansolo_commit with message "docs: add standup notes"
-Use hansolo_ship with merge true
+Use devsolo_commit with message "docs: add standup notes"
+Use devsolo_ship with merge true
 ```
 
 ### 3. Check Status Frequently
@@ -549,7 +549,7 @@ Helps maintain awareness of:
 - Active sessions
 - Next steps
 
-### 4. Let han-solo Manage Git
+### 4. Let devsolo Manage Git
 
 **Avoid during active sessions**:
 ```bash
@@ -558,13 +558,13 @@ git push
 gh pr create
 ```
 
-**Use han-solo instead**:
+**Use devsolo instead**:
 ```
 "Commit with message 'feat: add feature'"
 "Ship this feature"
 ```
 
-**Why?** han-solo maintains a state machine. Direct Git operations bypass tracking.
+**Why?** devsolo maintains a state machine. Direct Git operations bypass tracking.
 
 ### 5. Clean Up Regularly
 
@@ -575,7 +575,7 @@ gh pr create
 Or:
 
 ```
-Use hansolo_cleanup with deleteBranches true
+Use devsolo_cleanup with deleteBranches true
 ```
 
 Keeps repository and session storage tidy.
@@ -585,58 +585,58 @@ Keeps repository and session storage tidy.
 ### Example 1: Full Feature Development
 
 ```
-User: Initialize han-solo in this project
-Claude: [Calls hansolo_init, confirms setup]
+User: Initialize devsolo in this project
+Claude: [Calls devsolo_init, confirms setup]
 
 User: Start a new feature for search functionality
-Claude: [Calls hansolo_launch, creates feature/search-functionality]
+Claude: [Calls devsolo_launch, creates feature/search-functionality]
 
 User: *Makes code changes with Claude's help*
 
 User: Commit my changes with a good message
-Claude: [Calls hansolo_commit with "feat: add search with fuzzy matching"]
+Claude: [Calls devsolo_commit with "feat: add search with fuzzy matching"]
 
 User: Ship this feature
-Claude: [Calls hansolo_ship, creates PR, merges]
+Claude: [Calls devsolo_ship, creates PR, merges]
 
 User: What's my status?
-Claude: [Calls hansolo_status, shows COMPLETE state on main branch]
+Claude: [Calls devsolo_status, shows COMPLETE state on main branch]
 ```
 
 ### Example 2: Multi-Feature Management
 
 ```
 User: Show me what I'm working on
-Claude: [Calls hansolo_sessions, shows 2 active sessions]
+Claude: [Calls devsolo_sessions, shows 2 active sessions]
 
 User: Switch to the authentication feature
-Claude: [Calls hansolo_swap with branchName "feature/authentication"]
+Claude: [Calls devsolo_swap with branchName "feature/authentication"]
 
 User: *Makes changes*
 
 User: Commit this
-Claude: [Calls hansolo_commit]
+Claude: [Calls devsolo_commit]
 
 User: Switch to the dashboard feature
-Claude: [Calls hansolo_swap with branchName "feature/dashboard"]
+Claude: [Calls devsolo_swap with branchName "feature/dashboard"]
 
 User: Ship both features when ready
-Claude: [Calls hansolo_ship for current branch, suggests swapping and shipping other]
+Claude: [Calls devsolo_ship for current branch, suggests swapping and shipping other]
 ```
 
 ### Example 3: Emergency Hotfix
 
 ```
 User: Create a hotfix for the critical security bug in auth module
-Claude: [Calls hansolo_hotfix with severity "critical"]
+Claude: [Calls devsolo_hotfix with severity "critical"]
 
 User: *Fixes the vulnerability*
 
 User: Commit this fix immediately
-Claude: [Calls hansolo_commit with "fix: patch critical security vulnerability"]
+Claude: [Calls devsolo_commit with "fix: patch critical security vulnerability"]
 
 User: Ship this hotfix now
-Claude: [Calls hansolo_ship with force true, expedited merge]
+Claude: [Calls devsolo_ship with force true, expedited merge]
 ```
 
 ## Integration with Claude Code Features
@@ -646,12 +646,12 @@ Claude: [Calls hansolo_ship with force true, expedited merge]
 Enable persistent workflow status display:
 
 ```
-"Enable the han-solo status line"
+"Enable the devsolo status line"
 ```
 
 Shows in Claude Code:
 ```
-[han-solo] 📝 0c2a20a7 | feature/user-auth | CHANGES_COMMITTED
+[devsolo] 📝 0c2a20a7 | feature/user-auth | CHANGES_COMMITTED
 ```
 
 ### AI-Assisted Commit Messages
@@ -683,9 +683,9 @@ Claude generates structured PR description based on commits.
 - [Troubleshooting](troubleshooting.md) - Common issues and solutions
 
 **Getting Help**:
-- GitHub Issues: [Report bugs](https://github.com/slamb2k/hansolo/issues)
-- GitHub Discussions: [Ask questions](https://github.com/slamb2k/hansolo/discussions)
-- Ask Claude: "Help me troubleshoot han-solo integration"
+- GitHub Issues: [Report bugs](https://github.com/slamb2k/devsolo/issues)
+- GitHub Discussions: [Ask questions](https://github.com/slamb2k/devsolo/discussions)
+- Ask Claude: "Help me troubleshoot devsolo integration"
 
 ---
 

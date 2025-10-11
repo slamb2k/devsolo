@@ -1,4 +1,4 @@
-# han-solo Constitution
+# devsolo Constitution
 
 **Version**: 4.0.0  
 **Ratified**: September 21, 2025  
@@ -6,13 +6,13 @@
 
 ## Purpose
 
-This Constitution establishes the immutable principles and governance framework for the han-solo Git workflow automation tool. It defines the architectural philosophy, state machine rules, and amendment process that all implementations must follow.
+This Constitution establishes the immutable principles and governance framework for the devsolo Git workflow automation tool. It defines the architectural philosophy, state machine rules, and amendment process that all implementations must follow.
 
 ## Core Principles
 
 ### I. Hybrid Orchestration Architecture
 
-The han-solo tool employs a dual-layer architecture with clear separation of concerns:
+The devsolo tool employs a dual-layer architecture with clear separation of concerns:
 
 - **MCP Server Layer**: Provides deterministic state machine workflow control, enforces state transitions, and executes Git operations. This layer is the source of truth for workflow state and progression.
 
@@ -74,7 +74,7 @@ Intelligence enhances but never blocks workflow progression:
 
 ### VII. Initialization First
 
-The han-solo tool requires explicit initialization before use:
+The devsolo tool requires explicit initialization before use:
 
 - All workflow commands require prior execution of initialization
 - Initialization establishes Git repository, remote connections, and configuration
@@ -82,7 +82,7 @@ The han-solo tool requires explicit initialization before use:
 - Uninitialized projects receive clear guidance to run init first
 - Initialization can create remote repositories when none exist
 - Once initialized, configuration persists across sessions
-- Components install to `.hansolo/` directories for clean separation
+- Components install to `.devsolo/` directories for clean separation
 - CLAUDE.md is configured to ensure AI follows workflows
 
 ## State Machine Governance
@@ -256,9 +256,9 @@ Constitutional amendments require:
 
 ## Conclusion
 
-This Constitution establishes the foundational principles that ensure han-solo remains a reliable, predictable, and user-respecting tool. By separating concerns between deterministic control and intelligent assistance, enforcing linear history without compromise, and maintaining user sovereignty throughout all operations, han-solo transforms Git workflow management from a source of friction into a competitive advantage.
+This Constitution establishes the foundational principles that ensure devsolo remains a reliable, predictable, and user-respecting tool. By separating concerns between deterministic control and intelligent assistance, enforcing linear history without compromise, and maintaining user sovereignty throughout all operations, devsolo transforms Git workflow management from a source of friction into a competitive advantage.
 
-All implementations, modifications, and extensions must adhere to these principles. The architecture defined herein ensures that han-solo will continue to serve its users effectively as both the tool and the ecosystem evolve.
+All implementations, modifications, and extensions must adhere to these principles. The architecture defined herein ensures that devsolo will continue to serve its users effectively as both the tool and the ecosystem evolve.
 
 ---
 

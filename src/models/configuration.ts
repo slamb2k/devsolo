@@ -13,7 +13,7 @@ export class Configuration {
     this.version = options?.version || '1.0.0';
     this.scope = options?.scope || 'project';
     this.initialized = options?.initialized || false;
-    this.installPath = options?.installPath || '.hansolo';
+    this.installPath = options?.installPath || '.devsolo';
 
     this.components = options?.components || {
       mpcServer: true,
@@ -37,7 +37,7 @@ Changes:
 {{files}}
 
 {{stats}}`,
-        footer: '💥 SHIPPED BY [Han Solo](https://github.com/slamb2k/hansolo)',
+        footer: '💥 SHIPPED BY [Han Solo](https://github.com/slamb2k/devsolo)',
       },
       prTemplate: {
         body: `## Summary
@@ -49,7 +49,7 @@ Changes:
 <pre>
 ········◢█████◣
   ······◢████████◣
-   ... ◢███████████████████◣    DELIVERED BY <a href="https://github.com/slamb2k/hansolo">HAN SOLO</a> 🎉
+   ... ◢███████████████████◣    DELIVERED BY <a href="https://github.com/slamb2k/devsolo">HAN SOLO</a> 🎉
    ... ◥███████████████████◤       "Turn the ship around..."
   ······◥████████◤
 ········◥█████◤

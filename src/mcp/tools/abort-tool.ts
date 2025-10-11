@@ -69,7 +69,7 @@ export class AbortTool extends BaseMCPTool<AbortToolInput, SessionToolResult> {
         passed: false,
         message: `No session found for branch '${targetBranch}'`,
         level: 'error',
-        suggestions: ['Use hansolo_sessions to list available sessions'],
+        suggestions: ['Use devsolo_sessions to list available sessions'],
       };
     checks.push(sessionExistsCheck);
 
@@ -169,7 +169,7 @@ export class AbortTool extends BaseMCPTool<AbortToolInput, SessionToolResult> {
         nextSteps: [
           'Session has been aborted',
           input.deleteBranch ? 'Branch has been deleted' : 'Branch still exists (use --delete-branch to remove it)',
-          'Use hansolo_launch to start a new workflow',
+          'Use devsolo_launch to start a new workflow',
         ],
       },
       warnings: warnings.length > 0 ? warnings : undefined,

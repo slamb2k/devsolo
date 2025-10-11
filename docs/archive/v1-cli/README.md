@@ -1,10 +1,10 @@
 # v1.x CLI Documentation Archive
 
-This directory contains documentation from han-solo v1.x when it had a CLI interface.
+This directory contains documentation from devsolo v1.x when it had a CLI interface.
 
 ## What Happened
 
-In v2.0.0, han-solo underwent a complete architectural pivot:
+In v2.0.0, devsolo underwent a complete architectural pivot:
 - **Before (v1.x)**: Dual CLI/MCP architecture
 - **After (v2.0.0)**: Pure MCP-only architecture
 

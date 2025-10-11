@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "han-solo Installer API",
+    "title": "devsolo Installer API",
     "description": "Internal API for installer operations and configuration management",
     "version": "1.0.0"
   },

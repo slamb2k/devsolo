@@ -40,7 +40,7 @@ Jenkinsfile
 # Development files
 .env*
 !.env.example
-.hansolo/
+.devsolo/
 tests/
 jest.config.js
 .eslintrc*

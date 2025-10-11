@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
 /**
- * Advanced han-solo workflow example using the JavaScript API
+ * Advanced devsolo workflow example using the JavaScript API
  */
 
 const { execSync } = require('child_process');
 
-// Helper function to run han-solo commands
-function hansolo(command) {
-  console.log(`Running: hansolo ${command}`);
+// Helper function to run devsolo commands
+function devsolo(command) {
+  console.log(`Running: devsolo ${command}`);
   try {
-    const output = execSync(`hansolo ${command}`, { encoding: 'utf8' });
+    const output = execSync(`devsolo ${command}`, { encoding: 'utf8' });
     console.log(output);
     return output;
   } catch (error) {
@@ -25,27 +25,27 @@ function git(command) {
 }
 
 async function main() {
-  console.log('=== Advanced han-solo Workflow ===\n');
+  console.log('=== Advanced devsolo Workflow ===\n');
 
   // 1. Initialize if needed
   console.log('Step 1: Checking initialization...');
   try {
-    hansolo('status');
+    devsolo('status');
   } catch {
     console.log('Not initialized, running init...');
-    hansolo('init');
+    devsolo('init');
   }
 
   // 2. Check for existing sessions
   console.log('\nStep 2: Checking existing sessions...');
-  const sessions = hansolo('sessions --json');
+  const sessions = devsolo('sessions --json');
   console.log(`Active sessions: ${sessions}`);
 
   // 3. Create a feature branch with timestamp
   const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const branchName = `feature/auto-${timestamp}`;
   console.log(`\nStep 3: Creating branch ${branchName}...`);
-  hansolo(`launch --branch ${branchName}`);
+  devsolo(`launch --branch ${branchName}`);
 
   // 4. Make some changes (simulated)
   console.log('\nStep 4: Making changes...');
@@ -55,17 +55,17 @@ async function main() {
   // 5. Ship with automated commit message
   console.log('\nStep 5: Shipping changes...');
   const commitMsg = 'feat: automated workflow example';
-  hansolo(`ship --message "${commitMsg}" --push`);
+  devsolo(`ship --message "${commitMsg}" --push`);
 
   // 6. Create PR if GitHub is configured
   if (process.env.GITHUB_TOKEN) {
     console.log('\nStep 6: Creating pull request...');
-    hansolo('ship --create-pr');
+    devsolo('ship --create-pr');
   }
 
   // 7. Show final status
   console.log('\nStep 7: Final status:');
-  hansolo('status');
+  devsolo('status');
 
   console.log('\n=== Workflow Complete ===');
 }

@@ -1,6 +1,6 @@
 # Init
 
-Initialize han-solo in your project. Creates configuration and session storage.
+Initialize devsolo in your project. Creates configuration and session storage.
 
 ## Arguments
 
@@ -17,7 +17,7 @@ Initialize han-solo in your project. Creates configuration and session storage.
 ░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░
 ```
 
-1. Use the `mcp__hansolo__hansolo_init` tool to initialize han-solo
+1. Use the `mcp__devsolo__devsolo_init` tool to initialize devsolo
 2. Pass along the provided arguments (`scope`, `force`)
 3. Report initialization results
 
@@ -25,6 +25,6 @@ Initialize han-solo in your project. Creates configuration and session storage.
 
 Present initialization results clearly:
 - Scope: project or user
-- Configuration location: .hansolo/config.yaml
-- Session storage: .hansolo/sessions/
+- Configuration location: .devsolo/config.yaml
+- Session storage: .devsolo/sessions/
 - Status: initialized successfully or already initialized

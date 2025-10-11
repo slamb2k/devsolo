@@ -12,7 +12,7 @@ export class SessionRepository {
   private lockPath: string;
   private configManager: ConfigurationManager;
 
-  constructor(basePath: string = '.hansolo') {
+  constructor(basePath: string = '.devsolo') {
     // Always resolve relative to current working directory
     const resolvedBasePath = path.resolve(process.cwd(), basePath);
     this.sessionPath = path.join(resolvedBasePath, 'sessions');

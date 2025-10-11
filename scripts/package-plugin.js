@@ -49,7 +49,7 @@ function warning(message) {
 function validatePluginStructure(pluginDir) {
   const requiredFiles = [
     '.claude-plugin/plugin.json',
-    'dist/mcp/hansolo-mcp-server.js',
+    'dist/mcp/devsolo-mcp-server.js',
     'commands',
     'agents',
     'node_modules',
@@ -89,11 +89,11 @@ function validatePluginManifest(pluginDir) {
   });
 
   // Validate MCP server configuration
-  if (!manifest.mcpServers.hansolo) {
-    error('MCP server "hansolo" not configured in plugin.json');
+  if (!manifest.mcpServers.devsolo) {
+    error('MCP server "devsolo" not configured in plugin.json');
   }
 
-  const mcpServer = manifest.mcpServers.hansolo;
+  const mcpServer = manifest.mcpServers.devsolo;
   if (!mcpServer.command || !mcpServer.args) {
     error('MCP server configuration missing command or args');
   }
@@ -115,7 +115,7 @@ function createArchive(pluginDir, outputDir, version) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  const archiveName = `hansolo-plugin-v${version}.tar.gz`;
+  const archiveName = `devsolo-plugin-v${version}.tar.gz`;
   const archivePath = path.join(outputDir, archiveName);
 
   // Remove old archive if exists
@@ -166,7 +166,7 @@ function main() {
   const pluginDir = path.join(rootDir, 'dist-plugin');
   const outputDir = path.join(rootDir, 'packages');
 
-  log('\n📦 Packaging Claude Code Plugin for han-solo\n', colors.bright);
+  log('\n📦 Packaging Claude Code Plugin for devsolo\n', colors.bright);
 
   // Step 1: Check that plugin build exists
   if (!fs.existsSync(pluginDir)) {

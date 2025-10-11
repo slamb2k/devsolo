@@ -28,7 +28,7 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     // Skip MCP server test (requires ESM module handling for chalk/boxen)
-    '/tests/mcp/hansolo-mcp-server.test.ts',
+    '/tests/mcp/devsolo-mcp-server.test.ts',
     // Skip session-repository test (5 tests failing - needs investigation)
     '/tests/services/session-repository.test.ts'
   ]

@@ -3,7 +3,7 @@
 **Feature Branch**: `002-we-need-to`
 **Created**: 2025-09-23
 **Status**: Draft
-**Input**: User description: "We need to publish the tool to npm and add a javascript based installer that can be called when the hansolo is installed either using npm install/npm install -g/npx (no install). The installer should provide a beautiful guided process in the cli that informs the user what is going on, provides the ability for them to choose specific options that suit their dev process and gives clear tips about what to do next."
+**Input**: User description: "We need to publish the tool to npm and add a javascript based installer that can be called when the devsolo is installed either using npm install/npm install -g/npx (no install). The installer should provide a beautiful guided process in the cli that informs the user what is going on, provides the ability for them to choose specific options that suit their dev process and gives clear tips about what to do next."
 
 ## Execution Flow (main)
 ```
@@ -55,26 +55,26 @@ When creating this spec from a user prompt:
 ## User Scenarios & Testing *(mandatory)*
 
 ### Primary User Story
-As a developer, I want to easily install and configure hansolo via npm so that I can quickly integrate it into my development workflow with settings that match my team's processes.
+As a developer, I want to easily install and configure devsolo via npm so that I can quickly integrate it into my development workflow with settings that match my team's processes.
 
 ### Acceptance Scenarios
-1. **Given** a developer has npm installed, **When** they run `npm install -g @hansolo/cli`, **Then** the package installs and automatically launches an interactive setup wizard
-2. **Given** a developer runs `npx @hansolo/cli`, **When** hansolo is not installed locally, **Then** npx downloads and executes hansolo with the interactive installer
+1. **Given** a developer has npm installed, **When** they run `npm install -g @devsolo/cli`, **Then** the package installs and automatically launches an interactive setup wizard
+2. **Given** a developer runs `npx @devsolo/cli`, **When** devsolo is not installed locally, **Then** npx downloads and executes devsolo with the interactive installer
 3. **Given** the interactive installer is running, **When** the user selects their preferred workflow options, **Then** the tool configures itself according to their selections and saves the configuration
-4. **Given** the installer has completed setup, **When** the user views the final screen, **Then** they see clear next steps and commands to start using hansolo
-5. **Given** a developer installs hansolo locally in a project, **When** they run `npm install @hansolo/cli`, **Then** the installer runs in project-scoped mode with relevant configuration options
+4. **Given** the installer has completed setup, **When** the user views the final screen, **Then** they see clear next steps and commands to start using devsolo
+5. **Given** a developer installs devsolo locally in a project, **When** they run `npm install @devsolo/cli`, **Then** the installer runs in project-scoped mode with relevant configuration options
 
 ### Edge Cases
 - What happens when the user cancels the installer mid-process?
 - How does system handle when user has insufficient permissions for global install?
-- What happens when hansolo is already installed but user runs the installer again?
+- What happens when devsolo is already installed but user runs the installer again?
 - How does the installer behave when run in non-interactive environments (CI/CD)?
 - What happens when user's terminal doesn't support color or advanced formatting?
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
-- **FR-001**: System MUST publish hansolo package to npm registry under [NEEDS CLARIFICATION: specific package name - @hansolo/cli or other?]
+- **FR-001**: System MUST publish devsolo package to npm registry under [NEEDS CLARIFICATION: specific package name - @devsolo/cli or other?]
 - **FR-002**: System MUST automatically trigger interactive installer after npm installation (global, local, or npx execution)
 - **FR-003**: Installer MUST display clear visual feedback about current installation progress and status
 - **FR-004**: Installer MUST present configuration options relevant to user's development workflow
@@ -91,7 +91,7 @@ As a developer, I want to easily install and configure hansolo via npm so that I
 - **FR-015**: Installer MUST provide option to reconfigure existing installation
 
 ### Key Entities *(include if feature involves data)*
-- **Configuration Profile**: User's selected workflow preferences and settings that customize hansolo behavior
+- **Configuration Profile**: User's selected workflow preferences and settings that customize devsolo behavior
 - **Installation Context**: Environment information including installation type (global/local/npx), existing configurations, and system capabilities
 - **Setup Progress State**: Current step in the installation wizard, allowing resume if interrupted
 

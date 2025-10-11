@@ -19,7 +19,7 @@ export class AuditLogger {
   private entries: AuditEntry[] = [];
 
   constructor(options: AuditLoggerOptions = {}) {
-    this.logDir = options.logDir || path.join(process.cwd(), '.hansolo', 'audit');
+    this.logDir = options.logDir || path.join(process.cwd(), '.devsolo', 'audit');
     this.maxLogSize = options.maxLogSize || 10 * 1024 * 1024; // 10MB default
     this.maxLogFiles = options.maxLogFiles || 10;
     this.consoleOutput = options.consoleOutput ?? false;

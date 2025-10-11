@@ -1,10 +1,10 @@
 # Migration Guide: Legacy MCP Server to Plugin Architecture
 
-This guide helps existing han-solo users understand the evolution from pure MCP tools to the current plugin architecture with slash commands and specialized sub-agents.
+This guide helps existing devsolo users understand the evolution from pure MCP tools to the current plugin architecture with slash commands and specialized sub-agents.
 
 ## What Changed?
 
-han-solo has evolved from a pure MCP tool implementation to Claude Code's plugin architecture with slash commands and specialized sub-agents (git-droid, docs-droid). This provides better orchestration, coordination, and user experience while maintaining all existing MCP tools.
+devsolo has evolved from a pure MCP tool implementation to Claude Code's plugin architecture with slash commands and specialized sub-agents (git-droid, docs-droid). This provides better orchestration, coordination, and user experience while maintaining all existing MCP tools.
 
 ### Architecture Evolution
 
@@ -24,23 +24,23 @@ User → Slash Command → Sub-Agent → MCP Tools → Git/GitHub
 
 ## Command Usage
 
-**MCP Prompts remain unchanged** - the syntax is still `/hansolo:command`:
+**MCP Prompts remain unchanged** - the syntax is still `/devsolo:command`:
 
 ### Available Slash Commands
 ```
-/hansolo:init
-/hansolo:launch
-/hansolo:commit
-/hansolo:ship
-/hansolo:status
-/hansolo:sessions
-/hansolo:swap
-/hansolo:abort
-/hansolo:cleanup
-/hansolo:hotfix
-/hansolo:status-line
-/hansolo:prime
-/hansolo:doc
+/devsolo:init
+/devsolo:launch
+/devsolo:commit
+/devsolo:ship
+/devsolo:status
+/devsolo:sessions
+/devsolo:swap
+/devsolo:abort
+/devsolo:cleanup
+/devsolo:hotfix
+/devsolo:status-line
+/devsolo:prime
+/devsolo:doc
 ```
 
 **Note:** These are slash commands that invoke MCP tools, not the MCP tools themselves.
@@ -49,7 +49,7 @@ User → Slash Command → Sub-Agent → MCP Tools → Git/GitHub
 
 ### 1. Specialized Sub-Agents
 
-han-solo now includes two specialized sub-agents:
+devsolo now includes two specialized sub-agents:
 
 - **git-droid** 🤖 - Coordinates git workflows with intelligent defaults
 - **docs-droid** 📚 - Manages documentation structure and validation
@@ -68,8 +68,8 @@ Native slash commands integrate with Claude Code's auto-completion system, makin
 
 Two new commands for managing the codebase:
 
-- `/hansolo prime` - Prime Claude's understanding of the codebase
-- `/hansolo doc` - Manage documentation with automatic placement and validation
+- `/devsolo prime` - Prime Claude's understanding of the codebase
+- `/devsolo doc` - Manage documentation with automatic placement and validation
 
 ## What's New
 
@@ -88,28 +88,28 @@ Two new powerful commands are now available:
 
 ```bash
 # Prime codebase understanding
-/hansolo:prime
+/devsolo:prime
 
 # Manage documentation
-/hansolo:doc  # Audit mode - scans and fixes docs
-/hansolo:doc "feature-name" "# Documentation content"  # Create mode
+/devsolo:doc  # Audit mode - scans and fixes docs
+/devsolo:doc "feature-name" "# Documentation content"  # Create mode
 ```
 
 ## Backward Compatibility
 
 ### MCP Tools Still Work
 
-All underlying MCP tools (`hansolo_init`, `hansolo_launch`, etc.) still work exactly as before. You can still use natural language to invoke them:
+All underlying MCP tools (`devsolo_init`, `devsolo_launch`, etc.) still work exactly as before. You can still use natural language to invoke them:
 
 ```
-"Use hansolo_ship to commit, push, create PR, and merge"
+"Use devsolo_ship to commit, push, create PR, and merge"
 ```
 
 However, we recommend using slash commands for the best experience.
 
 ### Configuration Unchanged
 
-Your `.hansolo/` directory structure remains the same:
+Your `.devsolo/` directory structure remains the same:
 - Configuration files
 - Session storage
 - Workflow state
@@ -144,33 +144,33 @@ All GitHub integration features work exactly as before:
 
 **Slash commands (recommended):**
 ```
-/hansolo:launch "Add authentication feature"
+/devsolo:launch "Add authentication feature"
 ```
 
 **Direct MCP tool calls (still supported):**
 ```
-"Use hansolo_launch to start a new feature for authentication"
+"Use devsolo_launch to start a new feature for authentication"
 ```
 
 Both work - slash commands provide better orchestration via sub-agents.
 
 ### Commands Not Appearing in Menu
 
-Make sure you've restarted Claude Code after updating han-solo. The plugin architecture requires a restart to load new slash commands.
+Make sure you've restarted Claude Code after updating devsolo. The plugin architecture requires a restart to load new slash commands.
 
 ### Need More Control?
 
 You can still invoke MCP tools directly via natural language if you need fine-grained control:
 
 ```
-"Use hansolo_launch with parameters: branchName='feature/test', auto=true"
+"Use devsolo_launch with parameters: branchName='feature/test', auto=true"
 ```
 
 However, slash commands provide better orchestration and user experience.
 
 ## FAQ
 
-### Q: Do I need to reinstall han-solo?
+### Q: Do I need to reinstall devsolo?
 
 **A:** No! The update is transparent. Just pull the latest version and restart Claude Code.
 
@@ -180,7 +180,7 @@ However, slash commands provide better orchestration and user experience.
 
 ### Q: What's the difference between slash commands and MCP tools?
 
-**A:** Slash commands (e.g., `/hansolo:launch`) provide orchestration and invoke MCP tools (e.g., `hansolo_launch`) for execution. Slash commands add coordination via sub-agents, while MCP tools remain focused on execution.
+**A:** Slash commands (e.g., `/devsolo:launch`) provide orchestration and invoke MCP tools (e.g., `devsolo_launch`) for execution. Slash commands add coordination via sub-agents, while MCP tools remain focused on execution.
 
 ### Q: Should I use slash commands or direct MCP tool calls?
 
@@ -196,15 +196,15 @@ If you encounter any issues during migration:
 
 1. Check the [main README](../../README.md) for updated documentation
 2. Review the [slash commands reference](slash-commands-reference.md)
-3. Open an issue on [GitHub](https://github.com/slamb2k/hansolo/issues)
+3. Open an issue on [GitHub](https://github.com/slamb2k/devsolo/issues)
 
 ## Summary
 
-The plugin architecture evolution enhances han-solo while maintaining full compatibility:
+The plugin architecture evolution enhances devsolo while maintaining full compatibility:
 
-1. Continue using `/hansolo:command` syntax (no changes needed)
+1. Continue using `/devsolo:command` syntax (no changes needed)
 2. Enjoy enhanced features (banners, sub-agents, better orchestration)
-3. Explore new commands (`/hansolo:prime`, `/hansolo:doc`)
+3. Explore new commands (`/devsolo:prime`, `/devsolo:doc`)
 4. All MCP tools, workflows, and data remain unchanged!
 
-Welcome to the enhanced han-solo plugin architecture! 🚀
+Welcome to the enhanced devsolo plugin architecture! 🚀

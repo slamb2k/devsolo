@@ -60,7 +60,7 @@ describe('ContextDetector', () => {
       });
 
       Object.defineProperty(process.argv, '1', {
-        value: '/usr/local/bin/hansolo',
+        value: '/usr/local/bin/devsolo',
         writable: true,
       });
 

@@ -1,19 +1,19 @@
 # Product Specifications
 
-This folder contains product requirements, specifications, and strategic documents for han-solo.
+This folder contains product requirements, specifications, and strategic documents for devsolo.
 
 ## Contents
 
-- **hansolo-prd.md** - Product Requirements Document defining features, workflows, and technical requirements
-- **hansolo-product-brief.md** - High-level product brief and vision
-- **hansolo-constitution.md** - Core principles and design philosophy guiding han-solo development
+- **devsolo-prd.md** - Product Requirements Document defining features, workflows, and technical requirements
+- **devsolo-product-brief.md** - High-level product brief and vision
+- **devsolo-constitution.md** - Core principles and design philosophy guiding devsolo development
 
 ## Who This Is For
 
 - Product managers understanding the vision
-- Stakeholders evaluating han-solo
+- Stakeholders evaluating devsolo
 - Contributors understanding design decisions
-- New team members learning about han-solo's purpose
+- New team members learning about devsolo's purpose
 
 ## Related Documentation
 

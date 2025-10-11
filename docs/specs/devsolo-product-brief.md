@@ -1,4 +1,4 @@
-# han-solo Product Brief
+# devsolo Product Brief
 
 **Version**: 2.0.0 | **Date**: September 21, 2025
 
@@ -6,7 +6,7 @@
 Development teams lose **$20,000 per developer annually** to Git workflow inefficiencies. A 50-developer team wastes **$1M+ per year** on merge conflicts, broken deployments, and inconsistent practices. Current solutions either require extensive manual configuration or operate too late to prevent issues.
 
 ## Solution
-han-solo is an intelligent Git workflow automation tool that **guarantees linear history** and **prevents merge conflicts** through deterministic state control combined with AI assistance. One command replaces dozens of manual Git operations while enforcing best practices automatically.
+devsolo is an intelligent Git workflow automation tool that **guarantees linear history** and **prevents merge conflicts** through deterministic state control combined with AI assistance. One command replaces dozens of manual Git operations while enforcing best practices automatically.
 
 ## Key Benefits
 
@@ -32,12 +32,12 @@ Adapts from individual developers (0 reviews) to large teams
 ## How It Works
 
 Simple MCP tools accessed through Claude Code replace complex Git workflows:
-- `hansolo_init` → One-time setup (creates GitHub repo if needed)
-- `hansolo_launch` → Creates branch with safety checks
-- `hansolo_ship` → Complete workflow from commit to deployment
-- `hansolo_hotfix` → Emergency fixes with automatic backporting
-- `hansolo_status` → Comprehensive workflow visibility
-- `hansolo_sessions` → Multi-tasking with concurrent workflows
+- `devsolo_init` → One-time setup (creates GitHub repo if needed)
+- `devsolo_launch` → Creates branch with safety checks
+- `devsolo_ship` → Complete workflow from commit to deployment
+- `devsolo_hotfix` → Emergency fixes with automatic backporting
+- `devsolo_status` → Comprehensive workflow visibility
+- `devsolo_sessions` → Multi-tasking with concurrent workflows
 
 **Architecture**:
 - **MCP Server**: Deterministic state machine enforces workflow rules (100% reliable)
@@ -81,9 +81,9 @@ Simple MCP tools accessed through Claude Code replace complex Git workflows:
 - **Validation Contracts**: Guaranteed consistent behavior
 
 **Installation Structure**
-- Components install to `.hansolo/` directory (not `.claude/`)
-- Clear separation between han-solo and Claude configurations
-- User-level (`~/.hansolo/`) or project-level (`./.hansolo/`)
+- Components install to `.devsolo/` directory (not `.claude/`)
+- Clear separation between devsolo and Claude configurations
+- User-level (`~/.devsolo/`) or project-level (`./.devsolo/`)
 - Interactive installer with profiles (Solo, Team, Custom)
 
 **Integration Points**
@@ -92,7 +92,7 @@ Simple MCP tools accessed through Claude Code replace complex Git workflows:
 - Status lines for terminal awareness
 - Visual output with colors and icons
 
-| Capability | han-solo | Next Best Alternative |
+| Capability | devsolo | Next Best Alternative |
 |------------|----------|-----------------------|
 | Setup Time | 5 minutes | 2-3 days |
 | Linear History | Automatic | Manual configuration |
@@ -103,20 +103,20 @@ Simple MCP tools accessed through Claude Code replace complex Git workflows:
 ## Complete Feature Set
 
 **Core Workflows** (MCP Tools)
-- `hansolo_init` - Mandatory first-time setup with repo creation
-- `hansolo_launch` - Safe feature branch creation
-- `hansolo_ship` - Complete commit-to-merge automation
-- `hansolo_hotfix` - Emergency production fixes
+- `devsolo_init` - Mandatory first-time setup with repo creation
+- `devsolo_launch` - Safe feature branch creation
+- `devsolo_ship` - Complete commit-to-merge automation
+- `devsolo_hotfix` - Emergency production fixes
 
 **Session Management** (MCP Tools)
-- `hansolo_status` - Comprehensive environment overview
-- `hansolo_sessions` - List all active workflows
-- `hansolo_swap` - Switch between concurrent sessions
-- `hansolo_abort` - Safe workflow cancellation
+- `devsolo_status` - Comprehensive environment overview
+- `devsolo_sessions` - List all active workflows
+- `devsolo_swap` - Switch between concurrent sessions
+- `devsolo_abort` - Safe workflow cancellation
 
 **Additional Features** (MCP Tools)
-- `hansolo_commit` - Commit with optional message
-- `hansolo_status_line` - Configure terminal awareness
+- `devsolo_commit` - Commit with optional message
+- `devsolo_status_line` - Configure terminal awareness
 - Natural language interface through Claude Code
 - Prompt-based parameter collection for user-friendly interactions
 
@@ -130,9 +130,9 @@ Simple MCP tools accessed through Claude Code replace complex Git workflows:
 ## Installation & Setup
 
 **5 Minute Setup Process**
-1. Add han-solo MCP server to Claude Code configuration
+1. Add devsolo MCP server to Claude Code configuration
 2. Restart Claude Code to load MCP tools
-3. Run `hansolo_init` in your project (one-time setup)
+3. Run `devsolo_init` in your project (one-time setup)
 4. Ready to use all MCP tools immediately through natural language
 
 **Zero Configuration Required**
@@ -221,9 +221,9 @@ Simple MCP tools accessed through Claude Code replace complex Git workflows:
 
 ## Call to Action
 
-Git workflow problems cost the industry **$2B+ annually**. han-solo solves this with a unique combination of deterministic control and AI intelligence that no competitor can match. 
+Git workflow problems cost the industry **$2B+ annually**. devsolo solves this with a unique combination of deterministic control and AI intelligence that no competitor can match. 
 
-With proven demand, clear ROI, and a 2-month payback period, han-solo represents an exceptional investment opportunity in the developer tools space.
+With proven demand, clear ROI, and a 2-month payback period, devsolo represents an exceptional investment opportunity in the developer tools space.
 
 **Next Steps**:
 1. Review technical PRD

@@ -104,7 +104,7 @@ const CleanupSchema = z.object({
 const StatusSchema = z.object({
 });
 
-export class HanSoloMCPServer {
+export class DevSoloMCPServer {
   private server: Server;
 
   // MCP Tools
@@ -120,18 +120,18 @@ export class HanSoloMCPServer {
   private hotfixTool: HotfixTool;
   private statusLineTool: StatusLineTool;
 
-  constructor(basePath: string = '.hansolo') {
+  constructor(basePath: string = '.devsolo') {
     // Detect plugin context
     const isPluginMode = !!process.env['CLAUDE_PLUGIN_ROOT'];
     const pluginRoot = process.env['CLAUDE_PLUGIN_ROOT'] || '';
 
     if (isPluginMode) {
-      console.error(`han-solo running in plugin mode: ${pluginRoot}`);
+      console.error(`devsolo running in plugin mode: ${pluginRoot}`);
     }
 
     this.server = new Server(
       {
-        name: 'hansolo',
+        name: 'devsolo',
         version: '2.0.0',
       },
       {
@@ -190,8 +190,8 @@ export class HanSoloMCPServer {
       return {
         tools: [
           {
-            name: 'hansolo_init',
-            description: '🚀 Initialize han-solo in your project',
+            name: 'devsolo_init',
+            description: '🚀 Initialize devsolo in your project',
             inputSchema: {
               type: 'object',
               properties: {
@@ -208,7 +208,7 @@ export class HanSoloMCPServer {
             },
           },
           {
-            name: 'hansolo_launch',
+            name: 'devsolo_launch',
             description: 'Start a new feature workflow',
             inputSchema: {
               type: 'object',
@@ -237,7 +237,7 @@ export class HanSoloMCPServer {
             },
           },
           {
-            name: 'hansolo_sessions',
+            name: 'devsolo_sessions',
             description: 'List workflow sessions',
             inputSchema: {
               type: 'object',
@@ -258,7 +258,7 @@ export class HanSoloMCPServer {
             },
           },
           {
-            name: 'hansolo_swap',
+            name: 'devsolo_swap',
             description: 'Switch between workflow sessions',
             inputSchema: {
               type: 'object',
@@ -280,7 +280,7 @@ export class HanSoloMCPServer {
             },
           },
           {
-            name: 'hansolo_abort',
+            name: 'devsolo_abort',
             description: 'Abort a workflow session',
             inputSchema: {
               type: 'object',
@@ -305,7 +305,7 @@ export class HanSoloMCPServer {
             },
           },
           {
-            name: 'hansolo_commit',
+            name: 'devsolo_commit',
             description: 'Commit changes with optional message. Use stagedOnly to commit only staged files.',
             inputSchema: {
               type: 'object',
@@ -327,7 +327,7 @@ export class HanSoloMCPServer {
             },
           },
           {
-            name: 'hansolo_ship',
+            name: 'devsolo_ship',
             description: 'Push, create PR, merge, and cleanup (requires all changes committed)',
             inputSchema: {
               type: 'object',
@@ -361,7 +361,7 @@ export class HanSoloMCPServer {
             },
           },
           {
-            name: 'hansolo_hotfix',
+            name: 'devsolo_hotfix',
             description: 'Create emergency hotfix workflow',
             inputSchema: {
               type: 'object',
@@ -395,7 +395,7 @@ export class HanSoloMCPServer {
             },
           },
           {
-            name: 'hansolo_status',
+            name: 'devsolo_status',
             description: 'Show current workflow status',
             inputSchema: {
               type: 'object',
@@ -403,7 +403,7 @@ export class HanSoloMCPServer {
             },
           },
           {
-            name: 'hansolo_cleanup',
+            name: 'devsolo_cleanup',
             description: 'Clean up expired sessions and stale branches',
             inputSchema: {
               type: 'object',
@@ -420,7 +420,7 @@ export class HanSoloMCPServer {
             },
           },
           {
-            name: 'hansolo_status_line',
+            name: 'devsolo_status_line',
             description: 'Manage Claude Code status line display',
             inputSchema: {
               type: 'object',
@@ -474,7 +474,7 @@ export class HanSoloMCPServer {
 
       try {
         switch (name) {
-        case 'hansolo_init': {
+        case 'devsolo_init': {
           const params = InitSchema.parse(processedArgs);
           const result = await this.initTool.execute(params);
           return {
@@ -488,7 +488,7 @@ export class HanSoloMCPServer {
           };
         }
 
-        case 'hansolo_launch': {
+        case 'devsolo_launch': {
           const params = LaunchSchema.parse(processedArgs);
           const result = await this.launchTool.execute(params);
           return {
@@ -502,7 +502,7 @@ export class HanSoloMCPServer {
           };
         }
 
-        case 'hansolo_sessions': {
+        case 'devsolo_sessions': {
           const params = SessionsSchema.parse(processedArgs);
           const result = await this.sessionsTool.execute(params);
           return {
@@ -516,7 +516,7 @@ export class HanSoloMCPServer {
           };
         }
 
-        case 'hansolo_swap': {
+        case 'devsolo_swap': {
           const params = SwapSchema.parse(processedArgs);
           const result = await this.swapTool.execute(params);
           return {
@@ -530,7 +530,7 @@ export class HanSoloMCPServer {
           };
         }
 
-        case 'hansolo_abort': {
+        case 'devsolo_abort': {
           const params = AbortSchema.parse(processedArgs);
           const result = await this.abortTool.execute(params);
           return {
@@ -544,7 +544,7 @@ export class HanSoloMCPServer {
           };
         }
 
-        case 'hansolo_commit': {
+        case 'devsolo_commit': {
           const params = CommitSchema.parse(processedArgs);
           const result = await this.commitTool.execute(params);
           return {
@@ -558,7 +558,7 @@ export class HanSoloMCPServer {
           };
         }
 
-        case 'hansolo_ship': {
+        case 'devsolo_ship': {
           const params = ShipSchema.parse(processedArgs);
           const result = await this.shipTool.execute(params);
           return {
@@ -572,7 +572,7 @@ export class HanSoloMCPServer {
           };
         }
 
-        case 'hansolo_status': {
+        case 'devsolo_status': {
           const params = StatusSchema.parse(processedArgs);
           const result = await this.statusTool.execute(params);
 
@@ -587,7 +587,7 @@ export class HanSoloMCPServer {
           };
         }
 
-        case 'hansolo_cleanup': {
+        case 'devsolo_cleanup': {
           const params = CleanupSchema.parse(processedArgs);
           const result = await this.cleanupTool.execute(params);
           return {
@@ -601,7 +601,7 @@ export class HanSoloMCPServer {
           };
         }
 
-        case 'hansolo_status_line': {
+        case 'devsolo_status_line': {
           const params = StatusLineSchema.parse(processedArgs);
           const result = await this.statusLineTool.execute(params);
           return {
@@ -615,7 +615,7 @@ export class HanSoloMCPServer {
           };
         }
 
-        case 'hansolo_hotfix': {
+        case 'devsolo_hotfix': {
           const params = HotfixSchema.parse(processedArgs);
           const result = await this.hotfixTool.execute(params);
           return {
@@ -771,7 +771,7 @@ export class HanSoloMCPServer {
 
     // Log to stderr (stdout is used for MCP protocol)
     const mode = process.env['CLAUDE_PLUGIN_ROOT'] ? 'Plugin Mode' : 'Standalone Mode';
-    console.error(`han-solo MCP server v2.0.0 running (${mode})`);
+    console.error(`devsolo MCP server v2.0.0 running (${mode})`);
 
     // Keep the async function from returning by waiting on a promise
     // that resolves when the transport closes
@@ -795,4 +795,4 @@ export class HanSoloMCPServer {
 }
 
 // Export for use as a library
-// Server is started by bin/hansolo-mcp when run as a command
+// Server is started by bin/devsolo-mcp when run as a command

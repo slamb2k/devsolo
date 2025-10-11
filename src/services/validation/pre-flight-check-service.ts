@@ -287,7 +287,7 @@ export class PreFlightCheckService {
           id: 'commit_changes',
           label: 'Commit changes first',
           description: 'Create a commit with these changes before continuing',
-          action: 'Use hansolo_commit to commit changes',
+          action: 'Use devsolo_commit to commit changes',
           autoRecommended: false,
           risk: 'low',
         },
@@ -417,7 +417,7 @@ export class PreFlightCheckService {
           id: 'complete_session',
           label: 'Complete current session first',
           description: 'Ship the current session before starting a new one',
-          action: 'Use hansolo_ship to complete current session',
+          action: 'Use devsolo_ship to complete current session',
           autoRecommended: false,
           risk: 'low',
         },
@@ -519,7 +519,7 @@ export class PreFlightCheckService {
         passed: false,
         message: 'No active session found',
         level: 'error',
-        suggestions: ['Start a new session with hansolo_launch'],
+        suggestions: ['Start a new session with devsolo_launch'],
       };
     } catch (error) {
       return {
@@ -554,7 +554,7 @@ export class PreFlightCheckService {
         passed: false,
         message: `On main branch '${mainBranch}'`,
         level: 'error',
-        suggestions: ['Create a feature branch with hansolo_launch'],
+        suggestions: ['Create a feature branch with devsolo_launch'],
         details: { currentBranch, mainBranch },
       };
     } catch (error) {
@@ -635,7 +635,7 @@ export class PreFlightCheckService {
           unstagedCount,
           changedFiles: [...status.staged, ...status.modified, ...status.created, ...status.deleted],
         },
-        suggestions: ['Commit changes first using hansolo_commit'],
+        suggestions: ['Commit changes first using devsolo_commit'],
       };
     } catch (error) {
       return {

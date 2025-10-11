@@ -30,7 +30,7 @@ export interface PluginManifest {
   version: string;
   description?: string;
   main: string;
-  hansolo?: {
+  devsolo?: {
     minVersion?: string;
     maxVersion?: string;
     hooks?: string[];

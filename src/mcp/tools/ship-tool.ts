@@ -41,7 +41,7 @@ export class ShipTool extends BaseMCPTool<ShipToolInput, GitHubToolResult> {
     private githubIntegration: GitHubIntegration,
     private branchValidator: BranchValidator,
     configManager: ConfigurationManager,
-    _basePath: string = '.hansolo',
+    _basePath: string = '.devsolo',
     server?: Server
   ) {
     super(configManager, server);
@@ -97,7 +97,7 @@ export class ShipTool extends BaseMCPTool<ShipToolInput, GitHubToolResult> {
               'Analyze the overall changes and their purpose',
               'Generate a structured PR description with Summary, Changes, and Testing sections',
               'OR ask the user what PR description they want to use',
-              'Call hansolo_ship again with prDescription parameter',
+              'Call devsolo_ship again with prDescription parameter',
             ],
           } as GitHubToolResult,
         };

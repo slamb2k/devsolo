@@ -1,6 +1,6 @@
-# han-solo Quick Start Guide
+# devsolo Quick Start Guide
 
-Get up and running with han-solo in under 5 minutes.
+Get up and running with devsolo in under 5 minutes.
 
 ## Prerequisites
 
@@ -11,16 +11,16 @@ Get up and running with han-solo in under 5 minutes.
 
 ## Installation
 
-### 1. Install han-solo Globally
+### 1. Install devsolo Globally
 
 ```bash
-npm install -g @hansolo/cli
+npm install -g @devsolo/cli
 ```
 
 ### 2. Verify Installation
 
 ```bash
-hansolo --version
+devsolo --version
 ```
 
 ## Setup Your Project
@@ -31,13 +31,13 @@ hansolo --version
 cd /path/to/your/project
 ```
 
-### 2. Initialize han-solo
+### 2. Initialize devsolo
 
 ```bash
-hansolo init
+devsolo init
 ```
 
-This creates a `.hansolo` directory and sets up everything you need.
+This creates a `.devsolo` directory and sets up everything you need.
 
 ### 3. Configure GitHub Authentication
 
@@ -51,14 +51,14 @@ gh auth login
 export GITHUB_TOKEN=ghp_your_token_here
 ```
 
-That's it! han-solo is ready to use.
+That's it! devsolo is ready to use.
 
 ## Your First Workflow
 
 ### Step 1: Launch a New Feature
 
 ```bash
-hansolo launch
+devsolo launch
 ```
 
 This creates a new feature branch and starts tracking your workflow.
@@ -72,13 +72,13 @@ Work on your code as you normally would:
 vim src/my-feature.ts
 
 # Check status anytime
-hansolo status
+devsolo status
 ```
 
 ### Step 3: Ship Your Feature
 
 ```bash
-hansolo ship
+devsolo ship
 ```
 
 This single command:
@@ -94,34 +94,34 @@ This single command:
 
 ## Using with Claude Code
 
-If you have Claude Code installed, han-solo integrates seamlessly.
+If you have Claude Code installed, devsolo integrates seamlessly.
 
 ### 1. Initialize via Claude Code
 
 In Claude Code, run:
 ```
-/hansolo:init
+/devsolo:init
 ```
 
 ### 2. Enable the Status Line
 
 ```
-/hansolo:status-line enable
+/devsolo:status-line enable
 ```
 
 Now you'll see your workflow status at all times:
 ```
-[han-solo] 📝 0c2a20a7 | feature/my-feature | BRANCH_READY
+[devsolo] 📝 0c2a20a7 | feature/my-feature | BRANCH_READY
 ```
 
 ### 3. Use Slash Commands
 
-All han-solo commands work directly in Claude Code:
+All devsolo commands work directly in Claude Code:
 
 ```
-/hansolo:launch          # Start new feature
-/hansolo:status          # Check workflow status
-/hansolo:ship            # Ship your feature
+/devsolo:launch          # Start new feature
+/devsolo:status          # Check workflow status
+/devsolo:ship            # Ship your feature
 ```
 
 Claude can now help you manage your Git workflow!
@@ -132,71 +132,71 @@ Claude can now help you manage your Git workflow!
 
 ```bash
 # Start hotfix
-hansolo launch --branch hotfix/critical-bug
+devsolo launch --branch hotfix/critical-bug
 
 # Fix the bug
 vim src/buggy-file.ts
 
 # Ship it
-hansolo ship
+devsolo ship
 ```
 
 ### Multiple Features in Parallel
 
 ```bash
 # Start feature A
-hansolo launch --branch feature/user-auth
+devsolo launch --branch feature/user-auth
 
 # Work on it...
 
 # Switch to feature B
-hansolo launch --branch feature/dashboard
+devsolo launch --branch feature/dashboard
 
 # Work on it...
 
 # Switch back to feature A
-hansolo swap feature/user-auth
+devsolo swap feature/user-auth
 
 # Ship feature A
-hansolo ship
+devsolo ship
 
 # Switch to feature B
-hansolo swap feature/dashboard
+devsolo swap feature/dashboard
 
 # Ship feature B
-hansolo ship
+devsolo ship
 ```
 
 ### Cancel a Feature
 
 ```bash
 # Abort current feature
-hansolo abort
+devsolo abort
 
 # Optionally delete the branch
-hansolo abort --delete-branch
+devsolo abort --delete-branch
 ```
 
 ## Key Commands Reference
 
 | Command | What It Does |
 |---------|--------------|
-| `hansolo init` | Set up han-solo in your project |
-| `hansolo launch` | Start a new feature workflow |
-| `hansolo ship` | Complete and merge your feature |
-| `hansolo status` | See current workflow status |
-| `hansolo sessions` | List all active workflows |
-| `hansolo swap <branch>` | Switch between workflows |
-| `hansolo abort` | Cancel current workflow |
-| `hansolo cleanup` | Clean up merged branches and old sessions |
+| `devsolo init` | Set up devsolo in your project |
+| `devsolo launch` | Start a new feature workflow |
+| `devsolo ship` | Complete and merge your feature |
+| `devsolo status` | See current workflow status |
+| `devsolo sessions` | List all active workflows |
+| `devsolo swap <branch>` | Switch between workflows |
+| `devsolo abort` | Cancel current workflow |
+| `devsolo cleanup` | Clean up merged branches and old sessions |
 
 ## Tips for Success
 
-1. **Always run `hansolo launch`** before starting new work
-2. **Use `hansolo status`** to check where you are
-3. **Run `hansolo cleanup`** periodically to keep things tidy
+1. **Always run `devsolo launch`** before starting new work
+2. **Use `devsolo status`** to check where you are
+3. **Run `devsolo cleanup`** periodically to keep things tidy
 4. **Enable the status line** if using Claude Code
-5. **Let `hansolo ship` do the work** - it handles everything
+5. **Let `devsolo ship` do the work** - it handles everything
 
 ## Troubleshooting
 
@@ -215,7 +215,7 @@ export PATH="$(npm bin -g):$PATH"
 # Use npm's directory instead of system-wide
 npm config set prefix '~/.npm-global'
 export PATH=~/.npm-global/bin:$PATH
-npm install -g @hansolo/cli
+npm install -g @devsolo/cli
 ```
 
 ### GitHub authentication fails
@@ -232,11 +232,11 @@ export GITHUB_TOKEN=ghp_your_token
 
 ```bash
 # Check session details
-hansolo sessions --verbose
+devsolo sessions --verbose
 
 # Abort and restart
-hansolo abort
-hansolo launch
+devsolo abort
+devsolo launch
 ```
 
 ## Next Steps
@@ -248,10 +248,10 @@ hansolo launch
 
 ## Getting Help
 
-- **Documentation**: [GitHub Repository](https://github.com/slamb2k/hansolo)
-- **Issues**: [Report a bug](https://github.com/slamb2k/hansolo/issues)
-- **Discussions**: [Ask questions](https://github.com/slamb2k/hansolo/discussions)
+- **Documentation**: [GitHub Repository](https://github.com/slamb2k/devsolo)
+- **Issues**: [Report a bug](https://github.com/slamb2k/devsolo/issues)
+- **Discussions**: [Ask questions](https://github.com/slamb2k/devsolo/discussions)
 
 ---
 
-**You're all set!** Start shipping features with `hansolo launch` → *make changes* → `hansolo ship` 🚀
+**You're all set!** Start shipping features with `devsolo launch` → *make changes* → `devsolo ship` 🚀

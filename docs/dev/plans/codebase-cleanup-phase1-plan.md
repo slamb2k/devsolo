@@ -2,11 +2,11 @@
 
 ## Chore Description
 
-Based on comprehensive codebase analysis, this chore implements Phase 1 (Quick Wins) of the han-solo optimization plan. The goal is to remove redundant files, clean up build artifacts, eliminate unused dependencies, and improve repository hygiene without introducing any behavioral changes or regressions.
+Based on comprehensive codebase analysis, this chore implements Phase 1 (Quick Wins) of the devsolo optimization plan. The goal is to remove redundant files, clean up build artifacts, eliminate unused dependencies, and improve repository hygiene without introducing any behavioral changes or regressions.
 
 **Key Issues Identified:**
 - 13 compiled JavaScript and TypeScript declaration files incorrectly committed to `/src` directory
-- 49 stale lock files in `.hansolo/locks/` directory
+- 49 stale lock files in `.devsolo/locks/` directory
 - 1 temporary test file (`test-stash2.txt`) in repository root
 - Runtime debug log (`debug.log`) not properly ignored
 - Unused npm dependencies (`playwright`, `@types/rimraf`)
@@ -54,8 +54,8 @@ Based on comprehensive codebase analysis, this chore implements Phase 1 (Quick W
 **Why relevant**: These are TypeScript compilation outputs that should only exist in `/dist`, not `/src`. Their presence creates confusion and can cause build issues.
 
 **Runtime Files (49+ files):**
-- `.hansolo/locks/*.lock` - 49 stale session lock files
-- `.hansolo/debug.log` - Runtime debug log (56KB)
+- `.devsolo/locks/*.lock` - 49 stale session lock files
+- `.devsolo/debug.log` - Runtime debug log (56KB)
 - `test-stash2.txt` - Temporary test file in root
 
 **Why relevant**: These are ephemeral runtime files that accumulate during development and should not be committed to the repository.
@@ -74,7 +74,7 @@ Based on comprehensive codebase analysis, this chore implements Phase 1 (Quick W
 
 **`.gitignore`**
 - Add explicit rules for runtime files to prevent future commits
-- Ensure `.hansolo/debug.log` and `.hansolo/locks/*.lock` are excluded
+- Ensure `.devsolo/debug.log` and `.devsolo/locks/*.lock` are excluded
 
 **Why relevant**: Prevents runtime files from being accidentally committed in the future.
 
@@ -113,18 +113,18 @@ None required - this is purely a cleanup operation.
 **Expected Result**: `/src` directory contains only `.ts` files.
 
 ### Step 3: Clean Stale Runtime Files
-- Remove all lock files from `.hansolo/locks/` directory
-- Truncate or delete `.hansolo/debug.log` file
+- Remove all lock files from `.devsolo/locks/` directory
+- Truncate or delete `.devsolo/debug.log` file
 - Delete `test-stash2.txt` from repository root
-- Verify no active sessions are using these lock files (check `.hansolo/sessions/`)
+- Verify no active sessions are using these lock files (check `.devsolo/sessions/`)
 
 **Rationale**: These files are generated during runtime and should not be committed. They accumulate over time and pollute the repository.
 
 **Expected Result**: Clean runtime directories, no temporary files in git status.
 
 ### Step 4: Update .gitignore
-- Add explicit exclusion for `.hansolo/debug.log`
-- Add explicit exclusion for `.hansolo/locks/*.lock`
+- Add explicit exclusion for `.devsolo/debug.log`
+- Add explicit exclusion for `.devsolo/locks/*.lock`
 - Add rule for any `*.tmp` files
 - Add rule for `test-stash*.txt` patterns
 - Verify the rules are properly formatted and will be respected
@@ -188,10 +188,10 @@ Execute all validation commands to ensure zero regressions (see Validation Comma
 ### Step 10: Commit and Ship
 - Stage all changes (deletions, package.json updates, .gitignore changes)
 - Create commit with clear message following conventional commits format
-- Use han-solo ship command to complete the workflow
+- Use devsolo ship command to complete the workflow
 - Verify post-flight checks pass
 
-**Rationale**: Proper workflow completion using han-solo's own tools.
+**Rationale**: Proper workflow completion using devsolo's own tools.
 
 **Expected Result**: Changes merged to main via PR.
 
@@ -212,10 +212,10 @@ Execute every command to validate the chore is complete with zero regressions.
 - `git status` - Verify clean working directory (or only expected changes staged)
 - `npm ls playwright` - Verify playwright is not installed
 - `npm ls @types/rimraf` - Verify @types/rimraf is not installed
-- `ls .hansolo/locks/ | wc -l` - Verify lock files are cleaned (should be 0 or very few)
+- `ls .devsolo/locks/ | wc -l` - Verify lock files are cleaned (should be 0 or very few)
 - `test -f test-stash2.txt && echo "FAIL: temp file exists" || echo "PASS: temp file removed"` - Verify temp file removed
 - `node dist/index.js --help` - Verify CLI still works
-- `node dist/mcp/hansolo-mcp-server.js --help 2>/dev/null || echo "MCP server binary check"` - Verify MCP server builds correctly
+- `node dist/mcp/devsolo-mcp-server.js --help 2>/dev/null || echo "MCP server binary check"` - Verify MCP server builds correctly
 
 ---
 
@@ -240,7 +240,7 @@ Execute every command to validate the chore is complete with zero regressions.
 **Mitigation**: Compare timestamps - if `.ts` file is older than `.js` file, investigate before deleting.
 
 **Issue**: What if active sessions have lock files?
-**Mitigation**: Check `.hansolo/sessions/` for active sessions before cleaning locks. Only remove locks older than 24 hours.
+**Mitigation**: Check `.devsolo/sessions/` for active sessions before cleaning locks. Only remove locks older than 24 hours.
 
 **Issue**: What if rollup is used indirectly by another tool?
 **Mitigation**: Search entire codebase and package.json scripts before removing. If in doubt, keep it and document.

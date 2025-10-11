@@ -2,7 +2,7 @@
 
 ## Overview
 
-han-solo v2.0.0 represents a **complete architectural pivot** from a dual CLI/MCP system to a pure MCP-only design. This guide helps v1.x users understand the changes and migrate successfully.
+devsolo v2.0.0 represents a **complete architectural pivot** from a dual CLI/MCP system to a pure MCP-only design. This guide helps v1.x users understand the changes and migrate successfully.
 
 ## What Changed
 
@@ -11,7 +11,7 @@ han-solo v2.0.0 represents a **complete architectural pivot** from a dual CLI/MC
 | v1.x | v2.0.0 |
 |------|--------|
 | Dual CLI/MCP interface | Pure MCP-only |
-| Terminal commands (`hansolo launch`) | Claude Code integration only |
+| Terminal commands (`devsolo launch`) | Claude Code integration only |
 | CLI dependencies (chalk, ora, boxen, inquirer) | Zero terminal dependencies |
 | 15,000+ lines | ~9,300 lines (-37%) |
 | Manual terminal workflow | AI-assisted workflow |
@@ -30,10 +30,10 @@ han-solo v2.0.0 represents a **complete architectural pivot** from a dual CLI/MC
 - Interactive prompts
 - Shell completions
 - Man pages
-- CLI entry point (`hansolo` command)
+- CLI entry point (`devsolo` command)
 
 **🔄 Changed:**
-- Package name: `@hansolo/cli` → `hansolo-mcp`
+- Package name: `@devsolo/cli` → `devsolo-mcp`
 - Installation method: npm global → MCP server configuration
 - Interaction model: Terminal → Claude Code
 - Result format: Terminal output → Structured JSON
@@ -43,7 +43,7 @@ han-solo v2.0.0 represents a **complete architectural pivot** from a dual CLI/MC
 ### Stay on v1.x If:
 - You need standalone CLI tool
 - You don't use Claude Code
-- You have automated scripts using `hansolo` commands
+- You have automated scripts using `devsolo` commands
 - You need terminal-only workflow
 - **Recommendation**: Stay on v1.1.3 until you're ready for Claude Code
 
@@ -59,29 +59,29 @@ han-solo v2.0.0 represents a **complete architectural pivot** from a dual CLI/MC
 ### Step 1: Backup Your Configuration
 
 ```bash
-# Backup existing .hansolo directory
-cp -r .hansolo .hansolo.v1.backup
+# Backup existing .devsolo directory
+cp -r .devsolo .devsolo.v1.backup
 
 # Note your current configuration
-cat .hansolo/config.yaml > ~/hansolo-config-backup.yaml
+cat .devsolo/config.yaml > ~/devsolo-config-backup.yaml
 ```
 
 ### Step 2: Uninstall v1.x
 
 ```bash
 # Remove global CLI installation
-npm uninstall -g @hansolo/cli
+npm uninstall -g @devsolo/cli
 
 # Or remove from project
-npm uninstall @hansolo/cli
+npm uninstall @devsolo/cli
 ```
 
 ### Step 3: Install v2.0.0 MCP Server
 
 ```bash
-# Clone or download han-solo v2.0.0
-git clone https://github.com/slamb2k/hansolo.git
-cd hansolo
+# Clone or download devsolo v2.0.0
+git clone https://github.com/slamb2k/devsolo.git
+cd devsolo
 
 # Install dependencies
 npm install
@@ -93,7 +93,7 @@ npm run build:mcp
 
 ### Step 4: Configure Claude Code
 
-Add han-solo to your Claude Code MCP configuration:
+Add devsolo to your Claude Code MCP configuration:
 
 **Location**:
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -103,16 +103,16 @@ Add han-solo to your Claude Code MCP configuration:
 ```json
 {
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "command": "node",
-      "args": ["/absolute/path/to/hansolo/bin/hansolo-mcp"],
+      "args": ["/absolute/path/to/devsolo/bin/devsolo-mcp"],
       "cwd": "${workspaceFolder}"
     }
   }
 }
 ```
 
-Replace `/absolute/path/to/hansolo` with your actual path.
+Replace `/absolute/path/to/devsolo` with your actual path.
 
 ### Step 5: Restart Claude Code
 
@@ -123,20 +123,20 @@ Restart Claude Code to load the MCP server.
 In Claude Code, in your project directory:
 
 ```
-Use hansolo_init to initialize han-solo in this project
+Use devsolo_init to initialize devsolo in this project
 ```
 
 Or use the MCP tool directly:
 ```
-/mcp__hansolo__hansolo_init
+/mcp__devsolo__devsolo_init
 ```
 
 ### Step 7: Verify Setup
 
-Check that han-solo is working:
+Check that devsolo is working:
 
 ```
-Use hansolo_status to check the current state
+Use devsolo_status to check the current state
 ```
 
 You should see your project status.
@@ -147,32 +147,32 @@ You should see your project status.
 
 | v1.x CLI Command | v2.0.0 MCP Tool | Natural Language Example |
 |------------------|-----------------|--------------------------|
-| `hansolo init` | `hansolo_init` | "Initialize han-solo in this project" |
-| `hansolo launch` | `hansolo_launch` | "Start a new feature for user authentication" |
-| `hansolo commit` | `hansolo_commit` | "Commit these changes with message 'feat: add login'" |
-| `hansolo ship` | `hansolo_ship` | "Ship this feature to production" |
-| `hansolo status` | `hansolo_status` | "Show me the current workflow status" |
-| `hansolo sessions` | `hansolo_sessions` | "List all active workflow sessions" |
-| `hansolo swap <branch>` | `hansolo_swap` | "Switch to the feature/auth branch" |
-| `hansolo abort` | `hansolo_abort` | "Abort the current workflow" |
-| `hansolo hotfix` | `hansolo_hotfix` | "Create an emergency hotfix for bug XYZ" |
-| `hansolo cleanup` | `hansolo_cleanup` | "Clean up old sessions and branches" |
-| `hansolo config` | *(removed)* | Edit `.hansolo/config.yaml` directly |
-| `hansolo validate` | *(removed)* | Pre-flight checks now automatic |
-| `hansolo perf` | *(removed)* | Not applicable to MCP |
-| `hansolo interactive` | *(removed)* | Replaced by natural language |
-| `hansolo --help` | *(removed)* | Ask Claude about han-solo commands |
-| `hansolo --version` | *(removed)* | Check package.json |
+| `devsolo init` | `devsolo_init` | "Initialize devsolo in this project" |
+| `devsolo launch` | `devsolo_launch` | "Start a new feature for user authentication" |
+| `devsolo commit` | `devsolo_commit` | "Commit these changes with message 'feat: add login'" |
+| `devsolo ship` | `devsolo_ship` | "Ship this feature to production" |
+| `devsolo status` | `devsolo_status` | "Show me the current workflow status" |
+| `devsolo sessions` | `devsolo_sessions` | "List all active workflow sessions" |
+| `devsolo swap <branch>` | `devsolo_swap` | "Switch to the feature/auth branch" |
+| `devsolo abort` | `devsolo_abort` | "Abort the current workflow" |
+| `devsolo hotfix` | `devsolo_hotfix` | "Create an emergency hotfix for bug XYZ" |
+| `devsolo cleanup` | `devsolo_cleanup` | "Clean up old sessions and branches" |
+| `devsolo config` | *(removed)* | Edit `.devsolo/config.yaml` directly |
+| `devsolo validate` | *(removed)* | Pre-flight checks now automatic |
+| `devsolo perf` | *(removed)* | Not applicable to MCP |
+| `devsolo interactive` | *(removed)* | Replaced by natural language |
+| `devsolo --help` | *(removed)* | Ask Claude about devsolo commands |
+| `devsolo --version` | *(removed)* | Check package.json |
 
 ### Workflow Pattern Changes
 
 **v1.x CLI Workflow**:
 ```bash
 # Terminal commands
-hansolo launch --branch feature/auth
+devsolo launch --branch feature/auth
 vim src/auth.ts
-hansolo commit --message "feat: add auth"
-hansolo ship --pr-description "Add authentication"
+devsolo commit --message "feat: add auth"
+devsolo ship --pr-description "Add authentication"
 ```
 
 **v2.0.0 MCP Workflow**:
@@ -186,10 +186,10 @@ hansolo ship --pr-description "Add authentication"
 
 **v2.0.0 MCP Tool Workflow** (more explicit):
 ```
-Use hansolo_launch with branchName "feature/auth" and description "Authentication system"
+Use devsolo_launch with branchName "feature/auth" and description "Authentication system"
 *make changes*
-Use hansolo_commit with message "feat: add authentication"
-Use hansolo_ship with prDescription "Add authentication system"
+Use devsolo_commit with message "feat: add authentication"
+Use devsolo_ship with prDescription "Add authentication system"
 ```
 
 ## New Features in v2.0.0
@@ -236,24 +236,24 @@ Every tool includes:
 
 ### MCP Server Not Found
 
-**Problem**: Claude Code can't find the han-solo MCP server
+**Problem**: Claude Code can't find the devsolo MCP server
 
 **Solutions**:
 1. Verify path in `claude_desktop_config.json` is absolute
-2. Check file exists: `ls /path/to/hansolo/bin/hansolo-mcp`
-3. Verify it's executable: `chmod +x /path/to/hansolo/bin/hansolo-mcp`
+2. Check file exists: `ls /path/to/devsolo/bin/devsolo-mcp`
+3. Verify it's executable: `chmod +x /path/to/devsolo/bin/devsolo-mcp`
 4. Restart Claude Code after config changes
 
 ### Configuration Not Found
 
-**Problem**: "han-solo is not initialized"
+**Problem**: "devsolo is not initialized"
 
 **Solution**:
 ```
-Use hansolo_init to initialize han-solo in this project
+Use devsolo_init to initialize devsolo in this project
 ```
 
-This will create `.hansolo` directory in your project.
+This will create `.devsolo` directory in your project.
 
 ### Old Sessions
 
@@ -261,13 +261,13 @@ This will create `.hansolo` directory in your project.
 
 **Solution**: v1.x and v2.0.0 sessions are compatible. The session format hasn't changed. However, you may want to:
 ```
-Use hansolo_sessions with all true to see all sessions
-Use hansolo_cleanup to clean up old completed sessions
+Use devsolo_sessions with all true to see all sessions
+Use devsolo_cleanup to clean up old completed sessions
 ```
 
 ### Scripts Still Use CLI
 
-**Problem**: CI/CD scripts use `hansolo` commands
+**Problem**: CI/CD scripts use `devsolo` commands
 
 **Solutions**:
 1. **Option A**: Keep v1.x for CI/CD, use v2.0.0 locally
@@ -284,7 +284,7 @@ v1.1.3 is the last v1.x release. Critical bugs may be patched, but new features 
 
 ### Can I use both v1.x and v2.0.0?
 
-Not in the same project. They use the same `.hansolo` directory structure, but v2.0.0 requires Claude Code.
+Not in the same project. They use the same `.devsolo` directory structure, but v2.0.0 requires Claude Code.
 
 ### What about automation/CI/CD?
 
@@ -297,9 +297,9 @@ v2.0.0 is designed for interactive development with Claude Code, not automation.
 
 Yes! Your v1.x backup (Step 1) can be restored:
 ```bash
-rm -rf .hansolo
-cp -r .hansolo.v1.backup .hansolo
-npm install -g @hansolo/cli@1.1.3
+rm -rf .devsolo
+cp -r .devsolo.v1.backup .devsolo
+npm install -g @devsolo/cli@1.1.3
 ```
 
 ### Why remove the CLI entirely?
@@ -320,12 +320,12 @@ Maybe never, maybe in v3.x as a thin wrapper over MCP. The current focus is on A
 ### Resources
 - **New Documentation**: See `docs/guides/` for v2.0.0 guides
 - **Old Documentation**: See `docs/archive/v1-cli/` for v1.x reference
-- **Issues**: [GitHub Issues](https://github.com/slamb2k/hansolo/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/slamb2k/hansolo/discussions)
+- **Issues**: [GitHub Issues](https://github.com/slamb2k/devsolo/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/slamb2k/devsolo/discussions)
 
 ### Common Migration Questions
 
-Post in [GitHub Discussions](https://github.com/slamb2k/hansolo/discussions) with:
+Post in [GitHub Discussions](https://github.com/slamb2k/devsolo/discussions) with:
 - v1.x version you're migrating from
 - Your use case
 - Specific migration challenges
@@ -340,4 +340,4 @@ After migrating, see:
 
 ---
 
-**Welcome to han-solo v2.0.0 - AI-native Git workflow automation!** 🤖
+**Welcome to devsolo v2.0.0 - AI-native Git workflow automation!** 🤖

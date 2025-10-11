@@ -1,6 +1,6 @@
 # MCP Tools System Documentation
 
-**Audience**: Developers working on han-solo internals
+**Audience**: Developers working on devsolo internals
 
 **Purpose**: System-level documentation for implementing, testing, and maintaining MCP tools
 
@@ -28,7 +28,7 @@
 
 ### Pure MCP Architecture (v2.0.0)
 
-han-solo v2.0.0 implements a pure MCP-only architecture with no CLI layer. All user interaction happens through Claude Code via the MCP protocol.
+devsolo v2.0.0 implements a pure MCP-only architecture with no CLI layer. All user interaction happens through Claude Code via the MCP protocol.
 
 **Architecture Layers**:
 
@@ -39,7 +39,7 @@ han-solo v2.0.0 implements a pure MCP-only architecture with no CLI layer. All u
                 ↓ JSON-RPC
 ┌─────────────────────────────────┐
 │       MCP Server                │
-│    (HanSoloMCPServer)           │
+│    (DevSoloMCPServer)           │
 └─────────────────────────────────┘
                 ↓
 ┌─────────────────────────────────┐
@@ -74,17 +74,17 @@ han-solo v2.0.0 implements a pure MCP-only architecture with no CLI layer. All u
 
 | Tool | Type | Returns | Mutates State |
 |------|------|---------|---------------|
-| `hansolo_init` | Configuration | SessionToolResult | Yes (creates .hansolo) |
-| `hansolo_launch` | Workflow | SessionToolResult | Yes (creates session/branch) |
-| `hansolo_commit` | Workflow | SessionToolResult | Yes (commits changes) |
-| `hansolo_ship` | Workflow | GitHubToolResult | Yes (pushes, creates PR, merges) |
-| `hansolo_swap` | Workflow | SessionToolResult | Yes (switches session) |
-| `hansolo_abort` | Workflow | SessionToolResult | Yes (deletes session) |
-| `hansolo_hotfix` | Workflow | SessionToolResult | Yes (creates hotfix session) |
-| `hansolo_cleanup` | Workflow | SessionToolResult | Yes (deletes old sessions) |
-| `hansolo_status` | Query | QueryToolResult | No (read-only) |
-| `hansolo_sessions` | Query | QueryToolResult | No (read-only) |
-| `hansolo_status_line` | Configuration | QueryToolResult | Yes (updates config) |
+| `devsolo_init` | Configuration | SessionToolResult | Yes (creates .devsolo) |
+| `devsolo_launch` | Workflow | SessionToolResult | Yes (creates session/branch) |
+| `devsolo_commit` | Workflow | SessionToolResult | Yes (commits changes) |
+| `devsolo_ship` | Workflow | GitHubToolResult | Yes (pushes, creates PR, merges) |
+| `devsolo_swap` | Workflow | SessionToolResult | Yes (switches session) |
+| `devsolo_abort` | Workflow | SessionToolResult | Yes (deletes session) |
+| `devsolo_hotfix` | Workflow | SessionToolResult | Yes (creates hotfix session) |
+| `devsolo_cleanup` | Workflow | SessionToolResult | Yes (deletes old sessions) |
+| `devsolo_status` | Query | QueryToolResult | No (read-only) |
+| `devsolo_sessions` | Query | QueryToolResult | No (read-only) |
+| `devsolo_status_line` | Configuration | QueryToolResult | Yes (updates config) |
 
 ---
 
@@ -464,8 +464,8 @@ export class LaunchTool implements MCPTool<LaunchToolInput, SessionToolResult> {
 Services are registered in the MCP server initialization:
 
 ```typescript
-// In bin/hansolo-mcp
-const server = new HanSoloMCPServer({
+// In bin/devsolo-mcp
+const server = new DevSoloMCPServer({
   gitOps: new GitOperations(),
   sessionRepo: new SessionRepository(configManager),
   configManager: new ConfigurationManager(),
@@ -501,7 +501,7 @@ export function createErrorResult(
 
 ### Error Categories
 
-1. **Initialization Errors**: han-solo not initialized
+1. **Initialization Errors**: devsolo not initialized
 2. **Pre-Flight Failures**: Validation checks failed
 3. **Execution Errors**: Core workflow failed
 4. **Post-Flight Failures**: Verification failed (operation completed but state unexpected)
@@ -623,18 +623,18 @@ describe('LaunchTool Contract', () => {
 
 ### MCP Server Tool Registration
 
-Tools are registered in `HanSoloMCPServer`:
+Tools are registered in `DevSoloMCPServer`:
 
 ```typescript
-export class HanSoloMCPServer {
+export class DevSoloMCPServer {
   private tools: Map<string, MCPTool>;
 
   constructor(services: Services) {
     this.tools = new Map([
-      ['hansolo_init', new InitTool(services.configManager)],
-      ['hansolo_launch', new LaunchTool(services.gitOps, services.sessionRepo, ...)],
-      ['hansolo_commit', new CommitTool(services.gitOps, services.sessionRepo)],
-      ['hansolo_ship', new ShipTool(services.gitOps, services.github, ...)],
+      ['devsolo_init', new InitTool(services.configManager)],
+      ['devsolo_launch', new LaunchTool(services.gitOps, services.sessionRepo, ...)],
+      ['devsolo_commit', new CommitTool(services.gitOps, services.sessionRepo)],
+      ['devsolo_ship', new ShipTool(services.gitOps, services.github, ...)],
       // ... more tools
     ]);
   }
@@ -651,9 +651,9 @@ export class HanSoloMCPServer {
 
 ### Tool Naming Convention
 
-- **Prefix**: All tools prefixed with `hansolo_`
-- **Format**: `hansolo_<action>` (lowercase, underscore-separated)
-- **Examples**: `hansolo_launch`, `hansolo_status_line`
+- **Prefix**: All tools prefixed with `devsolo_`
+- **Format**: `devsolo_<action>` (lowercase, underscore-separated)
+- **Examples**: `devsolo_launch`, `devsolo_status_line`
 
 ---
 
@@ -689,8 +689,8 @@ export class HanSoloMCPServer {
 
 - [ ] **3. Register in MCP Server**
   ```typescript
-  // bin/hansolo-mcp or src/mcp/server.ts
-  this.tools.set('hansolo_my_tool', new MyTool(gitOps, sessionRepo));
+  // bin/devsolo-mcp or src/mcp/server.ts
+  this.tools.set('devsolo_my_tool', new MyTool(gitOps, sessionRepo));
   ```
 
 - [ ] **4. Add Pre-Flight Checks**
@@ -771,7 +771,7 @@ export class StashTool implements MCPTool<StashToolInput, SessionToolResult> {
 
       // Execute stash
       const stashRef = await this.gitOps.stashChanges(
-        input.message || 'han-solo auto-stash',
+        input.message || 'devsolo auto-stash',
         input.includeUntracked
       );
 
@@ -878,7 +878,7 @@ const cleanCheck = await this.preFlightCheckService.checkWorkingDirectoryClean()
 
 ## Summary
 
-The MCP tools system in han-solo v2.0.0 provides:
+The MCP tools system in devsolo v2.0.0 provides:
 
 ✅ **Consistent implementation pattern** across all 11 tools
 ✅ **Comprehensive validation** with pre/post-flight checks

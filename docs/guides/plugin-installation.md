@@ -1,12 +1,12 @@
-# Installing han-solo as a Claude Code Plugin
+# Installing devsolo as a Claude Code Plugin
 
-This guide explains how to install han-solo as a native Claude Code plugin, which provides the easiest installation method with automatic MCP server configuration.
+This guide explains how to install devsolo as a native Claude Code plugin, which provides the easiest installation method with automatic MCP server configuration.
 
 ## Overview
 
-han-solo can be installed as a Claude Code plugin, which bundles:
+devsolo can be installed as a Claude Code plugin, which bundles:
 - MCP server with all 11 workflow tools
-- 13 slash commands (`/hansolo:*`)
+- 13 slash commands (`/devsolo:*`)
 - 2 sub-agents (git-droid and docs-droid)
 - All necessary dependencies
 
@@ -25,7 +25,7 @@ han-solo can be installed as a Claude Code plugin, which bundles:
 When the Claude Code marketplace becomes available, you'll be able to install with:
 
 ```bash
-/plugin install hansolo
+/plugin install devsolo
 ```
 
 ### Method 2: Local Plugin Installation (For Development/Testing)
@@ -36,8 +36,8 @@ For testing or development, you can install the plugin from a local build:
 
 ```bash
 # Clone the repository
-git clone https://github.com/slamb2k/hansolo.git
-cd hansolo
+git clone https://github.com/slamb2k/devsolo.git
+cd devsolo
 
 # Install dependencies and build
 npm install
@@ -54,10 +54,10 @@ Create or update your Claude Code marketplace configuration to point to the loca
 {
   "name": "local-test",
   "plugins": {
-    "hansolo": {
-      "name": "hansolo",
+    "devsolo": {
+      "name": "devsolo",
       "version": "2.0.0",
-      "source": "file:///path/to/hansolo/dist-plugin"
+      "source": "file:///path/to/devsolo/dist-plugin"
     }
   }
 }
@@ -73,35 +73,35 @@ If you prefer manual control or the plugin system isn't available, see [Manual I
 
 ## Verification
 
-After installation, verify han-solo is working:
+After installation, verify devsolo is working:
 
 1. **Check MCP server status**: The MCP server should auto-start when Claude Code loads
-2. **Test a slash command**: Try `/hansolo:status` to check workflow status
+2. **Test a slash command**: Try `/devsolo:status` to check workflow status
 3. **Verify tools are available**: MCP tools should be listed in Claude Code's tool panel
 
 ## Usage
 
-Once installed as a plugin, use han-solo through its slash commands:
+Once installed as a plugin, use devsolo through its slash commands:
 
 ```
-/hansolo:init         # Initialize han-solo in your project
-/hansolo:launch       # Start a new feature workflow
-/hansolo:commit       # Commit changes
-/hansolo:ship         # Push, create PR, merge, and cleanup
-/hansolo:status       # Show current workflow status
-/hansolo:sessions     # List active workflow sessions
-/hansolo:swap         # Switch between workflow sessions
-/hansolo:abort        # Abort a workflow session
-/hansolo:hotfix       # Create emergency hotfix workflow
-/hansolo:cleanup      # Clean up expired sessions
-/hansolo:status-line  # Manage status line display
+/devsolo:init         # Initialize devsolo in your project
+/devsolo:launch       # Start a new feature workflow
+/devsolo:commit       # Commit changes
+/devsolo:ship         # Push, create PR, merge, and cleanup
+/devsolo:status       # Show current workflow status
+/devsolo:sessions     # List active workflow sessions
+/devsolo:swap         # Switch between workflow sessions
+/devsolo:abort        # Abort a workflow session
+/devsolo:hotfix       # Create emergency hotfix workflow
+/devsolo:cleanup      # Clean up expired sessions
+/devsolo:status-line  # Manage status line display
 ```
 
 For detailed usage of each command, see the [Quickstart Guide](./quickstart.md).
 
 ## Plugin Structure
 
-When installed as a plugin, han-solo uses this structure:
+When installed as a plugin, devsolo uses this structure:
 
 ```
 ${CLAUDE_PLUGIN_ROOT}/
@@ -117,7 +117,7 @@ ${CLAUDE_PLUGIN_ROOT}/
 │   └── docs-droid.md
 ├── dist/                    # Compiled MCP server
 │   └── mcp/
-│       └── hansolo-mcp-server.js
+│       └── devsolo-mcp-server.js
 └── node_modules/            # Bundled dependencies
 ```
 
@@ -132,12 +132,12 @@ The `${CLAUDE_PLUGIN_ROOT}` environment variable is set by Claude Code and point
 **Solutions**:
 1. Check Claude Code logs for MCP server startup errors
 2. Verify Node.js 20+ is installed: `node --version`
-3. Check that the plugin directory exists and contains `dist/mcp/hansolo-mcp-server.js`
+3. Check that the plugin directory exists and contains `dist/mcp/devsolo-mcp-server.js`
 4. Restart Claude Code to reload the plugin
 
 ### Slash Commands Not Available
 
-**Symptoms**: `/hansolo:*` commands are not recognized
+**Symptoms**: `/devsolo:*` commands are not recognized
 
 **Solutions**:
 1. Verify the plugin is enabled in Claude Code settings
@@ -160,7 +160,7 @@ To update to a new version:
 1. **If installed from marketplace**: Use Claude Code's update mechanism
 2. **If installed locally**:
    ```bash
-   cd hansolo
+   cd devsolo
    git pull
    npm install
    npm run build:plugin
@@ -179,10 +179,10 @@ To update to a new version:
 
 ## Uninstalling
 
-To uninstall the han-solo plugin:
+To uninstall the devsolo plugin:
 
 1. Use Claude Code's plugin management to disable/remove the plugin
-2. Remove any project-specific `.hansolo/` directories if desired
+2. Remove any project-specific `.devsolo/` directories if desired
 3. MCP server configuration is automatically removed with plugin
 
 ## Next Steps
@@ -193,6 +193,6 @@ To uninstall the han-solo plugin:
 
 ## Support
 
-- [GitHub Issues](https://github.com/slamb2k/hansolo/issues)
-- [Documentation](https://github.com/slamb2k/hansolo/tree/main/docs)
+- [GitHub Issues](https://github.com/slamb2k/devsolo/issues)
+- [Documentation](https://github.com/slamb2k/devsolo/tree/main/docs)
 - [Contributing Guide](../../CONTRIBUTING.md)

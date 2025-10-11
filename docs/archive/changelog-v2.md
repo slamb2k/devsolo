@@ -4,7 +4,7 @@
 
 **Release Date:** 2025-10-03
 
-This release completely reimagines the han-solo workflow with a focus on automation, safety, and user experience.
+This release completely reimagines the devsolo workflow with a focus on automation, safety, and user experience.
 
 ---
 
@@ -15,15 +15,15 @@ Ship your entire feature in a single command! No more running ship multiple time
 
 **Before:**
 ```bash
-hansolo ship
-hansolo ship --push
-hansolo ship --create-pr
-hansolo ship --merge
+devsolo ship
+devsolo ship --push
+devsolo ship --create-pr
+devsolo ship --merge
 ```
 
 **Now:**
 ```bash
-hansolo ship  # Does everything!
+devsolo ship  # Does everything!
 ```
 
 ### Comprehensive Pre/Post-Flight Checks
@@ -170,7 +170,7 @@ Defensive cleanup with verification:
 
 **Pre-Flight Checks:**
 - Git repository valid
-- Han-solo initialized
+- DevSolo initialized
 
 **Workflow:**
 - Syncs main branch with remote
@@ -234,13 +234,13 @@ All commands updated with consistent pattern:
 - `src/services/validation/pr-validator.ts` - PR validation
 
 ### Updated Commands (v2)
-- `src/commands/hansolo-launch-v2.ts` - Enhanced launch
-- `src/commands/hansolo-ship-v2.ts` - Automated ship
-- `src/commands/hansolo-cleanup-v2.ts` - Defensive cleanup
-- `src/commands/hansolo-abort-v2.ts` - Safe abort
-- `src/commands/hansolo-swap-v2.ts` - Smart swap
-- `src/commands/hansolo-status-v2.ts` - Rich status
-- `src/commands/hansolo-sessions-v2.ts` - Session management
+- `src/commands/devsolo-launch-v2.ts` - Enhanced launch
+- `src/commands/devsolo-ship-v2.ts` - Automated ship
+- `src/commands/devsolo-cleanup-v2.ts` - Defensive cleanup
+- `src/commands/devsolo-abort-v2.ts` - Safe abort
+- `src/commands/devsolo-swap-v2.ts` - Smart swap
+- `src/commands/devsolo-status-v2.ts` - Rich status
+- `src/commands/devsolo-sessions-v2.ts` - Session management
 
 ### Documentation
 - `docs/PRE-FLIGHT-CHECKS.md` - Complete check documentation
@@ -314,17 +314,17 @@ See [MIGRATION-V2.md](./docs/MIGRATION-V2.md) for detailed migration instruction
 **Quick Migration:**
 ```bash
 # Old v1 workflow
-hansolo launch --branch feature/auth
+devsolo launch --branch feature/auth
 # ... make changes ...
-hansolo ship
-hansolo ship --push
-hansolo ship --create-pr
-hansolo ship --merge
+devsolo ship
+devsolo ship --push
+devsolo ship --create-pr
+devsolo ship --merge
 
 # New v2 workflow
-hansolo launch "auth"
+devsolo launch "auth"
 # ... make changes ...
-hansolo ship  # That's it!
+devsolo ship  # That's it!
 ```
 
 ---

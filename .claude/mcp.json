@@ -1,13 +1,13 @@
 {
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "type": "stdio",
       "command": "node",
       "args": [
-        "/home/slamb2k/work/hansolo/dist/mcp/index.js"
+        "/home/slamb2k/work/devsolo/dist/mcp/index.js"
       ],
       "env": {
-        "HANSOLO_BASE_PATH": "${HANSOLO_BASE_PATH:-.hansolo}"
+        "DEVSOLO_BASE_PATH": "${DEVSOLO_BASE_PATH:-.devsolo}"
       }
     }
   }

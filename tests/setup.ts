@@ -12,7 +12,7 @@ global.console = {
 
 // Set test environment variables
 process.env['NODE_ENV'] = 'test';
-process.env['HANSOLO_TEST_MODE'] = 'true';
+process.env['DEVSOLO_TEST_MODE'] = 'true';
 
 // Mock Git operations by default
 jest.mock('simple-git', () => {

@@ -3,7 +3,7 @@
 ## The Truth About MCP in Claude
 
 ### What MCP Does NOT Provide ❌
-- **No slash commands in Claude's UI** - You won't see `/hansolo:launch` when typing `/`
+- **No slash commands in Claude's UI** - You won't see `/devsolo:launch` when typing `/`
 - **No autocomplete menu** - No dropdown with command suggestions
 - **No direct command invocation** - You can't type commands directly
 - **No visible prompt registration** - Prompts aren't shown to users
@@ -14,18 +14,18 @@
 - **Error handling** - Claude receives and can relay error messages
 - **State management** - Tools can maintain session state
 
-## How to Actually Use han-solo with Claude
+## How to Actually Use devsolo with Claude
 
 ### Method 1: Natural Language (Recommended)
 Simply describe what you want in plain English:
 
 ```
-User: "Initialize han-solo in this project"
-Claude: [Calls hansolo_init tool behind the scenes]
-Result: ✅ han-solo initialized successfully
+User: "Initialize devsolo in this project"
+Claude: [Calls devsolo_init tool behind the scenes]
+Result: ✅ devsolo initialized successfully
 
 User: "Start a new feature branch for authentication"
-Claude: [Calls hansolo_launch with appropriate parameters]
+Claude: [Calls devsolo_launch with appropriate parameters]
 Result: 🚀 Launched new workflow on branch: feature/auth
 ```
 
@@ -33,8 +33,8 @@ Result: 🚀 Launched new workflow on branch: feature/auth
 Ask Claude to use specific tools:
 
 ```
-User: "Use hansolo_status to check the current state"
-Claude: [Explicitly calls hansolo_status tool]
+User: "Use devsolo_status to check the current state"
+Claude: [Explicitly calls devsolo_status tool]
 Result: 📊 Current Workflow Status...
 ```
 
@@ -43,7 +43,7 @@ Describe the operation you want:
 
 ```
 User: "Switch to the main branch and stash my changes"
-Claude: [Interprets intent, calls hansolo_swap with stash:true]
+Claude: [Interprets intent, calls devsolo_swap with stash:true]
 Result: 🔄 Swapped to branch: main (changes stashed)
 ```
 
@@ -75,9 +75,9 @@ But in Claude's current implementation:
 Ask Claude to show available commands:
 
 ```
-User: "What han-solo commands are available?"
-Claude: Here are the available han-solo operations:
-- Initialize: "Set up han-solo"
+User: "What devsolo commands are available?"
+Claude: Here are the available devsolo operations:
+- Initialize: "Set up devsolo"
 - Launch: "Start a new feature"
 - Status: "Check current state"
 - Sessions: "List all workflows"
@@ -91,11 +91,11 @@ Develop natural phrases that trigger specific tools:
 
 | What You Say | What Claude Does |
 |-------------|------------------|
-| "han-solo init" | Calls `hansolo_init` |
-| "new feature branch" | Calls `hansolo_launch` |
-| "show sessions" | Calls `hansolo_sessions` |
-| "switch to main" | Calls `hansolo_swap` |
-| "ship it" | Calls `hansolo_ship` |
+| "devsolo init" | Calls `devsolo_init` |
+| "new feature branch" | Calls `devsolo_launch` |
+| "show sessions" | Calls `devsolo_sessions` |
+| "switch to main" | Calls `devsolo_swap` |
+| "ship it" | Calls `devsolo_ship` |
 
 ### 3. Create Aliases in Your Mind
 Remember these patterns:
@@ -136,20 +136,20 @@ But these aren't available today (as of late 2024).
 
 ### ✅ These Work:
 ```
-"Initialize han-solo for this project"
+"Initialize devsolo for this project"
 "Create a new feature branch called user-auth"
-"Show me all my active han-solo sessions"
+"Show me all my active devsolo sessions"
 "Commit my changes with message 'fix: memory leak'"
 "Switch to the payments branch and stash current changes"
 ```
 
 ### ❌ These Don't Work:
 ```
-/hansolo:init
-/hansolo:launch --branch feature/auth
-hansolo/ship --push --create-pr
-@hansolo status
-!hansolo sessions --all
+/devsolo:init
+/devsolo:launch --branch feature/auth
+devsolo/ship --push --create-pr
+@devsolo status
+!devsolo sessions --all
 ```
 
 ## TL;DR

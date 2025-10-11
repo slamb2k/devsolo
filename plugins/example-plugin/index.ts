@@ -3,7 +3,7 @@ import { Plugin, PluginContext } from '../../src/plugins/types';
 export class ExamplePlugin implements Plugin {
   name = 'example-plugin';
   version = '1.0.0';
-  description = 'Example plugin for han-solo';
+  description = 'Example plugin for devsolo';
 
   async activate(context: PluginContext): Promise<void> {
     console.log('Example plugin activated');

@@ -1,14 +1,14 @@
 # Phase 3: Pure MCP Architecture - Executive Summary
 
 **Date**: 2025-10-10
-**Decision**: Pivot han-solo from dual CLI/MCP to **pure MCP server**
+**Decision**: Pivot devsolo from dual CLI/MCP to **pure MCP server**
 **Impact**: Delete ~8,000 lines, eliminate ESM issues, AI-first architecture
 **Timeline**: 3-4 days
 
 ## The Decision
 
-**Before**: han-solo had both CLI (`hansolo launch`) and MCP (`/hansolo:launch`) interfaces
-**After**: han-solo is **MCP-only**, CLI can be added later as thin wrapper if needed
+**Before**: devsolo had both CLI (`devsolo launch`) and MCP (`/devsolo:launch`) interfaces
+**After**: devsolo is **MCP-only**, CLI can be added later as thin wrapper if needed
 
 ## Why This Is Brilliant
 
@@ -30,7 +30,7 @@
 
 ```
 📁 DELETE (~8,300 lines):
-├── bin/hansolo.js                    # CLI entry
+├── bin/devsolo.js                    # CLI entry
 ├── completions/                      # Shell completions
 ├── man/                              # Man pages
 ├── src/commands/                     # All CLI commands (~5,000 lines)
@@ -56,7 +56,7 @@
 ├── src/models/                       # All models
 ├── src/state-machines/               # All state machines
 ├── src/integrations/                 # GitHub, GitLab
-├── bin/hansolo-mcp                   # MCP binary
+├── bin/devsolo-mcp                   # MCP binary
 └── tests/services/                   # Service tests
 ```
 
@@ -68,18 +68,18 @@
 └──────────────────────────────────┘
               ↓
 ┌──────────────────────────────────┐
-│   MCP Server (hansolo-mcp)       │  ← Single entry point
+│   MCP Server (devsolo-mcp)       │  ← Single entry point
 │                                  │
 │   Tools:                         │
-│   • hansolo_init                 │
-│   • hansolo_launch               │
-│   • hansolo_ship                 │
-│   • hansolo_swap                 │
-│   • hansolo_abort                │
-│   • hansolo_sessions             │
-│   • hansolo_status               │
-│   • hansolo_cleanup              │
-│   • hansolo_hotfix               │
+│   • devsolo_init                 │
+│   • devsolo_launch               │
+│   • devsolo_ship                 │
+│   • devsolo_swap                 │
+│   • devsolo_abort                │
+│   • devsolo_sessions             │
+│   • devsolo_status               │
+│   • devsolo_cleanup              │
+│   • devsolo_hotfix               │
 │                                  │
 │   Each tool has:                 │
 │   ✓ Pre-flight checks            │
@@ -136,7 +136,7 @@ export class LaunchTool {
       branchName: session.branchName,
       preFlightChecks: preChecks.checks,
       postFlightVerifications: postChecks.checks,
-      nextSteps: ['Make changes', 'Use hansolo_ship']
+      nextSteps: ['Make changes', 'Use devsolo_ship']
     };
   }
 }
@@ -180,10 +180,10 @@ export class LaunchTool {
 **Impact**: ⚠️ **Breaking change**
 ```bash
 # Before (CLI)
-hansolo launch --branch feature/auth
+devsolo launch --branch feature/auth
 
 # After (MCP)
-/hansolo:launch --branchName feature/auth
+/devsolo:launch --branchName feature/auth
 ```
 
 **Migration Path**:
@@ -222,14 +222,14 @@ hansolo launch --branch feature/auth
 If needed later (100-200 lines):
 
 ```typescript
-// bin/hansolo-cli.ts
-import { HanSoloMCPServer } from '../src/mcp/hansolo-mcp-server';
+// bin/devsolo-cli.ts
+import { DevSoloMCPServer } from '../src/mcp/devsolo-mcp-server';
 
 async function cli() {
   const [command, ...args] = process.argv.slice(2);
   const input = parseArgs(args);
 
-  const server = new HanSoloMCPServer();
+  const server = new DevSoloMCPServer();
   const result = await server.executeTool(command, input);
 
   formatForTerminal(result);
@@ -254,7 +254,7 @@ async function cli() {
 
 This pivot makes strategic sense because:
 
-1. **Aligns with Vision** - han-solo's tagline already mentions Claude Code integration
+1. **Aligns with Vision** - devsolo's tagline already mentions Claude Code integration
 2. **Solves Technical Debt** - Eliminates ESM complexity that was blocking progress
 3. **Future-Proof** - MCP is Anthropic's strategic direction
 4. **AI-First** - Development is moving toward AI-assisted workflows
@@ -277,7 +277,7 @@ Before starting implementation:
 2. ✅ **Review detailed plan** - See `phase3-pure-mcp-architecture.md`
 3. 🚀 **Start Phase 1** - Create pre/post-flight services
 4. 🚀 **Execute methodically** - Follow the plan
-5. 🚀 **Ship han-solo 2.0** - Pure MCP server
+5. 🚀 **Ship devsolo 2.0** - Pure MCP server
 
 ---
 

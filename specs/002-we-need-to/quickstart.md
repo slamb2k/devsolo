@@ -1,4 +1,4 @@
-# Quickstart Guide: han-solo NPM Installation
+# Quickstart Guide: devsolo NPM Installation
 
 ## Prerequisites
 - Node.js 18+ (LTS)
@@ -9,24 +9,24 @@
 
 ### Option 1: Global Installation (Recommended)
 ```bash
-npm install -g @hansolo/cli
+npm install -g @devsolo/cli
 ```
 
 ### Option 2: Project-Level Installation
 ```bash
-npm install --save-dev @hansolo/cli
+npm install --save-dev @devsolo/cli
 ```
 
 ### Option 3: Try Without Installing
 ```bash
-npx @hansolo/cli init
+npx @devsolo/cli init
 ```
 
 ## First-Time Setup
 
 After installation, the interactive setup wizard will automatically launch. If it doesn't, run:
 ```bash
-hansolo configure
+devsolo configure
 ```
 
 ### Setup Wizard Walkthrough
@@ -91,41 +91,41 @@ hansolo configure
 
 ### 1. Check Installation
 ```bash
-hansolo --version
-# Output: @hansolo/cli v1.0.0
+devsolo --version
+# Output: @devsolo/cli v1.0.0
 ```
 
 ### 2. Verify Configuration
 ```bash
-hansolo config show
+devsolo config show
 # Displays current configuration
 ```
 
 ### 3. Initialize First Project
 ```bash
 cd your-project
-hansolo init
-# Creates .hansolo/ directory and sets up Git hooks
+devsolo init
+# Creates .devsolo/ directory and sets up Git hooks
 ```
 
 ### 4. Test Workflow Commands
 ```bash
 # Start a new feature
-hansolo launch feature "add user authentication"
+devsolo launch feature "add user authentication"
 
 # Check status
-hansolo status
+devsolo status
 
 # When ready to ship
-hansolo ship
+devsolo ship
 ```
 
 ## CI/CD Setup
 
 ### For GitHub Actions
 ```yaml
-# .github/workflows/hansolo.yml
-name: han-solo workflow
+# .github/workflows/devsolo.yml
+name: devsolo workflow
 on: [push, pull_request]
 
 jobs:
@@ -136,8 +136,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
-      - run: npm install -g @hansolo/cli
-      - run: hansolo validate
+      - run: npm install -g @devsolo/cli
+      - run: devsolo validate
 ```
 
 ### For GitLab CI
@@ -146,12 +146,12 @@ jobs:
 stages:
   - validate
 
-hansolo-check:
+devsolo-check:
   stage: validate
   image: node:18
   script:
-    - npm install -g @hansolo/cli
-    - hansolo validate
+    - npm install -g @devsolo/cli
+    - devsolo validate
 ```
 
 ## Common Scenarios
@@ -159,56 +159,56 @@ hansolo-check:
 ### Scenario 1: Team Onboarding
 ```bash
 # Share configuration
-hansolo config export > team-config.json
+devsolo config export > team-config.json
 
 # New team member imports
-hansolo config import team-config.json
+devsolo config import team-config.json
 ```
 
 ### Scenario 2: Upgrade Existing Installation
 ```bash
 # Check current version
-hansolo --version
+devsolo --version
 
 # Upgrade globally
-npm update -g @hansolo/cli
+npm update -g @devsolo/cli
 
 # Run configuration migration
-hansolo configure --upgrade
+devsolo configure --upgrade
 ```
 
 ### Scenario 3: Non-Interactive Installation (CI)
 ```bash
 # Set environment variables
-export HANSOLO_BRANCH_PATTERN="feature/{description}"
-export HANSOLO_COMMIT_STYLE="conventional"
-export HANSOLO_AUTO_REBASE="true"
-export HANSOLO_CI="github-actions"
+export DEVSOLO_BRANCH_PATTERN="feature/{description}"
+export DEVSOLO_COMMIT_STYLE="conventional"
+export DEVSOLO_AUTO_REBASE="true"
+export DEVSOLO_CI="github-actions"
 
 # Install with --ci flag
-npm install -g @hansolo/cli --ignore-scripts
-hansolo configure --ci
+npm install -g @devsolo/cli --ignore-scripts
+devsolo configure --ci
 ```
 
 ## Troubleshooting
 
 ### Issue: Installer doesn't start automatically
-**Solution**: Run `hansolo configure` manually
+**Solution**: Run `devsolo configure` manually
 
 ### Issue: Permission denied during global install
 **Solution**: Use sudo (Linux/Mac) or run as Administrator (Windows)
 ```bash
-sudo npm install -g @hansolo/cli
+sudo npm install -g @devsolo/cli
 ```
 
 ### Issue: Configuration not found
 **Solution**: Check configuration location
 ```bash
 # Global install
-ls ~/.hansolo/config.json
+ls ~/.devsolo/config.json
 
 # Local install
-ls ./.hansolo/config.json
+ls ./.devsolo/config.json
 ```
 
 ### Issue: Terminal doesn't support colors/animations
@@ -216,30 +216,30 @@ ls ./.hansolo/config.json
 
 ## Next Steps
 
-1. Read the [full documentation](https://hansolo.dev/docs)
-2. Join the [community Slack](https://hansolo.dev/slack)
-3. Report issues on [GitHub](https://github.com/hansolo/cli/issues)
+1. Read the [full documentation](https://devsolo.dev/docs)
+2. Join the [community Slack](https://devsolo.dev/slack)
+3. Report issues on [GitHub](https://github.com/devsolo/cli/issues)
 4. Configure your IDE integration
 
 ## Quick Reference
 
 | Command | Description |
 |---------|-------------|
-| `hansolo configure` | Run setup wizard |
-| `hansolo config show` | Display configuration |
-| `hansolo init` | Initialize project |
-| `hansolo launch` | Start new feature |
-| `hansolo ship` | Complete workflow |
-| `hansolo status` | Check current state |
-| `hansolo --help` | Show all commands |
+| `devsolo configure` | Run setup wizard |
+| `devsolo config show` | Display configuration |
+| `devsolo init` | Initialize project |
+| `devsolo launch` | Start new feature |
+| `devsolo ship` | Complete workflow |
+| `devsolo status` | Check current state |
+| `devsolo --help` | Show all commands |
 
 ## Success Criteria Validation
 
 ✅ **Installation**: Package installs via npm/npx
 ✅ **Configuration**: Wizard completes and saves settings
-✅ **Initialization**: Project setup creates .hansolo/ directory
+✅ **Initialization**: Project setup creates .devsolo/ directory
 ✅ **Workflow**: Basic commands execute successfully
 ✅ **CI/CD**: Non-interactive mode works in pipelines
 
 ---
-*Generated for han-solo v1.0.0*
+*Generated for devsolo v1.0.0*

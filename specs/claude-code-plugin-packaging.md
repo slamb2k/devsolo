@@ -1,29 +1,29 @@
 # Feature: Claude Code Plugin Packaging
 
 ## Feature Description
-Package han-solo as a proper Claude Code plugin with standardized plugin structure, enabling users to install and use han-solo through Claude Code's native plugin system instead of manually configuring the MCP server. This simplifies installation, improves discoverability, and provides a better user experience aligned with Claude Code's plugin ecosystem.
+Package devsolo as a proper Claude Code plugin with standardized plugin structure, enabling users to install and use devsolo through Claude Code's native plugin system instead of manually configuring the MCP server. This simplifies installation, improves discoverability, and provides a better user experience aligned with Claude Code's plugin ecosystem.
 
 The plugin will bundle the MCP server, slash commands, and sub-agents into a single installable package that can be distributed through a Claude Code marketplace or installed locally for development.
 
 ## User Story
 As a Claude Code user
-I want to install han-solo as a plugin through Claude Code's native plugin system
-So that I can start using han-solo workflows without manually configuring MCP servers and slash commands
+I want to install devsolo as a plugin through Claude Code's native plugin system
+So that I can start using devsolo workflows without manually configuring MCP servers and slash commands
 
 ## Problem Statement
-Currently, han-solo requires manual installation steps:
+Currently, devsolo requires manual installation steps:
 1. Clone the repository
 2. Build from source (`npm install && npm run build`)
 3. Manually configure MCP server in Claude Code settings
 4. Restart Claude Code
-5. Initialize han-solo in each project
+5. Initialize devsolo in each project
 
-This creates friction for new users and makes han-solo less discoverable within the Claude Code ecosystem. Users must know about han-solo beforehand and follow multi-step installation instructions, which increases the barrier to adoption.
+This creates friction for new users and makes devsolo less discoverable within the Claude Code ecosystem. Users must know about devsolo beforehand and follow multi-step installation instructions, which increases the barrier to adoption.
 
 ## Solution Statement
-Transform han-solo into a Claude Code plugin with the proper plugin structure (`.claude-plugin/plugin.json`, bundled MCP server, slash commands, and agents). This enables users to:
+Transform devsolo into a Claude Code plugin with the proper plugin structure (`.claude-plugin/plugin.json`, bundled MCP server, slash commands, and agents). This enables users to:
 
-1. Install via Claude Code plugin system: `/plugin install hansolo`
+1. Install via Claude Code plugin system: `/plugin install devsolo`
 2. Automatic MCP server configuration through plugin manifest
 3. Slash commands and sub-agents automatically registered
 4. One-command installation and activation
@@ -40,7 +40,7 @@ Use these files to implement the feature:
   - Add plugin distribution to `files` array
   - Update package metadata for plugin distribution
 
-- **src/mcp/hansolo-mcp-server.ts** (lines 1-100+)
+- **src/mcp/devsolo-mcp-server.ts** (lines 1-100+)
   - Ensure MCP server works in plugin context
   - Handle `${CLAUDE_PLUGIN_ROOT}` path resolution
   - Verify server initialization works when bundled in plugin
@@ -51,7 +51,7 @@ Use these files to implement the feature:
 - **tsconfig.mcp.json** (lines 1-31)
   - Adjust MCP server build configuration for plugin packaging
 
-- **.claude/commands/hansolo/** (all 13 slash command files)
+- **.claude/commands/devsolo/** (all 13 slash command files)
   - Move to plugin structure: `commands/`
   - Verify markdown format compatibility with plugin system
 
@@ -96,7 +96,7 @@ Use these files to implement the feature:
   - Points to local plugin directory or package
 
 - **docs/guides/plugin-installation.md**
-  - Complete guide for installing han-solo as plugin
+  - Complete guide for installing devsolo as plugin
   - Troubleshooting plugin-specific issues
   - Explain plugin vs manual installation
 
@@ -108,7 +108,7 @@ Use these files to implement the feature:
 ## Implementation Plan
 
 ### Phase 1: Foundation - Plugin Structure Setup
-Create the basic plugin structure and build tooling to package han-solo as a Claude Code plugin. This phase establishes the foundation without breaking existing functionality.
+Create the basic plugin structure and build tooling to package devsolo as a Claude Code plugin. This phase establishes the foundation without breaking existing functionality.
 
 **Key deliverables:**
 - Plugin manifest (`.claude-plugin/plugin.json`)
@@ -117,7 +117,7 @@ Create the basic plugin structure and build tooling to package han-solo as a Cla
 - Local testing setup
 
 ### Phase 2: Core Implementation - Integration and Migration
-Integrate existing han-solo components (MCP server, slash commands, sub-agents) into the plugin structure. Update build process to output both npm package and plugin package.
+Integrate existing devsolo components (MCP server, slash commands, sub-agents) into the plugin structure. Update build process to output both npm package and plugin package.
 
 **Key deliverables:**
 - MCP server bundled in plugin with correct path resolution
@@ -141,21 +141,21 @@ Test the plugin installation end-to-end, document installation process, and ensu
 - Create `.claude-plugin/plugin.json` with metadata:
   ```json
   {
-    "name": "hansolo",
-    "displayName": "han-solo",
+    "name": "devsolo",
+    "displayName": "devsolo",
     "description": "AI-native Git workflow automation for Claude Code",
     "version": "2.0.0",
-    "author": "han-solo contributors",
+    "author": "devsolo contributors",
     "license": "MIT",
-    "homepage": "https://github.com/slamb2k/hansolo",
+    "homepage": "https://github.com/slamb2k/devsolo",
     "repository": {
       "type": "git",
-      "url": "https://github.com/slamb2k/hansolo.git"
+      "url": "https://github.com/slamb2k/devsolo.git"
     },
     "mcpServers": {
-      "hansolo": {
+      "devsolo": {
         "command": "node",
-        "args": ["${CLAUDE_PLUGIN_ROOT}/dist/mcp/hansolo-mcp-server.js"],
+        "args": ["${CLAUDE_PLUGIN_ROOT}/dist/mcp/devsolo-mcp-server.js"],
         "env": {}
       }
     }
@@ -169,17 +169,17 @@ Test the plugin installation end-to-end, document installation process, and ensu
   - Create plugin distribution directory (`dist-plugin/`)
   - Copy `.claude-plugin/plugin.json` to `dist-plugin/.claude-plugin/`
   - Copy compiled MCP server from `dist/mcp/` to `dist-plugin/dist/mcp/`
-  - Copy slash commands from `.claude/commands/hansolo/` to `dist-plugin/commands/`
+  - Copy slash commands from `.claude/commands/devsolo/` to `dist-plugin/commands/`
   - Copy sub-agents from `.claude/agents/` to `dist-plugin/agents/`
   - Copy necessary dependencies (node_modules subset or bundle)
 - Add `build:plugin` script to package.json
 - Test build script produces correct structure
 
 ### Step 3: Update MCP Server for Plugin Context
-- Modify `src/mcp/hansolo-mcp-server.ts`:
+- Modify `src/mcp/devsolo-mcp-server.ts`:
   - Add detection for `${CLAUDE_PLUGIN_ROOT}` environment variable
   - Resolve file paths relative to plugin root when in plugin context
-  - Ensure `.hansolo/` directory creation works in plugin context
+  - Ensure `.devsolo/` directory creation works in plugin context
   - Add logging to distinguish plugin mode vs manual mode
 - Test MCP server initializes correctly when invoked from plugin path
 - Verify all MCP tools work with plugin-relative paths
@@ -209,7 +209,7 @@ Test the plugin installation end-to-end, document installation process, and ensu
   │   └── docs-droid.md
   ├── dist/                  # Compiled MCP server
   │   └── mcp/
-  │       └── hansolo-mcp-server.js
+  │       └── devsolo-mcp-server.js
   ├── node_modules/          # Bundled dependencies
   └── README.md
   ```
@@ -231,7 +231,7 @@ Test the plugin installation end-to-end, document installation process, and ensu
   - Validate plugin structure (all required files present)
   - Validate plugin.json schema
   - Create `.tar.gz` archive of `dist-plugin/` directory
-  - Name archive: `hansolo-plugin-v2.0.0.tar.gz`
+  - Name archive: `devsolo-plugin-v2.0.0.tar.gz`
   - Generate SHA256 checksum for verification
   - Output package to `packages/` directory
 - Test packaging script produces valid archive
@@ -250,15 +250,15 @@ Test the plugin installation end-to-end, document installation process, and ensu
 - Create `marketplace.json` for local testing:
   ```json
   {
-    "name": "local-hansolo-test",
+    "name": "local-devsolo-test",
     "version": "1.0.0",
     "plugins": {
-      "hansolo": {
-        "name": "hansolo",
+      "devsolo": {
+        "name": "devsolo",
         "description": "AI-native Git workflow automation",
         "version": "2.0.0",
-        "source": "file:///path/to/hansolo/dist-plugin",
-        "homepage": "https://github.com/slamb2k/hansolo"
+        "source": "file:///path/to/devsolo/dist-plugin",
+        "homepage": "https://github.com/slamb2k/devsolo"
       }
     }
   }
@@ -274,7 +274,7 @@ Test the plugin installation end-to-end, document installation process, and ensu
 - Test all 13 slash commands work as expected
 - Test git-droid and docs-droid sub-agents function
 - Verify all MCP tools execute successfully
-- Test initialization: `/hansolo:init`
+- Test initialization: `/devsolo:init`
 - Complete full workflow: launch → commit → ship
 
 ### Step 10: Update Documentation for Plugin Installation
@@ -305,7 +305,7 @@ Test the plugin installation end-to-end, document installation process, and ensu
 ### Step 12: Add Backward Compatibility Tests
 - Test manual MCP installation still works
 - Verify users can switch between plugin and manual mode
-- Test that existing `.hansolo/` directories work in plugin mode
+- Test that existing `.devsolo/` directories work in plugin mode
 - Verify slash commands work identically in both modes
 - Test MCP tools produce identical results
 - Document any differences between installation methods
@@ -333,7 +333,7 @@ Test the plugin installation end-to-end, document installation process, and ensu
   - Test path resolution with `${CLAUDE_PLUGIN_ROOT}`
   - Verify server initialization in plugin context
   - Test all MCP tools work with plugin-relative paths
-  - Verify `.hansolo/` directory creation from plugin
+  - Verify `.devsolo/` directory creation from plugin
 
 - **Packaging Script Tests**
   - Test `package-plugin.js` creates valid archive
@@ -350,10 +350,10 @@ Test the plugin installation end-to-end, document installation process, and ensu
   - Verify sub-agents are available
 
 - **Full Workflow Tests**
-  - Test `/hansolo:init` initializes project
-  - Test `/hansolo:launch` creates feature branch
-  - Test `/hansolo:commit` commits changes
-  - Test `/hansolo:ship` completes full workflow
+  - Test `/devsolo:init` initializes project
+  - Test `/devsolo:launch` creates feature branch
+  - Test `/devsolo:commit` commits changes
+  - Test `/devsolo:ship` completes full workflow
   - Verify all 13 slash commands work end-to-end
 
 - **Backward Compatibility Tests**
@@ -365,7 +365,7 @@ Test the plugin installation end-to-end, document installation process, and ensu
 ### Edge Cases
 - **Installation Edge Cases**
   - Plugin installed while manual MCP config exists
-  - Plugin installed in project with existing `.hansolo/` directory
+  - Plugin installed in project with existing `.devsolo/` directory
   - Plugin installed without Node.js dependencies available
   - Plugin installation on Windows/Linux/macOS
   - Plugin installed with spaces in path
@@ -391,11 +391,11 @@ Test the plugin installation end-to-end, document installation process, and ensu
 ## Acceptance Criteria
 1. **Plugin Structure**: Plugin package contains all required files in correct structure (`.claude-plugin/plugin.json`, `commands/`, `agents/`, `dist/mcp/`)
 
-2. **Installation**: Users can install han-solo via `/plugin install hansolo` without manual configuration
+2. **Installation**: Users can install devsolo via `/plugin install devsolo` without manual configuration
 
 3. **MCP Server**: MCP server auto-starts when plugin is enabled and all 11 MCP tools work correctly
 
-4. **Slash Commands**: All 13 slash commands (`/hansolo:*`) are registered and functional after plugin installation
+4. **Slash Commands**: All 13 slash commands (`/devsolo:*`) are registered and functional after plugin installation
 
 5. **Sub-Agents**: git-droid and docs-droid sub-agents work correctly in plugin context
 
@@ -427,8 +427,8 @@ Execute every command to validate the feature works correctly with zero regressi
 - `ls -la dist-plugin/commands/ | wc -l` - Verify 13 slash commands copied (14 lines with total)
 - `ls -la dist-plugin/agents/ | wc -l` - Verify 2 agents copied (3 lines with total)
 - `ls -la dist-plugin/dist/mcp/` - Verify MCP server bundled
-- `tar -tzf packages/hansolo-plugin-v2.0.0.tar.gz | head -20` - Verify package contents
-- `node dist/mcp/hansolo-mcp-server.js` - Verify MCP server runs (will wait for input, Ctrl+C to exit)
+- `tar -tzf packages/devsolo-plugin-v2.0.0.tar.gz | head -20` - Verify package contents
+- `node dist/mcp/devsolo-mcp-server.js` - Verify MCP server runs (will wait for input, Ctrl+C to exit)
 
 ## Notes
 
@@ -446,7 +446,7 @@ The plugin must bundle all Node.js dependencies since Claude Code plugin system 
 
 ### Path Resolution Strategy
 Use `${CLAUDE_PLUGIN_ROOT}` environment variable for all plugin-relative paths:
-- MCP server: `${CLAUDE_PLUGIN_ROOT}/dist/mcp/hansolo-mcp-server.js`
+- MCP server: `${CLAUDE_PLUGIN_ROOT}/dist/mcp/devsolo-mcp-server.js`
 - Slash commands: Automatically discovered in `${CLAUDE_PLUGIN_ROOT}/commands/`
 - Sub-agents: Automatically discovered in `${CLAUDE_PLUGIN_ROOT}/agents/`
 
@@ -459,10 +459,10 @@ Maintain support for manual MCP installation to support:
 
 ### Future Enhancements
 - Auto-update support when new versions published
-- Plugin configuration UI for han-solo preferences
+- Plugin configuration UI for devsolo preferences
 - Multiple marketplace support (official, community, private)
 - Plugin telemetry for usage analytics (opt-in)
-- Plugin-specific slash command namespace (`/hansolo:*` vs `/*`)
+- Plugin-specific slash command namespace (`/devsolo:*` vs `/*`)
 
 ### Security Considerations
 - Plugin package should be signed for verification

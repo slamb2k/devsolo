@@ -8,7 +8,7 @@ export interface StashResult {
 }
 
 /**
- * StashManager provides high-level stash operations for han-solo workflows
+ * StashManager provides high-level stash operations for devsolo workflows
  * Handles auto-stashing with consistent naming and lifecycle management
  */
 export class StashManager {
@@ -19,7 +19,7 @@ export class StashManager {
   }
 
   /**
-   * Stash uncommitted changes with a han-solo specific message
+   * Stash uncommitted changes with a devsolo specific message
    * @param reason - The workflow reason for stashing (swap, launch, abort)
    * @param branchName - Optional branch name to include in stash message
    * @returns StashResult with stashRef and message
@@ -27,7 +27,7 @@ export class StashManager {
   async stashChanges(reason: StashReason, branchName?: string): Promise<StashResult> {
     const timestamp = new Date().toISOString();
     const branchPart = branchName ? ` [${branchName}]` : '';
-    const message = `han-solo auto-stash (${reason})${branchPart} - ${timestamp}`;
+    const message = `devsolo auto-stash (${reason})${branchPart} - ${timestamp}`;
 
     const result = await this.gitOps.stashChanges(message);
 
@@ -70,11 +70,11 @@ export class StashManager {
   }
 
   /**
-   * Get han-solo specific stashes (auto-stashes)
-   * @returns Array of stash entries that were created by han-solo
+   * Get devsolo specific stashes (auto-stashes)
+   * @returns Array of stash entries that were created by devsolo
    */
-  async getHanSoloStashes(): Promise<string[]> {
+  async getDevSoloStashes(): Promise<string[]> {
     const allStashes = await this.listStashes();
-    return allStashes.filter(stash => stash.includes('han-solo auto-stash'));
+    return allStashes.filter(stash => stash.includes('devsolo auto-stash'));
   }
 }

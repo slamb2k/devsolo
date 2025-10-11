@@ -8,7 +8,7 @@ All MCP tools now follow a standardized workflow pattern enforced by the `BaseMC
 
 Every tool follows these phases:
 
-1. **Check Initialization** - Verify han-solo is initialized (skip for InitTool)
+1. **Check Initialization** - Verify devsolo is initialized (skip for InitTool)
 2. **Collect Missing Parameters** - Prompt-based parameter collection
 3. **Run Pre-Flight Checks** - Validate preconditions with actionable options
 4. **Handle Prompts** - Return options to user or auto-resolve with `--auto`
@@ -121,7 +121,7 @@ export class AbortTool extends BaseMCPTool<AbortToolInput, SessionToolResult> {
         nextSteps: [
           'Session has been aborted',
           input.deleteBranch ? 'Branch deleted' : 'Branch still exists',
-          'Use hansolo_launch to start a new workflow',
+          'Use devsolo_launch to start a new workflow',
         ],
       },
     };

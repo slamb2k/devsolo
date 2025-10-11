@@ -1,5 +1,5 @@
 #!/bin/bash
-# han-solo pre-commit hook
+# devsolo pre-commit hook
 # Prevents direct commits to protected branches
 
 PROTECTED_BRANCHES="main master develop production"
@@ -9,17 +9,17 @@ CURRENT_BRANCH=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
 for BRANCH in $PROTECTED_BRANCHES; do
   if [[ "$CURRENT_BRANCH" == "$BRANCH" ]]; then
     echo "❌ Direct commits to $BRANCH branch are not allowed!"
-    echo "Please use 'hansolo launch' to create a feature branch."
+    echo "Please use 'devsolo launch' to create a feature branch."
     exit 1
   fi
 done
 
-# Check if han-solo session exists for this branch
-if command -v hansolo &> /dev/null; then
-  HANSOLO_STATUS=$(hansolo status 2>/dev/null | grep -c "Active session")
-  if [[ $HANSOLO_STATUS -eq 0 ]]; then
-    echo "⚠️  Warning: No active han-solo session for this branch."
-    echo "Consider using 'hansolo launch' for workflow management."
+# Check if devsolo session exists for this branch
+if command -v devsolo &> /dev/null; then
+  DEVSOLO_STATUS=$(devsolo status 2>/dev/null | grep -c "Active session")
+  if [[ $DEVSOLO_STATUS -eq 0 ]]; then
+    echo "⚠️  Warning: No active devsolo session for this branch."
+    echo "Consider using 'devsolo launch' for workflow management."
   fi
 fi
 

@@ -1,21 +1,21 @@
 # User Guides
 
-This folder contains user-facing how-to documentation for han-solo.
+This folder contains user-facing how-to documentation for devsolo.
 
 ## Contents
 
 ### Getting Started
-- **quickstart.md** - Get up and running with han-solo in 5 minutes
+- **quickstart.md** - Get up and running with devsolo in 5 minutes
 - **usage.md** - Practical examples and common workflows
 - **troubleshooting.md** - Common issues and solutions
 
 ### Integration Guides
-- **mcp-integration.md** - Setting up han-solo MCP server with Claude Desktop
-- **claude-code-commands.md** - Using han-solo commands in Claude Code
+- **mcp-integration.md** - Setting up devsolo MCP server with Claude Desktop
+- **claude-code-commands.md** - Using devsolo commands in Claude Code
 
 ## Who This Is For
 
-- New users getting started with han-solo
+- New users getting started with devsolo
 - Users looking for practical how-to guides
 - Users setting up integrations with Claude Desktop or Claude Code
 - Users troubleshooting issues

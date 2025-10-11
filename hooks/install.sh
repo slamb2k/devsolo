@@ -1,5 +1,5 @@
 #!/bin/bash
-# Install han-solo git hooks
+# Install devsolo git hooks
 
 set -e
 
@@ -12,7 +12,7 @@ if [ ! -d ".git" ]; then
   exit 1
 fi
 
-echo "Installing han-solo git hooks..."
+echo "Installing devsolo git hooks..."
 
 # Install pre-commit hook
 if [ -f "$HOOKS_DIR/pre-commit" ]; then
@@ -36,7 +36,7 @@ if [ -f "$HOOKS_DIR/commit-msg" ]; then
 fi
 
 echo ""
-echo "🎉 han-solo git hooks installed successfully!"
+echo "🎉 devsolo git hooks installed successfully!"
 echo ""
 echo "The following hooks are now active:"
 echo "  • pre-commit: Prevents commits to protected branches"

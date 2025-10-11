@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-**MAJOR ARCHITECTURAL DECISION**: Pivot han-solo from a dual CLI/MCP tool to a **pure MCP server** with optional CLI wrapper layer for future.
+**MAJOR ARCHITECTURAL DECISION**: Pivot devsolo from a dual CLI/MCP tool to a **pure MCP server** with optional CLI wrapper layer for future.
 
 This eliminates:
 - ❌ All ESM module issues (no more ora, chalk, boxen, inquirer complexity)
@@ -29,7 +29,7 @@ This enables:
 
 ## Vision
 
-han-solo becomes a **pure MCP server** that provides Git workflow automation tools exclusively through the Model Context Protocol. This makes it:
+devsolo becomes a **pure MCP server** that provides Git workflow automation tools exclusively through the Model Context Protocol. This makes it:
 
 1. **AI-Native** - Designed for Claude Code and other MCP clients
 2. **Clean Architecture** - Single interface, single responsibility
@@ -47,7 +47,7 @@ han-solo becomes a **pure MCP server** that provides Git workflow automation too
 
 ```
 ┌─────────────────────────────────────┐
-│         CLI Entry (bin/hansolo.js)   │  ❌ DELETE
+│         CLI Entry (bin/devsolo.js)   │  ❌ DELETE
 └─────────────────────────────────────┘
               ↓
 ┌─────────────────────────────────────┐
@@ -76,20 +76,20 @@ ALSO DELETE:
 
 ```
 ┌─────────────────────────────────────┐
-│      MCP Server (bin/hansolo-mcp)    │  ✅ MAIN ENTRY
+│      MCP Server (bin/devsolo-mcp)    │  ✅ MAIN ENTRY
 └─────────────────────────────────────┘
               ↓
 ┌─────────────────────────────────────┐
 │   MCP Tools (src/mcp/tools/)         │  ✅ NEW STRUCTURE
-│   - hansolo_init                     │
-│   - hansolo_launch                   │
-│   - hansolo_ship                     │
-│   - hansolo_swap                     │
-│   - hansolo_abort                    │
-│   - hansolo_sessions                 │
-│   - hansolo_status                   │
-│   - hansolo_cleanup                  │
-│   - hansolo_hotfix                   │
+│   - devsolo_init                     │
+│   - devsolo_launch                   │
+│   - devsolo_ship                     │
+│   - devsolo_swap                     │
+│   - devsolo_abort                    │
+│   - devsolo_sessions                 │
+│   - devsolo_status                   │
+│   - devsolo_cleanup                  │
+│   - devsolo_hotfix                   │
 │                                      │
 │   Each tool:                         │
 │   - Pre-flight checks ✓              │
@@ -122,14 +122,14 @@ ALSO DELETE:
 ### 1. CLI Infrastructure (~1,500 lines)
 ```bash
 # Binaries
-bin/hansolo.js                          # CLI entry point
+bin/devsolo.js                          # CLI entry point
 
 # Completions
-completions/hansolo.bash
-completions/hansolo.zsh
+completions/devsolo.bash
+completions/devsolo.zsh
 
 # Man pages
-man/hansolo.1
+man/devsolo.1
 
 # Examples
 examples/basic-workflow.sh
@@ -139,19 +139,19 @@ examples/advanced-workflow.js
 ### 2. Command Files (~5,000 lines - keep logic, delete CLI)
 ```bash
 src/commands/
-├── hansolo-init.ts          (578 lines) - Extract logic, delete CLI
-├── hansolo-launch.ts        (561 lines) - Extract logic, delete CLI
-├── hansolo-ship.ts          (756 lines) - Extract logic, delete CLI
-├── hansolo-swap.ts          (xxx lines) - Extract logic, delete CLI
-├── hansolo-abort.ts         (xxx lines) - Extract logic, delete CLI
-├── hansolo-sessions.ts      (xxx lines) - Extract logic, delete CLI
-├── hansolo-status.ts        (xxx lines) - Extract logic, delete CLI
-├── hansolo-cleanup.ts       (521 lines) - Extract logic, delete CLI
-├── hansolo-hotfix.ts        (544 lines) - Extract logic, delete CLI
-├── hansolo-config.ts        (578 lines) - Extract logic, delete CLI
-├── hansolo-validate.ts      (580 lines) - Extract logic, delete CLI
-├── hansolo-perf.ts          (xxx lines) - Extract logic, delete CLI
-├── hansolo-status-line.ts   (643 lines) - DELETE (MCP handles this)
+├── devsolo-init.ts          (578 lines) - Extract logic, delete CLI
+├── devsolo-launch.ts        (561 lines) - Extract logic, delete CLI
+├── devsolo-ship.ts          (756 lines) - Extract logic, delete CLI
+├── devsolo-swap.ts          (xxx lines) - Extract logic, delete CLI
+├── devsolo-abort.ts         (xxx lines) - Extract logic, delete CLI
+├── devsolo-sessions.ts      (xxx lines) - Extract logic, delete CLI
+├── devsolo-status.ts        (xxx lines) - Extract logic, delete CLI
+├── devsolo-cleanup.ts       (521 lines) - Extract logic, delete CLI
+├── devsolo-hotfix.ts        (544 lines) - Extract logic, delete CLI
+├── devsolo-config.ts        (578 lines) - Extract logic, delete CLI
+├── devsolo-validate.ts      (580 lines) - Extract logic, delete CLI
+├── devsolo-perf.ts          (xxx lines) - Extract logic, delete CLI
+├── devsolo-status-line.ts   (643 lines) - DELETE (MCP handles this)
 ├── interactive.ts           (xxx lines) - DELETE
 ├── command-registry.ts      (xxx lines) - DELETE
 └── command-adapters.ts      (xxx lines) - DELETE
@@ -235,7 +235,7 @@ src/state-machines/            ✅ KEEP ALL
 ### 3. MCP Server (The Star!)
 ```bash
 src/mcp/
-├── hansolo-mcp-server.ts     ✅ KEEP & ENHANCE
+├── devsolo-mcp-server.ts     ✅ KEEP & ENHANCE
 └── index.ts                  ✅ KEEP
 ```
 
@@ -253,7 +253,7 @@ src/
 Each MCP tool will have this structure:
 
 ```typescript
-// src/mcp/tools/hansolo-launch.ts
+// src/mcp/tools/devsolo-launch.ts
 
 import { PreFlightChecks } from '../../services/validation/pre-flight-checks';
 import { PostFlightVerification } from '../../services/validation/post-flight-verification';
@@ -344,8 +344,8 @@ export class LaunchTool {
       warnings: postFlightResults.warnings,
       nextSteps: [
         'Make your code changes',
-        'Use hansolo_ship to commit, push, and create PR',
-        'Use hansolo_status to check current state'
+        'Use devsolo_ship to commit, push, and create PR',
+        'Use devsolo_status to check current state'
       ]
     };
   }
@@ -374,14 +374,14 @@ For each command, extract business logic to MCP tools:
 
 **2.1 Launch Command**
 - [x] Create `src/mcp/tools/launch-tool.ts` (9.8k lines)
-- [x] Extract logic from `src/commands/hansolo-launch.ts`
+- [x] Extract logic from `src/commands/devsolo-launch.ts`
 - [x] Add pre-flight checks
 - [x] Add post-flight verifications
 - [x] Write unit tests
 
 **2.2 Ship Command**
 - [x] Create `src/mcp/tools/ship-tool.ts` (14k lines)
-- [x] Extract logic from `src/commands/hansolo-ship.ts`
+- [x] Extract logic from `src/commands/devsolo-ship.ts`
 - [x] Add pre-flight checks
 - [x] Add post-flight verifications
 - [x] Write unit tests
@@ -393,7 +393,7 @@ For each command, extract business logic to MCP tools:
 ### Phase 3: Update MCP Server (Day 2 Morning) ✅ COMPLETED
 
 **3.1 Refactor MCP Server**
-- [x] Update `src/mcp/hansolo-mcp-server.ts`
+- [x] Update `src/mcp/devsolo-mcp-server.ts`
 - [x] Import new tool implementations
 - [x] Update tool handlers to use new tools
 - [x] Return structured responses
@@ -407,7 +407,7 @@ For each command, extract business logic to MCP tools:
 ### Phase 4: Delete CLI Infrastructure (Day 2 Afternoon) ✅ COMPLETED
 
 **4.1 Delete Files**
-- [x] Deleted `bin/hansolo.js` (CLI entry point)
+- [x] Deleted `bin/devsolo.js` (CLI entry point)
 - [x] Deleted `completions/` directory (bash, zsh completions)
 - [x] Deleted `man/` directory (man pages)
 - [x] Deleted `src/commands/` directory (~5,000 lines)
@@ -418,7 +418,7 @@ For each command, extract business logic to MCP tools:
 
 **4.2 Update package.json**
 - [x] Removed all CLI dependencies (ora, chalk, boxen, inquirer, cli-table3)
-- [x] Updated bin section (kept only hansolo-mcp)
+- [x] Updated bin section (kept only devsolo-mcp)
 - [x] Updated scripts (removed CLI-related scripts)
 - [x] Updated exports
 
@@ -436,7 +436,7 @@ For each command, extract business logic to MCP tools:
 - [x] Deleted `tests/contracts/` directory (CLI contract tests)
 
 **5.2 Enhance MCP Tests**
-- [x] Updated `tests/mcp/hansolo-mcp-server.test.ts`
+- [x] Updated `tests/mcp/devsolo-mcp-server.test.ts`
 - [x] Added tests for new tool structure
 - [x] Test pre-flight checks
 - [x] Test post-flight verifications
@@ -534,14 +534,14 @@ For each command, extract business logic to MCP tools:
 **Existing CLI Users:**
 ```bash
 # Before (CLI)
-hansolo init
-hansolo launch --branch feature/auth
-hansolo ship --message "feat: add auth"
+devsolo init
+devsolo launch --branch feature/auth
+devsolo ship --message "feat: add auth"
 
 # After (MCP via Claude Code)
-/hansolo:init
-/hansolo:launch --branchName feature/auth
-/hansolo:ship --message "feat: add auth"
+/devsolo:init
+/devsolo:launch --branchName feature/auth
+/devsolo:ship --message "feat: add auth"
 ```
 
 **CI/CD Users:**
@@ -559,9 +559,9 @@ hansolo ship --message "feat: add auth"
 If CLI is needed later (Phase 4+):
 
 ```typescript
-// bin/hansolo-cli.ts (~100-200 lines)
+// bin/devsolo-cli.ts (~100-200 lines)
 
-import { HanSoloMCPServer } from '../src/mcp/hansolo-mcp-server';
+import { DevSoloMCPServer } from '../src/mcp/devsolo-mcp-server';
 
 async function cli() {
   const args = process.argv.slice(2);
@@ -571,7 +571,7 @@ async function cli() {
   const input = parseArgsToMCPInput(args);
 
   // Call MCP server internally
-  const server = new HanSoloMCPServer();
+  const server = new DevSoloMCPServer();
   const result = await server.executeTool(command, input);
 
   // Format structured response for terminal
@@ -603,7 +603,7 @@ cli().catch(console.error);
 
 ## Conclusion
 
-This architectural pivot positions han-solo as a **best-in-class AI-native Git workflow tool**. By embracing MCP as the primary interface, we:
+This architectural pivot positions devsolo as a **best-in-class AI-native Git workflow tool**. By embracing MCP as the primary interface, we:
 
 - Solve technical debt (ESM issues)
 - Reduce complexity (40% less code)
@@ -680,4 +680,4 @@ See GitHub issues #76, #81, #84 for next phase priorities.
 
 ---
 
-**Phase 3 Complete. han-solo 2.0 is live! 🎉**
+**Phase 3 Complete. devsolo 2.0 is live! 🎉**

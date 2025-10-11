@@ -19,7 +19,7 @@ export class BranchValidator {
   private gitOps: GitOperations;
   private sessionRepo: SessionRepository;
 
-  constructor(basePath: string = '.hansolo') {
+  constructor(basePath: string = '.devsolo') {
     this.gitOps = new GitOperations();
     this.sessionRepo = new SessionRepository(basePath);
   }
@@ -75,7 +75,7 @@ export class BranchValidator {
         return {
           available: false,
           reason: 'Session already exists for this branch',
-          suggestions: ['Use /hansolo:swap to resume this session'],
+          suggestions: ['Use /devsolo:swap to resume this session'],
           previousSession,
         };
       }

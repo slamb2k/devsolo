@@ -6,7 +6,7 @@
 
 ## Problem
 
-Currently, `hansolo commit` and `hansolo ship` automatically stage ALL changes before committing. This causes issues when:
+Currently, `devsolo commit` and `devsolo ship` automatically stage ALL changes before committing. This causes issues when:
 
 1. **Incremental Work**: Developer has completed documentation but code is still WIP
 2. **Selective Commits**: Want to commit only specific files while leaving others untouched
@@ -21,11 +21,11 @@ Currently, `hansolo commit` and `hansolo ship` automatically stage ALL changes b
 
 # Tried:
 git add docs/dev/plans/*.md  # Stage only docs
-hansolo commit               # FAILS - stages ALL files, build breaks
+devsolo commit               # FAILS - stages ALL files, build breaks
 
 # Had to:
 git restore <wip-files>      # Revert WIP files
-hansolo commit               # Now works, but lost WIP progress
+devsolo commit               # Now works, but lost WIP progress
 ```
 
 ## Proposed Solution
@@ -40,10 +40,10 @@ git add docs/dev/plans/*.md
 git add src/services/completed-feature.ts
 
 # Commit ONLY staged files
-hansolo commit --staged-only --message "docs: planning complete"
+devsolo commit --staged-only --message "docs: planning complete"
 
 # Or with ship
-hansolo ship --staged-only --message "feat: add feature"
+devsolo ship --staged-only --message "feat: add feature"
 ```
 
 **Behavior:**
@@ -58,7 +58,7 @@ Negative flag to disable auto-staging:
 
 ```bash
 git add docs/
-hansolo commit --no-stage-all --message "docs update"
+devsolo commit --no-stage-all --message "docs update"
 ```
 
 **Less intuitive** than Option A.
@@ -70,10 +70,10 @@ If files are already staged, commit only those. Otherwise stage all:
 ```bash
 # Auto-detects staged files
 git add docs/
-hansolo commit --message "docs update"  # Commits only docs
+devsolo commit --message "docs update"  # Commits only docs
 
 # No staged files - stages everything
-hansolo commit --message "commit all"   # Current behavior
+devsolo commit --message "commit all"   # Current behavior
 ```
 
 **Pro**: No new flag needed
@@ -85,7 +85,7 @@ hansolo commit --message "commit all"   # Current behavior
 
 ### API Changes
 
-**hansolo_commit MCP tool:**
+**devsolo_commit MCP tool:**
 ```typescript
 export interface CommitToolInput {
   message?: string;
@@ -199,8 +199,8 @@ preFlightChecks.push({
 - [ ] Add tests for git operations
 
 **Phase 2: MCP Tool Integration**
-- [ ] Add `stagedOnly` parameter to hansolo_commit tool
-- [ ] Add `stagedOnly` parameter to hansolo_ship tool
+- [ ] Add `stagedOnly` parameter to devsolo_commit tool
+- [ ] Add `stagedOnly` parameter to devsolo_ship tool
 - [ ] Update tool schemas
 - [ ] Add pre-flight check for staged files
 

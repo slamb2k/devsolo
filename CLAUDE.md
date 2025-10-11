@@ -26,46 +26,46 @@ This file provides guidance to Claude Code when working with this repository.
 
 **If you create a file in the wrong location, you WILL be asked to fix it.**
 
-<!-- BEGIN HAN-SOLO MANAGED SECTION - DO NOT EDIT -->
+<!-- BEGIN DEVSOLO MANAGED SECTION - DO NOT EDIT -->
 
-## 🚀 han-solo Git Workflow Management
+## 🚀 devsolo Git Workflow Management
 
-This section is automatically managed by han-solo. Last updated: 2025-09-25T18:39:38.122Z
+This section is automatically managed by devsolo. Last updated: 2025-09-25T18:39:38.122Z
 
 ### Workflow Detection
 
-Before performing git operations, check for active han-solo session:
+Before performing git operations, check for active devsolo session:
 
 ```javascript
-// Check if han-solo is managing current work
-if (fs.existsSync('.hansolo/session.json')) {
-  // han-solo is active - MUST use MCP tools
-  return 'use-hansolo-mcp';
+// Check if devsolo is managing current work
+if (fs.existsSync('.devsolo/session.json')) {
+  // devsolo is active - MUST use MCP tools
+  return 'use-devsolo-mcp';
 } else {
   // No active session - can use standard git
   return 'use-standard-git';
 }
 ```
 
-### ⛔ When han-solo Session is Active
+### ⛔ When devsolo Session is Active
 
-If `.hansolo/session.json` exists, **NEVER** use these commands:
-- `git commit` → Use `/hansolo:ship` instead
-- `git push` → Use `/hansolo:ship` instead
-- `gh pr create` → Use `/hansolo:ship` instead
-- `git checkout -b` → Use `/hansolo:launch` instead
-- `git rebase` → han-solo handles this automatically
+If `.devsolo/session.json` exists, **NEVER** use these commands:
+- `git commit` → Use `/devsolo:ship` instead
+- `git push` → Use `/devsolo:ship` instead
+- `gh pr create` → Use `/devsolo:ship` instead
+- `git checkout -b` → Use `/devsolo:launch` instead
+- `git rebase` → devsolo handles this automatically
 
 ### ✅ When No Session Exists
 
-If no `.hansolo/session.json` file:
+If no `.devsolo/session.json` file:
 - Safe to use standard git commands
-- Can optionally start han-solo workflow with `/hansolo:launch`
-- Direct git operations won't conflict with han-solo
+- Can optionally start devsolo workflow with `/devsolo:launch`
+- Direct git operations won't conflict with devsolo
 
 ### Why This Enforcement?
 
-han-solo maintains a state machine tracking:
+devsolo maintains a state machine tracking:
 - Linear history enforcement
 - Automatic rebasing and conflict resolution
 - PR readiness validation
@@ -75,11 +75,11 @@ Direct git operations bypass this state tracking and will cause workflow corrupt
 
 ### Team Collaboration
 
-- **With han-solo**: Follow session-based rules above
-- **Without han-solo**: Use standard git workflow
+- **With devsolo**: Follow session-based rules above
+- **Without devsolo**: Use standard git workflow
 - **Mixed teams**: Both can work simultaneously using session detection
 
-<!-- END HAN-SOLO MANAGED SECTION -->
+<!-- END DEVSOLO MANAGED SECTION -->
 
 ## 📚 Documentation Guidelines
 
@@ -120,11 +120,11 @@ For dated snapshots: `repomix-2025-10-09.md`, `export-2025-01-15.md`
 - **Product specs** → `docs/specs/`
 - **Completed/superseded docs** → `docs/archive/`
 
-### Using the /hansolo:doc Command
+### Using the /devsolo:doc Command
 
-The `/hansolo:doc` slash command has two modes:
+The `/devsolo:doc` slash command has two modes:
 
-**AUDIT MODE** (no arguments): `/hansolo:doc`
+**AUDIT MODE** (no arguments): `/devsolo:doc`
 - Scans all documentation for naming and placement issues
 - Checks for missing README.md entries
 - Identifies documents that should be archived
@@ -132,7 +132,7 @@ The `/hansolo:doc` slash command has two modes:
 - Updates all README.md files
 - Reports all findings and actions
 
-**CREATE MODE** (with content): `/hansolo:doc <name> <content>`
+**CREATE MODE** (with content): `/devsolo:doc <name> <content>`
 - Analyzes your content to determine correct placement
 - Applies naming conventions automatically
 - Updates relevant README.md files

@@ -5,14 +5,14 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 /**
- * Post-install script for @hansolo/cli
+ * Post-install script for @devsolo/cli
  * Sets up necessary directories and configurations after npm install
  */
 
-const HANSOLO_DIR = path.join(process.env.HOME || process.env.USERPROFILE, '.hansolo');
-const CONFIG_FILE = path.join(HANSOLO_DIR, 'config.yaml');
-const SESSIONS_DIR = path.join(HANSOLO_DIR, 'sessions');
-const TEMPLATES_DIR = path.join(HANSOLO_DIR, 'templates');
+const DEVSOLO_DIR = path.join(process.env.HOME || process.env.USERPROFILE, '.devsolo');
+const CONFIG_FILE = path.join(DEVSOLO_DIR, 'config.yaml');
+const SESSIONS_DIR = path.join(DEVSOLO_DIR, 'sessions');
+const TEMPLATES_DIR = path.join(DEVSOLO_DIR, 'templates');
 
 function ensureDirectory(dirPath) {
   if (!fs.existsSync(dirPath)) {
@@ -23,7 +23,7 @@ function ensureDirectory(dirPath) {
 
 function createDefaultConfig() {
   if (!fs.existsSync(CONFIG_FILE)) {
-    const defaultConfig = `# han-solo Global Configuration
+    const defaultConfig = `# devsolo Global Configuration
 version: 1.0.0
 
 # Default settings for all projects
@@ -81,31 +81,31 @@ function checkGitInstalled() {
     return true;
   } catch (error) {
     console.error('✗ Git is not installed or not in PATH');
-    console.error('  Please install Git before using han-solo');
+    console.error('  Please install Git before using devsolo');
     return false;
   }
 }
 
 function printWelcomeMessage() {
   console.log('\n' + '='.repeat(60));
-  console.log('🚀 han-solo installation complete!');
+  console.log('🚀 devsolo installation complete!');
   console.log('='.repeat(60));
   console.log('\nGet started with:');
   console.log('  1. Navigate to your Git project');
-  console.log('  2. Run: hansolo init');
-  console.log('  3. Start a feature: hansolo launch <branch-name>');
+  console.log('  2. Run: devsolo init');
+  console.log('  3. Start a feature: devsolo launch <branch-name>');
   console.log('\nFor more information:');
-  console.log('  - Run: hansolo --help');
-  console.log('  - Visit: https://github.com/yourusername/hansolo');
+  console.log('  - Run: devsolo --help');
+  console.log('  - Visit: https://github.com/yourusername/devsolo');
   console.log('='.repeat(60) + '\n');
 }
 
 function main() {
-  console.log('\n🔧 Setting up han-solo...\n');
+  console.log('\n🔧 Setting up devsolo...\n');
 
   try {
     // Create necessary directories
-    ensureDirectory(HANSOLO_DIR);
+    ensureDirectory(DEVSOLO_DIR);
     ensureDirectory(SESSIONS_DIR);
     ensureDirectory(TEMPLATES_DIR);
 

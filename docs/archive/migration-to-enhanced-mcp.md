@@ -2,7 +2,7 @@
 
 ## Overview
 
-The enhanced MCP server (`hansolo-mcp-server-enhanced`) provides significant improvements over the legacy version, including support for both natural language tools and structured prompts. This guide will help you migrate from the legacy server to the enhanced version.
+The enhanced MCP server (`devsolo-mcp-server-enhanced`) provides significant improvements over the legacy version, including support for both natural language tools and structured prompts. This guide will help you migrate from the legacy server to the enhanced version.
 
 ## What's New in the Enhanced Server
 
@@ -20,7 +20,7 @@ The enhanced MCP server (`hansolo-mcp-server-enhanced`) provides significant imp
 ### 3. Better Developer Experience
 - Clearer next-step guidance after each command
 - Contextual help based on current state
-- Support for both naming conventions (`hansolo_init` and `hansolo/init`)
+- Support for both naming conventions (`devsolo_init` and `devsolo/init`)
 
 ## Migration Steps
 
@@ -30,9 +30,9 @@ The enhanced MCP server (`hansolo-mcp-server-enhanced`) provides significant imp
 ```json
 {
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "command": "node",
-      "args": ["/path/to/hansolo/dist/mcp/hansolo-mcp-server.js"]
+      "args": ["/path/to/devsolo/dist/mcp/devsolo-mcp-server.js"]
     }
   }
 }
@@ -42,9 +42,9 @@ The enhanced MCP server (`hansolo-mcp-server-enhanced`) provides significant imp
 ```json
 {
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "command": "node",
-      "args": ["/path/to/hansolo/dist/mcp/hansolo-mcp-server-enhanced.js"],
+      "args": ["/path/to/devsolo/dist/mcp/devsolo-mcp-server-enhanced.js"],
       "env": {
         "NODE_ENV": "production"
       }
@@ -74,7 +74,7 @@ npm run prepack
 npm run mcp:start
 
 # Or use the bin script
-./bin/hansolo-mcp-enhanced
+./bin/devsolo-mcp-enhanced
 
 # Run tests to ensure everything works
 npm run test:mcp
@@ -89,7 +89,7 @@ After updating the configuration, you must restart Claude Desktop for the change
 ### Legacy Server (Tools Only)
 
 With the legacy server, you could only use natural language:
-- "Initialize han-solo in this project"
+- "Initialize devsolo in this project"
 - "Start a new feature branch"
 - "Show me my sessions"
 
@@ -98,16 +98,16 @@ With the legacy server, you could only use natural language:
 With the enhanced server, you have both options:
 
 **Natural Language (unchanged):**
-- "Initialize han-solo in this project"
+- "Initialize devsolo in this project"
 - "Start a new feature branch for authentication"
 - "Show me all active sessions"
 
 **NEW - Structured Prompts:**
-- `hansolo/init scope:project`
-- `hansolo/launch branchName:feature/auth`
-- `hansolo/sessions all:true verbose:true`
-- `hansolo/swap branchName:main stash:true`
-- `hansolo/ship push:true createPR:true`
+- `devsolo/init scope:project`
+- `devsolo/launch branchName:feature/auth`
+- `devsolo/sessions all:true verbose:true`
+- `devsolo/swap branchName:main stash:true`
+- `devsolo/ship push:true createPR:true`
 
 ## Feature Comparison
 
@@ -138,15 +138,15 @@ The enhanced server supports additional environment variables:
 ```json
 {
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "command": "node",
-      "args": ["/path/to/hansolo/dist/mcp/hansolo-mcp-server-enhanced.js"],
+      "args": ["/path/to/devsolo/dist/mcp/devsolo-mcp-server-enhanced.js"],
       "env": {
         "NODE_ENV": "production",
-        "HANSOLO_BASE_PATH": ".hansolo",
-        "HANSOLO_DEFAULT_BRANCH": "main",
-        "HANSOLO_AUTO_CLEANUP": "true",
-        "HANSOLO_VERBOSE": "false"
+        "DEVSOLO_BASE_PATH": ".devsolo",
+        "DEVSOLO_DEFAULT_BRANCH": "main",
+        "DEVSOLO_AUTO_CLEANUP": "true",
+        "DEVSOLO_VERBOSE": "false"
       }
     }
   }
@@ -158,20 +158,20 @@ The enhanced server supports additional environment variables:
 ### 1. Test Natural Language (Should Work As Before)
 
 Ask Claude:
-- "Initialize han-solo for this project"
+- "Initialize devsolo for this project"
 - "Start a new feature branch"
 - "Show current status"
 
 ### 2. Test New Prompt Features
 
 Try the new structured commands:
-- `hansolo/init`
-- `hansolo/launch branchName:test-feature`
-- `hansolo/status`
+- `devsolo/init`
+- `devsolo/launch branchName:test-feature`
+- `devsolo/status`
 
 ### 3. Test Autocomplete
 
-When using `hansolo/swap`, you should see branch name suggestions if you have active sessions.
+When using `devsolo/swap`, you should see branch name suggestions if you have active sessions.
 
 ### 4. Verify Enhanced Feedback
 
@@ -188,9 +188,9 @@ If you need to rollback to the legacy server:
 ```json
 {
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "command": "node",
-      "args": ["/path/to/hansolo/dist/mcp/hansolo-mcp-server.js"]
+      "args": ["/path/to/devsolo/dist/mcp/devsolo-mcp-server.js"]
     }
   }
 }
@@ -212,7 +212,7 @@ npm run mcp:start:legacy
 npm run build:mcp
 
 # Check the file exists
-ls -la dist/mcp/hansolo-mcp-server-enhanced.js
+ls -la dist/mcp/devsolo-mcp-server-enhanced.js
 ```
 
 ### Prompts Not Appearing
@@ -266,7 +266,7 @@ After successful migration:
 
 ## Version Compatibility
 
-| han-solo Version | Legacy Server | Enhanced Server | Recommended |
+| devsolo Version | Legacy Server | Enhanced Server | Recommended |
 |-----------------|---------------|-----------------|-------------|
 | < 1.0.0 | ✅ | ❌ | Legacy |
 | 1.0.0 - 1.9.x | ✅ | ❌ | Legacy |
@@ -278,7 +278,7 @@ After successful migration:
 A: No, the enhanced server is fully backward compatible.
 
 ### Q: Can I run both servers simultaneously?
-A: No, Claude Desktop should only connect to one han-solo MCP server at a time.
+A: No, Claude Desktop should only connect to one devsolo MCP server at a time.
 
 ### Q: Do I need to retrain my usage patterns?
 A: No, but you can optionally learn the new prompt syntax for faster operations.

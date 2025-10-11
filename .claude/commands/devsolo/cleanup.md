@@ -24,7 +24,7 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
 ░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀░░░
 ```
 
-   - Call `mcp__hansolo__hansolo_cleanup` with parameters
+   - Call `mcp__devsolo__devsolo_cleanup` with parameters
    - Remove stale sessions
    - Delete orphaned branches (if requested)
    - Report results following git-droid output style
@@ -81,7 +81,7 @@ Sessions are considered stale if:
 
 ### Orphaned Branches
 Branches are considered orphaned if:
-- No active han-solo session exists
+- No active devsolo session exists
 - Not the main branch
 - Not currently checked out
 - User confirms deletion
@@ -90,16 +90,16 @@ Branches are considered orphaned if:
 
 ```
 # Cleanup with prompts
-/hansolo cleanup
+/devsolo cleanup
 
 # Cleanup and delete orphaned branches automatically
-/hansolo cleanup --deleteBranches
+/devsolo cleanup --deleteBranches
 
 # Force cleanup without confirmations
-/hansolo cleanup --deleteBranches --force
+/devsolo cleanup --deleteBranches --force
 
 # Cleanup only stale sessions (no branch deletion)
-/hansolo cleanup
+/devsolo cleanup
 # (respond "n" to branch deletion prompt)
 ```
 
@@ -108,15 +108,15 @@ Branches are considered orphaned if:
 ### Scenario 1: Regular Maintenance
 ```
 # After shipping several features, clean up
-/hansolo cleanup --deleteBranches
+/devsolo cleanup --deleteBranches
 # Removes completed session records and merged branches
 ```
 
 ### Scenario 2: Adopt Existing Branches
 ```
-# You have branches created outside han-solo
+# You have branches created outside devsolo
 # Cleanup will identify them as orphaned
-/hansolo cleanup
+/devsolo cleanup
 # Review the list, keep branches you want
 # Delete ones you don't need
 ```
@@ -124,14 +124,14 @@ Branches are considered orphaned if:
 ### Scenario 3: Repository Hygiene
 ```
 # Regular cleanup schedule (weekly/monthly)
-/hansolo cleanup --deleteBranches --force
+/devsolo cleanup --deleteBranches --force
 # Automated cleanup of stale state
 ```
 
 ### Scenario 4: After Team Member Leaves
 ```
 # Clean up sessions and branches from departed teammate
-/hansolo cleanup --deleteBranches
+/devsolo cleanup --deleteBranches
 # Review and confirm deletion of old work
 ```
 
@@ -157,7 +157,7 @@ The cleanup command will NOT remove:
 1. **Run Regularly**: Clean up after shipping features to keep state tidy
 2. **Review Before Confirming**: Check the list of items to be cleaned
 3. **Sync First**: Cleanup automatically syncs main, so you get latest state
-4. **Use Sessions List**: Run /hansolo sessions --all to see all sessions before cleanup
+4. **Use Sessions List**: Run /devsolo sessions --all to see all sessions before cleanup
 5. **Manual Cleanup**: Can always manually delete branches with git commands
 
 ## Notes

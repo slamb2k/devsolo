@@ -107,9 +107,9 @@ jobs:
         run: |
           npm link
           # Test MCP server can be required as module
-          node -e "const server = require('./dist/mcp/hansolo-mcp-server'); console.log('MCP server loaded successfully');"
-          # Verify hansolo-mcp binary exists
-          which hansolo-mcp || echo "hansolo-mcp binary not found"
+          node -e "const server = require('./dist/mcp/devsolo-mcp-server'); console.log('MCP server loaded successfully');"
+          # Verify devsolo-mcp binary exists
+          which devsolo-mcp || echo "devsolo-mcp binary not found"
 
   security:
     name: Security Scan

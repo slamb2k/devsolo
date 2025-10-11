@@ -12,7 +12,7 @@ Show the current workflow status including session information and git status.
 ░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀░
 ```
 
-1. Use the `mcp__hansolo__hansolo_status` tool to query current workflow status
+1. Use the `mcp__devsolo__devsolo_status` tool to query current workflow status
 2. Display the current branch, session information (if any), and git status
 3. Show whether there's an active workflow session
 

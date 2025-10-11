@@ -69,10 +69,10 @@ export class ValidationService {
       result.info.push(`Node.js version: ${nodeVersion}`);
     }
 
-    // Check for .hansolo directory
-    const hansoloDir = await this.checkHansoloDirectory();
-    if (!hansoloDir) {
-      result.info.push('Han-solo directory not initialized (will be created on first use)');
+    // Check for .devsolo directory
+    const devsoloDir = await this.checkDevSoloDirectory();
+    if (!devsoloDir) {
+      result.info.push('DevSolo directory not initialized (will be created on first use)');
     }
 
     return result;
@@ -106,11 +106,11 @@ export class ValidationService {
     }
   }
 
-  private async checkHansoloDirectory(): Promise<boolean> {
+  private async checkDevSoloDirectory(): Promise<boolean> {
     try {
       const dirs = [
-        path.join(process.cwd(), '.hansolo'),
-        path.join(process.env['HOME'] || '', '.hansolo'),
+        path.join(process.cwd(), '.devsolo'),
+        path.join(process.env['HOME'] || '', '.devsolo'),
       ];
 
       for (const dir of dirs) {

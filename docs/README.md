@@ -1,6 +1,6 @@
-# han-solo Documentation
+# devsolo Documentation
 
-Welcome to the han-solo documentation. This folder contains all project documentation organized by purpose and audience.
+Welcome to the devsolo documentation. This folder contains all project documentation organized by purpose and audience.
 
 ## Documentation Structure
 
@@ -12,14 +12,14 @@ Welcome to the han-solo documentation. This folder contains all project document
 - MCP and Claude Code integration guides
 - Contributing guidelines
 
-**For**: Users installing, configuring, or using han-solo in their projects
+**For**: Users installing, configuring, or using devsolo in their projects
 
 **Contains**:
 - `quickstart.md` - Get up and running in 5 minutes
 - `usage.md` - Practical examples and workflows
 - `troubleshooting.md` - Common issues and solutions
-- `mcp-integration.md` - Setting up han-solo with Claude Desktop
-- `claude-code-commands.md` - Using han-solo in Claude Code
+- `mcp-integration.md` - Setting up devsolo with Claude Desktop
+- `claude-code-commands.md` - Using devsolo in Claude Code
 
 ### 📖 [reference/](./reference/)
 **External references and AI context**
@@ -31,16 +31,16 @@ Store external materials that provide context for development:
 
 **For**: AI assistants planning/coding, developers researching external APIs
 
-**Purpose**: This folder stores reference materials from external sources that AI and developers can use during planning and implementation. These are NOT internal han-solo docs.
+**Purpose**: This folder stores reference materials from external sources that AI and developers can use during planning and implementation. These are NOT internal devsolo docs.
 
 ### 🛠️ [dev/](./dev/)
-**Development documentation for han-solo contributors**
+**Development documentation for devsolo contributors**
 - **[system/](./dev/system/)** - Internal system documentation (source of truth for generating user-facing docs)
 - **[plans/](./dev/plans/)** - Implementation plans, task lists, roadmaps
 - **[reports/](./dev/reports/)** - Bug reports, reviews, implementation summaries
 - **[learnings/](./dev/learnings/)** - Reusable patterns, strategies, best practices
 
-**For**: Contributors developing han-solo features, maintainers
+**For**: Contributors developing devsolo features, maintainers
 
 **dev/system/** contains:
 - `installation.md` - Developer installation methods (npm link, local dev setup)
@@ -83,13 +83,13 @@ Use this decision tree to determine where a document belongs:
 
 ### 1. Who is the primary audience?
 
-**End users** (people using han-solo in their projects)
+**End users** (people using devsolo in their projects)
 → `guides/`
 
 **AI assistants / External researchers**
 → `reference/`
 
-**Developers building han-solo**
+**Developers building devsolo**
 → Continue to step 2
 
 ### 2. What type of developer documentation?
@@ -159,7 +159,7 @@ pattern-<name>-guide.md
 
 **Answer**: `dev/system/api.md`
 
-**Reasoning**: Internal system documentation (source of truth). Developers building han-solo need complete API details. User-facing API guide would be simplified and go in `guides/`.
+**Reasoning**: Internal system documentation (source of truth). Developers building devsolo need complete API details. User-facing API guide would be simplified and go in `guides/`.
 
 ### Example 2: Installation Guide
 **Question**: We have TWO installation docs. Where do they go?
@@ -171,7 +171,7 @@ pattern-<name>-guide.md
 **Reasoning**: Different audiences need different installation paths.
 
 ### Example 3: MCP Integration Guide
-**Question**: Guide for setting up han-solo MCP server with Claude?
+**Question**: Guide for setting up devsolo MCP server with Claude?
 
 **Answer**: `guides/mcp-integration.md` ✅
 
@@ -196,7 +196,7 @@ pattern-<name>-guide.md
 ## Quick Navigation
 
 **I want to...**
-- **Get started with han-solo** → [guides/quickstart.md](./guides/quickstart.md)
+- **Get started with devsolo** → [guides/quickstart.md](./guides/quickstart.md)
 - **See usage examples** → [guides/usage.md](./guides/usage.md)
 - **Learn about MCP tools** → [guides/mcp-tools-reference.md](./guides/mcp-tools-reference.md)
 - **Set up Claude Code integration** → [guides/mcp-integration.md](./guides/mcp-integration.md)
@@ -205,7 +205,7 @@ pattern-<name>-guide.md
 - **See MCP tools implementation** → [dev/system/mcp-tools.md](./dev/system/mcp-tools.md)
 - **Understand MCP architecture** → [dev/system/mcp-architecture.md](./dev/system/mcp-architecture.md)
 - **Understand complete config schema** → [dev/system/configuration.md](./dev/system/configuration.md)
-- **Understand the product vision** → [specs/hansolo-prd.md](./specs/hansolo-prd.md)
+- **Understand the product vision** → [specs/devsolo-prd.md](./specs/devsolo-prd.md)
 - **Contribute code** → [dev/learnings/](./dev/learnings/) + [dev/reports/](./dev/reports/)
 - **Understand why something was done** → [archive/](./archive/)
 

@@ -60,12 +60,12 @@
 
 ---
 
-**han-solo Workflow Information**
+**devsolo Workflow Information**
 - Session ID: `{{SESSION_ID}}`
 - Branch: `{{BRANCH_NAME}}`
 - Workflow Type: `{{WORKFLOW_TYPE}}`
 - Created: {{CREATED_AT}}
 - State: `{{WORKFLOW_STATE}}`
 
-<!-- This PR was created using han-solo Git workflow automation -->
-<!-- Learn more: https://github.com/your-org/han-solo -->
+<!-- This PR was created using devsolo Git workflow automation -->
+<!-- Learn more: https://github.com/your-org/devsolo -->

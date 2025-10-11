@@ -1,6 +1,6 @@
 # Status Line
 
-Manage Claude Code status line display to show current han-solo workflow status.
+Manage Claude Code status line display to show current devsolo workflow status.
 
 ## Arguments
 
@@ -20,7 +20,7 @@ Manage Claude Code status line display to show current han-solo workflow status.
 ░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀░░░▀▀▀░▀▀▀░▀░▀░▀▀▀░
 ```
 
-1. Use the `mcp__hansolo__hansolo_status_line` tool to manage status line
+1. Use the `mcp__devsolo__devsolo_status_line` tool to manage status line
 2. Pass along the provided arguments
 3. Report configuration changes
 
@@ -29,7 +29,7 @@ Manage Claude Code status line display to show current han-solo workflow status.
 The status line displays workflow information directly in Claude Code:
 
 ```
-[han-solo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY
+[devsolo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY
 ```
 
 Components:
@@ -44,14 +44,14 @@ Components:
 Turns on the status line display in Claude Code.
 
 ```
-/hansolo status-line --action="enable"
+/devsolo status-line --action="enable"
 ```
 
 ### Disable
 Turns off the status line display.
 
 ```
-/hansolo status-line --action="disable"
+/devsolo status-line --action="disable"
 ```
 
 ### Update
@@ -59,17 +59,17 @@ Updates status line configuration without disabling.
 
 ```
 # Show only branch and state
-/hansolo status-line --action="update" --showSessionInfo=false
+/devsolo status-line --action="update" --showSessionInfo=false
 
 # Custom format
-/hansolo status-line --action="update" --format="{icon} {branch}"
+/devsolo status-line --action="update" --format="{icon} {branch}"
 ```
 
 ### Show
 Displays current status line configuration.
 
 ```
-/hansolo status-line --action="show"
+/devsolo status-line --action="show"
 ```
 
 ## Custom Format Strings
@@ -87,7 +87,7 @@ Examples:
 {icon} {branch}
 
 # Verbose format
-[han-solo] {icon} {session} | {branch} | {state} | {type}
+[devsolo] {icon} {session} | {branch} | {state} | {type}
 
 # Custom format
 {branch} ({state})
@@ -108,19 +108,19 @@ Examples:
 
 ```
 # Enable with default settings
-/hansolo status-line --action="enable"
+/devsolo status-line --action="enable"
 
 # Enable with custom format
-/hansolo status-line --action="enable" --format="{icon} {branch} | {state}"
+/devsolo status-line --action="enable" --format="{icon} {branch} | {state}"
 
 # Show only branch name
-/hansolo status-line --action="update" --showSessionInfo=false --showStateInfo=false
+/devsolo status-line --action="update" --showSessionInfo=false --showStateInfo=false
 
 # Disable status line
-/hansolo status-line --action="disable"
+/devsolo status-line --action="disable"
 
 # Check current configuration
-/hansolo status-line --action="show"
+/devsolo status-line --action="show"
 ```
 
 ## Output Format

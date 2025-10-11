@@ -34,15 +34,15 @@ coverage/
 .DS_Store
 Thumbs.db
 
-# han-solo runtime files
-.hansolo/
-!.hansolo/templates/
-!.hansolo/hooks/
-!.hansolo/commands/
-.hansolo/debug.log
-.hansolo/locks/*.lock
-.hansolo/sessions/
-.hansolo/audit/
+# devsolo runtime files
+.devsolo/
+!.devsolo/templates/
+!.devsolo/hooks/
+!.devsolo/commands/
+.devsolo/debug.log
+.devsolo/locks/*.lock
+.devsolo/sessions/
+.devsolo/audit/
 
 # Temporary files
 tmp/

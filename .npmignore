@@ -38,9 +38,9 @@ docs/
 *.tsbuildinfo
 *.map
 
-# han-solo runtime files
-.hansolo/
-hansolo.yaml
+# devsolo runtime files
+.devsolo/
+devsolo.yaml
 
 # Temporary files
 tmp/

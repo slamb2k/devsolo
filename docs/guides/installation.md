@@ -1,14 +1,14 @@
-# han-solo Installation Guide
+# devsolo Installation Guide
 
-Complete installation instructions for han-solo v2.0.0 MCP server with Claude Code.
+Complete installation instructions for devsolo v2.0.0 MCP server with Claude Code.
 
 ## Overview
 
-han-solo v2.0.0 is a pure MCP (Model Context Protocol) server that integrates with Claude Code. There is no standalone CLI installation - han-solo works exclusively through Claude Code's MCP interface.
+devsolo v2.0.0 is a pure MCP (Model Context Protocol) server that integrates with Claude Code. There is no standalone CLI installation - devsolo works exclusively through Claude Code's MCP interface.
 
 ## Prerequisites
 
-Before installing han-solo, ensure you have:
+Before installing devsolo, ensure you have:
 
 - **Node.js 20+** and npm
 - **Git 2.30+**
@@ -42,12 +42,12 @@ git --version  # Should show 2.30.x or higher
 
 Download and install Claude Code from: https://claude.com/claude-code
 
-### 2. Clone and Build han-solo
+### 2. Clone and Build devsolo
 
 ```bash
 # Clone the repository
-git clone https://github.com/slamb2k/hansolo.git
-cd hansolo
+git clone https://github.com/slamb2k/devsolo.git
+cd devsolo
 
 # Install dependencies
 npm install
@@ -59,11 +59,11 @@ npm run build
 npm run build:mcp
 ```
 
-This creates the MCP server at `bin/hansolo-mcp`.
+This creates the MCP server at `bin/devsolo-mcp`.
 
 ### 3. Configure Claude Code MCP Server
 
-Add han-solo to your Claude Code MCP configuration file:
+Add devsolo to your Claude Code MCP configuration file:
 
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
@@ -76,25 +76,25 @@ Add han-solo to your Claude Code MCP configuration file:
 ```json
 {
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "command": "node",
-      "args": ["/absolute/path/to/hansolo/bin/hansolo-mcp"],
+      "args": ["/absolute/path/to/devsolo/bin/devsolo-mcp"],
       "cwd": "${workspaceFolder}"
     }
   }
 }
 ```
 
-**Important**: Replace `/absolute/path/to/hansolo` with the actual absolute path to your han-solo installation.
+**Important**: Replace `/absolute/path/to/devsolo` with the actual absolute path to your devsolo installation.
 
 **Example**:
 
 ```json
 {
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "command": "node",
-      "args": ["/home/yourname/projects/hansolo/bin/hansolo-mcp"],
+      "args": ["/home/yourname/projects/devsolo/bin/devsolo-mcp"],
       "cwd": "${workspaceFolder}"
     }
   }
@@ -103,37 +103,37 @@ Add han-solo to your Claude Code MCP configuration file:
 
 ### 4. Restart Claude Code
 
-Restart Claude Code to load the han-solo MCP server.
+Restart Claude Code to load the devsolo MCP server.
 
 ### 5. Verify Installation
 
 In Claude Code, navigate to any project directory and ask:
 
 ```
-Show me the han-solo status
+Show me the devsolo status
 ```
 
 You should see either:
-- "han-solo is not initialized" (normal for first time)
+- "devsolo is not initialized" (normal for first time)
 - Current workflow status (if already initialized)
 
-If you see an error about han-solo not being available, see [Troubleshooting](#troubleshooting) below.
+If you see an error about devsolo not being available, see [Troubleshooting](#troubleshooting) below.
 
 ### 6. Initialize in Your Project
 
 In Claude Code, in your project directory:
 
 ```
-Initialize han-solo in this project
+Initialize devsolo in this project
 ```
 
 Or use the MCP tool directly:
 
 ```
-Use hansolo_init to set up han-solo
+Use devsolo_init to set up devsolo
 ```
 
-This creates a `.hansolo` directory in your project with configuration and session storage.
+This creates a `.devsolo` directory in your project with configuration and session storage.
 
 ### 7. Configure GitHub Authentication
 
@@ -304,7 +304,7 @@ gh auth login
 
 ### Windows
 
-han-solo is best used on Windows via WSL2 (Windows Subsystem for Linux).
+devsolo is best used on Windows via WSL2 (Windows Subsystem for Linux).
 
 #### Install WSL2
 
@@ -355,12 +355,12 @@ node --version  # Should show v20.x.x
 
 ```bash
 # Clone specific tag
-git clone --branch v2.0.0 https://github.com/slamb2k/hansolo.git
-cd hansolo
+git clone --branch v2.0.0 https://github.com/slamb2k/devsolo.git
+cd devsolo
 
 # Or clone and checkout specific branch
-git clone https://github.com/slamb2k/hansolo.git
-cd hansolo
+git clone https://github.com/slamb2k/devsolo.git
+cd devsolo
 git checkout feature/my-feature
 
 # Then build normally
@@ -373,8 +373,8 @@ npm run build:mcp
 
 ```bash
 # Clone to custom location
-git clone https://github.com/slamb2k/hansolo.git /opt/hansolo
-cd /opt/hansolo
+git clone https://github.com/slamb2k/devsolo.git /opt/devsolo
+cd /opt/devsolo
 
 # Build
 npm install
@@ -385,9 +385,9 @@ npm run build:mcp
 # In claude_desktop_config.json:
 {
   "mcpServers": {
-    "hansolo": {
+    "devsolo": {
       "command": "node",
-      "args": ["/opt/hansolo/bin/hansolo-mcp"],
+      "args": ["/opt/devsolo/bin/devsolo-mcp"],
       "cwd": "${workspaceFolder}"
     }
   }
@@ -398,25 +398,25 @@ npm run build:mcp
 
 ### MCP Server Not Found
 
-**Problem**: Claude Code can't find the han-solo MCP server
+**Problem**: Claude Code can't find the devsolo MCP server
 
 **Solutions**:
 
 1. **Verify path is absolute**:
    ```bash
    # Get absolute path
-   cd /path/to/hansolo
+   cd /path/to/devsolo
    pwd  # Copy this absolute path
    ```
 
 2. **Check file exists**:
    ```bash
-   ls -l /path/to/hansolo/bin/hansolo-mcp
+   ls -l /path/to/devsolo/bin/devsolo-mcp
    ```
 
 3. **Make executable**:
    ```bash
-   chmod +x /path/to/hansolo/bin/hansolo-mcp
+   chmod +x /path/to/devsolo/bin/devsolo-mcp
    ```
 
 4. **Verify Node.js path**:
@@ -474,8 +474,8 @@ nvm alias default 20
 ```bash
 # Option 1: Install in user directory
 cd ~
-git clone https://github.com/slamb2k/hansolo.git
-cd hansolo
+git clone https://github.com/slamb2k/devsolo.git
+cd devsolo
 
 # Option 2: Fix npm permissions
 mkdir ~/.npm-global
@@ -488,7 +488,7 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
 
 ### GitHub Authentication Fails
 
-**Problem**: "GitHub authentication failed" when using han-solo
+**Problem**: "GitHub authentication failed" when using devsolo
 
 **Solutions**:
 
@@ -515,7 +515,7 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
 
 ### Claude Code Not Loading MCP Server
 
-**Problem**: han-solo tools not available in Claude Code
+**Problem**: devsolo tools not available in Claude Code
 
 **Solutions**:
 
@@ -531,8 +531,8 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
 
 3. **Test MCP server manually**:
    ```bash
-   cd /path/to/hansolo
-   node bin/hansolo-mcp
+   cd /path/to/devsolo
+   node bin/devsolo-mcp
    # Should start without errors
    ```
 
@@ -541,15 +541,15 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
    - Restart Claude Code
    - Wait for MCP server to initialize
 
-### han-solo Not Initialized
+### devsolo Not Initialized
 
-**Problem**: "han-solo is not initialized in this project"
+**Problem**: "devsolo is not initialized in this project"
 
 **Solution**:
 
 In Claude Code:
 ```
-Initialize han-solo in this project
+Initialize devsolo in this project
 ```
 
 This is normal for first-time use in a project.
@@ -561,29 +561,29 @@ After installation, verify everything works:
 - [ ] Node.js 20+ installed: `node --version`
 - [ ] Git 2.30+ installed: `git --version`
 - [ ] Claude Code installed and running
-- [ ] han-solo cloned and built successfully
+- [ ] devsolo cloned and built successfully
 - [ ] MCP server configured in `claude_desktop_config.json`
 - [ ] Claude Code restarted
-- [ ] han-solo status check works in Claude Code
+- [ ] devsolo status check works in Claude Code
 - [ ] GitHub authentication configured (`gh auth login` or `GITHUB_TOKEN`)
-- [ ] han-solo initialized in a test project
+- [ ] devsolo initialized in a test project
 
 ## Next Steps
 
 After successful installation:
 
 1. **Read the Quick Start**: [Quick Start Guide](quickstart.md)
-2. **Initialize a project**: Ask Claude to "Initialize han-solo in this project"
+2. **Initialize a project**: Ask Claude to "Initialize devsolo in this project"
 3. **Try your first workflow**: See [Usage Guide](usage.md)
 4. **Explore MCP tools**: [MCP Tools Reference](mcp-tools-reference.md)
 5. **Migrating from v1.x?**: [Migration Guide](migration-from-cli.md)
 
-## Updating han-solo
+## Updating devsolo
 
 To update to the latest version:
 
 ```bash
-cd /path/to/hansolo
+cd /path/to/devsolo
 
 # Pull latest changes
 git pull origin main
@@ -598,19 +598,19 @@ npm run build:mcp
 
 ## Uninstalling
 
-To remove han-solo:
+To remove devsolo:
 
 ```bash
 # 1. Remove from Claude Code config
-# Edit claude_desktop_config.json and remove the "hansolo" entry
+# Edit claude_desktop_config.json and remove the "devsolo" entry
 
-# 2. Delete han-solo directory
-rm -rf /path/to/hansolo
+# 2. Delete devsolo directory
+rm -rf /path/to/devsolo
 
 # 3. Remove project configurations (optional)
-# In each project that used han-solo:
+# In each project that used devsolo:
 cd /path/to/your/project
-rm -rf .hansolo
+rm -rf .devsolo
 
 # 4. Restart Claude Code
 ```
@@ -620,10 +620,10 @@ rm -rf .hansolo
 If you encounter installation issues:
 
 - **Troubleshooting Guide**: [troubleshooting.md](troubleshooting.md)
-- **GitHub Issues**: [Report a bug](https://github.com/slamb2k/hansolo/issues)
-- **Discussions**: [Ask questions](https://github.com/slamb2k/hansolo/discussions)
-- **Ask Claude**: "Help me troubleshoot han-solo installation"
+- **GitHub Issues**: [Report a bug](https://github.com/slamb2k/devsolo/issues)
+- **Discussions**: [Ask questions](https://github.com/slamb2k/devsolo/discussions)
+- **Ask Claude**: "Help me troubleshoot devsolo installation"
 
 ---
 
-**Installation complete?** Head to the [Quick Start Guide](quickstart.md) to start using han-solo! 🚀
+**Installation complete?** Head to the [Quick Start Guide](quickstart.md) to start using devsolo! 🚀

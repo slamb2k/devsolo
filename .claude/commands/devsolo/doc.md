@@ -1,6 +1,6 @@
 # Doc
 
-Manage documentation following han-solo's documentation structure and conventions.
+Manage documentation following devsolo's documentation structure and conventions.
 
 ## Arguments
 
@@ -52,7 +52,7 @@ When called without arguments, performs a comprehensive documentation audit.
 
 ```
 # Run documentation audit
-/hansolo:doc
+/devsolo:doc
 
 docs-droid will scan, report issues, and offer to fix them.
 ```
@@ -100,7 +100,7 @@ When called with arguments, creates new documentation from provided content.
 
 ```
 # Create user guide
-/hansolo:doc "migration-guide" "# Migration Guide
+/devsolo:doc "migration-guide" "# Migration Guide
 
 How to migrate from v1 to v2...
 
@@ -110,7 +110,7 @@ How to migrate from v1 to v2...
 3. Run migration script"
 
 # Create implementation plan
-/hansolo:doc "auth-feature-plan" "# Authentication Feature Plan
+/devsolo:doc "auth-feature-plan" "# Authentication Feature Plan
 
 ## Overview
 Implement OAuth2 authentication...
@@ -121,7 +121,7 @@ Implement OAuth2 authentication...
 - [ ] Add tests"
 
 # Create bug report
-/hansolo:doc "login-bug-analysis" "# Login Bug Analysis
+/devsolo:doc "login-bug-analysis" "# Login Bug Analysis
 
 ## Issue
 Users cannot login after password reset...

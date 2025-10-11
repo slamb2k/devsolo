@@ -1,11 +1,11 @@
-# han-solo Configuration Guide
+# devsolo Configuration Guide
 
 ## Overview
 
-han-solo uses a hierarchical configuration system with three levels:
+devsolo uses a hierarchical configuration system with three levels:
 
-1. **Global Configuration** (`~/.hansolo/config.yaml`)
-2. **Project Configuration** (`<project>/.hansolo/config.yaml`)
+1. **Global Configuration** (`~/.devsolo/config.yaml`)
+2. **Project Configuration** (`<project>/.devsolo/config.yaml`)
 3. **Session Configuration** (runtime overrides)
 
 Settings cascade from global → project → session, with more specific settings overriding broader ones.
@@ -23,12 +23,12 @@ defaults:
 
 ## Global Configuration
 
-Located at `~/.hansolo/config.yaml`, created automatically on first install.
+Located at `~/.devsolo/config.yaml`, created automatically on first install.
 
 ### Default Settings
 
 ```yaml
-# han-solo Global Configuration
+# devsolo Global Configuration
 version: 1.0.0
 
 # Default settings for all projects
@@ -98,7 +98,7 @@ mcp:
 
 ## Project Configuration
 
-Located at `<project>/.hansolo/config.yaml`, created by `hansolo init`.
+Located at `<project>/.devsolo/config.yaml`, created by `devsolo init`.
 
 ### Project-Specific Settings
 
@@ -146,13 +146,13 @@ team:
 
 # Templates
 templates:
-  commitMessage: .hansolo/templates/commit.txt
-  pullRequest: .hansolo/templates/pr.md
+  commitMessage: .devsolo/templates/commit.txt
+  pullRequest: .devsolo/templates/pr.md
 ```
 
 ## Environment Variables
 
-han-solo respects these environment variables:
+devsolo respects these environment variables:
 
 ```bash
 # Authentication tokens
@@ -161,19 +161,19 @@ GITLAB_TOKEN=glpat-xxxx
 BITBUCKET_TOKEN=xxx
 
 # Configuration paths
-HANSOLO_CONFIG_DIR=~/.config/hansolo
-HANSOLO_PROJECT_CONFIG=./custom-config.yaml
+DEVSOLO_CONFIG_DIR=~/.config/devsolo
+DEVSOLO_PROJECT_CONFIG=./custom-config.yaml
 
 # Runtime overrides
-HANSOLO_NO_COLOR=1              # Disable colors
-HANSOLO_VERBOSE=1               # Enable verbose output
-HANSOLO_DRY_RUN=1              # Dry run mode
-HANSOLO_SKIP_HOOKS=1           # Skip git hooks
-HANSOLO_AUTO_YES=1             # Auto-confirm prompts
+DEVSOLO_NO_COLOR=1              # Disable colors
+DEVSOLO_VERBOSE=1               # Enable verbose output
+DEVSOLO_DRY_RUN=1              # Dry run mode
+DEVSOLO_SKIP_HOOKS=1           # Skip git hooks
+DEVSOLO_AUTO_YES=1             # Auto-confirm prompts
 
 # MCP Server
-HANSOLO_MCP_PORT=8080
-HANSOLO_MCP_HOST=0.0.0.0
+DEVSOLO_MCP_PORT=8080
+DEVSOLO_MCP_HOST=0.0.0.0
 ```
 
 ## Command-Line Overrides
@@ -182,18 +182,18 @@ Most configuration options can be overridden via CLI flags:
 
 ```bash
 # Override configuration
-hansolo launch --no-rebase
-hansolo ship --no-squash
-hansolo ship --skip-tests
+devsolo launch --no-rebase
+devsolo ship --no-squash
+devsolo ship --skip-tests
 
 # Platform selection
-hansolo init --platform github
-hansolo init --platform gitlab
+devsolo init --platform github
+devsolo init --platform gitlab
 
 # UI preferences
-hansolo status --no-color
-hansolo status --verbose
-hansolo sessions --json
+devsolo status --no-color
+devsolo status --verbose
+devsolo sessions --json
 ```
 
 ## Configuration Commands
@@ -202,41 +202,41 @@ hansolo sessions --json
 
 ```bash
 # Show effective configuration
-hansolo config
+devsolo config
 
 # Show specific setting
-hansolo config defaults.autoRebase
+devsolo config defaults.autoRebase
 
 # Show configuration source
-hansolo config --source
+devsolo config --source
 ```
 
 ### Set Configuration
 
 ```bash
 # Set global configuration
-hansolo config --global defaults.autoRebase false
+devsolo config --global defaults.autoRebase false
 
 # Set project configuration
-hansolo config defaults.requireApproval true
+devsolo config defaults.requireApproval true
 
 # Set platform token
-hansolo config --global platform.github.token ghp_xxxx
+devsolo config --global platform.github.token ghp_xxxx
 ```
 
 ### Reset Configuration
 
 ```bash
 # Reset to defaults
-hansolo config --reset
+devsolo config --reset
 
 # Reset specific setting
-hansolo config --unset defaults.autoRebase
+devsolo config --unset defaults.autoRebase
 ```
 
 ## Configuration Validation
 
-han-solo validates configuration on load:
+devsolo validates configuration on load:
 
 1. **Schema Validation**: Ensures valid YAML and correct types
 2. **Dependency Check**: Verifies required tools are available
@@ -246,7 +246,7 @@ han-solo validates configuration on load:
 Run validation manually:
 
 ```bash
-hansolo validate --config
+devsolo validate --config
 ```
 
 ## Migration from Other Tools
@@ -255,9 +255,9 @@ hansolo validate --config
 
 ```bash
 # Import git-flow configuration
-hansolo migrate git-flow
+devsolo migrate git-flow
 
-# Maps git-flow settings to han-solo:
+# Maps git-flow settings to devsolo:
 # - master → mainBranch
 # - develop → removed (linear history)
 # - feature/ → branches.feature
@@ -268,7 +268,7 @@ hansolo migrate git-flow
 
 ```bash
 # Import GitHub Flow settings
-hansolo migrate github-flow
+devsolo migrate github-flow
 
 # Simple mapping:
 # - main branch preserved
@@ -282,23 +282,23 @@ hansolo migrate github-flow
 
 ```bash
 # Check configuration paths
-hansolo config --paths
+devsolo config --paths
 
 # Validate configuration files
-hansolo validate --config
+devsolo validate --config
 
 # Show parse errors
-hansolo config --debug
+devsolo config --debug
 ```
 
 ### Token Issues
 
 ```bash
 # Test platform authentication
-hansolo validate --auth
+devsolo validate --auth
 
 # Clear cached tokens
-hansolo config --clear-tokens
+devsolo config --clear-tokens
 ```
 
 ### Performance Tuning
@@ -320,7 +320,7 @@ network:
 
 ## Best Practices
 
-1. **Version Control Config**: Commit `.hansolo/config.yaml` to share project settings
+1. **Version Control Config**: Commit `.devsolo/config.yaml` to share project settings
 2. **Use Environment Variables**: Store tokens in environment, not config files
 3. **Project Templates**: Create template configurations for different project types
 4. **Regular Cleanup**: Enable `autoCleanup` to prevent session accumulation

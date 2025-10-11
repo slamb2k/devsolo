@@ -11,7 +11,7 @@ export interface PRValidationResult {
 export class PRValidator {
   private github: GitHubIntegration;
 
-  constructor(basePath: string = '.hansolo') {
+  constructor(basePath: string = '.devsolo') {
     this.github = new GitHubIntegration(basePath);
   }
 

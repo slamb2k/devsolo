@@ -2,22 +2,22 @@
 Sync Impact Report
 ==================
 Version change: Template → 4.0.0
-Modified principles: Template placeholders → 7 concrete han-solo principles
+Modified principles: Template placeholders → 7 concrete devsolo principles
 Added sections: State Machine Governance, Architectural Boundaries, Quality Enforcement, Rights and Responsibilities
 Removed sections: Generic template placeholders
 Templates requiring updates:
-✅ plan-template.md - Constitution Check section needs han-solo specific gates
+✅ plan-template.md - Constitution Check section needs devsolo specific gates
 ✅ spec-template.md - No changes needed (remains generic)
 ✅ tasks-template.md - No changes needed (remains generic)
 Follow-up TODOs: None - all placeholders filled
 -->
 
-# han-solo Constitution
+# devsolo Constitution
 
 ## Core Principles
 
 ### I. Hybrid Orchestration Architecture
-The han-solo tool employs a dual-layer architecture with clear separation
+The devsolo tool employs a dual-layer architecture with clear separation
 of concerns:
 
 - **MCP Server Layer**: Provides deterministic state machine workflow control,
@@ -82,7 +82,7 @@ Intelligence enhances but never blocks workflow progression:
 - System degrades gracefully without losing functionality
 
 ### VII. Initialization First
-The han-solo tool requires explicit initialization before use:
+The devsolo tool requires explicit initialization before use:
 
 - All workflow commands require prior execution of initialization
 - Initialization establishes Git repository, remote connections, and configuration
@@ -90,7 +90,7 @@ The han-solo tool requires explicit initialization before use:
 - Uninitialized projects receive clear guidance to run init first
 - Initialization can create remote repositories when none exist
 - Once initialized, configuration persists across sessions
-- Components install to `.hansolo/` directories for clean separation
+- Components install to `.devsolo/` directories for clean separation
 - CLAUDE.md is configured to ensure AI follows workflows
 
 ## State Machine Governance

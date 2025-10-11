@@ -51,7 +51,7 @@ From jest.config.js `testPathIgnorePatterns`:
   - validate-environment.test.ts
 
 **MCP Server Test** (1 file):
-- `/tests/mcp/hansolo-mcp-server.test.ts` (ESM module issues)
+- `/tests/mcp/devsolo-mcp-server.test.ts` (ESM module issues)
 
 **Total Skipped**: ~19 test files/directories
 
@@ -108,13 +108,13 @@ coverageThreshold: {
 
 ### Large Command Files (>500 lines)
 ```
-708 lines - src/commands/hansolo-ship.ts
-643 lines - src/commands/hansolo-status-line.ts
-580 lines - src/commands/hansolo-validate.ts
-578 lines - src/commands/hansolo-config.ts
-561 lines - src/commands/hansolo-launch.ts
-544 lines - src/commands/hansolo-hotfix.ts
-521 lines - src/commands/hansolo-cleanup.ts
+708 lines - src/commands/devsolo-ship.ts
+643 lines - src/commands/devsolo-status-line.ts
+580 lines - src/commands/devsolo-validate.ts
+578 lines - src/commands/devsolo-config.ts
+561 lines - src/commands/devsolo-launch.ts
+544 lines - src/commands/devsolo-hotfix.ts
+521 lines - src/commands/devsolo-cleanup.ts
 ```
 
 **Total**: 4,135 lines in 7 oversized commands (16.6% of codebase)
@@ -137,8 +137,8 @@ Total: 2,595 lines, 96KB
 - ❌ Tests validate legacy code, not production code
 
 ### Broken Binary
-- `bin/hansolo-mcp-enhanced` references non-existent file
-- Points to: `dist/mcp/hansolo-mcp-server-enhanced.js`
+- `bin/devsolo-mcp-enhanced` references non-existent file
+- Points to: `dist/mcp/devsolo-mcp-server-enhanced.js`
 - No source file exists for this
 
 ---
@@ -180,9 +180,9 @@ import { MCPServer } from '../../src/mcp-server/server';
 
 **Production MCP server** (correct, but underutilized):
 ```typescript
-import { HanSoloMCP Server } from './hansolo-mcp-server';
+import { DevSoloMCP Server } from './devsolo-mcp-server';
 ```
-- Only imported in `src/mcp/index.ts` and `bin/hansolo-mcp`
+- Only imported in `src/mcp/index.ts` and `bin/devsolo-mcp`
 
 ---
 
