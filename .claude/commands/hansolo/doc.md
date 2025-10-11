@@ -7,13 +7,13 @@ Manage documentation following han-solo's documentation structure and convention
 - No arguments: Run in **AUDIT MODE** - scan and fix documentation issues
 - With arguments: Run in **CREATE MODE** - create new documentation
 
-## Mode 1: AUDIT MODE (No Arguments)
+## Workflow
+
+**Invoke docs-droid sub-agent** to manage documentation according to the mode:
+
+### Mode 1: AUDIT MODE (No Arguments)
 
 When called without arguments, performs a comprehensive documentation audit.
-
-### What It Does
-
-**Invokes docs-droid sub-agent** to:
 
 1. **Read Documentation Guidelines**
    - Load docs/README.md to understand structure and rules
@@ -48,27 +48,22 @@ When called without arguments, performs a comprehensive documentation audit.
    - Documents archived
    - Total changes
 
-### Example
+#### Example
 
 ```
 # Run documentation audit
-/hansolo doc
+/hansolo:doc
 
 docs-droid will scan, report issues, and offer to fix them.
 ```
 
-## Mode 2: CREATE MODE (With Arguments)
+### Mode 2: CREATE MODE (With Arguments)
 
 When called with arguments, creates new documentation from provided content.
 
-### Arguments in Create Mode
-
+**Arguments in Create Mode:**
 - First argument: Document name (will be converted to lowercase-with-hyphens.md)
 - Remaining arguments: Document content (markdown)
-
-### What It Does
-
-**Invokes docs-droid sub-agent** to:
 
 1. **Analyze Content**
    - Determine primary audience (users, developers, AI)
@@ -101,11 +96,11 @@ When called with arguments, creates new documentation from provided content.
    - READMEs updated
    - Documents archived (if any)
 
-### Examples
+#### Examples
 
 ```
 # Create user guide
-/hansolo doc "migration-guide" "# Migration Guide
+/hansolo:doc "migration-guide" "# Migration Guide
 
 How to migrate from v1 to v2...
 
@@ -115,7 +110,7 @@ How to migrate from v1 to v2...
 3. Run migration script"
 
 # Create implementation plan
-/hansolo doc "auth-feature-plan" "# Authentication Feature Plan
+/hansolo:doc "auth-feature-plan" "# Authentication Feature Plan
 
 ## Overview
 Implement OAuth2 authentication...
@@ -126,7 +121,7 @@ Implement OAuth2 authentication...
 - [ ] Add tests"
 
 # Create bug report
-/hansolo doc "login-bug-analysis" "# Login Bug Analysis
+/hansolo:doc "login-bug-analysis" "# Login Bug Analysis
 
 ## Issue
 Users cannot login after password reset...
@@ -194,3 +189,4 @@ docs-droid uses this logic:
 - All actions are reported clearly
 - Audit mode asks before making changes
 - Create mode determines placement automatically
+- No banner display for this command (docs-droid handles all output)

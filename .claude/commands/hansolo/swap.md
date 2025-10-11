@@ -10,16 +10,6 @@ Switch between active workflow sessions without aborting them.
 
 ## Workflow
 
-**Display the following banner immediately before doing anything else:**
-
-```
-░█▀▀░█░█░█▀█░█▀█░█▀█░▀█▀░█▀█░█▀▀░
-░▀▀█░█▄█░█▀█░█▀▀░█▀▀░░█░░█░█░█░█░
-░▀▀▀░▀░▀░▀░▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
-```
-
-Once displayed, continue with the following steps:
-
 1. **Invoke git-droid sub-agent** to coordinate the swap workflow
 2. git-droid will:
    - Verify target session exists
@@ -28,6 +18,14 @@ Once displayed, continue with the following steps:
    - If uncommitted changes present:
      - Offer to stash them (unless stash or force specified)
      - Warn about potential data loss if force=true
+   - **Display the following banner immediately before calling the MCP tool:**
+
+```
+░█▀▀░█░█░█▀█░█▀█░█▀█░▀█▀░█▀█░█▀▀░
+░▀▀█░█▄█░█▀█░█▀▀░█▀▀░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀░▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
+```
+
    - Call `mcp__hansolo__hansolo_swap` with parameters
    - Switch to target branch
    - Activate target session

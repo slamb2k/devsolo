@@ -10,16 +10,6 @@ Start a new feature workflow. Creates a feature branch and han-solo session.
 
 ## Workflow
 
-**Display the following banner immediately before doing anything else:**
-
-```
-░█░░░█▀█░█░█░█▀█░█▀▀░█░█░▀█▀░█▀█░█▀▀░
-░█░░░█▀█░█░█░█░█░█░░░█▀█░░█░░█░█░█░█░
-░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░
-```
-
-Once displayed, continue with the following steps:
-
 1. **Invoke git-droid sub-agent** to coordinate the launch workflow
 2. git-droid will:
    - Analyze current git state (check if on main, clean working directory)
@@ -33,6 +23,14 @@ Once displayed, continue with the following steps:
      - From description → convert to kebab-case with appropriate prefix (feature/, fix/, docs/, etc)
      - From uncommitted changes → analyze diff to infer purpose
      - Fallback to timestamp → feature/YYYY-MM-DD-HHMMSS
+   - **Display the following banner immediately before calling the MCP tool:**
+
+```
+░█░░░█▀█░█░█░█▀█░█▀▀░█░█░▀█▀░█▀█░█▀▀░
+░█░░░█▀█░█░█░█░█░█░░░█▀█░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░
+```
+
    - Call `mcp__hansolo__hansolo_launch` with appropriate parameters
    - Report results following git-droid output style
 

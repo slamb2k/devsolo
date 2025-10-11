@@ -10,16 +10,6 @@ Commit changes to the current feature branch with an auto-generated or custom me
 
 ## Workflow
 
-**Display the following banner immediately before doing anything else:**
-
-```
-░█▀▀░█▀█░█▀▄▀█░█▀▄▀█░▀█▀░▀█▀░
-░█░░░█░█░█░▀░█░█░▀░█░░█░░░█░░
-░▀▀▀░▀▀▀░▀░░░▀░▀░░░▀░▀▀▀░░▀░░
-```
-
-Once displayed, continue with the following steps:
-
 1. **Invoke git-droid sub-agent** to coordinate the commit workflow
 2. git-droid will:
    - Verify active session exists (guide to /hansolo launch if not)
@@ -30,6 +20,14 @@ Once displayed, continue with the following steps:
      - Apply **Conventional Commits** format: `<type>(<scope>): <description>`
      - Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert
      - Infer type from changes (new files = feat, bug fixes = fix, docs = docs, etc)
+   - **Display the following banner immediately before calling the MCP tool:**
+
+```
+░█▀▀░█▀█░█▀▄▀█░█▀▄▀█░▀█▀░▀█▀░
+░█░░░█░█░█░▀░█░█░▀░█░░█░░░█░░
+░▀▀▀░▀▀▀░▀░░░▀░▀░░░▀░▀▀▀░░▀░░
+```
+
    - Call `mcp__hansolo__hansolo_commit` with message and stagedOnly flag
    - Report results following git-droid output style
 

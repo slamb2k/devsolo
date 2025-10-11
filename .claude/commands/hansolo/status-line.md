@@ -12,15 +12,13 @@ Manage Claude Code status line display to show current han-solo workflow status.
 
 ## Workflow
 
-**Display the following banner immediately before doing anything else:**
+**Display the following banner immediately before calling the MCP tool:**
 
 ```
 ░█▀▀░▀█▀░█▀█░▀█▀░█░█░█▀▀░░░█░░░▀█▀░█▀█░█▀▀░
 ░▀▀█░░█░░█▀█░░█░░█░█░▀▀█░░░█░░░░█░░█░█░█▀▀░
 ░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀░░░▀▀▀░▀▀▀░▀░▀░▀▀▀░
 ```
-
-Once displayed, continue with the following steps:
 
 1. Use the `mcp__hansolo__hansolo_status_line` tool to manage status line
 2. Pass along the provided arguments

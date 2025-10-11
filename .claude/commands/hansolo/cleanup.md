@@ -9,16 +9,6 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
 
 ## Workflow
 
-**Display the following banner immediately before doing anything else:**
-
-```
-░█▀▀░█░░░█▀▀░█▀█░█▀█░█░█░█▀█░
-░█░░░█░░░█▀▀░█▀█░█░█░█░█░█▀▀░
-░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀░░░
-```
-
-Once displayed, continue with the following steps:
-
 1. **Invoke git-droid sub-agent** to coordinate the cleanup workflow
 2. git-droid will:
    - Sync main branch first (pull latest changes)
@@ -26,6 +16,14 @@ Once displayed, continue with the following steps:
    - Identify stale sessions (completed, aborted, or expired sessions)
    - Show summary of items to clean
    - Confirm deletions (unless force=true)
+   - **Display the following banner immediately before calling the MCP tool:**
+
+```
+░█▀▀░█░░░█▀▀░█▀█░█▀█░█░█░█▀█░
+░█░░░█░░░█▀▀░█▀█░█░█░█░█░█▀▀░
+░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀░░░
+```
+
    - Call `mcp__hansolo__hansolo_cleanup` with parameters
    - Remove stale sessions
    - Delete orphaned branches (if requested)
