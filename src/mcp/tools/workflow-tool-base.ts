@@ -3,12 +3,14 @@ import { ConfigurationManager } from '../../services/configuration-manager';
 import { PreFlightVerificationResult } from '../../services/validation/pre-flight-check-service';
 import { PostFlightVerificationResult } from '../../services/validation/post-flight-verification';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { getBanner } from '../../ui/banners';
 
 /**
  * Standard input structure for all workflow tools
  */
 export interface WorkflowToolInput {
   auto?: boolean; // Automatically choose recommended options for prompts
+  _via_prompt?: boolean; // Hidden: validates call is via MCP prompt (ensures banner display)
   [key: string]: unknown; // Allow additional tool-specific parameters
 }
 
@@ -63,6 +65,59 @@ implements MCPTool<TInput, TResult> {
    */
   async execute(input: TInput): Promise<TResult> {
     try {
+      // Phase 0: Display banner (if not called via MCP prompt to avoid double banner)
+      const viaPrompt = (input as any)._via_prompt;
+      const toolName = this.getToolName();
+      const promptName = toolName
+        .replace('Tool', '')
+        .replace(/([A-Z])/g, (_match, p1, offset) =>
+          offset > 0 ? `-${p1.toLowerCase()}` : p1.toLowerCase()
+        );
+
+      // Get banner for this tool
+      const bannerKey = `hansolo_${promptName.replace(/-/g, '_')}`;
+      const banner = getBanner(bannerKey);
+
+      // If NOT called via prompt, send banner via streaming notification
+      // (This will work properly when Claude Code implements notification support)
+      if (!viaPrompt && banner && this.server) {
+        try {
+          // Apply random color to banner
+          const colorPalette = [
+            '\x1b[33m',  // Yellow
+            '\x1b[36m',  // Cyan
+            '\x1b[35m',  // Magenta
+            '\x1b[32m',  // Green
+            '\x1b[91m',  // Bright Red
+            '\x1b[92m',  // Bright Green
+            '\x1b[93m',  // Bright Yellow
+            '\x1b[94m',  // Bright Blue
+            '\x1b[95m',  // Bright Magenta
+            '\x1b[96m',  // Bright Cyan
+          ];
+          const randomColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+          const reset = '\x1b[0m';
+          const coloredBanner = banner
+            .split('\n')
+            .map(line => `${randomColor}${line}${reset}`)
+            .join('\n');
+
+          // Send banner as progress notification
+          await this.server.notification({
+            method: 'notifications/progress',
+            params: {
+              progressToken: `banner-${promptName}-${Date.now()}`,
+              progress: 0,
+              total: 1,
+              message: coloredBanner,
+            },
+          });
+        } catch (error) {
+          // Silently fail if notifications not supported
+          // Banner will still appear in result warnings
+        }
+      }
+
       // Phase 1: Check initialization
       const initCheck = await this.checkInitialization();
       if (!initCheck.success) {
@@ -107,7 +162,7 @@ implements MCPTool<TInput, TResult> {
       const postFlightResult = await this.runPostFlightVerifications(context, workflowResult);
 
       // Phase 8: Merge and return final result
-      return this.createFinalResult(workflowResult, preFlightResult, postFlightResult);
+      return this.createFinalResult(workflowResult, preFlightResult, postFlightResult, viaPrompt, banner);
     } catch (error) {
       return this.createErrorResult(error);
     }
@@ -248,7 +303,9 @@ implements MCPTool<TInput, TResult> {
   protected createFinalResult(
     workflowResult: WorkflowExecutionResult,
     preFlightResult: PreFlightVerificationResult | null,
-    postFlightResult: PostFlightVerificationResult | null
+    postFlightResult: PostFlightVerificationResult | null,
+    viaPrompt: boolean = false,
+    banner: string | null = null
   ): TResult {
     const result: any = {
       success: postFlightResult ? postFlightResult.failedCount === 0 : workflowResult.success,
@@ -256,6 +313,12 @@ implements MCPTool<TInput, TResult> {
       errors: [...(workflowResult.errors || [])],
       warnings: [...(workflowResult.warnings || [])],
     };
+
+    // Include banner in warnings if NOT called via prompt (to show with tool result)
+    // This will be displayed until Claude Code properly supports streaming notifications
+    if (!viaPrompt && banner) {
+      result.warnings.unshift(banner);
+    }
 
     // Merge pre-flight results
     if (preFlightResult) {
