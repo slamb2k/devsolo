@@ -1,14 +1,11 @@
 {
   "mcpServers": {
     "devsolo": {
-      "type": "stdio",
       "command": "node",
       "args": [
-        "/home/slamb2k/work/devsolo/dist/mcp/index.js"
+        "/home/slamb2k/work/devsolo/dist/mcp/devsolo-mcp-server.js"
       ],
-      "env": {
-        "DEVSOLO_BASE_PATH": "${DEVSOLO_BASE_PATH:-.devsolo}"
-      }
+      "env": {}
     }
   }
 }
