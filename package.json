@@ -1,6 +1,6 @@
 {
   "name": "devsolo-mcp",
-  "version": "2.0.0",
+  "version": "2.2.0",
   "description": "AI-native git workflow automation via Model Context Protocol (MCP) for Claude Code",
   "main": "dist/index.js",
   "bin": {
@@ -50,7 +50,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/devsolo/cli.git"
+    "url": "git+https://github.com/slamb2k/devsolo.git"
   },
   "publishConfig": {
     "access": "public",

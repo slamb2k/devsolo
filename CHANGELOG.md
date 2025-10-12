@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2025-10-12
+
+### Changed
+- **BREAKING**: Complete project rebrand from `hansolo` to `devsolo`
+  - Package name: `hansolo-cli` → `devsolo-mcp`
+  - Repository: `slamb2k/hansolo` → `slamb2k/devsolo`
+  - All slash commands: `/hansolo:*` → `/devsolo:*`
+  - Directory structure: `.hansolo/` → `.devsolo/`
+  - MCP server binary: `hansolo-mcp` → `devsolo-mcp`
+  - All documentation, source code, and configuration files updated
+  - 166 files changed with comprehensive rename across entire codebase
+
+### Migration
+- **Existing users**: Update your MCP server configuration to use `devsolo-mcp`
+- Update slash commands from `/hansolo:*` to `/devsolo:*`
+- Old `.hansolo/` directories will continue to work but should be migrated to `.devsolo/`
+- Update any scripts or automation that reference `hansolo` to use `devsolo`
+
+### Fixed
+- Repository URL in package.json now points to correct GitHub location
+
+## [2.0.0] - 2024-XX-XX
+
 ### Changed
 - **BREAKING**: Migrated to pure MCP architecture - all functionality now exposed via MCP tools
 - **BREAKING**: Removed CLI commands in favor of natural language interface through Claude Code
