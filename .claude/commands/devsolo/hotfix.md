@@ -10,6 +10,7 @@ Create an emergency hotfix workflow with higher priority and optional fast-track
 - `skipReview` (optional): Skip code review requirement (default: false) - use with caution!
 - `autoMerge` (optional): Automatically merge when checks pass (default: true)
 - `auto` (optional): Automatically use recommended options (default: false)
+- `verbose` (optional): Show detailed output with all sections (default: false, brief mode)
 
 ## Workflow
 

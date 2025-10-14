@@ -7,6 +7,7 @@ Commit changes to the current feature branch with an auto-generated or custom me
 - `message` (optional): Custom commit message (default: auto-generated using conventional commits)
 - `stagedOnly` (optional): Only commit staged files, not all changes (default: false)
 - `auto` (optional): Automatically use recommended options (default: false)
+- `verbose` (optional): Show detailed output with all sections (default: false, brief mode)
 
 ## Workflow
 

@@ -7,6 +7,7 @@ Switch between active workflow sessions without aborting them.
 - `branchName` (required): Target branch to swap to
 - `stash` (optional): Stash uncommitted changes before swapping (default: prompt if changes present)
 - `force` (optional): Force swap even with uncommitted changes (default: false)
+- `verbose` (optional): Show detailed output with all sections (default: false, brief mode)
 
 ## Workflow
 

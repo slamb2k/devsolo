@@ -8,6 +8,7 @@ Cancel the current workflow session and optionally delete the feature branch.
 - `deleteBranch` (optional): Delete the branch after aborting (default: false)
 - `force` (optional): Force abort even with uncommitted changes (default: false)
 - `yes` (optional): Skip confirmation prompts (default: false)
+- `verbose` (optional): Show detailed output with all sections (default: false, brief mode)
 
 ## Workflow
 
