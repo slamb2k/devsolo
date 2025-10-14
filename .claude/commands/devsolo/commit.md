@@ -18,13 +18,18 @@ Commit changes to the current feature branch with an auto-generated or custom me
 ░▀▀▀░▀▀▀░▀░░░▀░▀░░░▀░▀▀▀░░▀░░
 ```
 
-1. **Invoke git-droid sub-agent** to coordinate the commit workflow
-2. git-droid will:
-   - Verify active session exists (guide to /devsolo:launch if not)
-   - Verify there are changes to commit
-   - Generate commit message if not provided (analyze git diff, apply Conventional Commits format)
-   - Call `mcp__devsolo__devsolo_commit` with message and stagedOnly flag
-   - Format results following git-droid output style (see `.claude/output-styles/git-droid.md`)
+1. **Use the Task tool** to invoke the git-droid sub-agent:
+   - **subagent_type:** "git-droid"
+   - **description:** "Coordinate commit workflow"
+   - **prompt:** "Execute the commit workflow with the following parameters: [pass all user arguments]. You must:
+     - Verify active session exists (guide to /devsolo:launch if not)
+     - Verify there are changes to commit
+     - Generate commit message if not provided (analyze git diff, apply Conventional Commits format)
+     - Call `mcp__devsolo__devsolo_commit` MCP tool with message and stagedOnly flag
+     - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps"
+
+2. git-droid will execute the workflow and return formatted results
 
 **Output Formatting:** git-droid handles all output formatting including:
 - Pre-flight Checks section

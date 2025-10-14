@@ -17,16 +17,21 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
 ░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀░░░
 ```
 
-1. **Invoke git-droid sub-agent** to coordinate the cleanup workflow
-2. git-droid will:
-   - Sync main branch first (pull latest changes)
-   - Identify orphaned branches and stale sessions
-   - Show summary of items to clean (use tables for multiple items)
-   - Confirm deletions (unless force=true)
-   - Call `mcp__devsolo__devsolo_cleanup` with parameters
-   - Remove stale sessions
-   - Delete orphaned branches (if requested)
-   - Format results following git-droid output style (see `.claude/output-styles/git-droid.md`)
+1. **Use the Task tool** to invoke the git-droid sub-agent:
+   - **subagent_type:** "git-droid"
+   - **description:** "Coordinate cleanup workflow"
+   - **prompt:** "Execute the cleanup workflow with the following parameters: [pass all user arguments]. You must:
+     - Sync main branch first (pull latest changes)
+     - Identify orphaned branches and stale sessions
+     - Show summary of items to clean (use tables for multiple items)
+     - Confirm deletions (unless force=true)
+     - Call `mcp__devsolo__devsolo_cleanup` MCP tool with parameters
+     - Remove stale sessions
+     - Delete orphaned branches (if requested)
+     - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Pre-flight Checks (analysis of what will be cleaned), Operations Executed, Post-flight Verifications, Result Summary (with counts), Next Steps"
+
+2. git-droid will execute the workflow and return formatted results
 
 **Output Formatting:** git-droid handles all output formatting including:
 - Pre-flight Checks section (analysis of what will be cleaned)

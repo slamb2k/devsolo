@@ -21,14 +21,19 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 ░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
 ```
 
-1. **Invoke git-droid sub-agent** to coordinate the ship workflow
-2. git-droid will:
-   - Check for uncommitted changes (use SlashCommand to invoke `/devsolo:commit` if needed)
-   - Check for active session
-   - Generate PR description if not provided (analyze commits since main)
-   - Call `mcp__devsolo__devsolo_ship` with parameters
-   - Monitor CI checks (MCP tool handles)
-   - Format results following git-droid output style (see `.claude/output-styles/git-droid.md`)
+1. **Use the Task tool** to invoke the git-droid sub-agent:
+   - **subagent_type:** "git-droid"
+   - **description:** "Coordinate ship workflow"
+   - **prompt:** "Execute the ship workflow with the following parameters: [pass all user arguments]. You must:
+     - Check for uncommitted changes (use SlashCommand to invoke `/devsolo:commit` if needed)
+     - Check for active session
+     - Generate PR description if not provided (analyze commits since main)
+     - Call `mcp__devsolo__devsolo_ship` MCP tool with all parameters
+     - Monitor CI checks (MCP tool handles this)
+     - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary (with PR link and stats), Next Steps"
+
+2. git-droid will execute the workflow and return formatted results
 
 **Output Formatting:** git-droid handles all output formatting including:
 - Pre-flight Checks section

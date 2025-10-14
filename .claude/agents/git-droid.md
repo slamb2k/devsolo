@@ -1,6 +1,7 @@
 ---
 name: git-droid
 description: Git workflow coordination agent for devsolo
+color: green
 ---
 
 # git-droid: Git Workflow Coordination Agent

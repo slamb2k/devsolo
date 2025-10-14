@@ -1,6 +1,7 @@
 ---
 name: docs-droid
 description: Documentation management agent for devsolo
+color: blue
 ---
 
 # docs-droid: Documentation Management Agent

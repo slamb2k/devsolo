@@ -17,14 +17,21 @@ Start a new feature workflow. Creates a feature branch and devsolo session.
 ░█░░░█▀█░█░█░█░█░█░░░█▀█░░█░░█░█░█░█░
 ░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░
 ```
-1. **Invoke git-droid sub-agent** to coordinate the launch workflow
-2. git-droid will:
-   - Analyze current git state (check if on main, clean working directory)
-   - Handle uncommitted changes (present numbered options if present)
-   - Handle existing session (offer to abort using SlashCommand tool to invoke `/devsolo:abort`)
-   - Generate branch name if not provided (from description, diff analysis, or timestamp)
-   - Call `mcp__devsolo__devsolo_launch` with appropriate parameters
-   - Format results following git-droid output style (see `.claude/output-styles/git-droid.md`)
+
+1. **Use the Task tool** to invoke the git-droid sub-agent:
+   - **subagent_type:** "git-droid"
+   - **description:** "Coordinate launch workflow"
+   - **prompt:** "Execute the launch workflow with the following parameters: [pass all user arguments]. You must:
+     - Analyze current git state (check if on main, clean working directory)
+     - Handle uncommitted changes (present numbered options if present)
+     - Handle existing session (offer to abort using SlashCommand tool to invoke `/devsolo:abort`)
+     - Generate branch name if not provided (from description, diff analysis, or timestamp)
+     - Call `mcp__devsolo__devsolo_launch` MCP tool with appropriate parameters
+     - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+     - Present numbered options for user choices with [RECOMMENDED] marker when needed"
+
+2. git-droid will execute the workflow and return formatted results
 
 **Output Formatting:** git-droid handles all output formatting including:
 - Pre-flight Checks section

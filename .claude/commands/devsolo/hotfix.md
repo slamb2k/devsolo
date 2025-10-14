@@ -21,16 +21,21 @@ Create an emergency hotfix workflow with higher priority and optional fast-track
 ░▀░▀░▀▀▀░░▀░░▀░░░▀▀▀░▀░▀░
 ```
 
-1. **Invoke git-droid sub-agent** to coordinate the hotfix workflow
-2. git-droid will:
-   - Validate severity level and adjust behavior accordingly
-   - Generate hotfix branch name (from issue, description, or timestamp)
-   - Check current state (on main, clean directory)
-   - Call `mcp__devsolo__devsolo_hotfix` with parameters
-   - Create hotfix branch from main
-   - Create session with HOTFIX workflow type
-   - Guide through rapid hotfix process
-   - Format results following git-droid output style (see `.claude/output-styles/git-droid.md`)
+1. **Use the Task tool** to invoke the git-droid sub-agent:
+   - **subagent_type:** "git-droid"
+   - **description:** "Coordinate hotfix workflow"
+   - **prompt:** "Execute the hotfix workflow with the following parameters: [pass all user arguments]. You must:
+     - Validate severity level and adjust behavior accordingly
+     - Generate hotfix branch name (from issue, description, or timestamp)
+     - Check current state (on main, clean directory)
+     - Call `mcp__devsolo__devsolo_hotfix` MCP tool with parameters
+     - Create hotfix branch from main
+     - Create session with HOTFIX workflow type
+     - Guide through rapid hotfix process
+     - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary (with severity indication), Next Steps (emphasizing urgency for critical hotfixes)"
+
+2. git-droid will execute the workflow and return formatted results
 
 **Output Formatting:** git-droid handles all output formatting including:
 - Pre-flight Checks section

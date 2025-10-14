@@ -9,7 +9,15 @@ Manage documentation following devsolo's documentation structure and conventions
 
 ## Workflow
 
-**Invoke docs-droid sub-agent** to manage documentation according to the mode:
+**Use the Task tool** to invoke the docs-droid sub-agent:
+- **subagent_type:** "docs-droid"
+- **description:** "Manage documentation"
+- **prompt:** "Execute documentation management according to the mode (audit or create) with the following parameters: [pass all user arguments]. You must:
+  - For AUDIT MODE (no arguments): Scan all documentation, identify issues, report findings, present numbered options, and fix if approved
+  - For CREATE MODE (with arguments): Analyze content, determine placement, apply naming conventions, check for superseded docs, create document, update READMEs
+  - Format all results following docs-droid output style from `.claude/output-styles/docs-droid.md`
+  - Use numbered options (3+ choices) with [RECOMMENDED] marker or yes/no for binary choices
+  - Provide structured findings reports and summary reports with action counts"
 
 **Output Formatting:** docs-droid handles all output formatting including:
 - Structured findings reports with clear sections
