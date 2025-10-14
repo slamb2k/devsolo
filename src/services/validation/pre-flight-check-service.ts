@@ -374,28 +374,26 @@ export class PreFlightCheckService {
   }
 
   /**
-   * Check if no existing session
+   * Check if no existing session on current branch
+   * Uses branch-based lookup to support concurrent workflows
    */
   private async checkNoExistingSession(_context: PreFlightContext): Promise<PreFlightCheckResult> {
     try {
-      const sessions = await this.sessionRepo.listSessions();
+      // Get current branch and check for session on THIS branch only
+      const currentBranch = await this.gitOps.getCurrentBranch();
+      const session = await this.sessionRepo.getSessionByBranch(currentBranch);
 
-      // Filter out completed and aborted sessions - only check for active ones
-      const activeSessions = sessions.filter(s =>
-        s.currentState !== 'COMPLETE' &&
-        s.currentState !== 'ABORTED'
-      );
-      const session = activeSessions[0] || null;
-
-      if (!session) {
+      // No session on current branch - OK to proceed
+      if (!session || !session.isActive()) {
         return {
           name: 'No Existing Session',
           passed: true,
-          message: 'No active session found',
+          message: `No active session on branch '${currentBranch}'`,
           level: 'info',
         };
       }
 
+      // Found active session on current branch - present options
       const options: CheckOption[] = [
         {
           id: 'abort_session',
@@ -406,10 +404,10 @@ export class PreFlightCheckService {
           risk: 'medium',
         },
         {
-          id: 'swap_session',
-          label: 'Switch to existing session',
-          description: 'Work on the existing session instead of creating a new one',
-          action: `git checkout ${session.branchName}`,
+          id: 'continue_session',
+          label: 'Continue existing session',
+          description: 'Continue working on the existing session',
+          action: 'Continue with current session',
           autoRecommended: false,
           risk: 'low',
         },
