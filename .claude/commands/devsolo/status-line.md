@@ -28,15 +28,29 @@ Manage Claude Code status line display to show current devsolo workflow status.
 
 The status line displays workflow information directly in Claude Code:
 
+**With Active Session:**
 ```
-[devsolo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY | ██████░░░░░░░░░ 92K/200K
+[devsolo] 💻 feature/my-feature | BRANCH_READY | sonnet.4.5 | █████████████░░ 180K/200K
+```
+
+**On Main Branch (No Session):**
+```
+[devsolo] 📁 main | sonnet.4.5 | █████████████░░ 180K/200K
+```
+
+**On Feature Branch (No Session):**
+```
+[devsolo] 📁 feature/other-work | sonnet.4.5 | █████████████░░ 180K/200K
 ```
 
 Components:
-- **Icon**: 💻 (workflow active), ⏸️ (paused), ✅ (complete)
-- **Session ID**: Short form of session identifier (8 chars)
-- **Branch Name**: Current feature branch
-- **State**: Current workflow state
+- **Icon**: State-based emoji when session active (💻 working, 📝 committed, 🚀 pushed, etc.), 📁 folder icon when no session
+- **Branch Name**:
+  - Green when session active
+  - Gray (dimmed) for main/master branch without session
+  - Yellow for other branches without session
+- **State**: Current workflow state (only shown when session active)
+- **Model**: Current Claude model in use (e.g., "sonnet.4.5", "opus.3.5")
 - **Context Window**: Bar graph showing remaining tokens with color coding:
   - 🟢 Green: >50% remaining (plenty of context)
   - 🟡 Yellow: 20-50% remaining (getting low)

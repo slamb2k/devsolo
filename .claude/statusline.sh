@@ -25,6 +25,15 @@ TOKEN_USED=$(echo "$INPUT" | jq -r '.tokens_used // .token_count // .context.use
 TOKEN_TOTAL=$(echo "$INPUT" | jq -r '.tokens_total // .token_limit // .context.total // .context.limit // empty' 2>/dev/null)
 TOKEN_BUDGET=$(echo "$INPUT" | jq -r '.budget.token_budget // .token_budget // empty' 2>/dev/null)
 
+# Extract model information if available
+MODEL_NAME=$(echo "$INPUT" | jq -r '.model // .model_name // empty' 2>/dev/null)
+# Format model name to be shorter (e.g., "claude-sonnet-4-5" → "sonnet-4.5")
+if [ -n "$MODEL_NAME" ]; then
+  MODEL_DISPLAY=$(echo "$MODEL_NAME" | sed -E 's/^claude-//' | sed -E 's/-([0-9]+)-([0-9]+).*$/.\1.\2/' | sed 's/-20[0-9]{6}$//')
+else
+  MODEL_DISPLAY=""
+fi
+
 # Change to workspace directory if provided
 if [ -n "$CWD" ]; then
   cd "$CWD" 2>/dev/null || true
@@ -109,10 +118,23 @@ create_remaining_bar() {
 }
 
 # Build status line
-if [ -n "$SESSION_ID" ]; then
-  # Active session found
-  SHORT_ID="${SESSION_ID:0:8}"
+# Build context window display if available
+CONTEXT_DISPLAY=""
+if [ -n "$TOKEN_USED" ] && [ -n "$TOKEN_TOTAL" ]; then
+  BAR=$(create_remaining_bar "$TOKEN_USED" "$TOKEN_TOTAL")
+  CONTEXT_DISPLAY=" ${GRAY}|${RESET}${BAR}"
+elif [ -n "$TOKEN_BUDGET" ]; then
+  CONTEXT_DISPLAY=" ${GRAY}|${RESET} ${CYAN}budget: ${TOKEN_BUDGET}${RESET}"
+fi
 
+# Build model display if available
+MODEL_DISPLAY_FIELD=""
+if [ -n "$MODEL_DISPLAY" ]; then
+  MODEL_DISPLAY_FIELD=" ${GRAY}|${RESET} ${MAGENTA}${MODEL_DISPLAY}${RESET}"
+fi
+
+if [ -n "$SESSION_ID" ]; then
+  # Active session found - show branch with state icon
   # Color/emoji based on state
   state_color=""
   case "$SESSION_STATE" in
@@ -133,7 +155,7 @@ if [ -n "$SESSION_ID" ]; then
       state_color="$BLUE"
       ;;
     "CHANGES_COMMITTED"|"PUSHED")
-      EMOJI="📝"
+      EMOJI="🚀"
       state_color="$MAGENTA"
       ;;
     "REBASING"|"MERGING")
@@ -141,31 +163,20 @@ if [ -n "$SESSION_ID" ]; then
       state_color="$CYAN"
       ;;
     *)
-      EMOJI="🚀"
+      EMOJI="💻"
       state_color="$CYAN"
       ;;
   esac
 
-  # Build context window display if available
-  CONTEXT_DISPLAY=""
-  if [ -n "$TOKEN_USED" ] && [ -n "$TOKEN_TOTAL" ]; then
-    BAR=$(create_remaining_bar "$TOKEN_USED" "$TOKEN_TOTAL")
-    CONTEXT_DISPLAY="${GRAY}|${RESET}${BAR}"
-  elif [ -n "$TOKEN_BUDGET" ]; then
-    CONTEXT_DISPLAY="${GRAY}|${RESET} ${CYAN}budget: ${TOKEN_BUDGET}${RESET}"
-  fi
-
-  echo -e "${BOLD}[devsolo]${RESET} $EMOJI ${GREEN}${SHORT_ID}${RESET} ${GRAY}|${RESET} ${YELLOW}${BRANCH}${RESET} ${GRAY}|${RESET} ${state_color}${SESSION_STATE}${RESET}${CONTEXT_DISPLAY}"
+  # Show branch in green with state-based emoji
+  echo -e "${BOLD}[devsolo]${RESET} $EMOJI ${GREEN}${BRANCH}${RESET} ${GRAY}|${RESET} ${state_color}${SESSION_STATE}${RESET}${MODEL_DISPLAY_FIELD}${CONTEXT_DISPLAY}"
 else
   # No active session
-  # Build context window display if available
-  CONTEXT_DISPLAY=""
-  if [ -n "$TOKEN_USED" ] && [ -n "$TOKEN_TOTAL" ]; then
-    BAR=$(create_remaining_bar "$TOKEN_USED" "$TOKEN_TOTAL")
-    CONTEXT_DISPLAY="${GRAY}|${RESET}${BAR}"
-  elif [ -n "$TOKEN_BUDGET" ]; then
-    CONTEXT_DISPLAY="${GRAY}|${RESET} ${CYAN}budget: ${TOKEN_BUDGET}${RESET}"
+  if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
+    # Main branch - show in dimmed white with folder icon
+    echo -e "${BOLD}[devsolo]${RESET} 📁 ${GRAY}${BRANCH}${RESET}${MODEL_DISPLAY_FIELD}${CONTEXT_DISPLAY}"
+  else
+    # Other branch without session - show in yellow with folder icon
+    echo -e "${BOLD}[devsolo]${RESET} 📁 ${YELLOW}${BRANCH}${RESET}${MODEL_DISPLAY_FIELD}${CONTEXT_DISPLAY}"
   fi
-
-  echo -e "${BOLD}[devsolo]${RESET} 📁 ${YELLOW}${BRANCH}${RESET} ${GRAY}|${RESET} ${GRAY}no session${RESET}${CONTEXT_DISPLAY}"
 fi
