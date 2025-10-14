@@ -30,17 +30,17 @@ The status line displays workflow information directly in Claude Code:
 
 **With Active Session:**
 ```
-[devsolo] 💻 feature/my-feature | BRANCH_READY | sonnet.4.5 | █████████████░░ 180K/200K
+[devsolo]  💻 feature/my-feature | 🌿 ✎ 3 | BRANCH_READY | sonnet.4.5 | █████████████░░ 180K/200K
 ```
 
 **On Main Branch (No Session):**
 ```
-[devsolo] 📁 main | sonnet.4.5 | █████████████░░ 180K/200K
+[devsolo]  📁 main | 🌿 🔀 ↑2 | sonnet.4.5 | █████████████░░ 180K/200K
 ```
 
 **On Feature Branch (No Session):**
 ```
-[devsolo] 📁 feature/other-work | sonnet.4.5 | █████████████░░ 180K/200K
+[devsolo]  📁 feature/other-work | 🌿 ✎ 5 | sonnet.4.5 | █████████████░░ 180K/200K
 ```
 
 Components:
@@ -49,8 +49,12 @@ Components:
   - Green when session active
   - Gray (dimmed) for main/master branch without session
   - Yellow for other branches without session
+- **Git Stats**: Shows repository status
+  - ✎ N - N uncommitted files (in yellow)
+  - 🔀 ↑N - N commits ahead of remote (in green)
+  - 🔀 ↓N - N commits behind remote (in red)
 - **State**: Current workflow state (only shown when session active)
-- **Model**: Current Claude model in use (e.g., "sonnet.4.5", "opus.3.5")
+- **Model**: Current Claude model in use (e.g., "sonnet.4.5", "opus.3.5") - displayed in blue
 - **Context Window**: Bar graph showing remaining tokens with color coding:
   - 🟢 Green: >50% remaining (plenty of context)
   - 🟡 Yellow: 20-50% remaining (getting low)
@@ -222,5 +226,5 @@ Present status line configuration in a clear, structured format:
 - Persists across Claude Code sessions
 - **Context Window Bar Graph**: Displays remaining tokens in real-time with color-coded visual indicator
   - Helps you monitor when to wrap up long conversations
-  - Green bar indicates plenty of context remaining
+  - Green bar indicates plenty of context remaining to use
   - Yellow/Red bars suggest starting a new conversation soon

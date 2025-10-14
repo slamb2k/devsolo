@@ -20,13 +20,25 @@ INPUT=$(cat)
 # Extract working directory from JSON input if available
 CWD=$(echo "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)
 
-# Extract context/token information if available
-TOKEN_USED=$(echo "$INPUT" | jq -r '.tokens_used // .token_count // .context.used // empty' 2>/dev/null)
-TOKEN_TOTAL=$(echo "$INPUT" | jq -r '.tokens_total // .token_limit // .context.total // .context.limit // empty' 2>/dev/null)
-TOKEN_BUDGET=$(echo "$INPUT" | jq -r '.budget.token_budget // .token_budget // empty' 2>/dev/null)
+# Extract context/token information from transcript
+TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
+TOKEN_USED=""
+TOKEN_TOTAL=200000  # Claude Code's standard context window
+TOKEN_BUDGET=""
+
+if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
+  # Sum all token usage from the transcript (only count actual input/output, not cache reads)
+  TOKEN_USED=$(jq -s '[.[] | select(.message.usage != null) | .message.usage | ((.input_tokens // 0) + (.output_tokens // 0))] | add' "$TRANSCRIPT_PATH" 2>/dev/null)
+
+  # If transcript is empty or sum failed, set to empty
+  if [ "$TOKEN_USED" = "null" ] || [ -z "$TOKEN_USED" ]; then
+    TOKEN_USED=""
+  fi
+fi
 
 # Extract model information if available
-MODEL_NAME=$(echo "$INPUT" | jq -r '.model // .model_name // empty' 2>/dev/null)
+# Try to extract model.id first (object format), then fall back to model as string
+MODEL_NAME=$(echo "$INPUT" | jq -r 'if .model | type == "object" then .model.id elif .model | type == "string" then .model else .model_name // empty end' 2>/dev/null)
 # Format model name to be shorter (e.g., "claude-sonnet-4-5" → "sonnet-4.5")
 if [ -n "$MODEL_NAME" ]; then
   MODEL_DISPLAY=$(echo "$MODEL_NAME" | sed -E 's/^claude-//' | sed -E 's/-([0-9]+)-([0-9]+).*$/.\1.\2/' | sed 's/-20[0-9]{6}$//')
@@ -41,6 +53,37 @@ fi
 
 # Read current git branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "no-branch")
+
+# Get git stats: uncommitted changes and commits ahead/behind remote
+GIT_STATS=""
+GIT_STATS_CONTENT=""
+if [ "$BRANCH" != "no-branch" ]; then
+  # Check for uncommitted changes
+  CHANGED_FILES=$(git status --porcelain 2>/dev/null | wc -l)
+  if [ "$CHANGED_FILES" -gt 0 ]; then
+    GIT_STATS_CONTENT="✎ ${YELLOW}${CHANGED_FILES}${RESET}"
+  fi
+
+  # Check if branch has upstream
+  UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+  if [ -n "$UPSTREAM" ]; then
+    # Get ahead/behind counts
+    AHEAD=$(git rev-list --count HEAD@{u}..HEAD 2>/dev/null || echo "0")
+    BEHIND=$(git rev-list --count HEAD..HEAD@{u} 2>/dev/null || echo "0")
+
+    if [ "$AHEAD" != "0" ] || [ "$BEHIND" != "0" ]; then
+      [ -n "$GIT_STATS_CONTENT" ] && GIT_STATS_CONTENT+=" "
+      GIT_STATS_CONTENT+="🔀"
+      [ "$AHEAD" != "0" ] && GIT_STATS_CONTENT+=" ${GREEN}↑${AHEAD}${RESET}"
+      [ "$BEHIND" != "0" ] && GIT_STATS_CONTENT+=" ${RED}↓${BEHIND}${RESET}"
+    fi
+  fi
+
+  # Add divider if we have git stats
+  if [ -n "$GIT_STATS_CONTENT" ]; then
+    GIT_STATS=" ${GRAY}|${RESET} 🌿 ${GIT_STATS_CONTENT}"
+  fi
+fi
 
 # Check for active devsolo session on current branch
 SESSION_DIR=".devsolo/sessions"
@@ -130,7 +173,7 @@ fi
 # Build model display if available
 MODEL_DISPLAY_FIELD=""
 if [ -n "$MODEL_DISPLAY" ]; then
-  MODEL_DISPLAY_FIELD=" ${GRAY}|${RESET} ${MAGENTA}${MODEL_DISPLAY}${RESET}"
+  MODEL_DISPLAY_FIELD=" ${GRAY}|${RESET} ${BLUE}${MODEL_DISPLAY}${RESET}"
 fi
 
 if [ -n "$SESSION_ID" ]; then
@@ -169,14 +212,14 @@ if [ -n "$SESSION_ID" ]; then
   esac
 
   # Show branch in green with state-based emoji
-  echo -e "${BOLD}[devsolo]${RESET} $EMOJI ${GREEN}${BRANCH}${RESET} ${GRAY}|${RESET} ${state_color}${SESSION_STATE}${RESET}${MODEL_DISPLAY_FIELD}${CONTEXT_DISPLAY}"
+  echo -e "${BOLD}[devsolo]${RESET}  $EMOJI ${GREEN}${BRANCH}${RESET}${GIT_STATS} ${GRAY}|${RESET} ${state_color}${SESSION_STATE}${RESET}${MODEL_DISPLAY_FIELD}${CONTEXT_DISPLAY}"
 else
   # No active session
   if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
     # Main branch - show in dimmed white with folder icon
-    echo -e "${BOLD}[devsolo]${RESET} 📁 ${GRAY}${BRANCH}${RESET}${MODEL_DISPLAY_FIELD}${CONTEXT_DISPLAY}"
+    echo -e "${BOLD}[devsolo]${RESET}  📁 ${GRAY}${BRANCH}${RESET}${GIT_STATS}${MODEL_DISPLAY_FIELD}${CONTEXT_DISPLAY}"
   else
     # Other branch without session - show in yellow with folder icon
-    echo -e "${BOLD}[devsolo]${RESET} 📁 ${YELLOW}${BRANCH}${RESET}${MODEL_DISPLAY_FIELD}${CONTEXT_DISPLAY}"
+    echo -e "${BOLD}[devsolo]${RESET}  📁 ${YELLOW}${BRANCH}${RESET}${GIT_STATS}${MODEL_DISPLAY_FIELD}${CONTEXT_DISPLAY}"
   fi
 fi
