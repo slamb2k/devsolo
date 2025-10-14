@@ -280,12 +280,19 @@ created: ${new Date().toISOString()}
 # devsolo pre-commit hook
 # Enforces workflow and runs quality checks
 
-# Check for active devsolo session
-if [ -f ".devsolo/session.json" ]; then
-  echo "❌ devsolo session active!"
-  echo "📝 Use '/devsolo:commit' to commit changes"
-  echo "   Or use '/devsolo:abort' to exit the workflow"
-  exit 1
+# Check for active devsolo session on current branch
+CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+if [ -f ".devsolo/sessions/index.json" ] && [ -n "$CURRENT_BRANCH" ]; then
+  SESSION_ID=$(jq -r --arg branch "$CURRENT_BRANCH" '.branchMap[$branch] // empty' .devsolo/sessions/index.json 2>/dev/null)
+  if [ -n "$SESSION_ID" ] && [ -f ".devsolo/sessions/$SESSION_ID.json" ]; then
+    SESSION_STATE=$(jq -r '.currentState' ".devsolo/sessions/$SESSION_ID.json" 2>/dev/null)
+    if [ "$SESSION_STATE" != "COMPLETE" ] && [ "$SESSION_STATE" != "ABORTED" ]; then
+      echo "❌ devsolo session active on this branch!"
+      echo "📝 Use '/devsolo:commit' to commit changes"
+      echo "   Or use '/devsolo:abort' to exit the workflow"
+      exit 1
+    fi
+  fi
 fi
 
 # Prevent direct commits to main/master branches
@@ -327,12 +334,19 @@ exit 0
 # devsolo pre-push hook
 # Validates branch state and runs tests before pushing
 
-# Check for active devsolo session
-if [ -f ".devsolo/session.json" ]; then
-  echo "❌ devsolo session active!"
-  echo "📝 Use '/devsolo:ship' to push changes"
-  echo "   Or complete the workflow with '/devsolo:ship'"
-  exit 1
+# Check for active devsolo session on current branch
+CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+if [ -f ".devsolo/sessions/index.json" ] && [ -n "$CURRENT_BRANCH" ]; then
+  SESSION_ID=$(jq -r --arg branch "$CURRENT_BRANCH" '.branchMap[$branch] // empty' .devsolo/sessions/index.json 2>/dev/null)
+  if [ -n "$SESSION_ID" ] && [ -f ".devsolo/sessions/$SESSION_ID.json" ]; then
+    SESSION_STATE=$(jq -r '.currentState' ".devsolo/sessions/$SESSION_ID.json" 2>/dev/null)
+    if [ "$SESSION_STATE" != "COMPLETE" ] && [ "$SESSION_STATE" != "ABORTED" ]; then
+      echo "❌ devsolo session active on this branch!"
+      echo "📝 Use '/devsolo:ship' to push changes"
+      echo "   Or complete the workflow with '/devsolo:ship'"
+      exit 1
+    fi
+  fi
 fi
 
 branch=$(git branch --show-current)
@@ -411,22 +425,28 @@ This section is automatically managed by devsolo. Last updated: ${new Date().toI
 
 ### Workflow Detection
 
-Before performing git operations, check for active devsolo session:
+Before performing git operations, check for active devsolo session on current branch:
 
 \`\`\`javascript
-// Check if devsolo is managing current work
-if (fs.existsSync('.devsolo/session.json')) {
-  // devsolo is active - MUST use MCP tools
-  return 'use-devsolo-mcp';
-} else {
-  // No active session - can use standard git
-  return 'use-standard-git';
+// Check if devsolo is managing current branch
+const currentBranch = execSync('git branch --show-current').toString().trim();
+const index = JSON.parse(fs.readFileSync('.devsolo/sessions/index.json', 'utf-8'));
+const sessionId = index.branchMap?.[currentBranch];
+
+if (sessionId) {
+  const session = JSON.parse(fs.readFileSync(\`.devsolo/sessions/\${sessionId}.json\`, 'utf-8'));
+  if (session.currentState !== 'COMPLETE' && session.currentState !== 'ABORTED') {
+    // devsolo is active on this branch - MUST use MCP tools
+    return 'use-devsolo-mcp';
+  }
 }
+// No active session on current branch - can use standard git
+return 'use-standard-git';
 \`\`\`
 
 ### ⛔ When devsolo Session is Active
 
-If \`.devsolo/session.json\` exists, **NEVER** use these commands:
+If an active session exists for the current branch, **NEVER** use these commands:
 - \`git commit\` → Use \`/devsolo:ship\` instead
 - \`git push\` → Use \`/devsolo:ship --push\` instead
 - \`gh pr create\` → Use \`/devsolo:ship --create-pr\` instead
@@ -435,10 +455,11 @@ If \`.devsolo/session.json\` exists, **NEVER** use these commands:
 
 ### ✅ When No Session Exists
 
-If no \`.devsolo/session.json\` file:
+If no active session exists for the current branch:
 - Safe to use standard git commands
 - Can optionally start devsolo workflow with \`/devsolo:launch\`
 - Direct git operations won't conflict with devsolo
+- Other branches may have active sessions (devsolo supports concurrent workflows)
 
 ### Why This Enforcement?
 
