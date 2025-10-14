@@ -111,7 +111,7 @@ Please choose an option:
 - **`.claude/commands/devsolo/init.md`** - Simple command, ensure consistent format
 - **`.claude/commands/devsolo/status-line.md`** - Simple command, ensure consistent format
 - **`.claude/commands/devsolo/prime.md`** - Informational command, no changes needed
-- **`.claude/commands/devsolo/doc.md`** - Uses docs-droid, update to match patterns
+- **`.claude/commands/devsolo/docs.md`** - Uses docs-droid, update to match patterns
 
 ### Validation Services (Reference Only - No Changes Needed)
 - **`src/services/validation/pre-flight-check-service.ts`** - Contains CheckOption structure (lines 8-15) already properly designed

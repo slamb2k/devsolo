@@ -1,4 +1,4 @@
-# Doc
+# Docs
 
 Manage documentation following devsolo's documentation structure and conventions.
 
@@ -8,6 +8,8 @@ Manage documentation following devsolo's documentation structure and conventions
 - With arguments: Run in **CREATE MODE** - create new documentation
 
 ## Workflow
+
+**⚠️ CRITICAL OUTPUT REQUIREMENT:** After invoking the Task tool, you MUST immediately output the complete docs-droid response as text to the user. DO NOT add commentary, summaries, or interpretations. The user needs to see all numbered options, formatted sections, and status information exactly as docs-droid returns them.
 
 1. **Use the Task tool** to invoke the docs-droid sub-agent:
    - **subagent_type:** "docs-droid"
@@ -19,11 +21,11 @@ Manage documentation following devsolo's documentation structure and conventions
      - Use numbered options (3+ choices) with [RECOMMENDED] marker or yes/no for binary choices
      - Provide structured findings reports and summary reports with action counts"
 
-2. **Display docs-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by docs-droid
-   - Do NOT add commentary, summaries, or interpretations
-   - Do NOT intercept or modify the output
-   - The user needs to see the options and formatted sections directly
+2. **⬆️ OUTPUT the complete docs-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as docs-droid returned it
+   - Include ALL sections: findings reports, numbered options, summary reports
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 **Output Formatting:** docs-droid handles all output formatting including:
 - Structured findings reports with clear sections
@@ -83,7 +85,7 @@ When called without arguments, performs a comprehensive documentation audit.
 
 ```
 # Run documentation audit
-/devsolo:doc
+/devsolo:docs
 
 docs-droid will scan, report issues, and offer to fix them.
 ```
@@ -132,7 +134,7 @@ When called with arguments, creates new documentation from provided content.
 
 ```
 # Create user guide
-/devsolo:doc "migration-guide" "# Migration Guide
+/devsolo:docs "migration-guide" "# Migration Guide
 
 How to migrate from v1 to v2...
 
@@ -142,7 +144,7 @@ How to migrate from v1 to v2...
 3. Run migration script"
 
 # Create implementation plan
-/devsolo:doc "auth-feature-plan" "# Authentication Feature Plan
+/devsolo:docs "auth-feature-plan" "# Authentication Feature Plan
 
 ## Overview
 Implement OAuth2 authentication...
@@ -153,7 +155,7 @@ Implement OAuth2 authentication...
 - [ ] Add tests"
 
 # Create bug report
-/devsolo:doc "login-bug-analysis" "# Login Bug Analysis
+/devsolo:docs "login-bug-analysis" "# Login Bug Analysis
 
 ## Issue
 Users cannot login after password reset...

@@ -204,7 +204,7 @@ devsolo provides native Claude Code slash commands for all functionality. Type `
 | `/devsolo:hotfix` | Create emergency hotfix workflow | `/devsolo:hotfix` |
 | `/devsolo:status-line` | Manage Claude Code status line | `/devsolo:status-line` |
 | `/devsolo:prime` | Prime understanding of codebase | `/devsolo:prime` |
-| `/devsolo:doc` | Manage documentation | `/devsolo:doc` |
+| `/devsolo:docs` | Manage documentation | `/devsolo:docs` |
 
 ### How Slash Commands Work
 

@@ -18,6 +18,8 @@ Start a new feature workflow. Creates a feature branch and devsolo session.
 ░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░
 ```
 
+**⚠️ CRITICAL OUTPUT REQUIREMENT:** After EVERY Task tool invocation in this workflow, you MUST immediately output the complete git-droid response as text to the user. DO NOT proceed to check signals or continue to the next stage without first displaying the full output. The user needs to see all numbered options, formatted sections, and status information.
+
 The launch workflow consists of up to four stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Initialize Launch Workflow
@@ -50,9 +52,11 @@ The launch workflow consists of up to four stages, each using a separate git-dro
        * 'Next Stage: CREATE_BRANCH' (clean state, ready to launch)
        * 'Next Stage: ABORTED' (user cancelled or not on main/out of sync)"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Pre-flight Checks, numbered options, Result Summary
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 3. **Check the response** for the "Next Stage:" directive in Result Summary:
    - If 'Next Stage: HANDLE_CHANGES', proceed to Stage 2 (Handle Uncommitted Changes)
@@ -81,9 +85,11 @@ Only execute this stage if Stage 1 returned 'HANDLE_CHANGES' or 'HANDLE_BOTH'.
        * 'Next Stage: CREATE_BRANCH' (if no session conflict)
        * 'Next Stage: ABORTED' (if action failed)"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Operations Executed, Post-flight Verifications, Result Summary
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 3. **Check the response** for the "Next Stage:" directive in Result Summary:
    - If 'Next Stage: HANDLE_SESSION', proceed to Stage 3 (Handle Existing Session)
@@ -107,9 +113,11 @@ Only execute this stage if Stage 1 or 2 returned 'HANDLE_SESSION'.
        * 'Next Stage: CREATE_BRANCH' (session handled successfully)
        * 'Next Stage: ABORTED' (user cancelled or abort failed)"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Operations Executed, Post-flight Verifications, Result Summary
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 3. **Check the response** for the "Next Stage:" directive in Result Summary:
    - If 'Next Stage: CREATE_BRANCH', proceed to Stage 4 (Create Feature Branch)
@@ -131,9 +139,11 @@ Only execute this stage if Stage 1 or 2 returned 'HANDLE_SESSION'.
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: COMPLETED' (launch successful)"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 **Output Formatting:** Each git-droid stage handles its own output formatting following the git-droid output style
 

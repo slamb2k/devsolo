@@ -536,11 +536,11 @@ For dated snapshots: \`repomix-2025-10-09.md\`, \`export-2025-01-15.md\`
 - **Product specs** → \`docs/specs/\`
 - **Completed/superseded docs** → \`docs/archive/\`
 
-### Using the /devsolo:doc Command
+### Using the /devsolo:docs Command
 
-The \`/devsolo:doc\` slash command has two modes:
+The \`/devsolo:docs\` slash command has two modes:
 
-**AUDIT MODE** (no arguments): \`/devsolo:doc\`
+**AUDIT MODE** (no arguments): \`/devsolo:docs\`
 - Scans all documentation for naming and placement issues
 - Checks for missing README.md entries
 - Identifies documents that should be archived
@@ -548,7 +548,7 @@ The \`/devsolo:doc\` slash command has two modes:
 - Updates all README.md files
 - Reports all findings and actions
 
-**CREATE MODE** (with content): \`/devsolo:doc <name> <content>\`
+**CREATE MODE** (with content): \`/devsolo:docs <name> <content>\`
 - Analyzes your content to determine correct placement
 - Applies naming conventions automatically
 - Updates relevant README.md files

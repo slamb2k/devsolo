@@ -10,6 +10,9 @@ Format all docs-droid output using this consistent, structured style for clarity
 - **Before/After**: Show changes clearly
 - **Action Summary**: Always provide complete summary of actions taken
 - **Numbered Options**: When presenting multiple choices (3+), use numbered format with [RECOMMENDED]
+- **Section Breaks**: Every `---` MUST be followed by a header with an icon (e.g., `📊 **Summary**`)
+- **Compact Formatting**: Single-line items within sections should not have blank lines between them
+- **Header Spacing**: Section headers followed by lists or multi-line content must have one blank line after the header
 
 ## Output Format for Audit Mode
 
@@ -19,24 +22,29 @@ Format all docs-droid output using this consistent, structured style for clarity
 
 Found <N> total documents
 
-Issues Found:
+---
+⚠️ **Issues Found**
 
 Naming Violations (<count>):
+
 | Current Path | Issue | Suggested Fix |
 |--------------|-------|---------------|
 | path/File.md | PascalCase | path/file.md |
 
 Placement Errors (<count>):
+
 | Current Path | Reason | Correct Location |
 |--------------|--------|------------------|
 | docs/guides/api.md | Internal API doc | docs/dev/system/api.md |
 
 Missing from README (<count>):
+
 | Document | Missing From |
 |----------|--------------|
 | docs/guides/new-guide.md | docs/guides/README.md |
 
 Archival Candidates (<count>):
+
 | Document | Reason |
 |----------|--------|
 | docs/dev/plans/phase1.md | Marked COMPLETE |
@@ -46,7 +54,9 @@ Archival Candidates (<count>):
 
 For simple yes/no confirmations:
 ```
-⚠ Proposed Actions:
+---
+⚠️ **Proposed Actions**
+
 - Rename <N> files
 - Move <N> files
 - Update <N> README files
@@ -57,7 +67,8 @@ Fix these issues? [y/N]
 
 For multiple options (3+ choices):
 ```
-⚠ Multiple Actions Available:
+---
+⚠️ **Multiple Actions Available**
 
 Please choose an option:
 
@@ -73,58 +84,71 @@ Please choose an option:
 
 ### Actions Report
 ```
-✓ Actions Completed:
+---
+✅ **Actions Completed**
 
 Files Renamed:
+
 - docs/guides/QuickStart.md → docs/guides/quickstart.md
 - docs/dev/API_Ref.md → docs/dev/api-ref.md
 
 Files Moved:
+
 - docs/guides/api-internals.md → docs/dev/system/api-internals.md
 
 README Updates:
+
 - docs/guides/README.md (added 1 entry, sorted entries)
 - docs/dev/system/README.md (added 1 entry)
 - docs/dev/plans/README.md (removed archived entries)
 
 Documents Archived:
+
 - docs/dev/plans/phase1-complete.md → docs/archive/phase1-complete.md
   Reason: Implementation plan marked COMPLETE
 
-📊 Summary:
-- Files renamed: 2
-- Files moved: 1
-- READMEs updated: 3
-- Documents archived: 1
-- Total changes: 7
+---
+📊 **Summary**
+
+**Files renamed:** 2
+**Files moved:** 1
+**READMEs updated:** 3
+**Documents archived:** 1
+**Total changes:** 7
 ```
 
 ## Output Format for Create Mode
 
 ### Analysis Phase
 ```
-📋 Analyzing content...
+---
+📋 **Analyzing content**
 
 Content Analysis:
-- Primary audience: <users|developers|AI>
-- Document type: <guide|spec|plan|report|reference>
-- Subject: <brief-description>
-- Technical level: <beginner|intermediate|advanced>
+**Primary audience:** <users|developers|AI>
+**Document type:** <guide|spec|plan|report|reference>
+**Subject:** <brief-description>
+**Technical level:** <beginner|intermediate|advanced>
 
 Placement Decision:
-✓ Audience is <audience> → docs/<folder>/
-✓ Type is <type> → docs/<folder>/
-✓ Result: docs/<folder>/<filename>.md
+
+- ✓ Audience is <audience> → docs/<folder>/
+- ✓ Type is <type> → docs/<folder>/
+- ✓ Result: docs/<folder>/<filename>.md
 
 Naming:
-✓ Applied convention: <filename>.md
-✓ Descriptive and clear
+
+- ✓ Applied convention: <filename>.md
+- ✓ Descriptive and clear
 ```
 
 ### Supersession Check
 ```
-Supersession Check:
-⚠ Found similar documents:
+---
+⚠️ **Supersession Check**
+
+Found similar documents:
+
 | Document | Similarity | Action |
 |----------|------------|--------|
 | docs/guides/old-guide.md | Same topic | Archive |
@@ -133,23 +157,29 @@ Supersession Check:
 
 ### Creation Report
 ```
-✓ Document Created:
+---
+✅ **Document Created**
 
 Created:
+
 - 📄 docs/guides/migration-guide.md (1234 bytes)
 
 README Updated:
+
 - 📋 docs/guides/README.md (added entry)
 
 Documents Archived:
+
 - 🗄️ docs/guides/old-migration.md → docs/archive/old-migration.md
   Reason: Superseded by new migration guide
 
-📊 Summary:
-- Document created: docs/guides/migration-guide.md
-- READMEs updated: 1
-- Documents archived: 1
-- Total actions: 3
+---
+📊 **Summary**
+
+**Document created:** docs/guides/migration-guide.md
+**READMEs updated:** 1
+**Documents archived:** 1
+**Total actions:** 3
 ```
 
 ## Example: Complete Audit Output
@@ -159,9 +189,11 @@ Documents Archived:
 
 Found 45 total documents
 
-Issues Found:
+---
+⚠️ **Issues Found**
 
 Naming Violations (3):
+
 | Current Path                    | Issue      | Suggested Fix              |
 |--------------------------------|------------|----------------------------|
 | docs/guides/QuickStart.md      | PascalCase | quickstart.md              |
@@ -169,23 +201,28 @@ Naming Violations (3):
 | docs/specs/Feature Plan.md     | Spaces     | feature-plan.md            |
 
 Placement Errors (2):
+
 | Current Path                      | Reason              | Correct Location                |
 |----------------------------------|---------------------|---------------------------------|
 | docs/guides/api-internals.md     | Internal system doc | docs/dev/system/api-internals.md |
 | docs/dev/user-quickstart.md      | User-facing guide   | docs/guides/user-quickstart.md   |
 
 Missing from README (1):
+
 | Document                          | Missing From              |
 |----------------------------------|---------------------------|
 | docs/dev/reports/phase2-summary.md | docs/dev/reports/README.md |
 
 Archival Candidates (2):
+
 | Document                          | Reason                    |
 |----------------------------------|---------------------------|
 | docs/dev/plans/phase1-plan.md   | Marked COMPLETE           |
 | docs/specs/old-architecture.md  | Superseded by new version |
 
-⚠ Proposed Actions:
+---
+⚠️ **Proposed Actions**
+
 - Rename 3 files
 - Move 2 files
 - Update 4 README files
@@ -193,35 +230,42 @@ Archival Candidates (2):
 
 Fix these issues? [y/N]: y
 
-✓ Actions Completed:
+---
+✅ **Actions Completed**
 
 Files Renamed:
+
 - docs/guides/QuickStart.md → docs/guides/quickstart.md
 - docs/dev/system/API_Guide.md → docs/dev/system/api-guide.md
 - docs/specs/Feature Plan.md → docs/specs/feature-plan.md
 
 Files Moved:
+
 - docs/guides/api-internals.md → docs/dev/system/api-internals.md
 - docs/dev/user-quickstart.md → docs/guides/user-quickstart.md
 
 README Updates:
+
 - docs/guides/README.md (updated quickstart entry, removed api-internals, added user-quickstart)
 - docs/dev/system/README.md (updated api-guide entry, added api-internals)
 - docs/specs/README.md (updated feature-plan entry)
 - docs/dev/reports/README.md (added phase2-summary)
 
 Documents Archived:
+
 - docs/dev/plans/phase1-plan.md → docs/archive/phase1-plan.md
   Reason: Implementation plan marked COMPLETE in content
 - docs/specs/old-architecture.md → docs/archive/old-architecture.md
   Reason: Superseded by new-architecture.md
 
-📊 Summary:
-- Files renamed: 3
-- Files moved: 2
-- READMEs updated: 4
-- Documents archived: 2
-- Total changes: 11
+---
+📊 **Summary**
+
+**Files renamed:** 3
+**Files moved:** 2
+**READMEs updated:** 4
+**Documents archived:** 2
+**Total changes:** 11
 
 ✅ Documentation audit complete! All issues resolved.
 ```
@@ -229,25 +273,31 @@ Documents Archived:
 ## Example: Complete Create Output
 
 ```
-📋 Analyzing content...
+---
+📋 **Analyzing content**
 
 Content Analysis:
-- Primary audience: End users
-- Document type: User guide
-- Subject: Migration from v1 to v2
-- Technical level: Intermediate
+**Primary audience:** End users
+**Document type:** User guide
+**Subject:** Migration from v1 to v2
+**Technical level:** Intermediate
 
 Placement Decision:
-✓ Audience is end users → docs/guides/
-✓ Type is how-to guide → docs/guides/
-✓ Result: docs/guides/migration-v1-to-v2.md
+
+- ✓ Audience is end users → docs/guides/
+- ✓ Type is how-to guide → docs/guides/
+- ✓ Result: docs/guides/migration-v1-to-v2.md
 
 Naming:
-✓ Applied convention: migration-v1-to-v2.md
-✓ Descriptive and clear (includes version info)
 
-Supersession Check:
-⚠ Found similar documents:
+- ✓ Applied convention: migration-v1-to-v2.md
+- ✓ Descriptive and clear (includes version info)
+
+---
+⚠️ **Supersession Check**
+
+Found similar documents:
+
 | Document                       | Similarity    | Action    |
 |-------------------------------|---------------|-----------|
 | docs/guides/migration-guide.md | Same topic    | Archive   |
@@ -255,24 +305,30 @@ Supersession Check:
 
 Creating document...
 
-✓ Document Created:
+---
+✅ **Document Created**
 
 Created:
+
 - 📄 docs/guides/migration-v1-to-v2.md (3456 bytes)
 
 README Updated:
+
 - 📋 docs/guides/README.md (added entry in Migration section)
 
 Documents Archived:
+
 - 🗄️ docs/guides/migration-guide.md → docs/archive/migration-guide.md
   Reason: Superseded by more specific v1-to-v2 migration guide
 
-📊 Summary:
-- Document created: docs/guides/migration-v1-to-v2.md
-- Placement: docs/guides/ (end user guide)
-- READMEs updated: 1
-- Documents archived: 1
-- Total actions: 3
+---
+📊 **Summary**
+
+**Document created:** docs/guides/migration-v1-to-v2.md
+**Placement:** docs/guides/ (end user guide)
+**READMEs updated:** 1
+**Documents archived:** 1
+**Total actions:** 3
 
 ✅ Document created successfully!
 ```
@@ -281,7 +337,8 @@ Documents Archived:
 
 ### File List
 ```
-📁 Documents in docs/guides/:
+---
+📁 **Documents in docs/guides/**
 
 | File                    | Size    | Modified   | In README |
 |------------------------|---------|------------|-----------|
@@ -292,7 +349,8 @@ Documents Archived:
 
 ### Issue Summary
 ```
-📋 Issue Summary:
+---
+📊 **Issue Summary**
 
 | Issue Type           | Count | Severity |
 |---------------------|-------|----------|
@@ -301,12 +359,13 @@ Documents Archived:
 | Missing README      | 1     | Low      |
 | Archival candidates | 2     | Low      |
 
-Total issues: 8
+**Total issues:** 8
 ```
 
 ### Archival Report
 ```
-🗄️ Archived Documents:
+---
+🗄️ **Archived Documents**
 
 | Original Location              | Archive Location           | Reason              |
 |-------------------------------|----------------------------|---------------------|
@@ -328,18 +387,22 @@ Total issues: 8
 10. **Report all changes** - No silent modifications
 11. **Keep summaries concise** - Details in tables
 12. **Always end with summary** - Recap of all actions (📊 Summary:)
+13. **Section breaks with headers** - Every `---` MUST be immediately followed by an icon and bold header
+14. **Compact single-line items** - Key-value pairs should not have blank lines between them
+15. **Header spacing** - Section headers followed by lists or multi-line content must have one blank line after
 
 ## Error Messages
 
 ```
-✗ Error: <error-summary>
+---
+✗ **Error: <error-summary>**
 
-Issue: <description-of-problem>
+**Issue:** <description-of-problem>
+**Expected:** <what-should-be>
+**Actual:** <what-was-found>
 
-Expected: <what-should-be>
-Actual: <what-was-found>
+**Resolution:**
 
-Resolution:
 - <step-1-to-fix>
 - <step-2-to-fix>
 ```
@@ -347,11 +410,12 @@ Resolution:
 ## Warnings
 
 ```
-⚠ Warning: <warning-summary>
+---
+⚠️ **Warning: <warning-summary>**
 
-Details: <explanation>
+**Details:** <explanation>
 
-This may cause: <potential-issues>
+**This may cause:** <potential-issues>
 
-Recommendation: <suggested-action>
+**Recommendation:** <suggested-action>
 ```

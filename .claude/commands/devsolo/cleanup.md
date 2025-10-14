@@ -17,6 +17,8 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
 ░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀░░░
 ```
 
+**⚠️ CRITICAL OUTPUT REQUIREMENT:** After EVERY Task tool invocation in this workflow, you MUST immediately output the complete git-droid response as text to the user. DO NOT proceed to check signals or continue to the next stage without first displaying the full output. The user needs to see all numbered options, formatted sections, and status information.
+
 The cleanup workflow consists of two stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Analyze Repository
@@ -41,9 +43,11 @@ The cleanup workflow consists of two stages, each using a separate git-droid sub
        * 'Next Stage: EXECUTE_SESSION_CLEANUP' (user chose option 2)
        * 'Next Stage: ABORTED' (user chose option 3, or nothing to clean)"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 3. **Check the response** for the "Next Stage:" directive in Result Summary:
    - If 'Next Stage: EXECUTE_FULL_CLEANUP', proceed to Stage 2 with deleteBranches=true
@@ -67,9 +71,11 @@ The cleanup workflow consists of two stages, each using a separate git-droid sub
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: COMPLETED' (cleanup successful)"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 **Output Formatting:** Each git-droid stage handles its own output formatting following the git-droid output style
 
