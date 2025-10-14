@@ -18,6 +18,8 @@ Commit changes to the current feature branch with an auto-generated or custom me
 ░▀▀▀░▀▀▀░▀░░░▀░▀░░░▀░▀▀▀░░▀░░
 ```
 
+**⚠️ CRITICAL OUTPUT REQUIREMENT:** After invoking the Task tool, you MUST immediately output the complete git-droid response as text to the user. DO NOT add commentary, summaries, or interpretations. The user needs to see all formatted sections and status information exactly as git-droid returns them.
+
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Coordinate commit workflow"
@@ -29,9 +31,11 @@ Commit changes to the current feature branch with an auto-generated or custom me
      - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
      - Include these sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
    - Do NOT intercept or modify the output
    - The user needs to see the options and formatted sections directly
 

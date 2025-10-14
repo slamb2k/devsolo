@@ -302,7 +302,7 @@ await gitDroid.ship({ prDescription });
 11. `/devsolo:info-line` → `/devsolo status-line`
 
 **From Existing .devsolo/commands (already slash commands, migrate to .claude/commands/devsolo/):**
-1. `.devsolo/commands/doc.md` → `.claude/commands/devsolo/doc.md`
+1. `.devsolo/commands/doc.md` → `.claude/commands/devsolo/docs.md`
 2. `.devsolo/commands/prime.md` → `.claude/commands/devsolo/prime.md`
 
 **Note:** The `.devsolo/commands/` files already use slash command format and should be used as reference examples for migrating MCP prompts.
@@ -559,12 +559,12 @@ Migrate documentation management to slash commands and create a specialized `doc
 - Follows devsolo documentation structure and conventions
 - Comprehensive workflow for checking, fixing, and creating documentation
 - Directly calls file operations (Read, Write, Edit tools)
-- Should be migrated to `.claude/commands/devsolo/doc.md`
+- Should be migrated to `.claude/commands/devsolo/docs.md`
 
 **Migration Strategy:**
 
 **Step 1: Direct Copy**
-- Copy `.devsolo/commands/doc.md` to `.claude/commands/devsolo/doc.md`
+- Copy `.devsolo/commands/doc.md` to `.claude/commands/devsolo/docs.md`
 - This provides immediate functionality in new location
 
 **Step 2: Integration with docs-droid**

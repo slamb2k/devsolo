@@ -1314,7 +1314,7 @@ Slash Commands → Sub-Agents → MCP Tools → Services → Git/GitHub
 
 ---
 
-### 12. /devsolo:doc
+### 12. /devsolo:docs
 
 **Audit Mode Output:**
 

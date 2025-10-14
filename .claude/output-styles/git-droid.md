@@ -10,6 +10,9 @@ Format all git-droid output using this consistent, structured style for clarity 
 - **Actionable Guidance**: Always provide next steps or resolution guidance for errors
 - **Progressive Disclosure**: Show summary first, details on request
 - **Exact Section Labels**: Use exact section labels as specified below (capitalization and punctuation matter)
+- **Section Breaks**: Every `---` MUST be followed by a header with an icon (e.g., `📊 **Summary**`)
+- **Compact Formatting**: Single-line items within sections should not have blank lines between them
+- **Header Spacing**: Section headers followed by lists or multi-line content must have one blank line after the header
 
 ## Standard Section Labels
 
@@ -36,8 +39,7 @@ Commands that perform workflow operations (launch, commit, ship, swap, abort, cl
 - Item: value ⚠
 
 ---
-
-**Pre-flight Checks:**
+📋 **Pre-flight Checks**
 
 - ✓ Check name (passed message)
 - ✓ Check name
@@ -58,8 +60,7 @@ Please choose an option:
    Risk: High | Action: what gets executed
 
 ---
-
-**Operations Executed:**
+✅ **Operations Executed**
 
 - ✓ Operation description 1
 - ✓ Operation description 2
@@ -72,22 +73,46 @@ Please choose an option:
 - ✓ Verification 3
 
 ---
-
-## ✅ Result Summary (or ## ✗ Error Summary)
+📊 **Result Summary** (or ✗ **Error Summary**)
 
 **Key metric:** value
+**Another metric:** value
+**Status:** value
 
 **Details:**
+
 - Detail 1
 - Detail 2
 
 ---
-
-**Next Steps:**
+🚀 **Next Steps**
 
 - Actionable guidance 1
 - Actionable guidance 2
 ```
+
+**Formatting Rules:**
+
+1. **Section Breaks with Headers**: Every `---` MUST be immediately followed by an icon and bold header
+   - ✅ Correct: `---\n📊 **Summary**\n`
+   - ❌ Wrong: `---\n**Summary**\n` (missing icon)
+   - ❌ Wrong: `---\n\n**Summary**\n` (extra blank line)
+
+2. **Compact Single-Line Items**: When a section has only simple key-value pairs, no blank lines between them
+   - ✅ Correct: `**Status:** value\n**Session:** value\n**Branch:** value`
+   - ❌ Wrong: `**Status:** value\n\n**Session:** value\n\n**Branch:** value`
+
+3. **Spacing for Lists**: Section headers followed by lists need one blank line
+   - ✅ Correct: `**Details:**\n\n- Detail 1\n- Detail 2`
+   - ❌ Wrong: `**Details:**\n- Detail 1\n- Detail 2` (no blank line)
+
+4. **Icon Selection**: Use appropriate icons for section types
+   - 📋 Pre-flight Checks, Pre-analysis
+   - ✅ Operations Executed, Success summaries
+   - 📊 Result Summary, Statistics
+   - 🚀 Next Steps
+   - ✗ Error Summary
+   - ⚠️ Warnings
 
 ## Numbered Option Format
 
@@ -219,14 +244,11 @@ Or for errors:
 ## ✅ Workflow Launched Successfully
 
 **Session Created:** `2d967326-881b-4167-9e52-fef1e07366f0`
-
 **Branch:** `feature/add-user-authentication`
-
 **State:** `BRANCH_READY`
 
 ---
-
-**Pre-flight Checks:**
+📋 **Pre-flight Checks**
 
 - ✓ On main branch
 - ✓ Working directory clean
@@ -234,7 +256,8 @@ Or for errors:
 - ✓ No existing session
 - ✓ Branch name available
 
-**Operations Executed:**
+---
+✅ **Operations Executed**
 
 - ✓ Created branch: `feature/add-user-authentication`
 - ✓ Checked out to new branch
@@ -247,8 +270,7 @@ Or for errors:
 - ✓ Checked out to feature branch
 
 ---
-
-**Next Steps:**
+🚀 **Next Steps**
 
 When ready to ship your changes:
 
@@ -264,13 +286,13 @@ When ready to ship your changes:
 **Operation:** Changes committed to feature/add-user-authentication
 
 ---
-
-**Pre-flight Checks:**
+📋 **Pre-flight Checks**
 
 - ✓ Active session exists (2d967326...)
 - ✓ Changes to commit (3 files modified)
 
-**Operations Executed:**
+---
+✅ **Operations Executed**
 
 - ✓ Created commit (abc1234)
 - ✓ Updated session state
@@ -281,8 +303,7 @@ When ready to ship your changes:
 - ✓ Session state updated to CHANGES_COMMITTED
 
 ---
-
-**Commit Details:**
+📊 **Commit Details**
 
 ```
 Commit: abc1234567890abcdef1234567890abcdef1234
@@ -302,8 +323,7 @@ src/auth/auth.test.ts | 89 ++++++++++++++++++++++++++++++++++++++++++
 ```
 
 ---
-
-**Next Steps:**
+🚀 **Next Steps**
 
 Ready to ship! Use `/devsolo:ship` to:
 
@@ -321,15 +341,15 @@ Ready to ship! Use `/devsolo:ship` to:
 **Operation:** Feature shipped via PR #123
 
 ---
-
-**Pre-flight Checks:**
+📋 **Pre-flight Checks**
 
 - ✓ All changes committed
 - ✓ Session ready to ship
 - ✓ GitHub authentication configured
 - ✓ CI configured in repository
 
-**Operations Executed:**
+---
+✅ **Operations Executed**
 
 - ✓ Pushed to remote
 - ✓ Created PR #123
@@ -349,8 +369,7 @@ Ready to ship! Use `/devsolo:ship` to:
 - ✓ Session completed
 
 ---
-
-**Summary:**
+📊 **Summary**
 
 - **PR:** https://github.com/owner/repo/pull/123
 - **Commits:** 3
@@ -359,8 +378,7 @@ Ready to ship! Use `/devsolo:ship` to:
 - **Merge method:** squash
 
 ---
-
-**Next Steps:**
+🚀 **Next Steps**
 
 You're back on the main branch. Ready to start a new feature with `/devsolo:launch`
 ```
@@ -373,16 +391,14 @@ You're back on the main branch. Ready to start a new feature with `/devsolo:laun
 **Error:** Cannot commit without active session
 
 ---
-
-**Pre-flight Checks:**
+📋 **Pre-flight Checks**
 
 - ✗ No active session on current branch
 - ⚠ On branch 'feature/old-work'
 - ✓ Changes detected (ready to commit)
 
 ---
-
-**Issue:**
+⚠️ **Issue**
 
 You are on branch `feature/old-work` but there is no active devsolo session for this branch.
 
@@ -400,8 +416,7 @@ Please choose an option:
    Risk: Medium | Action: Use git commit directly
 
 ---
-
-**Next Steps:**
+🚀 **Next Steps**
 
 Choose one of the options above to continue.
 ```
@@ -509,8 +524,10 @@ Details: <additional-information>
 8. **Use numbered options** - When presenting choices, use 1, 2, 3 format with [RECOMMENDED] marker
 9. **Show risk and action** - For all options, display `Risk: Low/Medium/High | Action: what happens`
 10. **Use consistent icons** - ✓ success, ✗ error, ⚠ warning, 🔍 analysis, 📋 info, ✅ complete, 📊 summary
-11. **Use horizontal rules** - Add `---` between major sections for visual separation
-12. **Make errors actionable** - Always suggest resolution steps as numbered options
+11. **Use horizontal rules with headers** - Every `---` MUST be immediately followed by an icon and bold header (e.g., `---\n📊 **Summary**\n`)
+12. **Compact single-line items** - Key-value pairs in sections should not have blank lines between them
+13. **Section header spacing** - Headers followed by lists or multi-line content must have one blank line after
+14. **Make errors actionable** - Always suggest resolution steps as numbered options
 
 ## Verbose Mode
 

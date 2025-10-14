@@ -72,7 +72,7 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 
 ### Existing Slash Commands
 - **`.devsolo/commands/prime.md`** - Codebase priming command. Will be migrated to `.claude/commands/devsolo/prime.md`.
-- **`.devsolo/commands/doc.md`** - Documentation management command. Will be migrated to `.claude/commands/devsolo/doc.md` and enhanced with docs-droid.
+- **`.devsolo/commands/doc.md`** - Documentation management command. Will be migrated to `.claude/commands/devsolo/docs.md` and enhanced with docs-droid.
 
 ### Documentation
 - **`docs/dev/plans/mcp-to-plugin-migration.md`** - The comprehensive migration plan with all architectural decisions.
@@ -371,7 +371,7 @@ User → Slash Command → Sub-Agent (git-droid) → MCP Tools → Git/GitHub
 - Test output style with sample documentation operations
 
 ### Step 20: Migrate doc.md Slash Command
-- Copy `.devsolo/commands/doc.md` to `.claude/commands/devsolo/doc.md`
+- Copy `.devsolo/commands/doc.md` to `.claude/commands/devsolo/docs.md`
 - Enhance AUDIT MODE to use docs-droid:
   - docs-droid scans all .md files
   - docs-droid validates naming and placement

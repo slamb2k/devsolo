@@ -40,7 +40,7 @@ User → Slash Command → Sub-Agent → MCP Tools → Git/GitHub
 /devsolo:hotfix
 /devsolo:status-line
 /devsolo:prime
-/devsolo:doc
+/devsolo:docs
 ```
 
 **Note:** These are slash commands that invoke MCP tools, not the MCP tools themselves.
@@ -69,7 +69,7 @@ Native slash commands integrate with Claude Code's auto-completion system, makin
 Two new commands for managing the codebase:
 
 - `/devsolo prime` - Prime Claude's understanding of the codebase
-- `/devsolo doc` - Manage documentation with automatic placement and validation
+- `/devsolo docs` - Manage documentation with automatic placement and validation
 
 ## What's New
 
@@ -91,8 +91,8 @@ Two new powerful commands are now available:
 /devsolo:prime
 
 # Manage documentation
-/devsolo:doc  # Audit mode - scans and fixes docs
-/devsolo:doc "feature-name" "# Documentation content"  # Create mode
+/devsolo:docs  # Audit mode - scans and fixes docs
+/devsolo:docs "feature-name" "# Documentation content"  # Create mode
 ```
 
 ## Backward Compatibility
@@ -204,7 +204,7 @@ The plugin architecture evolution enhances devsolo while maintaining full compat
 
 1. Continue using `/devsolo:command` syntax (no changes needed)
 2. Enjoy enhanced features (banners, sub-agents, better orchestration)
-3. Explore new commands (`/devsolo:prime`, `/devsolo:doc`)
+3. Explore new commands (`/devsolo:prime`, `/devsolo:docs`)
 4. All MCP tools, workflows, and data remain unchanged!
 
 Welcome to the enhanced devsolo plugin architecture! 🚀

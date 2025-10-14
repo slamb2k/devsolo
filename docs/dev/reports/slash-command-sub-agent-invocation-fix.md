@@ -92,7 +92,7 @@ Updated all 9 devsolo command files to explicitly specify Task tool invocation:
 5. `.claude/commands/devsolo/swap.md` - Swap workflow
 6. `.claude/commands/devsolo/cleanup.md` - Cleanup workflow
 7. `.claude/commands/devsolo/hotfix.md` - Hotfix workflow
-8. `.claude/commands/devsolo/doc.md` - Documentation management
+8. `.claude/commands/devsolo/docs.md` - Documentation management
 
 All commands with query-only operations (info, sessions, init, status-line) already use direct MCP tool calls without sub-agents, which is correct since they don't need orchestration.
 

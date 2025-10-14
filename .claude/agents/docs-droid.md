@@ -260,7 +260,7 @@ Move documents to `docs/archive/` when:
 
 ### Scenario 1: Audit Mode
 ```
-User: /devsolo:doc
+User: /devsolo:docs
 
 docs-droid analysis:
 📋 Scanning documentation in docs/...
@@ -288,7 +288,7 @@ Fix these issues? [y/N]
 
 ### Scenario 2: Create Mode
 ```
-User: /devsolo:doc "migration-guide" "# Migration Guide\n\nHow to migrate from v1 to v2..."
+User: /devsolo:docs "migration-guide" "# Migration Guide\n\nHow to migrate from v1 to v2..."
 
 docs-droid analysis:
 📋 Analyzing content...

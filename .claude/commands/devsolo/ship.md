@@ -21,6 +21,8 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 ░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
 ```
 
+**⚠️ CRITICAL OUTPUT REQUIREMENT:** After EVERY Task tool invocation in this workflow, you MUST immediately output the complete git-droid response as text to the user. DO NOT proceed to check signals or continue to the next stage without first displaying the full output. The user needs to see all numbered options, formatted sections, and status information.
+
 The ship workflow consists of three stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Initialize Ship Workflow
@@ -45,9 +47,11 @@ The ship workflow consists of three stages, each using a separate git-droid sub-
        * 'Next Stage: PROCEED_TO_SHIP' (no uncommitted changes)
        * 'Next Stage: ABORTED' (user chose option 3)"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Pre-flight Checks, numbered options, Result Summary
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 3. **Check the response** for the "Next Stage:" directive in Result Summary:
    - If 'Next Stage: COMMIT_ALL' or 'Next Stage: COMMIT_STAGED', proceed to Stage 2 (Commit Changes)
@@ -74,9 +78,11 @@ Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
        * 'Next Stage: PROCEED_TO_SHIP' (commit successful)
        * 'Next Stage: ABORTED' (commit failed or user aborted)"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Operations Executed, Post-flight Verifications, Result Summary
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 3. **Check the response** for the "Next Stage:" directive in Result Summary:
    - If 'Next Stage: PROCEED_TO_SHIP', proceed to Stage 3 (Complete Ship Workflow)
@@ -97,9 +103,11 @@ Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
        * 'Next Stage: COMPLETED' (ship successful)
        * 'Next Stage: FAILED' (ship failed, branch preserved)"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 **Output Formatting:** Each git-droid stage handles its own output formatting following the git-droid output style
 

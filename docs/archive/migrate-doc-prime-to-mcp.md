@@ -28,7 +28,7 @@ So that I don't see duplicate commands when working in the devsolo repository it
 ## Problem Statement
 
 Currently:
-1. The `/doc` command exists in `.claude/commands/doc.md` - only available locally in the devsolo repo
+1. The `/doc` command exists in `.claude/commands/docs.md` - only available locally in the devsolo repo
 2. The `/prime` command exists in `.claude/commands/disler/prime.md` - only available locally
 3. When working in the devsolo repository, developers would see commands twice: once from local slash commands and once from the MCP server (if both were registered)
 4. Users of devsolo in other projects don't have access to these useful documentation and priming capabilities
@@ -38,7 +38,7 @@ Currently:
 ## Solution Statement
 
 1. **Move commands to devsolo managed location**:
-   - Move `.claude/commands/doc.md` → `.devsolo/commands/doc.md`
+   - Move `.claude/commands/docs.md` → `.devsolo/commands/docs.md`
    - Move `.claude/commands/disler/prime.md` → `.devsolo/commands/prime.md`
 
 2. **Expose via MCP prompts**:
@@ -48,7 +48,7 @@ Currently:
 
 3. **Update devsolo init**:
    - Extend `installClaudeGuidance()` in `ConfigurationManager` to add a documentation guidelines section
-   - Include folder structure, naming conventions, placement rules, and references to `/devsolo:doc` and `/devsolo:prime`
+   - Include folder structure, naming conventions, placement rules, and references to `/devsolo:docs` and `/devsolo:prime`
 
 4. **Update package distribution**:
    - Add `.devsolo/commands` to the `files` array in package.json to include commands in published package (excluding runtime data like session.json)
@@ -63,9 +63,9 @@ This approach:
 
 ### Existing Files to Modify
 
-- **.claude/commands/doc.md**
+- **.claude/commands/docs.md**
   - Current location of documentation management command
-  - Will be moved to `.devsolo/commands/doc.md`
+  - Will be moved to `.devsolo/commands/docs.md`
   - Contains comprehensive audit and create mode logic
 
 - **.claude/commands/disler/prime.md**
@@ -100,7 +100,7 @@ This approach:
 
 - **docs/guides/claude-code-commands.md**
   - Documents how MCP commands work in Claude Code
-  - Need to add `/devsolo:doc` and `/devsolo:prime` to the command list
+  - Need to add `/devsolo:docs` and `/devsolo:prime` to the command list
 
 - **docs/README.md**
   - Main documentation overview
@@ -112,8 +112,8 @@ This approach:
 
 ### New Files
 
-- **.devsolo/commands/doc.md**
-  - Moved from `.claude/commands/doc.md`
+- **.devsolo/commands/docs.md**
+  - Moved from `.claude/commands/docs.md`
   - No content changes, just new location
 
 - **.devsolo/commands/prime.md**
@@ -146,7 +146,7 @@ This approach:
 ### Step 1: Create Directory and Move Command Files
 
 - [ ] Create `.devsolo/commands/` directory
-- [ ] Move `.claude/commands/doc.md` to `.devsolo/commands/doc.md`
+- [ ] Move `.claude/commands/docs.md` to `.devsolo/commands/docs.md`
 - [ ] Move `.claude/commands/disler/prime.md` to `.devsolo/commands/prime.md`
 - [ ] Verify markdown structure is compatible with MCP prompt handling
 - [ ] Remove empty `.claude/commands/disler/` directory if no other files remain
@@ -339,13 +339,13 @@ This approach:
 ### Step 8: Update Documentation
 
 - [ ] Open `docs/guides/claude-code-commands.md`
-- [ ] Add `/devsolo:doc` command to the command list with description and examples
+- [ ] Add `/devsolo:docs` command to the command list with description and examples
 - [ ] Add `/devsolo:prime` command to the command list
 - [ ] Include usage examples for both audit and create modes of /doc
 
 - [ ] Open `docs/README.md`
 - [ ] Verify the documentation structure description is current
-- [ ] Add note about `/devsolo:doc` command for creating documentation
+- [ ] Add note about `/devsolo:docs` command for creating documentation
 
 - [ ] Update main `README.md` if necessary to reference new commands
 
@@ -365,9 +365,9 @@ This approach:
 
 - [ ] Configure devsolo MCP server in Claude Desktop config
 - [ ] Restart Claude Desktop to load updated MCP server
-- [ ] In Claude Code, type `/devsolo:doc` and verify command appears
-- [ ] Test audit mode: `/devsolo:doc` with no arguments
-- [ ] Test create mode: `/devsolo:doc test-doc "# Test\nThis is a test document"`
+- [ ] In Claude Code, type `/devsolo:docs` and verify command appears
+- [ ] Test audit mode: `/devsolo:docs` with no arguments
+- [ ] Test create mode: `/devsolo:docs test-doc "# Test\nThis is a test document"`
 - [ ] Type `/devsolo:prime` and verify command appears
 - [ ] Test prime command executes correctly (reads README files)
 
@@ -375,7 +375,7 @@ This approach:
 
 - [ ] Open Claude Code in the devsolo repository itself
 - [ ] Type `/` and check command list
-- [ ] Verify `/devsolo:doc` appears only once (from MCP, not local)
+- [ ] Verify `/devsolo:docs` appears only once (from MCP, not local)
 - [ ] Verify `/devsolo:prime` appears only once (from MCP, not local)
 - [ ] Confirm no `/doc` or `/prime` local commands appear
 
@@ -425,7 +425,7 @@ Execute every validation command below to ensure zero regressions.
 ### Edge Cases
 
 - **Missing Command Files**
-  - What happens if `.devsolo/commands/doc.md` is deleted?
+  - What happens if `.devsolo/commands/docs.md` is deleted?
   - Should return helpful error message
 
 - **Malformed Arguments**
@@ -441,23 +441,23 @@ Execute every validation command below to ensure zero regressions.
   - Test installation of package in another project includes command files
 
 - **MCP Server Restart**
-  - Modify `.devsolo/commands/doc.md` content while MCP server is running
+  - Modify `.devsolo/commands/docs.md` content while MCP server is running
   - Restart MCP server
   - Verify changes are reflected in prompt execution
 
 ## Acceptance Criteria
 
-- [ ] `.devsolo/commands/doc.md` exists and contains complete documentation management logic
+- [ ] `.devsolo/commands/docs.md` exists and contains complete documentation management logic
 - [ ] `.devsolo/commands/prime.md` exists and contains codebase priming logic
-- [ ] `.claude/commands/doc.md` and `.claude/commands/disler/prime.md` are removed
+- [ ] `.claude/commands/docs.md` and `.claude/commands/disler/prime.md` are removed
 - [ ] `package.json` includes `.devsolo/commands` in files array (not entire `.devsolo/` directory)
 - [ ] `.gitignore` un-ignores `.devsolo/commands/` so command files are tracked in git
 - [ ] Runtime files (.devsolo/session.json, .devsolo/config.json) remain git-ignored
 - [ ] MCP server's `ListPromptsRequestSchema` returns `doc` and `prime` prompts
 - [ ] MCP server's `GetPromptRequestSchema` correctly reads markdown files and substitutes arguments
 - [ ] `devsolo init` creates CLAUDE.md with both git workflow and documentation guidelines sections
-- [ ] `/devsolo:doc` command works in Claude Code (audit mode)
-- [ ] `/devsolo:doc <name> <content>` command works in Claude Code (create mode)
+- [ ] `/devsolo:docs` command works in Claude Code (audit mode)
+- [ ] `/devsolo:docs <name> <content>` command works in Claude Code (create mode)
 - [ ] `/devsolo:prime` command works in Claude Code
 - [ ] When working in devsolo repository, commands appear only once (via MCP)
 - [ ] Documentation is updated to reflect new commands
@@ -476,10 +476,10 @@ Execute every command to validate the feature works correctly with zero regressi
 - `npm run lint` - Verify code style compliance
 - `git status` - Ensure only intended files are changed
 - Create test repository and run `devsolo init` - Verify CLAUDE.md generation
-- In Claude Code, test `/devsolo:doc` (audit mode) - Verify command executes
-- In Claude Code, test `/devsolo:doc test "# Test"` (create mode) - Verify document creation
+- In Claude Code, test `/devsolo:docs` (audit mode) - Verify command executes
+- In Claude Code, test `/devsolo:docs test "# Test"` (create mode) - Verify document creation
 - In Claude Code, test `/devsolo:prime` - Verify codebase priming
-- In devsolo repo, verify `/devsolo:doc` appears only once in command list
+- In devsolo repo, verify `/devsolo:docs` appears only once in command list
 - Restart Claude Desktop and verify commands are still available
 
 ## Notes

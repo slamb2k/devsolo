@@ -18,6 +18,8 @@ Switch between active workflow sessions without aborting them.
 ░▀▀▀░▀░▀░▀░▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
 ```
 
+**⚠️ CRITICAL OUTPUT REQUIREMENT:** After EVERY Task tool invocation in this workflow, you MUST immediately output the complete git-droid response as text to the user. DO NOT proceed to check signals or continue to the next stage without first displaying the full output. The user needs to see all numbered options, formatted sections, and status information.
+
 The swap workflow consists of three stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Initialize Swap Workflow
@@ -43,9 +45,11 @@ The swap workflow consists of three stages, each using a separate git-droid sub-
        * 'Next Stage: PROCEED_TO_SWAP' (user chose option 3 force, or no changes)
        * 'Next Stage: ABORTED' (user chose option 4, or target session not found)"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 3. **Check the response** for the "Next Stage:" directive in Result Summary:
    - If 'Next Stage: STASH_CHANGES', proceed to Stage 2 (Stash Current Work)
@@ -71,9 +75,11 @@ Only execute this stage if Stage 1 returned 'STASH_CHANGES'.
        * 'Next Stage: PROCEED_TO_SWAP' (stash successful)
        * 'Next Stage: ABORTED' (stash failed)"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 3. **Check the response** for the "Next Stage:" directive in Result Summary:
    - If 'Next Stage: PROCEED_TO_SWAP', proceed to Stage 3 (Switch to Target Branch)
@@ -95,9 +101,11 @@ Only execute this stage if Stage 1 returned 'STASH_CHANGES'.
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: COMPLETED' (swap successful)"
 
-2. **Display git-droid's output verbatim** to the user
-   - Show the complete formatted output exactly as returned by git-droid
-   - Do NOT add commentary, summaries, or interpretations
+2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+   - Display the ENTIRE formatted output exactly as git-droid returned it
+   - Include ALL sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+   - Do NOT summarize, skip sections, or add commentary
+   - The user MUST see this output before you proceed
 
 **Output Formatting:** Each git-droid stage handles its own output formatting following the git-droid output style
 
