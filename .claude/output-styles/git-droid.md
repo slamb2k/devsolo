@@ -46,19 +46,6 @@ Commands that perform workflow operations (launch, commit, ship, swap, abort, cl
 - ⚠ Check name (warning message)
 - ✗ Check name (failed message)
 
-**Options Required:** (only if a check has level='prompt')
-
-Please choose an option:
-
-1. Primary option label (brief description) [RECOMMENDED]
-   Risk: Low | Action: what gets executed
-
-2. Alternative option label (brief description)
-   Risk: Medium | Action: what gets executed
-
-3. Another option label (brief description)
-   Risk: High | Action: what gets executed
-
 ---
 ✅ **Operations Executed**
 
@@ -87,16 +74,33 @@ Please choose an option:
 ---
 🚀 **Next Steps**
 
+**Options:** (only if user needs to choose)
+
+| # | Option | Risk | Action |
+|---|--------|------|--------|
+| 1 | Primary option label (brief description) [RECOMMENDED] | Low | What gets executed |
+| 2 | Alternative option label (brief description) | Medium | What gets executed |
+| 3 | Another option label (brief description) | High | What gets executed |
+
+Choose an option above to continue.
+
+**General Guidance:** (always provide)
+
 - Actionable guidance 1
 - Actionable guidance 2
 ```
 
 **Formatting Rules:**
 
-1. **Section Breaks with Headers**: Every `---` MUST be immediately followed by an icon and bold header
-   - ✅ Correct: `---\n📊 **Summary**\n`
+1. **Section Breaks with Headers**: Every `---` MUST be on its own line, followed by a newline, then the icon and bold header
+   - ✅ Correct:
+     ```
+     ---
+     📊 **Summary**
+     ```
+   - ❌ Wrong: `---📊 **Summary**` (no newline after ---)
    - ❌ Wrong: `---\n**Summary**\n` (missing icon)
-   - ❌ Wrong: `---\n\n**Summary**\n` (extra blank line)
+   - ❌ Wrong: `---\n\n**Summary**\n` (extra blank line after ---)
 
 2. **Compact Single-Line Items**: When a section has only simple key-value pairs, no blank lines between them
    - ✅ Correct: `**Status:** value\n**Session:** value\n**Branch:** value`
@@ -116,48 +120,69 @@ Please choose an option:
 
 ## Numbered Option Format
 
-When presenting user options (from CheckOption arrays returned by MCP tools), format as:
+When presenting user options (from CheckOption arrays returned by MCP tools), format as a table in the **Next Steps** section:
 
 ```
-**Options Required:**
+---
+🚀 **Next Steps**
 
-Please choose an option:
+**Options:**
 
-1. Option label (description) [RECOMMENDED]
-   Risk: Low | Action: specific action that will be executed
+| # | Option | Risk | Action |
+|---|--------|------|--------|
+| 1 | Primary option label (brief description) [RECOMMENDED] | Low | What gets executed |
+| 2 | Alternative option label (brief description) | Medium | What gets executed |
+| 3 | Another option label (brief description) | High | What gets executed |
 
-2. Option label (description)
-   Risk: Medium | Action: specific action that will be executed
-
-3. Option label (description)
-   Risk: High | Action: specific action that will be executed
+Choose an option above to continue.
 ```
 
 **Rules:**
+- Options MUST be presented in Next Steps section, NOT after Pre-flight Checks
+- Use a markdown table with columns: #, Option, Risk, Action
 - Always number options (1, 2, 3, ...)
 - Exactly ONE option must have `[RECOMMENDED]` marker (the one with autoRecommended: true)
-- Show risk level: `Risk: Low`, `Risk: Medium`, or `Risk: High`
-- Show action: `Action: ` followed by what will be executed
-- Description in parentheses after label
-- Label uses Title Case
-- Each option separated by blank line for readability
+- Show risk level: `Low`, `Medium`, or `High`
+- Show action: Brief description of what will be executed
+- Add a prompt below the table: "Choose an option above to continue."
 
-**Converting CheckOption to Numbered Format:**
+**Converting CheckOption to Table Format:**
 
 ```typescript
-// MCP tool returns:
-{
-  id: 'stash_and_switch',
-  label: 'Stash changes and switch to main',
-  description: 'Safely stash your current changes and switch to main branch',
-  action: 'git stash push && git checkout main',
-  autoRecommended: true,
-  risk: 'low'
-}
+// MCP tool returns array:
+[
+  {
+    id: 'commit_all',
+    label: 'Commit all changes and proceed',
+    description: 'Stage and commit all changes',
+    action: 'git add -A && git commit',
+    autoRecommended: true,
+    risk: 'low'
+  },
+  {
+    id: 'commit_staged',
+    label: 'Commit only staged changes',
+    description: 'Commit staged files only',
+    action: 'git commit',
+    autoRecommended: false,
+    risk: 'medium'
+  },
+  {
+    id: 'abort',
+    label: 'Abort workflow',
+    description: 'Cancel operation',
+    action: 'exit',
+    autoRecommended: false,
+    risk: 'low'
+  }
+]
 
-// Format as:
-1. Stash changes and switch to main (Safely stash your current changes) [RECOMMENDED]
-   Risk: Low | Action: git stash push && git checkout main
+// Format as table in Next Steps:
+| # | Option | Risk | Action |
+|---|--------|------|--------|
+| 1 | Commit all changes and proceed (Stage and commit all changes) [RECOMMENDED] | Low | git add -A && git commit |
+| 2 | Commit only staged changes (Commit staged files only) | Medium | git commit |
+| 3 | Abort workflow (Cancel operation) | Low | exit |
 ```
 
 ## Output Format for Operations
