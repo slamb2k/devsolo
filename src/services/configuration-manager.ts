@@ -278,13 +278,13 @@ created: ${new Date().toISOString()}
     // Pre-commit hook
     const preCommitHook = `#!/bin/bash
 # devsolo pre-commit hook
-# Enforces workflow when devsolo session is active
+# Enforces workflow and runs quality checks
 
 # Check for active devsolo session
 if [ -f ".devsolo/session.json" ]; then
   echo "❌ devsolo session active!"
-  echo "📝 Use 'devsolo ship' or '/devsolo:ship' to commit changes"
-  echo "   Or use 'devsolo abort' to exit the workflow"
+  echo "📝 Use '/devsolo:commit' to commit changes"
+  echo "   Or use '/devsolo:abort' to exit the workflow"
   exit 1
 fi
 
@@ -296,6 +296,27 @@ if [[ "$branch" == "main" || "$branch" == "master" ]]; then
   exit 1
 fi
 
+# Run linting (fail on errors only, not warnings)
+echo "🔍 Running linter..."
+lint_output=$(npm run lint 2>&1)
+if echo "$lint_output" | grep -qE "✖ [0-9]+ problems \\([1-9][0-9]* error"; then
+  echo "❌ Lint check failed with errors!"
+  echo "Run 'npm run lint' to see errors"
+  exit 1
+else
+  echo "✅ Lint check passed"
+fi
+
+# Run type checking
+echo "🔍 Running type check..."
+if npm run build > /dev/null 2>&1; then
+  echo "✅ Type check passed"
+else
+  echo "❌ Type check failed!"
+  echo "Run 'npm run build' to see errors"
+  exit 1
+fi
+
 exit 0
 `;
 
@@ -304,13 +325,13 @@ exit 0
     // Pre-push hook
     const prePushHook = `#!/bin/bash
 # devsolo pre-push hook
-# Validates branch state before pushing
+# Validates branch state and runs tests before pushing
 
 # Check for active devsolo session
 if [ -f ".devsolo/session.json" ]; then
   echo "❌ devsolo session active!"
-  echo "📝 Use 'devsolo ship --push' to push changes"
-  echo "   Or complete the workflow with 'devsolo ship'"
+  echo "📝 Use '/devsolo:ship' to push changes"
+  echo "   Or complete the workflow with '/devsolo:ship'"
   exit 1
 fi
 
@@ -318,6 +339,16 @@ branch=$(git branch --show-current)
 
 if [[ "$branch" == "main" || "$branch" == "master" ]]; then
   echo "❌ Direct pushes to $branch are not allowed!"
+  exit 1
+fi
+
+# Run tests before pushing
+echo "🧪 Running tests..."
+if npm test > /dev/null 2>&1; then
+  echo "✅ All tests passed"
+else
+  echo "❌ Tests failed!"
+  echo "Run 'npm test' to see failures"
   exit 1
 fi
 

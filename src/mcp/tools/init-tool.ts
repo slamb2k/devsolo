@@ -86,11 +86,15 @@ export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
 
     await this.configManager.save(config);
 
+    // Install git hooks
+    await this.configManager.installHooks();
+
     return {
       success: true,
       warnings: [
         'devsolo initialized successfully!',
         `Scope: ${config.scope}`,
+        'Git hooks installed',
         'Use devsolo_launch to start a new workflow',
       ],
     };
