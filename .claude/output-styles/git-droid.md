@@ -10,7 +10,7 @@ Format all git-droid output using this consistent, structured style for clarity 
 - **Actionable Guidance**: Always provide next steps or resolution guidance for errors
 - **Progressive Disclosure**: Show summary first, details on request
 - **Exact Section Labels**: Use exact section labels as specified below (capitalization and punctuation matter)
-- **Section Breaks**: Every `---` MUST be followed by a header with an icon (e.g., `📊 **Summary**`)
+- **Section Headers**: Use icon and bold text for section headers (e.g., `📊 **Summary**`)
 - **Compact Formatting**: Single-line items within sections should not have blank lines between them
 - **Header Spacing**: Section headers followed by lists or multi-line content must have one blank line after the header
 
@@ -38,7 +38,6 @@ Commands that perform workflow operations (launch, commit, ship, swap, abort, cl
 - Item: value ✓
 - Item: value ⚠
 
----
 📋 **Pre-flight Checks**
 
 - ✓ Check name (passed message)
@@ -46,7 +45,6 @@ Commands that perform workflow operations (launch, commit, ship, swap, abort, cl
 - ⚠ Check name (warning message)
 - ✗ Check name (failed message)
 
----
 ✅ **Operations Executed**
 
 - ✓ Operation description 1
@@ -59,7 +57,6 @@ Commands that perform workflow operations (launch, commit, ship, swap, abort, cl
 - ✓ Verification 2
 - ✓ Verification 3
 
----
 📊 **Result Summary** (or ✗ **Error Summary**)
 
 **Key metric:** value
@@ -71,16 +68,15 @@ Commands that perform workflow operations (launch, commit, ship, swap, abort, cl
 - Detail 1
 - Detail 2
 
----
 🚀 **Next Steps**
 
 **Options:** (only if user needs to choose)
 
-| # | Option | Risk | Action |
-|---|--------|------|--------|
-| 1 | Primary option label (brief description) [RECOMMENDED] | Low | What gets executed |
-| 2 | Alternative option label (brief description) | Medium | What gets executed |
-| 3 | Another option label (brief description) | High | What gets executed |
+| # | Option | Risk |
+|---|--------|------|
+| 1 | Primary option label [RECOMMENDED] | Low |
+| 2 | Alternative option | Medium |
+| 3 | Another option | High |
 
 Choose an option above to continue.
 
@@ -92,41 +88,33 @@ Choose an option above to continue.
 
 **Formatting Rules:**
 
-1. **Section Breaks with Headers**: Every `---` MUST be on its own line with a newline character immediately after it, then the icon and bold header
+1. **Section Headers**: Use emoji icon followed by bold text for all main sections
+   - ✅ Correct: `📊 **Result Summary**`
+   - ✅ Correct: `🚀 **Next Steps**`
+   - ❌ Wrong: `**Result Summary**` (missing icon)
+   - ❌ Wrong: `## 📊 **Result Summary**` (don't use markdown `##` headers)
 
-   **Correct format:**
-   ```
-   ---
-   📊 **Summary**
-   ```
-
-   **This means in your actual text output:**
-   - Type `---` then press Enter (newline)
-   - Type `📊 **Summary**`
-
-   **Common mistakes:**
-   - ❌ Wrong: `---📊 **Summary**` (MISSING NEWLINE - this is the most common error!)
-   - ❌ Wrong: `---\n**Summary**\n` (missing icon)
-   - ❌ Wrong: `---\n\n**Summary**\n` (extra blank line after ---)
-   - ❌ Wrong: `## 📊 **Summary**` (don't use markdown headers for main sections)
-
-   **CRITICAL**: The newline after `---` is essential for proper markdown rendering. Without it, the section break won't render correctly. Main workflow sections (Pre-flight Checks, Operations Executed, Result Summary, Next Steps) MUST use `---` + newline format.
-
-2. **Subsection Headers**: Subsections within a main section (like "Post-flight Verifications" under "Operations Executed") should have an icon
+2. **Subsection Headers**: Subsections within a main section should have an icon
    - ✅ Correct: `✓ **Post-flight Verifications:**`
+   - ✅ Correct: `📋 **Details:**`
    - ❌ Wrong: `**Post-flight Verifications:**` (missing icon)
 
-3. **Compact Single-Line Items**: When a section has only simple key-value pairs, no blank lines between them
+3. **Section Spacing**: Add a blank line before each main section header for visual separation
+   - ✅ Correct: `- Last item\n\n📊 **Result Summary**`
+   - ❌ Wrong: `- Last item\n📊 **Result Summary**` (no blank line)
+
+4. **Compact Single-Line Items**: When a section has only simple key-value pairs, no blank lines between them
    - ✅ Correct: `**Status:** value\n**Session:** value\n**Branch:** value`
    - ❌ Wrong: `**Status:** value\n\n**Session:** value\n\n**Branch:** value`
 
-4. **Spacing for Lists**: Section headers followed by lists need one blank line
-   - ✅ Correct: `**Details:**\n\n- Detail 1\n- Detail 2`
-   - ❌ Wrong: `**Details:**\n- Detail 1\n- Detail 2` (no blank line)
+5. **Spacing for Lists**: Section headers followed by lists need one blank line
+   - ✅ Correct: `📋 **Details:**\n\n- Detail 1\n- Detail 2`
+   - ❌ Wrong: `📋 **Details:**\n- Detail 1\n- Detail 2` (no blank line)
 
-5. **Icon Selection**: Use appropriate icons for section types
-   - 📋 Pre-flight Checks, Pre-analysis
+6. **Icon Selection**: Use appropriate icons for section types
+   - 📋 Pre-flight Checks, Pre-analysis, Details
    - ✅ Operations Executed, Success summaries
+   - ✓ Post-flight Verifications
    - 📊 Result Summary, Statistics
    - 🚀 Next Steps
    - ✗ Error Summary
@@ -137,7 +125,6 @@ Choose an option above to continue.
 When presenting user options (from CheckOption arrays returned by MCP tools), format as a table in the **Next Steps** section:
 
 ```
----
 🚀 **Next Steps**
 
 **Options:**
@@ -248,7 +235,6 @@ Format as markdown list:
 ### Result Summary
 Format using the standard section break pattern:
 ```
----
 📊 **Result Summary**
 
 **<Primary metric>:** <value>
@@ -262,7 +248,6 @@ Format using the standard section break pattern:
 
 Or for errors:
 ```
----
 ✗ **Error Summary**
 
 **Error:** <error-summary>
@@ -278,7 +263,6 @@ Or for errors:
 ## Example: Launch Workflow Output
 
 ```
----
 📋 **Pre-flight Checks**
 
 - ✓ On main branch
@@ -287,7 +271,6 @@ Or for errors:
 - ✓ No existing session
 - ✓ Branch name available
 
----
 ✅ **Operations Executed**
 
 - ✓ Created branch: `feature/add-user-authentication`
@@ -300,14 +283,12 @@ Or for errors:
 - ✓ Session created
 - ✓ Checked out to feature branch
 
----
 📊 **Result Summary**
 
 **Session Created:** `2d967326-881b-4167-9e52-fef1e07366f0`
 **Branch:** `feature/add-user-authentication`
 **State:** `BRANCH_READY`
 
----
 🚀 **Next Steps**
 
 When ready to ship your changes:
@@ -319,13 +300,11 @@ When ready to ship your changes:
 ## Example: Commit Workflow Output
 
 ```
----
 📋 **Pre-flight Checks**
 
 - ✓ Active session exists (2d967326...)
 - ✓ Changes to commit (3 files modified)
 
----
 ✅ **Operations Executed**
 
 - ✓ Created commit (abc1234)
@@ -336,7 +315,6 @@ When ready to ship your changes:
 - ✓ Commit created successfully
 - ✓ Session state updated to CHANGES_COMMITTED
 
----
 📊 **Result Summary**
 
 **Operation:** Changes committed to feature/add-user-authentication
@@ -361,7 +339,6 @@ src/auth/auth.test.ts | 89 ++++++++++++++++++++++++++++++++++++++++++
 3 files changed, 144 insertions(+), 0 deletions(-)
 ```
 
----
 🚀 **Next Steps**
 
 Ready to ship! Use `/devsolo:ship` to:
@@ -375,7 +352,6 @@ Ready to ship! Use `/devsolo:ship` to:
 ## Example: Ship Workflow Output
 
 ```
----
 📋 **Pre-flight Checks**
 
 - ✓ All changes committed
@@ -383,7 +359,6 @@ Ready to ship! Use `/devsolo:ship` to:
 - ✓ GitHub authentication configured
 - ✓ CI configured in repository
 
----
 ✅ **Operations Executed**
 
 - ✓ Pushed to remote
@@ -403,7 +378,6 @@ Ready to ship! Use `/devsolo:ship` to:
 - ✓ On main branch
 - ✓ Session completed
 
----
 📊 **Result Summary**
 
 **Operation:** Feature shipped via PR #123
@@ -413,7 +387,6 @@ Ready to ship! Use `/devsolo:ship` to:
 **CI checks:** 3 passed
 **Merge method:** squash
 
----
 🚀 **Next Steps**
 
 You're back on the main branch. Ready to start a new feature with `/devsolo:launch`
@@ -422,14 +395,12 @@ You're back on the main branch. Ready to start a new feature with `/devsolo:laun
 ## Example: Error Handling Output
 
 ```
----
 📋 **Pre-flight Checks**
 
 - ✗ No active session on current branch
 - ⚠ On branch 'feature/old-work'
 - ✓ Changes detected (ready to commit)
 
----
 ✗ **Error Summary**
 
 **Error:** Cannot commit without active session
@@ -438,7 +409,6 @@ You're back on the main branch. Ready to start a new feature with `/devsolo:laun
 
 You are on branch `feature/old-work` but there is no active devsolo session for this branch.
 
----
 🚀 **Next Steps**
 
 **Options:**
@@ -555,7 +525,7 @@ Details: <additional-information>
 8. **Use numbered options** - When presenting choices, use 1, 2, 3 format with [RECOMMENDED] marker
 9. **Show risk and action** - For all options, display `Risk: Low/Medium/High | Action: what happens`
 10. **Use consistent icons** - ✓ success, ✗ error, ⚠ warning, 🔍 analysis, 📋 info, ✅ complete, 📊 summary
-11. **Use horizontal rules with headers** - Every `---` MUST be immediately followed by an icon and bold header (e.g., `---\n📊 **Summary**\n`)
+11. **Use section headers** - Use icon and bold text for section headers (e.g., `📊 **Summary**`), no `---` needed
 12. **Compact single-line items** - Key-value pairs in sections should not have blank lines between them
 13. **Section header spacing** - Headers followed by lists or multi-line content must have one blank line after
 14. **Make errors actionable** - Always suggest resolution steps as numbered options

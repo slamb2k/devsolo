@@ -28,7 +28,6 @@ Format all docs-droid output using this consistent, structured style for clarity
 
 Found <N> total documents
 
----
 ⚠️ **Issues Found**
 
 Naming Violations (<count>):
@@ -60,7 +59,6 @@ Archival Candidates (<count>):
 
 For simple yes/no confirmations:
 ```
----
 ⚠️ **Proposed Actions**
 
 - Rename <N> files
@@ -73,18 +71,15 @@ Fix these issues? [y/N]
 
 For multiple options (3+ choices), use table format in Next Steps:
 ```
----
 ⚠️ **Issues Found**
 
 [Tables with issues as shown above]
 
----
 📊 **Summary**
 
 **Total issues:** 8
 **Files affected:** 5
 
----
 🚀 **Next Steps**
 
 **Options:**
@@ -100,7 +95,6 @@ Choose an option above to continue.
 
 ### Actions Report
 ```
----
 ✅ **Actions Completed**
 
 Files Renamed:
@@ -123,7 +117,6 @@ Documents Archived:
 - docs/dev/plans/phase1-complete.md → docs/archive/phase1-complete.md
   Reason: Implementation plan marked COMPLETE
 
----
 📊 **Summary**
 
 **Files renamed:** 2
@@ -137,7 +130,6 @@ Documents Archived:
 
 ### Analysis Phase
 ```
----
 📋 **Analyzing content**
 
 Content Analysis:
@@ -160,7 +152,6 @@ Naming:
 
 ### Supersession Check
 ```
----
 ⚠️ **Supersession Check**
 
 Found similar documents:
@@ -173,7 +164,6 @@ Found similar documents:
 
 ### Creation Report
 ```
----
 ✅ **Document Created**
 
 Created:
@@ -189,7 +179,6 @@ Documents Archived:
 - 🗄️ docs/guides/old-migration.md → docs/archive/old-migration.md
   Reason: Superseded by new migration guide
 
----
 📊 **Summary**
 
 **Document created:** docs/guides/migration-guide.md
@@ -205,7 +194,6 @@ Documents Archived:
 
 Found 45 total documents
 
----
 ⚠️ **Issues Found**
 
 Naming Violations (3):
@@ -236,7 +224,6 @@ Archival Candidates (2):
 | docs/dev/plans/phase1-plan.md   | Marked COMPLETE           |
 | docs/specs/old-architecture.md  | Superseded by new version |
 
----
 ⚠️ **Proposed Actions**
 
 - Rename 3 files
@@ -246,7 +233,6 @@ Archival Candidates (2):
 
 Fix these issues? [y/N]: y
 
----
 ✅ **Actions Completed**
 
 Files Renamed:
@@ -274,7 +260,6 @@ Documents Archived:
 - docs/specs/old-architecture.md → docs/archive/old-architecture.md
   Reason: Superseded by new-architecture.md
 
----
 📊 **Summary**
 
 **Files renamed:** 3
@@ -289,7 +274,6 @@ Documents Archived:
 ## Example: Complete Create Output
 
 ```
----
 📋 **Analyzing content**
 
 Content Analysis:
@@ -309,7 +293,6 @@ Naming:
 - ✓ Applied convention: migration-v1-to-v2.md
 - ✓ Descriptive and clear (includes version info)
 
----
 ⚠️ **Supersession Check**
 
 Found similar documents:
@@ -321,7 +304,6 @@ Found similar documents:
 
 Creating document...
 
----
 ✅ **Document Created**
 
 Created:
@@ -337,7 +319,6 @@ Documents Archived:
 - 🗄️ docs/guides/migration-guide.md → docs/archive/migration-guide.md
   Reason: Superseded by more specific v1-to-v2 migration guide
 
----
 📊 **Summary**
 
 **Document created:** docs/guides/migration-v1-to-v2.md
@@ -353,7 +334,6 @@ Documents Archived:
 
 ### File List
 ```
----
 📁 **Documents in docs/guides/**
 
 | File                    | Size    | Modified   | In README |
@@ -365,7 +345,6 @@ Documents Archived:
 
 ### Issue Summary
 ```
----
 📊 **Issue Summary**
 
 | Issue Type           | Count | Severity |
@@ -380,7 +359,6 @@ Documents Archived:
 
 ### Archival Report
 ```
----
 🗄️ **Archived Documents**
 
 | Original Location              | Archive Location           | Reason              |
@@ -410,7 +388,6 @@ Documents Archived:
 ## Error Messages
 
 ```
----
 ✗ **Error: <error-summary>**
 
 **Issue:** <description-of-problem>
@@ -426,7 +403,6 @@ Documents Archived:
 ## Warnings
 
 ```
----
 ⚠️ **Warning: <warning-summary>**
 
 **Details:** <explanation>
