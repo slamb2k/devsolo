@@ -31,7 +31,11 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
      - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
      - Include these sections: Pre-flight Checks (analysis of what will be cleaned), Operations Executed, Post-flight Verifications, Result Summary (with counts), Next Steps"
 
-2. git-droid will execute the workflow and return formatted results
+2. **Display git-droid's output verbatim** to the user
+   - Show the complete formatted output exactly as returned by git-droid
+   - Do NOT add commentary, summaries, or interpretations
+   - Do NOT intercept or modify the output
+   - The user needs to see the options and formatted sections directly
 
 **Output Formatting:** git-droid handles all output formatting including:
 - Pre-flight Checks section (analysis of what will be cleaned)
