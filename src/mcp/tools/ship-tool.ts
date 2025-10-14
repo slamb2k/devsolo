@@ -480,7 +480,7 @@ export class ShipTool extends BaseMCPTool<ShipToolInput, GitHubToolResult> {
         description = `## Summary
 
 Branch: ${session.branchName}
-Session: ${session.id}
+Workflow: ${session.workflowType} (${session.currentState})
 Created: ${new Date(session.createdAt).toLocaleString()}
 
 ## Changes

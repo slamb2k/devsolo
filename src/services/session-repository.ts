@@ -20,6 +20,15 @@ export class SessionRepository {
     this.configManager = new ConfigurationManager(basePath);
   }
 
+  /**
+   * Convert branch name to safe filename
+   * Replaces filesystem-unsafe characters with URL encoding
+   */
+  private branchToFilename(branchName: string): string {
+    // URL encode the branch name to handle all special characters
+    return encodeURIComponent(branchName) + '.json';
+  }
+
   async initialize(): Promise<void> {
     await fs.mkdir(this.sessionPath, { recursive: true });
     await fs.mkdir(this.lockPath, { recursive: true });
@@ -28,13 +37,14 @@ export class SessionRepository {
   async createSession(session: WorkflowSession): Promise<WorkflowSession> {
     await this.initialize();
 
-    const sessionFile = path.join(this.sessionPath, `${session.id}.json`);
-    const lockFile = path.join(this.lockPath, `${session.id}.lock`);
+    const filename = this.branchToFilename(session.branchName);
+    const sessionFile = path.join(this.sessionPath, filename);
+    const lockFile = path.join(this.lockPath, filename.replace('.json', '.lock'));
 
     // Check if session already exists
     try {
       await fs.access(sessionFile);
-      throw new Error(`Session ${session.id} already exists`);
+      throw new Error(`Session for branch ${session.branchName} already exists`);
     } catch (error: any) {
       if (error.code !== 'ENOENT') {
         throw error;
@@ -66,39 +76,51 @@ export class SessionRepository {
   }
 
   async getSession(sessionId: string): Promise<WorkflowSession | null> {
-    const sessionFile = path.join(this.sessionPath, `${sessionId}.json`);
+    await this.initialize();
 
-    try {
-      const data = await fs.readFile(sessionFile, 'utf-8');
-      const json = JSON.parse(data);
-      return WorkflowSession.fromJSON(json);
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
-        return null;
+    // Since we use branch-based filenames, we need to scan files to find by ID
+    // This is O(n) but provides backward compatibility
+    // Prefer using getSessionByBranch() for O(1) lookup
+    const files = await fs.readdir(this.sessionPath);
+
+    for (const file of files) {
+      if (!file.endsWith('.json')) {
+        continue;
       }
-      throw error;
+
+      try {
+        const sessionFile = path.join(this.sessionPath, file);
+        const data = await fs.readFile(sessionFile, 'utf-8');
+        const json = JSON.parse(data);
+
+        if (json.id === sessionId) {
+          return WorkflowSession.fromJSON(json);
+        }
+      } catch (error) {
+        // Skip files that can't be read or parsed
+        continue;
+      }
     }
+
+    return null;
   }
 
   async getSessionByBranch(branchName: string): Promise<WorkflowSession | null> {
     await this.initialize();
 
-    const files = await fs.readdir(this.sessionPath);
+    // O(1) lookup using branch-based filename
+    const filename = this.branchToFilename(branchName);
+    const sessionFile = path.join(this.sessionPath, filename);
 
-    for (const file of files) {
-      if (!file.endsWith('.json') || file === 'index.json') {
-        continue;
+    try {
+      const data = await fs.readFile(sessionFile, 'utf-8');
+      return WorkflowSession.fromJSON(JSON.parse(data));
+    } catch (error: any) {
+      if (error.code === 'ENOENT') {
+        return null; // No session for this branch
       }
-
-      const sessionId = path.basename(file, '.json');
-      const session = await this.getSession(sessionId);
-
-      if (session && session.branchName === branchName) {
-        return session;
-      }
+      throw error;
     }
-
-    return null;
   }
 
   async updateSession(sessionId: string, updates: Partial<WorkflowSession>): Promise<WorkflowSession> {
@@ -111,8 +133,9 @@ export class SessionRepository {
     Object.assign(session, updates);
     session.updatedAt = new Date().toISOString();
 
-    // Write atomically
-    const sessionFile = path.join(this.sessionPath, `${sessionId}.json`);
+    // Write atomically using branch-based filename
+    const filename = this.branchToFilename(session.branchName);
+    const sessionFile = path.join(this.sessionPath, filename);
     const tempFile = `${sessionFile}.tmp`;
     await fs.writeFile(tempFile, JSON.stringify(session.toJSON(), null, 2));
     await fs.rename(tempFile, sessionFile);
@@ -121,14 +144,16 @@ export class SessionRepository {
   }
 
   async deleteSession(sessionId: string): Promise<void> {
-    const sessionFile = path.join(this.sessionPath, `${sessionId}.json`);
-    const lockFile = path.join(this.lockPath, `${sessionId}.lock`);
-
-    // Get session for audit
+    // Get session for audit (also gives us branch name)
     const session = await this.getSession(sessionId);
     if (!session) {
       return; // Already deleted
     }
+
+    // Use branch-based filenames
+    const filename = this.branchToFilename(session.branchName);
+    const sessionFile = path.join(this.sessionPath, filename);
+    const lockFile = path.join(this.lockPath, filename.replace('.json', '.lock'));
 
     // Delete files
     await fs.unlink(sessionFile).catch(() => { /* ignore */ });
@@ -157,15 +182,22 @@ export class SessionRepository {
     const sessions: WorkflowSession[] = [];
 
     for (const file of files) {
-      if (!file.endsWith('.json') || file === 'index.json') {
+      if (!file.endsWith('.json')) {
         continue;
       }
 
-      const sessionId = path.basename(file, '.json');
-      const session = await this.getSession(sessionId);
+      try {
+        const sessionFile = path.join(this.sessionPath, file);
+        const data = await fs.readFile(sessionFile, 'utf-8');
+        const json = JSON.parse(data);
+        const session = WorkflowSession.fromJSON(json);
 
-      if (session && (includeExpired || !session.isExpired())) {
-        sessions.push(session);
+        if (session && (includeExpired || !session.isExpired())) {
+          sessions.push(session);
+        }
+      } catch (error) {
+        // Skip files that can't be read or parsed
+        continue;
       }
     }
 
@@ -275,7 +307,14 @@ export class SessionRepository {
   }
 
   async acquireLock(sessionId: string): Promise<boolean> {
-    const lockFile = path.join(this.lockPath, `${sessionId}.lock`);
+    // Get session to find branch name
+    const session = await this.getSession(sessionId);
+    if (!session) {
+      throw new Error(`Session ${sessionId} not found`);
+    }
+
+    const filename = this.branchToFilename(session.branchName);
+    const lockFile = path.join(this.lockPath, filename.replace('.json', '.lock'));
 
     try {
       // Check if lock exists
@@ -300,12 +339,26 @@ export class SessionRepository {
   }
 
   async releaseLock(sessionId: string): Promise<void> {
-    const lockFile = path.join(this.lockPath, `${sessionId}.lock`);
+    // Get session to find branch name
+    const session = await this.getSession(sessionId);
+    if (!session) {
+      return; // Session already deleted, lock doesn't matter
+    }
+
+    const filename = this.branchToFilename(session.branchName);
+    const lockFile = path.join(this.lockPath, filename.replace('.json', '.lock'));
     await fs.unlink(lockFile).catch(() => { /* ignore */ });
   }
 
   async isLocked(sessionId: string): Promise<boolean> {
-    const lockFile = path.join(this.lockPath, `${sessionId}.lock`);
+    // Get session to find branch name
+    const session = await this.getSession(sessionId);
+    if (!session) {
+      return false; // Session doesn't exist, can't be locked
+    }
+
+    const filename = this.branchToFilename(session.branchName);
+    const lockFile = path.join(this.lockPath, filename.replace('.json', '.lock'));
     try {
       await fs.access(lockFile);
       return true;
