@@ -21,6 +21,113 @@ defaults:
   squashMerge: true
 ```
 
+## Auto Mode Configuration
+
+devsolo supports an `autoMode` preference that automatically handles all prompts with recommended options. This eliminates the need to pass `--auto` with every command.
+
+### Setting Auto Mode
+
+Add to your configuration file:
+
+```yaml
+preferences:
+  autoMode: true  # Automatically use recommended options for all prompts
+```
+
+### Configuration Locations
+
+1. **Global Config** (`~/.devsolo/config.yaml`): Applies to all projects
+2. **Project Config** (`<project>/.devsolo/config.yaml`): Project-specific setting
+
+### Override Behavior
+
+The auto mode can be overridden on a per-command basis:
+
+```bash
+# Config has autoMode: true, but disable for this command
+/devsolo:launch --auto:false
+/devsolo:commit --auto:false
+
+# Config has autoMode: false, but enable for this command
+/devsolo:launch --auto:true
+/devsolo:ship --auto:true
+
+# Shorthand syntax (when config has autoMode: false)
+/devsolo:launch --auto
+```
+
+### Priority Order
+
+The resolution of auto mode follows this priority (highest to lowest):
+
+1. **Explicit command flag**: `--auto:true` or `--auto:false`
+2. **Config preference**: `preferences.autoMode`
+3. **Default**: `false` (prompts enabled)
+
+### Example Scenarios
+
+**Scenario 1: Global Auto Mode**
+```yaml
+# ~/.devsolo/config.yaml
+preferences:
+  autoMode: true
+```
+- All commands use auto mode by default
+- Override with `--auto:false` when you need to choose manually
+
+**Scenario 2: Project-Specific Auto Mode**
+```yaml
+# project/.devsolo/config.yaml
+preferences:
+  autoMode: true
+```
+- Only this project uses auto mode
+- Other projects use default (prompts)
+
+**Scenario 3: Selective Auto Mode**
+```yaml
+# config.yaml
+preferences:
+  autoMode: false  # default
+```
+```bash
+# Enable auto mode only for specific commands
+/devsolo:launch --auto:true
+/devsolo:commit  # Will prompt (no auto flag)
+```
+
+### When Auto Mode is Active
+
+When auto mode is enabled (via config or flag), devsolo will:
+
+1. **Automatically resolve pre-flight check failures** with recommended options:
+   - Stash uncommitted changes before switching branches
+   - Abort existing sessions when launching new workflows
+   - Switch to main branch when required
+
+2. **Generate content automatically**:
+   - Branch names from descriptions or changes
+   - Commit messages from diffs (using Conventional Commits)
+   - PR descriptions from commits and changes
+
+3. **Choose low-risk options** when multiple options are available
+
+### Nested Command Propagation
+
+When a command explicitly sets `auto` (true or false), this value propagates to all nested operations:
+
+```bash
+# Launch with auto:true
+/devsolo:launch --auto:true
+
+# All nested operations inherit auto:true:
+# - Pre-flight checks auto-resolve
+# - Branch name auto-generated
+# - Session conflicts auto-resolved
+```
+
+This ensures consistent behavior throughout multi-stage workflows.
+
 ## Global Configuration
 
 Located at `~/.devsolo/config.yaml`, created automatically on first install.

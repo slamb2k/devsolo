@@ -21,6 +21,11 @@ Switch between active workflow sessions without aborting them.
 
 **⚠️ CRITICAL OUTPUT REQUIREMENT:** After EVERY Task tool invocation in this workflow, you MUST immediately output the complete git-droid response as text to the user. DO NOT proceed to check signals or continue to the next stage without first displaying the full output. The user needs to see all numbered options, formatted sections, and status information.
 
+**Before starting the workflow, resolve auto mode:**
+1. If `--auto` argument was provided: use that value (true or false)
+2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.autoMode`
+3. Pass the resolved auto mode to all nested MCP tool calls and slash command invocations using `--auto:true` or `--auto:false`
+
 The swap workflow consists of three stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Initialize Swap Workflow
@@ -28,15 +33,17 @@ The swap workflow consists of three stages, each using a separate git-droid sub-
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Initialising swap workflow..."
-   - **prompt:** "Initialize the swap workflow with the following parameters: [pass all user arguments]. You must:
+   - **prompt:** "Initialize the swap workflow with the following parameters: [pass all user arguments]. Auto mode: [resolved auto mode value]. You must:
      - Verify target session exists on target branch
      - If target session not found: List available sessions and abort
      - Check for uncommitted changes on current branch using `git status`
-     - If uncommitted changes exist: Present numbered options to user:
-       1. Stash changes and swap [RECOMMENDED]
-       2. Commit changes first (then abort swap, user should commit manually)
-       3. Discard changes and swap (force)
-       4. Abort swap workflow
+     - If uncommitted changes exist:
+       * If auto mode is TRUE: Automatically choose option 1 (stash) and set 'Next Stage: STASH_CHANGES'
+       * If auto mode is FALSE: Present numbered options to user:
+         1. Stash changes and swap [RECOMMENDED]
+         2. Commit changes first (then abort swap, user should commit manually)
+         3. Discard changes and swap (force)
+         4. Abort swap workflow
      - If no uncommitted changes: Indicate ready to swap
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
      - Include these sections: Pre-flight Checks, Result Summary

@@ -12,11 +12,16 @@ Manage documentation following devsolo's documentation structure and conventions
 
 **⚠️ CRITICAL OUTPUT REQUIREMENT:** After invoking the Task tool, you MUST immediately output the complete docs-droid response as text to the user. DO NOT add commentary, summaries, or interpretations. The user needs to see all numbered options, formatted sections, and status information exactly as docs-droid returns them.
 
+**Before starting the workflow, resolve auto mode:**
+1. If `--auto` argument was provided: use that value (true or false)
+2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.autoMode`
+3. Pass the resolved auto mode to the docs-droid sub-agent prompt
+
 1. **Use the Task tool** to invoke the docs-droid sub-agent:
    - **subagent_type:** "docs-droid"
    - **description:** "Manage documentation"
-   - **prompt:** "Execute documentation management according to the mode (audit or create) with the following parameters: [pass all user arguments]. You must:
-     - For AUDIT MODE (no arguments): Scan all documentation, identify issues, report findings, present numbered options, and fix if approved
+   - **prompt:** "Execute documentation management according to the mode (audit or create) with the following parameters: [pass all user arguments]. Auto mode: [resolved auto mode value]. You must:
+     - For AUDIT MODE (no arguments): Scan all documentation, identify issues, report findings. If auto mode is TRUE, automatically choose the [RECOMMENDED] option. If auto mode is FALSE, present numbered options and wait for user choice. Fix if approved.
      - For CREATE MODE (with arguments): Analyze content, determine placement, apply naming conventions, check for superseded docs, create document, update READMEs
      - Format all results following docs-droid output style from `.claude/output-styles/docs-droid.md`
      - Use numbered options (3+ choices) with [RECOMMENDED] marker or yes/no for binary choices

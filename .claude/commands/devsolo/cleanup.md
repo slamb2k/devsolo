@@ -20,6 +20,11 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
 
 **⚠️ CRITICAL OUTPUT REQUIREMENT:** After EVERY Task tool invocation in this workflow, you MUST immediately output the complete git-droid response as text to the user. DO NOT proceed to check signals or continue to the next stage without first displaying the full output. The user needs to see all numbered options, formatted sections, and status information.
 
+**Before starting the workflow, resolve auto mode:**
+1. If `--auto` argument was provided: use that value (true or false)
+2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.autoMode`
+3. Pass the resolved auto mode to all nested MCP tool calls and slash command invocations using `--auto:true` or `--auto:false`
+
 The cleanup workflow consists of two stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Analyze Repository
@@ -27,13 +32,14 @@ The cleanup workflow consists of two stages, each using a separate git-droid sub
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Analyzing repository..."
-   - **prompt:** "Analyze the repository for cleanup candidates with the following parameters: [pass all user arguments]. You must:
+   - **prompt:** "Analyze the repository for cleanup candidates with the following parameters: [pass all user arguments]. Auto mode: [resolved auto mode value]. You must:
      - Sync main branch first (checkout main, pull latest changes)
      - Scan `.devsolo/sessions/` directory for stale sessions (COMPLETE, ABORTED, expired, branch deleted)
      - Scan git branches for orphaned branches (no active session, not main, not current)
      - Present findings in tables if multiple items found
      - Show summary of what will be cleaned
-     - Present numbered options to user:
+     - If auto mode is TRUE: Automatically choose option 1 (clean sessions and branches) and set 'Next Stage: EXECUTE_FULL_CLEANUP'
+     - If auto mode is FALSE: Present numbered options to user:
        1. Clean sessions and branches [RECOMMENDED]
        2. Clean sessions only
        3. Cancel cleanup
