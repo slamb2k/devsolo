@@ -17,6 +17,14 @@ Manage documentation following devsolo's documentation structure and conventions
 2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.autoMode`
 3. Pass the resolved auto mode to the docs-droid sub-agent prompt
 
+**Before starting the workflow, resolve verbose mode:**
+1. If `--verbose` argument was provided: use that value (true or false)
+2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.verboseMode`
+3. If not in config, default to `false` (brief mode)
+4. Pass the resolved verbose mode to the docs-droid sub-agent invocation using `verbose=true` or `verbose=false`
+5. In brief mode (verbose=false), docs-droid agent should show minimal output: status indicator + summary report only
+6. In verbose mode (verbose=true), docs-droid agent should show all sections: findings reports, numbered options, summary reports with full details
+
 1. **Use the Task tool** to invoke the docs-droid sub-agent:
    - **subagent_type:** "docs-droid"
    - **description:** "Manage documentation"

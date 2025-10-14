@@ -27,6 +27,14 @@ Cancel the current workflow session and optionally delete the feature branch.
 2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.autoMode`
 3. Pass the resolved auto mode to all nested MCP tool calls and slash command invocations using `--auto:true` or `--auto:false`
 
+**Before starting the workflow, resolve verbose mode:**
+1. If `--verbose` argument was provided: use that value (true or false)
+2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.verboseMode`
+3. If not in config, default to `false` (brief mode)
+4. Pass the resolved verbose mode to all nested git-droid sub-agent invocations using `verbose=true` or `verbose=false`
+5. In brief mode (verbose=false), git-droid agents should show minimal output: status indicator + result summary only
+6. In verbose mode (verbose=true), git-droid agents should show all sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+
 The abort workflow consists of three stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Initialize Abort Workflow

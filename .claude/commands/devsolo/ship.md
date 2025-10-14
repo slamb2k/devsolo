@@ -29,6 +29,14 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.autoMode`
 3. Pass the resolved auto mode to all nested MCP tool calls and slash command invocations using `--auto:true` or `--auto:false`
 
+**Before starting the workflow, resolve verbose mode:**
+1. If `--verbose` argument was provided: use that value (true or false)
+2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.verboseMode`
+3. If not in config, default to `false` (brief mode)
+4. Pass the resolved verbose mode to all nested git-droid sub-agent invocations using `verbose=true` or `verbose=false`
+5. In brief mode (verbose=false), git-droid agents should show minimal output: status indicator + result summary only
+6. In verbose mode (verbose=true), git-droid agents should show all sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+
 The ship workflow consists of three stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Initialize Ship Workflow
@@ -36,7 +44,7 @@ The ship workflow consists of three stages, each using a separate git-droid sub-
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Initialising ship workflow..."
-   - **prompt:** "Initialize the ship workflow with the following parameters: [pass all user arguments]. You must:
+   - **prompt:** "Initialize the ship workflow with the following parameters: [pass all user arguments including verbose flag]. You must:
      - Check for active devsolo session
      - Check for uncommitted changes using `git status`
      - Verify session is ready to ship
@@ -46,7 +54,9 @@ The ship workflow consists of three stages, each using a separate git-droid sub-
        3. Abort ship workflow
      - If no uncommitted changes: Indicate ready to proceed with ship
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - Include these sections: Pre-flight Checks, Result Summary
+     - IMPORTANT - Output formatting based on verbose flag:
+       * If verbose=false (brief mode): Show only status indicator + Result Summary
+       * If verbose=true (verbose mode): Include all sections: Pre-flight Checks, Result Summary
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: COMMIT_ALL' (user chose option 1)
        * 'Next Stage: COMMIT_STAGED' (user chose option 2)
@@ -71,7 +81,7 @@ Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Committing changes..."
-   - **prompt:** "Commit the uncommitted changes. You must:
+   - **prompt:** "Commit the uncommitted changes with the following parameters: [pass verbose flag]. You must:
      - Use SlashCommand tool to invoke `/devsolo:commit` with appropriate parameters
      - If Stage 1 returned 'COMMIT_STAGED': Pass --stagedOnly flag
      - If Stage 1 returned 'COMMIT_ALL': Do not pass --stagedOnly flag
@@ -79,7 +89,9 @@ Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
      - Wait for commit to complete
      - Verify commit was successful
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - Include these sections: Operations Executed, Post-flight Verifications, Result Summary
+     - IMPORTANT - Output formatting based on verbose flag:
+       * If verbose=false (brief mode): Show only status indicator + Result Summary
+       * If verbose=true (verbose mode): Include all sections: Operations Executed, Post-flight Verifications, Result Summary
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: PROCEED_TO_SHIP' (commit successful)
        * 'Next Stage: ABORTED' (commit failed or user aborted)"
@@ -99,12 +111,14 @@ Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Completing ship workflow..."
-   - **prompt:** "Complete the ship workflow with the following parameters: [pass all user arguments]. You must:
+   - **prompt:** "Complete the ship workflow with the following parameters: [pass all user arguments including verbose flag]. You must:
      - Generate PR description if not provided (analyze commits since main)
      - Call `mcp__devsolo__devsolo_ship` MCP tool with all parameters
      - Monitor CI checks (MCP tool handles this)
      - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - Include these sections: Operations Executed (push, PR creation, CI wait, merge, cleanup), Post-flight Verifications, Result Summary (with PR link and stats), Next Steps
+     - IMPORTANT - Output formatting based on verbose flag:
+       * If verbose=false (brief mode): Show only status indicator + Result Summary (with PR link)
+       * If verbose=true (verbose mode): Include all sections: Operations Executed, Post-flight Verifications, Result Summary (with PR link and stats), Next Steps
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: COMPLETED' (ship successful)
        * 'Next Stage: FAILED' (ship failed, branch preserved)"
