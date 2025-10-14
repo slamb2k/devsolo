@@ -34,6 +34,18 @@ Start a new feature workflow. Creates a feature branch and devsolo session.
 5. In brief mode (verbose=false), git-droid agents should show minimal output: status indicator + result summary only
 6. In verbose mode (verbose=true), git-droid agents should show all sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
 
+**Create workflow progress tracker:**
+Use the TodoWrite tool to create todos showing all workflow stages:
+```json
+[
+  {"content": "Initialize launch workflow", "activeForm": "Initializing launch workflow", "status": "pending"},
+  {"content": "Resolve pre-flight issues (if needed)", "activeForm": "Resolving pre-flight issues", "status": "pending"},
+  {"content": "Generate branch name (if needed)", "activeForm": "Generating branch name", "status": "pending"},
+  {"content": "Complete launch workflow", "activeForm": "Completing launch workflow", "status": "pending"}
+]
+```
+Update todo status as you progress through stages (pending → in_progress → completed). Skip stages that aren't needed by marking them completed immediately.
+
 The launch workflow consists of up to four stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Initialize Launch Workflow

@@ -33,6 +33,16 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
 5. In brief mode (verbose=false), git-droid agents should show minimal output: status indicator + result summary only
 6. In verbose mode (verbose=true), git-droid agents should show all sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
 
+**Create workflow progress tracker:**
+Use the TodoWrite tool to create todos showing all workflow stages:
+```json
+[
+  {"content": "Analyze repository", "activeForm": "Analyzing repository", "status": "pending"},
+  {"content": "Execute cleanup", "activeForm": "Executing cleanup", "status": "pending"}
+]
+```
+Update todo status as you progress through stages (pending → in_progress → completed).
+
 The cleanup workflow consists of two stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Analyze Repository

@@ -37,11 +37,24 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 5. In brief mode (verbose=false), git-droid agents should show minimal output: status indicator + result summary only
 6. In verbose mode (verbose=true), git-droid agents should show all sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
 
+**Create workflow progress tracker:**
+Use the TodoWrite tool to create todos showing all workflow stages:
+```json
+[
+  {"content": "Initialize ship workflow", "activeForm": "Initializing ship workflow", "status": "pending"},
+  {"content": "Commit changes (if needed)", "activeForm": "Committing changes", "status": "pending"},
+  {"content": "Complete ship workflow", "activeForm": "Completing ship workflow", "status": "pending"}
+]
+```
+Update todo status as you progress through stages (pending → in_progress → completed).
+
 The ship workflow consists of three stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Initialize Ship Workflow
 
-1. **Use the Task tool** to invoke the git-droid sub-agent:
+1. **Mark todo as in_progress:** Update "Initialize ship workflow" to in_progress status
+
+2. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Initialising ship workflow..."
    - **prompt:** "Initialize the ship workflow with the following parameters: [pass all user arguments including verbose flag]. You must:
@@ -63,22 +76,26 @@ The ship workflow consists of three stages, each using a separate git-droid sub-
        * 'Next Stage: PROCEED_TO_SHIP' (no uncommitted changes)
        * 'Next Stage: ABORTED' (user chose option 3)"
 
-2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+3. **⬆️ OUTPUT the complete git-droid response above as text to the user**
    - Display the ENTIRE formatted output exactly as git-droid returned it
    - Include ALL sections: Pre-flight Checks, numbered options, Result Summary
    - Do NOT summarize, skip sections, or add commentary
    - The user MUST see this output before you proceed
 
-3. **Check the response** for the "Next Stage:" directive in Result Summary:
+4. **Check the response** for the "Next Stage:" directive in Result Summary:
    - If 'Next Stage: COMMIT_ALL' or 'Next Stage: COMMIT_STAGED', proceed to Stage 2 (Commit Changes)
-   - If 'Next Stage: PROCEED_TO_SHIP', skip to Stage 3 (Complete Ship Workflow)
+   - If 'Next Stage: PROCEED_TO_SHIP', skip to Stage 3 (Complete Ship Workflow) and mark "Commit changes" as completed
    - If 'Next Stage: ABORTED', terminate workflow
+
+5. **Mark todo as completed:** Update "Initialize ship workflow" to completed status
 
 ### Stage 2: Commit Changes (Conditional)
 
 Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
 
-1. **Use the Task tool** to invoke the git-droid sub-agent:
+1. **Mark todo as in_progress:** Update "Commit changes (if needed)" to in_progress status
+
+2. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Committing changes..."
    - **prompt:** "Commit the uncommitted changes with the following parameters: [pass verbose flag]. You must:
@@ -96,19 +113,23 @@ Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
        * 'Next Stage: PROCEED_TO_SHIP' (commit successful)
        * 'Next Stage: ABORTED' (commit failed or user aborted)"
 
-2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+3. **⬆️ OUTPUT the complete git-droid response above as text to the user**
    - Display the ENTIRE formatted output exactly as git-droid returned it
    - Include ALL sections: Operations Executed, Post-flight Verifications, Result Summary
    - Do NOT summarize, skip sections, or add commentary
    - The user MUST see this output before you proceed
 
-3. **Check the response** for the "Next Stage:" directive in Result Summary:
+4. **Check the response** for the "Next Stage:" directive in Result Summary:
    - If 'Next Stage: PROCEED_TO_SHIP', proceed to Stage 3 (Complete Ship Workflow)
    - If 'Next Stage: ABORTED', terminate workflow
 
+5. **Mark todo as completed:** Update "Commit changes (if needed)" to completed status
+
 ### Stage 3: Complete Ship Workflow
 
-1. **Use the Task tool** to invoke the git-droid sub-agent:
+1. **Mark todo as in_progress:** Update "Complete ship workflow" to in_progress status
+
+2. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Completing ship workflow..."
    - **prompt:** "Complete the ship workflow with the following parameters: [pass all user arguments including verbose flag]. You must:
@@ -123,11 +144,13 @@ Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
        * 'Next Stage: COMPLETED' (ship successful)
        * 'Next Stage: FAILED' (ship failed, branch preserved)"
 
-2. **⬆️ OUTPUT the complete git-droid response above as text to the user**
+3. **⬆️ OUTPUT the complete git-droid response above as text to the user**
    - Display the ENTIRE formatted output exactly as git-droid returned it
    - Include ALL sections: Operations Executed, Post-flight Verifications, Result Summary, Next Steps
    - Do NOT summarize, skip sections, or add commentary
    - The user MUST see this output before you proceed
+
+4. **Mark todo as completed:** Update "Complete ship workflow" to completed status
 
 **Output Formatting:** Each git-droid stage handles its own output formatting following the git-droid output style
 
