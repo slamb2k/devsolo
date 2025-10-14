@@ -34,23 +34,37 @@ This section is automatically managed by devsolo. Last updated: 2025-09-25T18:39
 
 ### Workflow Detection
 
-Before performing git operations, check for active devsolo session:
+Before performing git operations, check for active devsolo session on current branch:
 
 ```javascript
-// Check if devsolo is managing current work
-if (fs.existsSync('.devsolo/session.json')) {
-  // devsolo is active - MUST use MCP tools
-  return 'use-devsolo-mcp';
-} else {
-  // No active session - can use standard git
-  return 'use-standard-git';
+// Check if devsolo is managing current branch
+const currentBranch = execSync('git branch --show-current').toString().trim();
+
+// Scan session files to find one matching current branch
+if (fs.existsSync('.devsolo/sessions')) {
+  const files = fs.readdirSync('.devsolo/sessions');
+  for (const file of files) {
+    if (!file.endsWith('.json')) continue;
+
+    const sessionPath = `.devsolo/sessions/${file}`;
+    const session = JSON.parse(fs.readFileSync(sessionPath, 'utf-8'));
+
+    if (session.branchName === currentBranch &&
+        session.currentState !== 'COMPLETE' &&
+        session.currentState !== 'ABORTED') {
+      // devsolo is active on this branch - MUST use MCP tools
+      return 'use-devsolo-mcp';
+    }
+  }
 }
+// No active session on current branch - can use standard git
+return 'use-standard-git';
 ```
 
 ### ⛔ When devsolo Session is Active
 
-If `.devsolo/session.json` exists, **NEVER** use these commands:
-- `git commit` → Use `/devsolo:ship` instead
+If an active session exists for the current branch, **NEVER** use these commands:
+- `git commit` → Use `/devsolo:commit` instead
 - `git push` → Use `/devsolo:ship` instead
 - `gh pr create` → Use `/devsolo:ship` instead
 - `git checkout -b` → Use `/devsolo:launch` instead
@@ -58,7 +72,7 @@ If `.devsolo/session.json` exists, **NEVER** use these commands:
 
 ### ✅ When No Session Exists
 
-If no `.devsolo/session.json` file:
+If no active session exists for the current branch:
 - Safe to use standard git commands
 - Can optionally start devsolo workflow with `/devsolo:launch`
 - Direct git operations won't conflict with devsolo
