@@ -159,3 +159,4 @@ When adding significant documentation:
 1. Create the document in the appropriate folder
 2. Update that folder's README.md with an entry
 3. Link related documents for cross-references
+- If we know the MCP server is running old compiled code, and we should use a devsolo feature, first rebuild the code and then allow the user to restart Claude Code.
