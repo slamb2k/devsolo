@@ -55,14 +55,13 @@ export class InfoTool extends BaseMCPTool<InfoToolInput, QueryToolResult> {
 
     if (session) {
       data['session'] = {
-        id: session.id,
         branchName: session.branchName,
         state: session.currentState,
         workflowType: session.workflowType,
         createdAt: session.createdAt,
         pr: session.metadata?.pr,
       };
-      data['message'] = `Active session on ${currentBranch} (state: ${session.currentState})`;
+      data['message'] = `Active ${session.workflowType} workflow on ${currentBranch} (state: ${session.currentState})`;
     } else {
       data['message'] = `No active session on ${currentBranch}`;
     }

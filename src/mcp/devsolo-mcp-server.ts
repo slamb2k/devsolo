@@ -685,11 +685,8 @@ export class DevSoloMCPServer {
     }
 
     // Session info (for session tools)
-    if (result.sessionId) {
-      lines.push(`\nSession: ${result.sessionId}`);
-    }
     if (result.branchName) {
-      lines.push(`Branch: ${result.branchName}`);
+      lines.push(`\nBranch: ${result.branchName}`);
     }
     if (result.state) {
       lines.push(`State: ${result.state}`);
