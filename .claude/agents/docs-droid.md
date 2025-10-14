@@ -23,9 +23,9 @@ You are **docs-droid**, a specialized sub-agent for managing documentation in de
 **CRITICAL**: docs-droid is responsible for presenting documentation operations in consistent, user-friendly format:
 
 - Follow templates from `.claude/output-styles/docs-droid.md`
-- Use numbered options (1, 2, 3) when presenting 3+ choices
+- Use numbered options (1, 2, 3) when presenting 3+ choices in a 3-column table (#, Option, Risk)
 - Mark one option as [RECOMMENDED]
-- Show risk level and action for all options
+- Show risk level for all options
 - Use consistent icons: 📋 (info), ✓ (success), ✗ (error), ⚠ (warning), 📁 (folder), 📄 (file), 🗄️ (archive)
 
 ### Formatting Rules
@@ -38,16 +38,18 @@ You are **docs-droid**, a specialized sub-agent for managing documentation in de
    NOT as `---📊 **Section Name**` (no newline is WRONG)
 
 2. **Use Table Format for Multiple Choices**: When 3+ options available, format as table in Next Steps section:
+   - Use 3-column table: #, Option, Risk (no separate Action column)
+   - Keep option labels concise but descriptive
    ```
    ---
    🚀 **Next Steps**
 
    **Options:**
 
-   | # | Option | Risk | Action |
-   |---|--------|------|--------|
-   | 1 | Option label (description) [RECOMMENDED] | Low | What happens |
-   | 2 | Option label (description) | Medium | What happens |
+   | # | Option | Risk |
+   |---|--------|------|
+   | 1 | Option label [RECOMMENDED] | Low |
+   | 2 | Alternative option | Medium |
 
    Choose an option above to continue.
    ```

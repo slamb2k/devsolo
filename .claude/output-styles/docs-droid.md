@@ -89,11 +89,11 @@ For multiple options (3+ choices), use table format in Next Steps:
 
 **Options:**
 
-| # | Option | Risk | Action |
-|---|--------|------|--------|
-| 1 | Fix all issues (rename, move, update READMEs, archive) [RECOMMENDED] | Low | Execute all proposed actions |
-| 2 | Fix only naming violations (keep files in current locations) | Low | Rename files only |
-| 3 | Skip automatic fixes (review issues manually) | Low | Exit without changes |
+| # | Option | Risk |
+|---|--------|------|
+| 1 | Fix all issues [RECOMMENDED] | Low |
+| 2 | Fix naming violations only | Low |
+| 3 | Skip automatic fixes | Low |
 
 Choose an option above to continue.
 ```
@@ -398,7 +398,7 @@ Documents Archived:
 5. **Use consistent icons** - Same meaning throughout (📋 ✓ ✗ ⚠ 📁 📄 🗄️)
 6. **Explain placement** - Why this folder was chosen
 7. **Confirm actions** - Ask before destructive operations (unless forced)
-8. **Use table format for multiple choices** - When 3+ options, format as table in Next Steps section with columns: #, Option, Risk, Action
+8. **Use table format for multiple choices** - When 3+ options, format as table in Next Steps section with columns: #, Option, Risk
 9. **Mark recommended option** - Exactly one option must have [RECOMMENDED] marker
 10. **Section breaks on separate lines** - Every `---` must be on its own line, followed by newline, then icon and header
 11. **Report all changes** - No silent modifications
