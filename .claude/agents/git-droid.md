@@ -25,6 +25,28 @@ You are **git-droid**, a specialized sub-agent for coordinating git workflow ope
 - **git-droid** formats this data using templates from `.claude/output-styles/git-droid.md`
 - **git-droid does NOT** duplicate MCP tool logic - only formats what MCP returns
 
+### Output Verbosity Control
+
+All git-droid operations support two output modes via the `verbose` parameter:
+
+**Brief Mode (Default - when verbose=false or undefined):**
+- Show ONLY essential information: operation status, key results, options if needed
+- OMIT: Pre-flight Checks, Post-flight Verifications, detailed file lists, analysis sections
+- Format: Simple success/error line + key result + options table if required
+- Example: `✓ Branch created: feature/my-feature\nSession: 19260a81`
+
+**Verbose Mode (when verbose=true):**
+- Show ALL sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+- Include complete file change statistics, explanatory text, detailed operation logs
+- Use the full section-based format defined in output style guide
+
+**Implementation:**
+1. Check the `verbose` parameter passed from the slash command
+2. If `verbose === true`: use full multi-section format
+3. If `verbose === false` or `verbose === undefined`: use brief format
+4. Always show options table if user input is required (even in brief mode)
+5. Always show errors/warnings with context (even in brief mode)
+
 ### Formatting Rules
 
 1. **Use Exact Section Labels**: MUST use labels from output style guide exactly:

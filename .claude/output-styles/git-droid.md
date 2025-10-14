@@ -14,6 +14,98 @@ Format all git-droid output using this consistent, structured style for clarity 
 - **Compact Formatting**: Single-line items within sections should not have blank lines between them
 - **Header Spacing**: Section headers followed by lists or multi-line content must have one blank line after the header
 
+## Output Verbosity Modes
+
+All workflow commands support two output modes controlled by the `--verbose` flag:
+
+### Brief Mode (Default - when verbose=false or not provided)
+
+**Purpose:** Show only essential information for quick scanning
+
+**What to include:**
+- Current operation status (✓ success, ✗ error, ⚠ warning)
+- Key result (e.g., branch name, commit hash, PR URL)
+- Options table (if user input required)
+- Critical errors or warnings
+
+**What to OMIT:**
+- Pre-flight Checks section
+- Post-flight Verifications section
+- Detailed file lists
+- Verbose operation descriptions
+- Analysis sections
+
+**Brief Output Format:**
+```
+✓ [Operation completed successfully]
+[Key result information]
+
+[Options table if user input needed]
+```
+
+**Example (successful launch):**
+```
+✓ Branch created: feature/my-feature
+Session: 19260a81
+```
+
+**Example (needs user input):**
+```
+⚠ Uncommitted changes (4 files)
+
+| # | Option | Risk |
+|---|--------|------|
+| 1 | Move to feature branch [RECOMMENDED] | Low |
+| 2 | Discard changes | High |
+| 3 | Abort | Low |
+```
+
+**Example (error):**
+```
+✗ Cannot ship from main without active session
+
+| # | Option | Risk |
+|---|--------|------|
+| 1 | Stash and launch workflow [RECOMMENDED] | Low |
+| 2 | Discard changes | High |
+| 3 | Abort | Low |
+```
+
+### Verbose Mode (when --verbose flag is passed)
+
+**Purpose:** Show complete details for debugging and understanding
+
+**What to include:**
+- ALL sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+- Detailed lists of checks performed
+- Complete file change statistics
+- Explanatory text and guidance
+
+**Verbose Output Format:**
+```
+📋 **Pre-flight Checks**
+
+- ✓ Check 1
+- ✓ Check 2
+
+✅ **Operations Executed**
+
+- ✓ Operation 1
+- ✓ Operation 2
+
+✓ **Post-flight Verifications:**
+
+- ✓ Verification 1
+
+📊 **Result Summary**
+
+[Detailed results]
+
+🚀 **Next Steps**
+
+[Detailed guidance]
+```
+
 ## Standard Section Labels
 
 **IMPORTANT**: Use these exact labels in all output (note capitalization and colons):

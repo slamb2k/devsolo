@@ -6,6 +6,7 @@ Manage documentation following devsolo's documentation structure and conventions
 
 - No arguments: Run in **AUDIT MODE** - scan and fix documentation issues
 - With arguments: Run in **CREATE MODE** - create new documentation
+- `verbose` (optional): Show detailed output with all sections (default: false, brief mode)
 
 ## Workflow
 

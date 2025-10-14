@@ -7,6 +7,7 @@ Start a new feature workflow. Creates a feature branch and devsolo session.
 - `description` (optional): Description of the feature (used for branch name generation)
 - `branchName` (optional): Explicit branch name to use (default: auto-generated)
 - `auto` (optional): Automatically handle all prompts with recommended options (default: false)
+- `verbose` (optional): Show detailed output with all sections (default: false, brief mode)
 
 ## Workflow
 

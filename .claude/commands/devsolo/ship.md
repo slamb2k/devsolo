@@ -10,6 +10,7 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 - `merge` (optional): Merge PR after CI passes (default: true)
 - `stagedOnly` (optional): When committing, only commit staged files (default: false)
 - `auto` (optional): Automatically use recommended options (default: false)
+- `verbose` (optional): Show detailed output with all sections (default: false, brief mode)
 
 ## Workflow
 

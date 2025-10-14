@@ -6,6 +6,7 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
 
 - `deleteBranches` (optional): Delete orphaned branches (default: prompt)
 - `force` (optional): Skip confirmations (default: false)
+- `verbose` (optional): Show detailed output with all sections (default: false, brief mode)
 
 ## Workflow
 

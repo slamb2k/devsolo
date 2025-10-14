@@ -10,15 +10,111 @@ Format all docs-droid output using this consistent, structured style for clarity
 - **Before/After**: Show changes clearly
 - **Action Summary**: Always provide complete summary of actions taken
 - **Numbered Options**: When presenting multiple choices (3+), use numbered format with [RECOMMENDED]
-- **Section Breaks**: Every `---` MUST be on its own line, followed by a newline, then icon and bold header:
+- **Section Headers**: Use emoji icon followed by bold text for all main sections
   ```
-  ---
   📊 **Summary**
   ```
-  NOT `---📊 **Summary**` (missing newline)
+  NOT `**Summary**` (missing icon) or `## 📊 **Summary**` (don't use markdown headers)
 - **Compact Formatting**: Single-line items within sections should not have blank lines between them
 - **Header Spacing**: Section headers followed by lists or multi-line content must have one blank line after the header
 - **Options in Next Steps**: When presenting multiple choices, format as a table in the Next Steps section
+
+## Output Verbosity Modes
+
+All docs commands support two output modes controlled by the `--verbose` flag:
+
+### Brief Mode (Default - when verbose=false or not provided)
+
+**Purpose:** Show only essential information for quick scanning
+
+**What to include:**
+- Current operation status (✓ success, ✗ error, ⚠ warning)
+- Key results (files affected, actions completed count)
+- Critical errors or warnings
+- Options table (if user input required)
+
+**What to OMIT:**
+- Detailed analysis sections
+- Before/after file lists for simple operations
+- Detailed reasoning for placement decisions
+- Step-by-step operation descriptions
+
+**Brief Output Format:**
+```
+✓ [Operation completed successfully]
+[Key result summary]
+
+[Options table if user input needed]
+```
+
+**Example (successful audit with no issues):**
+```
+✓ Documentation audit complete
+45 files scanned, 0 issues found
+```
+
+**Example (audit with issues requiring user choice):**
+```
+⚠ Found 8 issues across 5 files
+
+| # | Option | Risk |
+|---|--------|------|
+| 1 | Fix all issues [RECOMMENDED] | Low |
+| 2 | Fix naming violations only | Low |
+| 3 | Skip automatic fixes | Low |
+```
+
+### Verbose Mode (when verbose=true)
+
+**Purpose:** Show complete details for auditing and debugging
+
+**What to include:**
+- Full analysis sections
+- Complete issue tables (naming violations, placement errors, etc.)
+- Before/after comparisons
+- Detailed reasoning for decisions
+- Complete file lists with statistics
+- README update details
+- Step-by-step operation logs
+
+**Verbose Output Format:**
+Use the standard section-based format with all details:
+- Analysis phase (content analysis, placement decision, naming)
+- Issues Found (complete tables for each issue type)
+- Proposed Actions (detailed list)
+- Actions Completed (full before/after lists)
+- Summary (complete statistics)
+
+**Example sections in verbose mode:**
+```
+📋 **Analyzing content**
+
+Content Analysis:
+**Primary audience:** End users
+**Document type:** User guide
+**Subject:** Migration from v1 to v2
+**Technical level:** Intermediate
+
+Placement Decision:
+- ✓ Audience is end users → docs/guides/
+- ✓ Type is how-to guide → docs/guides/
+- ✓ Result: docs/guides/migration-v1-to-v2.md
+
+[... complete output with all sections ...]
+```
+
+### How to Check Verbose Flag
+
+In docs-droid agent, check the `verbose` parameter:
+```
+if (verbose === true) {
+  // Show full output with all sections
+} else {
+  // Show brief output with only essentials
+}
+```
+
+Default is brief mode if verbose parameter is not provided or is false.
 
 ## Output Format for Audit Mode
 
