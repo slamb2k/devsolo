@@ -12,9 +12,13 @@ Format all git-droid output using this consistent, structured style for clarity 
 
 ## Output Format for Operations
 
+**IMPORTANT:** Always use double newlines (`\n\n`) between major sections and single newlines (`\n`) between list items to ensure proper rendering.
+
 ### Analysis Phase
+Format as:
 ```
-🔍 Analysis:
+**🔍 git-droid analysis:**
+
 - Current branch: <branch-name> <status-icon>
 - Working directory: <clean|changes-present> <status-icon>
 - Active session: <yes|no> <status-icon>
@@ -22,44 +26,64 @@ Format all git-droid output using this consistent, structured style for clarity 
 ```
 
 ### Pre-Flight Checks
+Format as markdown list with proper spacing:
 ```
-Pre-flight checks:
-✓ Check description 1
-✓ Check description 2
-✗ Check description 3 (failed)
-⚠ Check description 4 (warning)
+**Pre-flight checks:**
+
+- ✓ Check description 1
+- ✓ Check description 2
+- ✗ Check description 3 (failed)
+- ⚠ Check description 4 (warning)
 ```
 
 ### Operation Steps
+Format as markdown list:
 ```
-Operation: <action-description>...
-Operation: <action-description>...
+**Operations:**
+
+- ✓ Operation description 1
+- ✓ Operation description 2
+- ✓ Operation description 3
 ```
 
 ### Post-Flight Verifications
+Format as markdown list:
 ```
-Post-flight verifications:
-✓ Verification description 1
-✓ Verification description 2
-✗ Verification description 3 (failed)
+**Post-flight verifications:**
+
+- ✓ Verification description 1
+- ✓ Verification description 2
+- ✓ Verification description 3
 ```
 
 ### Result Summary
+Format with clear sections using markdown headers:
 ```
-✅ Success! <summary-message>
+## ✅ <Operation> Successful
 
-Next steps:
-- <actionable-step-1>
-- <actionable-step-2>
+**<Primary metric>:** <value>
+
+### Operations Completed
+
+- ✓ Operation 1
+- ✓ Operation 2
+- ✓ Operation 3
+
+### Next Steps
+
+<Guidance text>
 ```
 
 Or for errors:
 ```
-✗ Operation failed: <error-summary>
+## ✗ Operation Failed
 
-Issue: <description-of-what-went-wrong>
+**Error:** <error-summary>
 
-Resolution:
+**Issue:** <description-of-what-went-wrong>
+
+### Resolution
+
 - <actionable-fix-1>
 - <actionable-fix-2>
 ```
@@ -67,138 +91,178 @@ Resolution:
 ## Example: Launch Workflow Output
 
 ```
-🔍 Analysis:
-- Current branch: main ✓
-- Working directory: clean ✓
-- No active session ✓
-- Generated branch name: feature/add-user-authentication
+## ✅ Workflow Launched Successfully
 
-Calling mcp__devsolo__devsolo_launch...
+**Session Created:** `2d967326-881b-4167-9e52-fef1e07366f0`
 
-Pre-flight checks:
-✓ On main branch
-✓ Working directory clean
-✓ Branch name available
+**Branch:** `feature/add-user-authentication`
 
-Operation: Creating branch feature/add-user-authentication...
-Operation: Creating workflow session...
-Operation: Checking out to new branch...
+**State:** `BRANCH_READY`
 
-Post-flight verifications:
-✓ Branch created
-✓ Session created
-✓ Checked out to new branch
+---
 
-✅ Success! Session started on feature/add-user-authentication
+### 🔍 Pre-flight Checks
 
-Next steps:
-- Make your code changes
-- Run /devsolo commit to commit changes
-- Run /devsolo ship to create PR and merge
+- ✓ On main branch
+- ✓ Working directory clean
+- ✓ Main branch up to date
+- ✓ No existing session
+- ✓ Branch name available
+
+### ✅ Operations Completed
+
+- ✓ Created branch: `feature/add-user-authentication`
+- ✓ Checked out to new branch
+- ✓ Session initialized
+
+### 📝 Current State
+
+- **Working directory:** Clean
+- **Ready for:** Feature development
+
+---
+
+### 🎯 Next Steps
+
+When ready to ship your changes:
+
+- Run `/devsolo:commit` to commit your changes
+- Run `/devsolo:ship` to push, create PR, and merge
 ```
 
 ## Example: Commit Workflow Output
 
 ```
-🔍 Analysis:
-- Active session: feature/add-user-authentication ✓
-- Changes detected: 3 files modified ✓
-- Generated commit message: feat(auth): implement user authentication system
+## ✅ Commit Successful
 
-Calling mcp__devsolo__devsolo_commit...
+**Operation:** Changes committed to feature/add-user-authentication
 
-Pre-flight checks:
-✓ Active session exists
-✓ Changes to commit (3 files)
-✓ Not on main branch
+### Pre-flight Checks
 
-Operation: Staging files...
-Operation: Creating commit...
-Operation: Updating session state...
+- ✓ Active session exists (2d967326...)
+- ✓ Changes to commit (3 files modified)
 
-Post-flight verifications:
-✓ Commit created (abc1234)
-✓ Session state updated to CHANGES_COMMITTED
+### Commit Details
 
-✅ Success! Changes committed
+```
+Commit: abc1234567890abcdef1234567890abcdef1234
+Author: Your Name <your.email@example.com>
+Date:   Tue Oct 14 17:11:46 2025 +1100
 
-Next steps:
-- Run /devsolo ship to push and create PR
+feat(auth): implement user authentication system
+```
+
+### Files Changed
+
+```
+src/auth/login.ts     | 45 ++++++++++++++++++++++++++
+src/auth/index.ts     | 12 +++++--
+src/auth/auth.test.ts | 89 ++++++++++++++++++++++++++++++++++++++++++
+3 files changed, 144 insertions(+), 0 deletions(-)
+```
+
+### Session State Update
+
+- **Previous State:** BRANCH_READY
+- **Current State:** CHANGES_COMMITTED
+
+### Next Steps
+
+Ready to ship! Use `/devsolo:ship` to:
+
+- Push changes to remote
+- Create pull request
+- Merge to main
+- Clean up branches
 ```
 
 ## Example: Ship Workflow Output
 
 ```
-🔍 Analysis:
-- Active session: feature/add-user-authentication ✓
-- Uncommitted changes: none ✓
-- Generated PR description: Created
+## ✅ Ship Successful
 
-Calling mcp__devsolo__devsolo_ship...
+**Operation:** Feature shipped via PR #123
 
-Pre-flight checks:
-✓ All changes committed
-✓ Session ready to ship
-✓ GitHub authentication configured
-✓ CI configured in repository
+---
 
-Operation: Pushing to remote...
-Operation: Creating PR #123...
-Operation: Waiting for CI checks (timeout: 20 minutes)...
-  - Check: build (running...)
-  - Check: test (running...)
-  - Check: lint (passed ✓)
-  - Check: build (passed ✓)
-  - Check: test (passed ✓)
-Operation: Merging PR with squash...
-Operation: Syncing main branch...
-Operation: Deleting feature branch (local)...
-Operation: Deleting feature branch (remote)...
-Operation: Completing session...
+### Pre-flight Checks
 
-Post-flight verifications:
-✓ Pushed to remote
-✓ PR created (#123)
-✓ CI checks passed
-✓ PR merged
-✓ Branches deleted
-✓ On main branch
-✓ Session completed
+- ✓ All changes committed
+- ✓ Session ready to ship
+- ✓ GitHub authentication configured
+- ✓ CI configured in repository
 
-✅ Success! Feature shipped via PR #123
+### Operations Executed
 
-📊 Summary:
-- PR: https://github.com/owner/repo/pull/123
-- Commits: 3
-- Files changed: 5
-- CI checks: 3 passed
-- Merge method: squash
+- ✓ Pushed to remote
+- ✓ Created PR #123
+- ✓ Waited for CI checks (all passed)
+- ✓ Merged PR to main
+- ✓ Cleaned up branches
+- ✓ Switched to main branch
+
+### Post-flight Verifications
+
+- ✓ Pushed to remote
+- ✓ PR created (#123)
+- ✓ CI checks passed (build, test, lint)
+- ✓ PR merged successfully
+- ✓ Feature branch deleted (local & remote)
+- ✓ On main branch
+- ✓ Session completed
+
+---
+
+### 📊 Summary
+
+- **PR:** https://github.com/owner/repo/pull/123
+- **Commits:** 3
+- **Files changed:** 5
+- **CI checks:** 3 passed
+- **Merge method:** squash
+
+### Next Steps
+
+You're back on the main branch. Ready to start a new feature with `/devsolo:launch`
 ```
 
 ## Example: Error Handling Output
 
 ```
-🔍 Analysis:
-- Current branch: feature/old-work ✗
-- Active session: none ✗
+## ✗ Operation Failed
 
-Calling mcp__devsolo__devsolo_commit...
+**Error:** Cannot commit without active session
 
-Pre-flight checks:
-✗ No active session on current branch
+---
 
-✗ Operation failed: Cannot commit without active session
+### Pre-flight Checks
 
-Issue: You are on branch 'feature/old-work' but there is no active devsolo session for this branch.
+- ✗ No active session on current branch
+- ⚠ On branch 'feature/old-work'
+- ✓ Changes detected (ready to commit)
 
-Resolution:
-- Option 1: Switch to a branch with an active session
-  Run /devsolo sessions to see active sessions
-  Run /devsolo swap <branch-name> to switch
-- Option 2: Start a new session on this branch
-  Run /devsolo launch to start a new session
-- Option 3: Adopt this branch into a new session
-  Run /devsolo launch --adopt to create session for current branch
+---
+
+### Issue
+
+You are on branch `feature/old-work` but there is no active devsolo session for this branch.
+
+### Resolution
+
+Choose one of the following options:
+
+**Option 1: Switch to a branch with an active session**
+
+- Run `/devsolo:sessions` to see active sessions
+- Run `/devsolo:swap <branch-name>` to switch to that session
+
+**Option 2: Start a new session on this branch**
+
+- Run `/devsolo:launch` to start a fresh session (will create new branch)
+
+**Option 3: Continue with standard git**
+
+- Use standard `git commit` commands without devsolo workflow
 ```
 
 ## Tables for Lists
@@ -294,16 +358,16 @@ Details: <additional-information>
 
 ## Consistency Rules
 
-1. **Always show analysis first** - Let user know what git-droid is thinking
-2. **Always show pre-flight checks** - Transparency about validation
-3. **Always show operations as they execute** - Progress visibility
-4. **Always show post-flight verifications** - Confirm success
-5. **Always provide next steps** - Guide user forward
-6. **Use consistent icons** - Same meaning across all output
-7. **Use tables for lists** - Better scannability
-8. **Keep summaries concise** - Details available on request
-9. **Make errors actionable** - Always suggest resolution
-10. **Show context for decisions** - Explain why parameters were generated
+1. **Always use markdown formatting** - Use `##` and `###` for headers, `**bold**` for emphasis, proper list syntax with `-`
+2. **Always include blank lines** - Use double newlines (`\n\n`) between sections for proper rendering
+3. **Always show pre-flight checks** - Display validation checks with ✓/✗/⚠ before operations
+4. **Always show operations executed** - List what was done during the workflow
+5. **Always show post-flight verifications** - Confirm success after operations complete
+6. **Always provide next steps** - Guide user forward with actionable commands
+7. **Use consistent section headers** - "Pre-flight Checks", "Operations Executed", "Post-flight Verifications", "Next Steps"
+8. **Use consistent icons** - ✓ success, ✗ error, ⚠ warning, 🔍 analysis, 📋 info, ✅ complete, 📊 summary
+9. **Use horizontal rules** - Add `---` between major sections for visual separation
+10. **Make errors actionable** - Always suggest resolution steps clearly formatted
 
 ## Verbose Mode
 
