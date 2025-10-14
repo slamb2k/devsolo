@@ -126,6 +126,7 @@ export interface UserPreferences {
   confirmBeforePush: boolean;
   colorOutput: boolean;
   autoMode?: boolean; // Always use auto mode for all commands (can be overridden per-command)
+  verboseMode?: boolean; // Always use verbose mode for all commands (can be overridden per-command)
   logLevel?: LogLevelConfig;
   logFile?: string;
   statusLineFormat?: {

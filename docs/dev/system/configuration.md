@@ -128,6 +128,115 @@ When a command explicitly sets `auto` (true or false), this value propagates to 
 
 This ensures consistent behavior throughout multi-stage workflows.
 
+## Verbose Mode Configuration
+
+devsolo supports a `verboseMode` preference that controls the level of detail shown in command output. By default, commands show brief output (status + summary). When verbose mode is enabled, commands show detailed sections including pre-flight checks, operations executed, and post-flight verifications.
+
+### Setting Verbose Mode
+
+Add to your configuration file:
+
+```yaml
+preferences:
+  verboseMode: true  # Show detailed output for all commands
+```
+
+### Configuration Locations
+
+1. **Global Config** (`~/.devsolo/config.yaml`): Applies to all projects
+2. **Project Config** (`<project>/.devsolo/config.yaml`): Project-specific setting
+
+### Override Behavior
+
+The verbose mode can be overridden on a per-command basis:
+
+```bash
+# Config has verboseMode: true, but disable for this command
+/devsolo:ship --verbose:false
+
+# Config has verboseMode: false, but enable for this command
+/devsolo:ship --verbose:true
+
+# Shorthand syntax (when config has verboseMode: false)
+/devsolo:ship --verbose
+```
+
+### Priority Order
+
+The resolution of verbose mode follows this priority (highest to lowest):
+
+1. **Explicit command flag**: `--verbose:true` or `--verbose:false`
+2. **Config preference**: `preferences.verboseMode`
+3. **Default**: `false` (brief mode)
+
+### Output Comparison
+
+**Brief Mode (verbose=false, default):**
+```
+✓ Initialized ship workflow
+✓ Committed changes
+
+✅ Result Summary
+PR: #127 - Merged ✓
+Next Stage: COMPLETED
+```
+
+**Verbose Mode (verbose=true):**
+```
+📋 Pre-flight Checks
+- ✓ Session exists
+- ✓ On feature branch
+- ✓ No uncommitted changes
+
+⚙️ Operations Executed
+- ✓ Pushed branch to remote
+- ✓ Created pull request #127
+- ✓ Waited for CI checks
+- ✓ Merged pull request
+
+✓ Post-flight Verifications
+- ✓ Branch merged
+- ✓ Feature branch deleted
+- ✓ Session closed
+
+✅ Result Summary
+PR: #127 - Merged ✓
+Stats: 13 files, 215 insertions, 25 deletions
+Next Stage: COMPLETED
+
+🚀 Next Steps
+Start a new feature with /devsolo:launch
+```
+
+### When to Use Verbose Mode
+
+**Use Brief Mode (default) when:**
+- You trust the workflow automation
+- You want minimal terminal clutter
+- You're running commands frequently
+
+**Use Verbose Mode when:**
+- Debugging workflow issues
+- Learning devsolo behavior
+- Auditing operations for compliance
+- Investigating errors
+
+### Nested Command Propagation
+
+When a command explicitly sets `verbose` (true or false), this value propagates to all nested operations:
+
+```bash
+# Ship with verbose:true
+/devsolo:ship --verbose:true
+
+# All nested operations inherit verbose:true:
+# - Stage 1: Detailed pre-flight checks shown
+# - Stage 2: Detailed commit operations shown
+# - Stage 3: Detailed ship operations shown
+```
+
+This ensures consistent output verbosity throughout multi-stage workflows.
+
 ## Global Configuration
 
 Located at `~/.devsolo/config.yaml`, created automatically on first install.

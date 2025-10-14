@@ -29,6 +29,14 @@ Create an emergency hotfix workflow with higher priority and optional fast-track
 2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.autoMode`
 3. Pass the resolved auto mode to the nested MCP tool call using `--auto:true` or `--auto:false`
 
+**Before starting the workflow, resolve verbose mode:**
+1. If `--verbose` argument was provided: use that value (true or false)
+2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.verboseMode`
+3. If not in config, default to `false` (brief mode)
+4. Pass the resolved verbose mode to the git-droid sub-agent invocation using `verbose=true` or `verbose=false`
+5. In brief mode (verbose=false), git-droid agent should show minimal output: status indicator + result summary only
+6. In verbose mode (verbose=true), git-droid agent should show all sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Coordinate hotfix workflow"

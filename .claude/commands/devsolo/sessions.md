@@ -18,6 +18,12 @@ List and manage workflow sessions.
 ░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░
 ```
 
+**Before starting the workflow, resolve verbose mode:**
+1. If `--verbose` argument was provided: use that value (true or false)
+2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.verboseMode`
+3. If not in config, default to `false` (brief mode)
+4. Pass the resolved verbose mode to the MCP tool call
+
 1. Use the `mcp__devsolo__devsolo_sessions` tool to query sessions
 2. Pass along the provided arguments (`all`, `verbose`, `cleanup`)
 3. Display the sessions in a clear table format
