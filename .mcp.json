@@ -3,7 +3,7 @@
     "devsolo": {
       "command": "node",
       "args": [
-        "/home/slamb2k/work/devsolo/dist/mcp/devsolo-mcp-server.js"
+        "./bin/devsolo-mcp"
       ],
       "env": {}
     }
