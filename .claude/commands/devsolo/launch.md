@@ -10,27 +10,26 @@ Start a new feature workflow. Creates a feature branch and devsolo session.
 
 ## Workflow
 
-1. **Invoke git-droid sub-agent** to coordinate the launch workflow
-2. git-droid will:
-   - Analyze current git state (check if on main, clean working directory)
-   - Handle uncommitted changes:
-     - If present: Ask user "You have uncommitted changes. Would you like to: (a) commit them first, (b) stash them, (c) cancel?"
-     - If (a) commit: Use SlashCommand tool to invoke `/devsolo:commit`
-     - If (b) stash: Stash changes with descriptive message
-     - If (c) cancel: Exit without launching
-   - Handle existing session (offer to abort using SlashCommand tool to invoke `/devsolo:abort`)
-   - Generate branch name if not provided:
-     - From description → convert to kebab-case with appropriate prefix (feature/, fix/, docs/, etc)
-     - From uncommitted changes → analyze diff to infer purpose
-     - Fallback to timestamp → feature/YYYY-MM-DD-HHMMSS
-   - **Display the following banner immediately before calling the MCP tool:**
+**Display the following banner immediately before commencing the workflow**
 
 ```
 ░█░░░█▀█░█░█░█▀█░█▀▀░█░█░▀█▀░█▀█░█▀▀░
 ░█░░░█▀█░█░█░█░█░█░░░█▀█░░█░░█░█░█░█░
 ░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░
 ```
-
+1. **Invoke git-droid sub-agent** to coordinate the launch workflow
+2. git-droid will:
+   - Analyze current git state (check if on main, clean working directory)
+   - Handle uncommitted changes:
+     - If present: Ask user "You have uncommitted changes. Would you like to: (a) bring them, (b) discard them, (c) cancel?"
+     - If (a) stash: Stash changes so that they can be popped in the new session
+     - If (b) discard: Don't keep the changes and launch a fresh session
+     - If (c) cancel: Exit without launching
+   - Handle existing session (offer to abort using SlashCommand tool to invoke `/devsolo:abort`)
+   - Generate branch name if not provided:
+     - From description → convert to kebab-case with appropriate prefix (feature/, fix/, docs/, etc)
+     - From uncommitted changes → analyze diff to infer purpose
+     - Fallback to timestamp → feature/YYYY-MM-DD-HHMMSS
    - Call `mcp__devsolo__devsolo_launch` with appropriate parameters
    - Report results following git-droid output style
 
