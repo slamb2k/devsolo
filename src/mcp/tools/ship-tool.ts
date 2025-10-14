@@ -387,40 +387,59 @@ export class ShipTool extends BaseMCPTool<ShipToolInput, GitHubToolResult> {
 
   /**
    * Sync main and cleanup
+   * Uses try-finally to ensure session cleanup always happens
    */
   private async syncMainAndCleanup(session: WorkflowSession): Promise<void> {
-    // Switch to main
-    await this.gitOps.checkoutBranch('main');
-
-    // Pull latest (includes squashed merge)
-    await this.gitOps.pull('origin', 'main');
-
-    // Delete local branch
     try {
-      await this.gitOps.deleteBranch(session.branchName, true);
-    } catch {
-      // Already deleted
-    }
+      // Switch to main
+      try {
+        await this.gitOps.checkoutBranch('main');
+      } catch (error) {
+        console.error('Failed to checkout main branch:', error);
+        // Continue anyway - session cleanup must happen
+      }
 
-    // Delete remote branch
-    try {
-      await this.gitOps.deleteRemoteBranch(session.branchName);
-      // Track deletion
-      await this.branchValidator.trackBranchDeletion(session);
-    } catch {
-      // Already deleted
-    }
+      // Pull latest (includes squashed merge)
+      try {
+        await this.gitOps.pull('origin', 'main');
+      } catch (error) {
+        console.error('Failed to pull main branch:', error);
+        // Continue anyway - session cleanup must happen
+      }
 
-    // Mark session as complete
-    session.transitionTo('COMPLETE', 'ship_command');
-    await this.sessionRepo.updateSession(session.id, session);
+      // Delete local branch
+      try {
+        await this.gitOps.deleteBranch(session.branchName, true);
+      } catch (error) {
+        console.error('Failed to delete local branch:', error);
+        // Already deleted or can't delete - not critical
+      }
 
-    // Clean up completed session to prevent accumulation
-    try {
-      await this.sessionRepo.deleteSession(session.id);
-    } catch (error) {
-      // Non-fatal - session marked complete even if cleanup fails
-      console.error('Failed to cleanup session:', error);
+      // Delete remote branch
+      try {
+        await this.gitOps.deleteRemoteBranch(session.branchName);
+        // Track deletion
+        await this.branchValidator.trackBranchDeletion(session);
+      } catch (error) {
+        console.error('Failed to delete remote branch:', error);
+        // Already deleted or can't delete - not critical
+      }
+    } finally {
+      // CRITICAL: Always mark session as complete and cleanup, even if git operations fail
+      try {
+        session.transitionTo('COMPLETE', 'ship_command');
+        await this.sessionRepo.updateSession(session.id, session);
+      } catch (error) {
+        console.error('Failed to mark session as complete:', error);
+      }
+
+      // Clean up completed session to prevent accumulation
+      try {
+        await this.sessionRepo.deleteSession(session.id);
+      } catch (error) {
+        // Non-fatal - session marked complete even if cleanup fails
+        console.error('Failed to cleanup session:', error);
+      }
     }
   }
 
