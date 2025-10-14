@@ -9,7 +9,7 @@ Initialize devsolo in your project. Creates configuration and session storage.
 
 ## Workflow
 
-**Display the following banner immediately before calling the MCP tool:**
+**Display the following banner immediately before commencing the workflow:**
 
 ```
 ░▀█▀░█▀█░▀█▀░▀█▀░▀█▀░█▀█░█░░░▀█▀░█▀▀░▀█▀░█▀█░█▀▀░
@@ -23,8 +23,32 @@ Initialize devsolo in your project. Creates configuration and session storage.
 
 ## Output Format
 
-Present initialization results clearly:
-- Scope: project or user
-- Configuration location: .devsolo/config.yaml
-- Session storage: .devsolo/sessions/
-- Status: initialized successfully or already initialized
+Present initialization results in a clear, structured format:
+
+```
+## ✅ Initialization Complete
+
+**Scope:** project
+**Configuration:** .devsolo/config.yaml
+**Session Storage:** .devsolo/sessions/
+**Status:** Initialized successfully
+
+---
+
+**Created Files:**
+- .devsolo/config.yaml
+- .devsolo/sessions/
+
+**Next Steps:**
+
+- Use `/devsolo:launch` to start a new feature workflow
+- Use `/devsolo:info` to check workflow status
+```
+
+**Formatting Guidelines:**
+- Show clear initialization status (success/already initialized)
+- List all created files and directories
+- Display configuration and storage locations
+- Provide actionable next steps
+- Use consistent section structure
+- Follow markdown formatting standards

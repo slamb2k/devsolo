@@ -9,14 +9,7 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
 
 ## Workflow
 
-1. **Invoke git-droid sub-agent** to coordinate the cleanup workflow
-2. git-droid will:
-   - Sync main branch first (pull latest changes)
-   - Identify orphaned branches (branches without active sessions)
-   - Identify stale sessions (completed, aborted, or expired sessions)
-   - Show summary of items to clean
-   - Confirm deletions (unless force=true)
-   - **Display the following banner immediately before calling the MCP tool:**
+**Display the following banner immediately before commencing the workflow:**
 
 ```
 ░█▀▀░█░░░█▀▀░█▀█░█▀█░█░█░█▀█░
@@ -24,10 +17,23 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
 ░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀░░░
 ```
 
+1. **Invoke git-droid sub-agent** to coordinate the cleanup workflow
+2. git-droid will:
+   - Sync main branch first (pull latest changes)
+   - Identify orphaned branches and stale sessions
+   - Show summary of items to clean (use tables for multiple items)
+   - Confirm deletions (unless force=true)
    - Call `mcp__devsolo__devsolo_cleanup` with parameters
    - Remove stale sessions
    - Delete orphaned branches (if requested)
-   - Report results following git-droid output style
+   - Format results following git-droid output style (see `.claude/output-styles/git-droid.md`)
+
+**Output Formatting:** git-droid handles all output formatting including:
+- Pre-flight Checks section (analysis of what will be cleaned)
+- Operations Executed section
+- Post-flight Verifications section
+- Result Summary section with counts
+- Next Steps section
 
 ## Cleanup Workflow Details
 
@@ -90,16 +96,16 @@ Branches are considered orphaned if:
 
 ```
 # Cleanup with prompts
-/devsolo cleanup
+/devsolo:cleanup
 
 # Cleanup and delete orphaned branches automatically
-/devsolo cleanup --deleteBranches
+/devsolo:cleanup --deleteBranches
 
 # Force cleanup without confirmations
-/devsolo cleanup --deleteBranches --force
+/devsolo:cleanup --deleteBranches --force
 
 # Cleanup only stale sessions (no branch deletion)
-/devsolo cleanup
+/devsolo:cleanup
 # (respond "n" to branch deletion prompt)
 ```
 
@@ -108,7 +114,7 @@ Branches are considered orphaned if:
 ### Scenario 1: Regular Maintenance
 ```
 # After shipping several features, clean up
-/devsolo cleanup --deleteBranches
+/devsolo:cleanup --deleteBranches
 # Removes completed session records and merged branches
 ```
 
@@ -116,7 +122,7 @@ Branches are considered orphaned if:
 ```
 # You have branches created outside devsolo
 # Cleanup will identify them as orphaned
-/devsolo cleanup
+/devsolo:cleanup
 # Review the list, keep branches you want
 # Delete ones you don't need
 ```
@@ -124,14 +130,14 @@ Branches are considered orphaned if:
 ### Scenario 3: Repository Hygiene
 ```
 # Regular cleanup schedule (weekly/monthly)
-/devsolo cleanup --deleteBranches --force
+/devsolo:cleanup --deleteBranches --force
 # Automated cleanup of stale state
 ```
 
 ### Scenario 4: After Team Member Leaves
 ```
 # Clean up sessions and branches from departed teammate
-/devsolo cleanup --deleteBranches
+/devsolo:cleanup --deleteBranches
 # Review and confirm deletion of old work
 ```
 
@@ -157,7 +163,7 @@ The cleanup command will NOT remove:
 1. **Run Regularly**: Clean up after shipping features to keep state tidy
 2. **Review Before Confirming**: Check the list of items to be cleaned
 3. **Sync First**: Cleanup automatically syncs main, so you get latest state
-4. **Use Sessions List**: Run /devsolo sessions --all to see all sessions before cleanup
+4. **Use Sessions List**: Run /devsolo:sessions --all to see all sessions before cleanup
 5. **Manual Cleanup**: Can always manually delete branches with git commands
 
 ## Notes

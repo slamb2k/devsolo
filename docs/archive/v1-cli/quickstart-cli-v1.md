@@ -106,7 +106,7 @@ In Claude Code, run:
 ### 2. Enable the Status Line
 
 ```
-/devsolo:status-line enable
+/devsolo:info-line enable
 ```
 
 Now you'll see your workflow status at all times:
@@ -120,7 +120,7 @@ All devsolo commands work directly in Claude Code:
 
 ```
 /devsolo:launch          # Start new feature
-/devsolo:status          # Check workflow status
+/devsolo:info          # Check workflow status
 /devsolo:ship            # Ship your feature
 ```
 

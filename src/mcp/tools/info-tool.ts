@@ -11,16 +11,16 @@ import { ConfigurationManager } from '../../services/configuration-manager';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
- * Input for status tool
+ * Input for info tool
  */
-export interface StatusToolInput extends WorkflowToolInput {
+export interface InfoToolInput extends WorkflowToolInput {
   // No additional input required
 }
 
 /**
- * Status tool - Shows current workflow status
+ * Info tool - Shows current workflow information
  */
-export class StatusTool extends BaseMCPTool<StatusToolInput, QueryToolResult> {
+export class InfoTool extends BaseMCPTool<InfoToolInput, QueryToolResult> {
   constructor(
     private sessionRepo: SessionRepository,
     private gitOps: GitOperations,
@@ -31,9 +31,9 @@ export class StatusTool extends BaseMCPTool<StatusToolInput, QueryToolResult> {
   }
 
   protected getBanner(): string {
-    return `░█▀▀░▀█▀░█▀█░▀█▀░█░█░█▀▀░
-░▀▀█░░█░░█▀█░░█░░█░█░▀▀█░
-░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀░`;
+    return `░▀█▀░█▀█░█▀▀░█▀█░
+░░█░░█░█░█▀▀░█░█░
+░▀▀▀░▀░▀░▀░░░▀▀▀░`;
   }
 
   protected async executeWorkflow(

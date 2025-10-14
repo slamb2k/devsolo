@@ -113,7 +113,7 @@ export class SwapTool extends BaseMCPTool<SwapToolInput, SessionToolResult> {
         nextSteps: [
           `Switched to ${input.branchName}`,
           'Continue working on this feature',
-          'Use devsolo_status to check current state',
+          'Use devsolo_info to check current state',
         ],
       },
     };

@@ -12,7 +12,7 @@ import {
   LaunchTool,
   ShipTool,
   CommitTool,
-  StatusTool,
+  InfoTool,
   SessionsTool,
   AbortTool,
   SwapTool,
@@ -112,7 +112,7 @@ export class DevSoloMCPServer {
   private launchTool: LaunchTool;
   private shipTool: ShipTool;
   private commitTool: CommitTool;
-  private statusTool: StatusTool;
+  private infoTool: InfoTool;
   private sessionsTool: SessionsTool;
   private abortTool: AbortTool;
   private swapTool: SwapTool;
@@ -173,7 +173,7 @@ export class DevSoloMCPServer {
       this.server
     );
     this.commitTool = new CommitTool(gitOps, sessionRepo, configManager, this.server);
-    this.statusTool = new StatusTool(sessionRepo, gitOps, configManager, this.server);
+    this.infoTool = new InfoTool(sessionRepo, gitOps, configManager, this.server);
     this.sessionsTool = new SessionsTool(sessionRepo, configManager, this.server);
     this.abortTool = new AbortTool(sessionRepo, gitOps, configManager, this.server);
     this.swapTool = new SwapTool(sessionRepo, gitOps, stashManager, configManager, this.server);
@@ -395,8 +395,8 @@ export class DevSoloMCPServer {
             },
           },
           {
-            name: 'devsolo_status',
-            description: 'Show current workflow status',
+            name: 'devsolo_info',
+            description: 'Show current workflow information',
             inputSchema: {
               type: 'object',
               properties: {},
@@ -572,9 +572,9 @@ export class DevSoloMCPServer {
           };
         }
 
-        case 'devsolo_status': {
+        case 'devsolo_info': {
           const params = StatusSchema.parse(processedArgs);
-          const result = await this.statusTool.execute(params);
+          const result = await this.infoTool.execute(params);
 
           return {
             content: [

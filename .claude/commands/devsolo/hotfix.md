@@ -13,15 +13,7 @@ Create an emergency hotfix workflow with higher priority and optional fast-track
 
 ## Workflow
 
-1. **Invoke git-droid sub-agent** to coordinate the hotfix workflow
-2. git-droid will:
-   - Validate severity level and adjust behavior accordingly
-   - Generate hotfix branch name:
-     - From issue: hotfix/issue-123
-     - From description: hotfix/fix-critical-login-bug
-     - Fallback: hotfix/YYYY-MM-DD-HHMMSS
-   - Check current state (on main, clean directory)
-   - **Display the following banner immediately before calling the MCP tool:**
+**Display the following banner immediately before commencing the workflow:**
 
 ```
 ░█░█░█▀█░▀█▀░█▀▀░▀█▀░█░█░
@@ -29,11 +21,23 @@ Create an emergency hotfix workflow with higher priority and optional fast-track
 ░▀░▀░▀▀▀░░▀░░▀░░░▀▀▀░▀░▀░
 ```
 
+1. **Invoke git-droid sub-agent** to coordinate the hotfix workflow
+2. git-droid will:
+   - Validate severity level and adjust behavior accordingly
+   - Generate hotfix branch name (from issue, description, or timestamp)
+   - Check current state (on main, clean directory)
    - Call `mcp__devsolo__devsolo_hotfix` with parameters
    - Create hotfix branch from main
    - Create session with HOTFIX workflow type
    - Guide through rapid hotfix process
-   - Report results following git-droid output style
+   - Format results following git-droid output style (see `.claude/output-styles/git-droid.md`)
+
+**Output Formatting:** git-droid handles all output formatting including:
+- Pre-flight Checks section
+- Operations Executed section
+- Post-flight Verifications section
+- Result Summary section (with severity indication)
+- Next Steps section (emphasizing urgency for critical hotfixes)
 
 ## Hotfix Workflow Details
 
@@ -117,26 +121,26 @@ Behavior:
 
 ```
 # Critical hotfix with issue number
-/devsolo hotfix --issue="123" --severity="critical" --skipReview --autoMerge
+/devsolo:hotfix --issue="123" --severity="critical" --skipReview --autoMerge
 
 # High severity hotfix with description
-/devsolo hotfix --issue="Fix login authentication bug" --severity="high"
+/devsolo:hotfix --issue="Fix login authentication bug" --severity="high"
 
 # Medium hotfix (normal process)
-/devsolo hotfix --issue="456" --severity="medium"
+/devsolo:hotfix --issue="456" --severity="medium"
 
 # Critical hotfix, skip everything (use only in emergencies!)
-/devsolo hotfix --issue="production-down" --severity="critical" --skipTests --skipReview --autoMerge
+/devsolo:hotfix --issue="production-down" --severity="critical" --skipTests --skipReview --autoMerge
 
 # Auto mode for critical hotfix
-/devsolo hotfix --issue="789" --severity="critical" --auto
+/devsolo:hotfix --issue="789" --severity="critical" --auto
 ```
 
 ## Complete Hotfix Workflow Example
 
 ```
 # 1. Start hotfix
-/devsolo hotfix --issue="critical-auth-bypass" --severity="critical"
+/devsolo:hotfix --issue="critical-auth-bypass" --severity="critical"
 
 git-droid output:
 🔍 Analysis:
@@ -161,16 +165,16 @@ Operation: Creating HOTFIX session...
 Next steps:
 1. Make MINIMAL changes to fix the issue
 2. Test the fix locally
-3. Run /devsolo commit to commit changes
-4. Run /devsolo ship to deploy immediately
+3. Run /devsolo:commit to commit changes
+4. Run /devsolo:ship to deploy immediately
 
 # 2. Make the fix (your code changes)
 
 # 3. Commit the fix
-/devsolo commit --message="hotfix: fix critical authentication bypass vulnerability"
+/devsolo:commit --message="hotfix: fix critical authentication bypass vulnerability"
 
 # 4. Ship immediately
-/devsolo ship --auto
+/devsolo:ship --auto
 # Auto-merge enabled, will merge as soon as CI passes
 ```
 
