@@ -34,6 +34,17 @@ Switch between active workflow sessions without aborting them.
 5. In brief mode (verbose=false), git-droid agents should show minimal output: status indicator + result summary only
 6. In verbose mode (verbose=true), git-droid agents should show all sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
 
+**Create workflow progress tracker:**
+Use the TodoWrite tool to create todos showing all workflow stages:
+```json
+[
+  {"content": "Initialize swap workflow", "activeForm": "Initializing swap workflow", "status": "pending"},
+  {"content": "Handle uncommitted changes (if needed)", "activeForm": "Handling uncommitted changes", "status": "pending"},
+  {"content": "Complete swap workflow", "activeForm": "Completing swap workflow", "status": "pending"}
+]
+```
+Update todo status as you progress through stages (pending → in_progress → completed). Skip stages that aren't needed by marking them completed immediately.
+
 The swap workflow consists of three stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Initialize Swap Workflow

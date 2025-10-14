@@ -35,6 +35,17 @@ Cancel the current workflow session and optionally delete the feature branch.
 5. In brief mode (verbose=false), git-droid agents should show minimal output: status indicator + result summary only
 6. In verbose mode (verbose=true), git-droid agents should show all sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
 
+**Create workflow progress tracker:**
+Use the TodoWrite tool to create todos showing all workflow stages:
+```json
+[
+  {"content": "Initialize abort workflow", "activeForm": "Initializing abort workflow", "status": "pending"},
+  {"content": "Handle uncommitted changes (if needed)", "activeForm": "Handling uncommitted changes", "status": "pending"},
+  {"content": "Complete abort workflow", "activeForm": "Completing abort workflow", "status": "pending"}
+]
+```
+Update todo status as you progress through stages (pending → in_progress → completed). Skip stages that aren't needed by marking them completed immediately.
+
 The abort workflow consists of three stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Initialize Abort Workflow
