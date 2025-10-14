@@ -10,9 +10,15 @@ Format all docs-droid output using this consistent, structured style for clarity
 - **Before/After**: Show changes clearly
 - **Action Summary**: Always provide complete summary of actions taken
 - **Numbered Options**: When presenting multiple choices (3+), use numbered format with [RECOMMENDED]
-- **Section Breaks**: Every `---` MUST be followed by a header with an icon (e.g., `📊 **Summary**`)
+- **Section Breaks**: Every `---` MUST be on its own line, followed by a newline, then icon and bold header:
+  ```
+  ---
+  📊 **Summary**
+  ```
+  NOT `---📊 **Summary**` (missing newline)
 - **Compact Formatting**: Single-line items within sections should not have blank lines between them
 - **Header Spacing**: Section headers followed by lists or multi-line content must have one blank line after the header
+- **Options in Next Steps**: When presenting multiple choices, format as a table in the Next Steps section
 
 ## Output Format for Audit Mode
 
@@ -65,21 +71,31 @@ For simple yes/no confirmations:
 Fix these issues? [y/N]
 ```
 
-For multiple options (3+ choices):
+For multiple options (3+ choices), use table format in Next Steps:
 ```
 ---
-⚠️ **Multiple Actions Available**
+⚠️ **Issues Found**
 
-Please choose an option:
+[Tables with issues as shown above]
 
-1. Fix all issues (rename, move, update READMEs, archive) [RECOMMENDED]
-   Risk: Low | Action: Execute all proposed actions
+---
+📊 **Summary**
 
-2. Fix only naming violations (keep files in current locations)
-   Risk: Low | Action: Rename files only
+**Total issues:** 8
+**Files affected:** 5
 
-3. Skip automatic fixes (review issues manually)
-   Risk: Low | Action: Exit without changes
+---
+🚀 **Next Steps**
+
+**Options:**
+
+| # | Option | Risk | Action |
+|---|--------|------|--------|
+| 1 | Fix all issues (rename, move, update READMEs, archive) [RECOMMENDED] | Low | Execute all proposed actions |
+| 2 | Fix only naming violations (keep files in current locations) | Low | Rename files only |
+| 3 | Skip automatic fixes (review issues manually) | Low | Exit without changes |
+
+Choose an option above to continue.
 ```
 
 ### Actions Report
@@ -382,12 +398,12 @@ Documents Archived:
 5. **Use consistent icons** - Same meaning throughout (📋 ✓ ✗ ⚠ 📁 📄 🗄️)
 6. **Explain placement** - Why this folder was chosen
 7. **Confirm actions** - Ask before destructive operations (unless forced)
-8. **Use numbered options for multiple choices** - When 3+ options, use numbered format with [RECOMMENDED]
-9. **Show risk and action** - For numbered options, display `Risk: Low/Medium/High | Action: what happens`
-10. **Report all changes** - No silent modifications
-11. **Keep summaries concise** - Details in tables
-12. **Always end with summary** - Recap of all actions (📊 Summary:)
-13. **Section breaks with headers** - Every `---` MUST be immediately followed by an icon and bold header
+8. **Use table format for multiple choices** - When 3+ options, format as table in Next Steps section with columns: #, Option, Risk, Action
+9. **Mark recommended option** - Exactly one option must have [RECOMMENDED] marker
+10. **Section breaks on separate lines** - Every `---` must be on its own line, followed by newline, then icon and header
+11. **Report all changes** - No silent modifications
+12. **Keep summaries concise** - Details in tables
+13. **Always end with summary** - Recap of all actions (📊 Summary:)
 14. **Compact single-line items** - Key-value pairs should not have blank lines between them
 15. **Header spacing** - Section headers followed by lists or multi-line content must have one blank line after
 
