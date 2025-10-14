@@ -49,9 +49,6 @@ export class SessionRepository {
     // Create lock file with PID
     await fs.writeFile(lockFile, process.pid.toString());
 
-    // Update index
-    await this.updateIndex(session);
-
     // Create audit entry
     const auditEntry = new AuditEntry({
       sessionId: session.id,
@@ -84,14 +81,24 @@ export class SessionRepository {
   }
 
   async getSessionByBranch(branchName: string): Promise<WorkflowSession | null> {
-    const index = await this.readIndex();
-    const sessionId = index.branchMap?.[branchName];
+    await this.initialize();
 
-    if (!sessionId) {
-      return null;
+    const files = await fs.readdir(this.sessionPath);
+
+    for (const file of files) {
+      if (!file.endsWith('.json') || file === 'index.json') {
+        continue;
+      }
+
+      const sessionId = path.basename(file, '.json');
+      const session = await this.getSession(sessionId);
+
+      if (session && session.branchName === branchName) {
+        return session;
+      }
     }
 
-    return this.getSession(sessionId);
+    return null;
   }
 
   async updateSession(sessionId: string, updates: Partial<WorkflowSession>): Promise<WorkflowSession> {
@@ -110,9 +117,6 @@ export class SessionRepository {
     await fs.writeFile(tempFile, JSON.stringify(session.toJSON(), null, 2));
     await fs.rename(tempFile, sessionFile);
 
-    // Update index
-    await this.updateIndex(session);
-
     return session;
   }
 
@@ -129,9 +133,6 @@ export class SessionRepository {
     // Delete files
     await fs.unlink(sessionFile).catch(() => { /* ignore */ });
     await fs.unlink(lockFile).catch(() => { /* ignore */ });
-
-    // Update index
-    await this.removeFromIndex(sessionId, session.branchName);
 
     // Create audit entry
     const auditEntry = new AuditEntry({
@@ -333,75 +334,6 @@ export class SessionRepository {
     }
 
     return cleaned;
-  }
-
-  private async readIndex(): Promise<any> {
-    const indexFile = path.join(this.sessionPath, 'index.json');
-
-    try {
-      const data = await fs.readFile(indexFile, 'utf-8');
-      return JSON.parse(data);
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
-        return { sessions: [], branchMap: {} };
-      }
-      throw error;
-    }
-  }
-
-  private async updateIndex(session: WorkflowSession): Promise<void> {
-    const index = await this.readIndex();
-
-    // Update sessions list
-    if (!index.sessions) {
-      index.sessions = [];
-    }
-    const existingIndex = index.sessions.findIndex((s: any) => s.id === session.id);
-    const sessionSummary = {
-      id: session.id,
-      branchName: session.branchName,
-      workflowType: session.workflowType,
-      currentState: session.currentState,
-      updatedAt: session.updatedAt,
-    };
-
-    if (existingIndex >= 0) {
-      index.sessions[existingIndex] = sessionSummary;
-    } else {
-      index.sessions.push(sessionSummary);
-    }
-
-    // Update branch map
-    if (!index.branchMap) {
-      index.branchMap = {};
-    }
-    index.branchMap[session.branchName] = session.id;
-
-    // Write index
-    const indexFile = path.join(this.sessionPath, 'index.json');
-    const tempFile = `${indexFile}.tmp`;
-    await fs.writeFile(tempFile, JSON.stringify(index, null, 2));
-    await fs.rename(tempFile, indexFile);
-  }
-
-  private async removeFromIndex(sessionId: string, branchName: string): Promise<void> {
-    const index = await this.readIndex();
-
-    // Remove from sessions list
-    if (index.sessions) {
-      index.sessions = index.sessions.filter((s: any) => s.id !== sessionId);
-    }
-
-    // Remove from branch map
-    if (index.branchMap && index.branchMap[branchName] === sessionId) {
-      delete index.branchMap[branchName];
-    }
-
-    // Write index
-    const indexFile = path.join(this.sessionPath, 'index.json');
-    const tempFile = `${indexFile}.tmp`;
-    await fs.writeFile(tempFile, JSON.stringify(index, null, 2));
-    await fs.rename(tempFile, indexFile);
   }
 
   private async appendAudit(entry: AuditEntry): Promise<void> {

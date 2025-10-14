@@ -282,17 +282,23 @@ created: ${new Date().toISOString()}
 
 # Check for active devsolo session on current branch
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
-if [ -f ".devsolo/sessions/index.json" ] && [ -n "$CURRENT_BRANCH" ]; then
-  SESSION_ID=$(jq -r --arg branch "$CURRENT_BRANCH" '.branchMap[$branch] // empty' .devsolo/sessions/index.json 2>/dev/null)
-  if [ -n "$SESSION_ID" ] && [ -f ".devsolo/sessions/$SESSION_ID.json" ]; then
-    SESSION_STATE=$(jq -r '.currentState' ".devsolo/sessions/$SESSION_ID.json" 2>/dev/null)
-    if [ "$SESSION_STATE" != "COMPLETE" ] && [ "$SESSION_STATE" != "ABORTED" ]; then
-      echo "❌ devsolo session active on this branch!"
-      echo "📝 Use '/devsolo:commit' to commit changes"
-      echo "   Or use '/devsolo:abort' to exit the workflow"
-      exit 1
+SESSION_ID=""
+if [ -d ".devsolo/sessions" ] && [ -n "$CURRENT_BRANCH" ]; then
+  for session_file in .devsolo/sessions/*.json; do
+    [ -f "$session_file" ] || continue
+    BRANCH_NAME=$(jq -r '.branchName // empty' "$session_file" 2>/dev/null)
+    if [ "$BRANCH_NAME" == "$CURRENT_BRANCH" ]; then
+      SESSION_ID=$(basename "$session_file" .json)
+      SESSION_STATE=$(jq -r '.currentState' "$session_file" 2>/dev/null)
+      if [ "$SESSION_STATE" != "COMPLETE" ] && [ "$SESSION_STATE" != "ABORTED" ]; then
+        echo "❌ devsolo session active on this branch!"
+        echo "📝 Use '/devsolo:commit' to commit changes"
+        echo "   Or use '/devsolo:abort' to exit the workflow"
+        exit 1
+      fi
+      break
     fi
-  fi
+  done
 fi
 
 # Prevent direct commits to main/master branches
@@ -336,17 +342,23 @@ exit 0
 
 # Check for active devsolo session on current branch
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
-if [ -f ".devsolo/sessions/index.json" ] && [ -n "$CURRENT_BRANCH" ]; then
-  SESSION_ID=$(jq -r --arg branch "$CURRENT_BRANCH" '.branchMap[$branch] // empty' .devsolo/sessions/index.json 2>/dev/null)
-  if [ -n "$SESSION_ID" ] && [ -f ".devsolo/sessions/$SESSION_ID.json" ]; then
-    SESSION_STATE=$(jq -r '.currentState' ".devsolo/sessions/$SESSION_ID.json" 2>/dev/null)
-    if [ "$SESSION_STATE" != "COMPLETE" ] && [ "$SESSION_STATE" != "ABORTED" ]; then
-      echo "❌ devsolo session active on this branch!"
-      echo "📝 Use '/devsolo:ship' to push changes"
-      echo "   Or complete the workflow with '/devsolo:ship'"
-      exit 1
+SESSION_ID=""
+if [ -d ".devsolo/sessions" ] && [ -n "$CURRENT_BRANCH" ]; then
+  for session_file in .devsolo/sessions/*.json; do
+    [ -f "$session_file" ] || continue
+    BRANCH_NAME=$(jq -r '.branchName // empty' "$session_file" 2>/dev/null)
+    if [ "$BRANCH_NAME" == "$CURRENT_BRANCH" ]; then
+      SESSION_ID=$(basename "$session_file" .json)
+      SESSION_STATE=$(jq -r '.currentState' "$session_file" 2>/dev/null)
+      if [ "$SESSION_STATE" != "COMPLETE" ] && [ "$SESSION_STATE" != "ABORTED" ]; then
+        echo "❌ devsolo session active on this branch!"
+        echo "📝 Use '/devsolo:ship' to push changes"
+        echo "   Or complete the workflow with '/devsolo:ship'"
+        exit 1
+      fi
+      break
     fi
-  fi
+  done
 fi
 
 branch=$(git branch --show-current)
@@ -430,14 +442,22 @@ Before performing git operations, check for active devsolo session on current br
 \`\`\`javascript
 // Check if devsolo is managing current branch
 const currentBranch = execSync('git branch --show-current').toString().trim();
-const index = JSON.parse(fs.readFileSync('.devsolo/sessions/index.json', 'utf-8'));
-const sessionId = index.branchMap?.[currentBranch];
 
-if (sessionId) {
-  const session = JSON.parse(fs.readFileSync(\`.devsolo/sessions/\${sessionId}.json\`, 'utf-8'));
-  if (session.currentState !== 'COMPLETE' && session.currentState !== 'ABORTED') {
-    // devsolo is active on this branch - MUST use MCP tools
-    return 'use-devsolo-mcp';
+// Scan session files to find one matching current branch
+if (fs.existsSync('.devsolo/sessions')) {
+  const files = fs.readdirSync('.devsolo/sessions');
+  for (const file of files) {
+    if (!file.endsWith('.json')) continue;
+
+    const sessionPath = \`.devsolo/sessions/\${file}\`;
+    const session = JSON.parse(fs.readFileSync(sessionPath, 'utf-8'));
+
+    if (session.branchName === currentBranch &&
+        session.currentState !== 'COMPLETE' &&
+        session.currentState !== 'ABORTED') {
+      // devsolo is active on this branch - MUST use MCP tools
+      return 'use-devsolo-mcp';
+    }
   }
 }
 // No active session on current branch - can use standard git
