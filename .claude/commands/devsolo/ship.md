@@ -21,42 +21,137 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 ░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
 ```
 
+The ship workflow consists of three stages, each using a separate git-droid sub-agent invocation:
+
+### Stage 1: Initialize Ship Workflow
+
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
-   - **description:** "Coordinate ship workflow"
-   - **prompt:** "Execute the ship workflow with the following parameters: [pass all user arguments]. You must:
-     - Check for uncommitted changes (use SlashCommand to invoke `/devsolo:commit` if needed)
-     - Check for active session
-     - Generate PR description if not provided (analyze commits since main)
-     - Call `mcp__devsolo__devsolo_ship` MCP tool with all parameters
-     - Monitor CI checks (MCP tool handles this)
-     - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - Include these sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary (with PR link and stats), Next Steps"
+   - **description:** "Initialising ship workflow..."
+   - **prompt:** "Initialize the ship workflow with the following parameters: [pass all user arguments]. You must:
+     - Check for active devsolo session
+     - Check for uncommitted changes using `git status`
+     - Verify session is ready to ship
+     - If uncommitted changes exist: Present numbered options to user:
+       1. Commit all changes and proceed with ship [RECOMMENDED]
+       2. Commit only staged changes and proceed with ship
+       3. Abort ship workflow
+     - If no uncommitted changes: Indicate ready to proceed with ship
+     - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Pre-flight Checks, Result Summary
+     - IMPORTANT: In your Result Summary section, include EXACTLY one of:
+       * 'Next Stage: COMMIT_ALL' (user chose option 1)
+       * 'Next Stage: COMMIT_STAGED' (user chose option 2)
+       * 'Next Stage: PROCEED_TO_SHIP' (no uncommitted changes)
+       * 'Next Stage: ABORTED' (user chose option 3)"
 
 2. **Display git-droid's output verbatim** to the user
    - Show the complete formatted output exactly as returned by git-droid
    - Do NOT add commentary, summaries, or interpretations
-   - Do NOT intercept or modify the output
-   - The user needs to see the options and formatted sections directly
 
-**Output Formatting:** git-droid handles all output formatting including:
-- Pre-flight Checks section
-- Operations Executed section
-- Post-flight Verifications section
-- Result Summary section with PR link and stats
-- Next Steps section
+3. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: COMMIT_ALL' or 'Next Stage: COMMIT_STAGED', proceed to Stage 2 (Commit Changes)
+   - If 'Next Stage: PROCEED_TO_SHIP', skip to Stage 3 (Complete Ship Workflow)
+   - If 'Next Stage: ABORTED', terminate workflow
+
+### Stage 2: Commit Changes (Conditional)
+
+Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
+
+1. **Use the Task tool** to invoke the git-droid sub-agent:
+   - **subagent_type:** "git-droid"
+   - **description:** "Committing changes..."
+   - **prompt:** "Commit the uncommitted changes. You must:
+     - Use SlashCommand tool to invoke `/devsolo:commit` with appropriate parameters
+     - If Stage 1 returned 'COMMIT_STAGED': Pass --stagedOnly flag
+     - If Stage 1 returned 'COMMIT_ALL': Do not pass --stagedOnly flag
+     - Pass --auto flag if provided in user arguments
+     - Wait for commit to complete
+     - Verify commit was successful
+     - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Operations Executed, Post-flight Verifications, Result Summary
+     - IMPORTANT: In your Result Summary section, include EXACTLY one of:
+       * 'Next Stage: PROCEED_TO_SHIP' (commit successful)
+       * 'Next Stage: ABORTED' (commit failed or user aborted)"
+
+2. **Display git-droid's output verbatim** to the user
+   - Show the complete formatted output exactly as returned by git-droid
+   - Do NOT add commentary, summaries, or interpretations
+
+3. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: PROCEED_TO_SHIP', proceed to Stage 3 (Complete Ship Workflow)
+   - If 'Next Stage: ABORTED', terminate workflow
+
+### Stage 3: Complete Ship Workflow
+
+1. **Use the Task tool** to invoke the git-droid sub-agent:
+   - **subagent_type:** "git-droid"
+   - **description:** "Completing ship workflow..."
+   - **prompt:** "Complete the ship workflow with the following parameters: [pass all user arguments]. You must:
+     - Generate PR description if not provided (analyze commits since main)
+     - Call `mcp__devsolo__devsolo_ship` MCP tool with all parameters
+     - Monitor CI checks (MCP tool handles this)
+     - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Operations Executed (push, PR creation, CI wait, merge, cleanup), Post-flight Verifications, Result Summary (with PR link and stats), Next Steps
+     - IMPORTANT: In your Result Summary section, include EXACTLY one of:
+       * 'Next Stage: COMPLETED' (ship successful)
+       * 'Next Stage: FAILED' (ship failed, branch preserved)"
+
+2. **Display git-droid's output verbatim** to the user
+   - Show the complete formatted output exactly as returned by git-droid
+   - Do NOT add commentary, summaries, or interpretations
+
+**Output Formatting:** Each git-droid stage handles its own output formatting following the git-droid output style
 
 ## Ship Workflow Details
 
-**Step 1: Handle Uncommitted Changes**
-   - Check for uncommitted changes using `git status`
-   - If present: Invoke `/devsolo:commit` using SlashCommand tool
-   - Wait for commit to complete before proceeding
+The ship command orchestrates three distinct stages:
 
-**Step 2: Generate PR Description** (if not provided)
-   - Analyze all commits since main branch
-   - Extract key changes and organize by component/area
-   - Generate structured PR description:
+### Stage 1: Initialising ship workflow...
+
+**Purpose:** Pre-flight checks and detection of uncommitted changes
+
+**Operations:**
+- Verify active devsolo session exists
+- Check `git status` for uncommitted changes
+- Validate session state is ready to ship
+- Report findings to user
+- Return signal for next stage decision
+
+**Output:**
+- Pre-flight Checks section
+- Result Summary
+- Signal: Next Stage: COMMIT_ALL | COMMIT_STAGED | PROCEED_TO_SHIP | ABORTED
+
+### Stage 2: Committing changes... (Conditional)
+
+**Purpose:** Commit any uncommitted changes before shipping
+
+**When Executed:** Only if Stage 1 detected uncommitted changes
+
+**Operations:**
+- Invoke `/devsolo:commit` via SlashCommand tool
+- Pass --stagedOnly if Stage 1 returned COMMIT_STAGED
+- Pass --auto if provided in user arguments
+- Wait for commit to complete
+- Verify commit succeeded
+- Update session state
+
+**Output:**
+- Operations Executed section
+- Post-flight Verifications
+- Result Summary
+- Signal: Next Stage: PROCEED_TO_SHIP | ABORTED
+
+### Stage 3: Completing ship workflow...
+
+**Purpose:** Push, create PR, wait for CI, merge, and cleanup
+
+**Operations:**
+1. **Generate PR Description** (if not provided):
+   - Analyze commits since main branch
+   - Extract key changes
+   - Create structured description:
      ```
      ## Summary
      Brief overview (1-3 sentences)
@@ -72,7 +167,7 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
      Fixes #123
      ```
 
-   **Step 3: Ship the Feature**
+2. **Execute Ship via MCP Tool:**
    - Call `mcp__devsolo__devsolo_ship` with all parameters
    - This single tool call handles:
      - Push to remote
@@ -83,12 +178,18 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
      - Delete feature branches (local & remote)
      - Mark session as complete
 
-   **Step 4: Report Results**
+3. **Report Results:**
    - Show PR URL and number
    - Show merge status
    - Show cleanup results
    - Report any errors with actionable guidance
-   - Follow git-droid output style
+
+**Output:**
+- Operations Executed section
+- Post-flight Verifications
+- Result Summary (with PR link and stats)
+- Next Steps
+- Signal: Next Stage: COMPLETED | FAILED
 
 ## PR Description Generation Rules
 

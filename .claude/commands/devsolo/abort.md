@@ -19,67 +19,150 @@ Cancel the current workflow session and optionally delete the feature branch.
 ░▀░▀░▀▀░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀░
 ```
 
+The abort workflow consists of three stages, each using a separate git-droid sub-agent invocation:
+
+### Stage 1: Initialize Abort Workflow
+
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
-   - **description:** "Coordinate abort workflow"
-   - **prompt:** "Execute the abort workflow with the following parameters: [pass all user arguments]. You must:
+   - **description:** "Initialising abort workflow..."
+   - **prompt:** "Initialize the abort workflow with the following parameters: [pass all user arguments]. You must:
      - Verify session exists for the target branch
-     - Check for uncommitted changes (present numbered options if present)
-     - Confirm abort (destructive action, unless yes=true)
-     - Call `mcp__devsolo__devsolo_abort` MCP tool with parameters
-     - Switch to main branch
-     - Optionally delete the feature branch
-     - Mark session as aborted
-     - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - Include these sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
-     - Present numbered options for user choices with [RECOMMENDED] marker when needed"
+     - If session not found: Report error and abort
+     - Check for uncommitted changes using `git status`
+     - Present WARNING about destructive action
+     - If uncommitted changes exist: Present numbered options:
+       1. Stash changes and abort session [RECOMMENDED]
+       2. Discard changes and abort session (force)
+       3. Cancel abort workflow
+     - If no uncommitted changes: Present numbered options:
+       1. Abort session (keep branch) [RECOMMENDED]
+       2. Abort session and delete branch
+       3. Cancel abort workflow
+     - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Pre-flight Checks, Result Summary
+     - IMPORTANT: In your Result Summary section, include EXACTLY one of:
+       * 'Next Stage: STASH_CHANGES' (uncommitted changes: user chose option 1)
+       * 'Next Stage: PROCEED_TO_ABORT' (uncommitted changes: user chose option 2, OR no changes: user chose option 1)
+       * 'Next Stage: DELETE_BRANCH' (no changes: user chose option 2)
+       * 'Next Stage: ABORTED' (user chose option 3, or session not found)"
 
 2. **Display git-droid's output verbatim** to the user
    - Show the complete formatted output exactly as returned by git-droid
    - Do NOT add commentary, summaries, or interpretations
-   - Do NOT intercept or modify the output
-   - The user needs to see the options and formatted sections directly
 
-**Output Formatting:** git-droid handles all output formatting including:
-- Pre-flight Checks section
-- Operations Executed section
-- Post-flight Verifications section
-- Result Summary section
-- Next Steps section
-- Numbered options for user choices (with [RECOMMENDED] marker)
+3. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: STASH_CHANGES', proceed to Stage 2 (Handle Uncommitted Changes)
+   - If 'Next Stage: PROCEED_TO_ABORT', skip to Stage 3 (Abort Session)
+   - If 'Next Stage: DELETE_BRANCH', skip to Stage 3 with deleteBranch=true
+   - If 'Next Stage: ABORTED', terminate workflow
+
+### Stage 2: Handle Uncommitted Changes (Conditional)
+
+Only execute this stage if Stage 1 returned 'STASH_CHANGES'.
+
+1. **Use the Task tool** to invoke the git-droid sub-agent:
+   - **subagent_type:** "git-droid"
+   - **description:** "Handling uncommitted changes..."
+   - **prompt:** "Stash uncommitted changes before aborting. You must:
+     - Get current branch name
+     - Create stash with labeled reference: abort-from-{branch}
+     - Store stash reference for potential recovery
+     - Verify stash succeeded
+     - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Operations Executed, Post-flight Verifications, Result Summary
+     - IMPORTANT: In your Result Summary section, include EXACTLY one of:
+       * 'Next Stage: PROCEED_TO_ABORT' (stash successful)
+       * 'Next Stage: ABORTED' (stash failed)"
+
+2. **Display git-droid's output verbatim** to the user
+   - Show the complete formatted output exactly as returned by git-droid
+   - Do NOT add commentary, summaries, or interpretations
+
+3. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: PROCEED_TO_ABORT', proceed to Stage 3 (Abort Session)
+   - If 'Next Stage: ABORTED', terminate workflow
+
+### Stage 3: Abort Session
+
+1. **Use the Task tool** to invoke the git-droid sub-agent:
+   - **subagent_type:** "git-droid"
+   - **description:** "Aborting session..."
+   - **prompt:** "Complete the abort operation with the following parameters: [pass all user arguments]. You must:
+     - Call `mcp__devsolo__devsolo_abort` MCP tool with parameters
+     - Pass --deleteBranch if Stage 1 returned 'DELETE_BRANCH'
+     - Switch to main branch
+     - Delete feature branch (if requested)
+     - Mark session as aborted
+     - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+     - IMPORTANT: In your Result Summary section, include EXACTLY one of:
+       * 'Next Stage: COMPLETED' (abort successful)"
+
+2. **Display git-droid's output verbatim** to the user
+   - Show the complete formatted output exactly as returned by git-droid
+   - Do NOT add commentary, summaries, or interpretations
+
+**Output Formatting:** Each git-droid stage handles its own output formatting following the git-droid output style
 
 ## Abort Workflow Details
 
-```
-1. Pre-flight Checks:
-   ✓ Session exists for branch
-   ✓ Not currently on main branch
-   ✓ Uncommitted changes handled (stashed or force)
+The abort command orchestrates three distinct stages:
 
-2. Confirmation:
-   ⚠ Abort will:
-   - Mark session as aborted
-   - Switch to main branch
-   - Optionally delete branch (if --deleteBranch)
-   - Any uncommitted changes will be lost (unless stashed)
+### Stage 1: Initialising abort workflow...
 
-   Confirm? [y/N]
+**Purpose:** Verify session and detect uncommitted changes
 
-3. Abort Operation:
-   - Stash uncommitted changes (if requested)
-   - Switch to main branch
-   - Delete local feature branch (if requested)
-   - Delete remote branch (if exists and requested)
-   - Prune stale remote-tracking refs (if remote branch deleted)
-   - Mark session as aborted
-   - Update session state
+**Operations:**
+- Verify session exists for target branch
+- If not found: Report error and abort workflow
+- Check for uncommitted changes
+- Present WARNING about destructive action
+- Present context-appropriate numbered options to user
+- Return signal for next stage decision
 
-4. Post-flight Verifications:
-   ✓ On main branch
-   ✓ Session marked aborted
-   ✓ Branch deleted (if requested)
-   ✓ Remote-tracking refs cleaned up
-```
+**Output:**
+- Pre-flight Checks section
+- Result Summary
+- Signal: Next Stage: STASH_CHANGES | PROCEED_TO_ABORT | DELETE_BRANCH | ABORTED
+
+### Stage 2: Handling uncommitted changes... (Conditional)
+
+**Purpose:** Stash uncommitted changes before aborting
+
+**When Executed:** Only if Stage 1 returned STASH_CHANGES
+
+**Operations:**
+- Get current branch name
+- Create stash with labeled reference: abort-from-{branch}
+- Store stash reference for potential recovery
+- Verify stash succeeded
+
+**Output:**
+- Operations Executed section
+- Post-flight Verifications
+- Result Summary
+- Signal: Next Stage: PROCEED_TO_ABORT | ABORTED
+
+### Stage 3: Aborting session...
+
+**Purpose:** Execute abort operation and cleanup
+
+**Operations:**
+- Call `mcp__devsolo__devsolo_abort` MCP tool
+- Pass --deleteBranch if Stage 1 returned DELETE_BRANCH
+- Switch to main branch
+- Delete feature branch (if requested)
+- Delete remote branch (if exists and requested)
+- Prune stale remote-tracking refs
+- Mark session as aborted
+
+**Output:**
+- Operations Executed section
+- Post-flight Verifications
+- Result Summary
+- Next Steps
+- Signal: Next Stage: COMPLETED
 
 ## Examples
 

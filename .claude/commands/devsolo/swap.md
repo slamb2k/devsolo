@@ -18,60 +18,144 @@ Switch between active workflow sessions without aborting them.
 ░▀▀▀░▀░▀░▀░▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
 ```
 
+The swap workflow consists of three stages, each using a separate git-droid sub-agent invocation:
+
+### Stage 1: Initialize Swap Workflow
+
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
-   - **description:** "Coordinate swap workflow"
-   - **prompt:** "Execute the swap workflow with the following parameters: [pass all user arguments]. You must:
-     - Verify target session exists (list available sessions if not)
-     - Check for uncommitted changes (present numbered options if present)
-     - Call `mcp__devsolo__devsolo_swap` MCP tool with parameters
-     - Switch to target branch
-     - Activate target session
-     - Pop stash if previously stashed on target branch
-     - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - Include these sections: Pre-flight Checks, Operations Executed, Post-flight Verifications, Result Summary, Next Steps
-     - Present numbered options for user choices with [RECOMMENDED] marker when needed"
+   - **description:** "Initialising swap workflow..."
+   - **prompt:** "Initialize the swap workflow with the following parameters: [pass all user arguments]. You must:
+     - Verify target session exists on target branch
+     - If target session not found: List available sessions and abort
+     - Check for uncommitted changes on current branch using `git status`
+     - If uncommitted changes exist: Present numbered options to user:
+       1. Stash changes and swap [RECOMMENDED]
+       2. Commit changes first (then abort swap, user should commit manually)
+       3. Discard changes and swap (force)
+       4. Abort swap workflow
+     - If no uncommitted changes: Indicate ready to swap
+     - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Pre-flight Checks, Result Summary
+     - IMPORTANT: In your Result Summary section, include EXACTLY one of:
+       * 'Next Stage: STASH_CHANGES' (user chose option 1)
+       * 'Next Stage: COMMIT_FIRST' (user chose option 2, terminal state)
+       * 'Next Stage: PROCEED_TO_SWAP' (user chose option 3 force, or no changes)
+       * 'Next Stage: ABORTED' (user chose option 4, or target session not found)"
 
 2. **Display git-droid's output verbatim** to the user
    - Show the complete formatted output exactly as returned by git-droid
    - Do NOT add commentary, summaries, or interpretations
-   - Do NOT intercept or modify the output
-   - The user needs to see the options and formatted sections directly
 
-**Output Formatting:** git-droid handles all output formatting including:
-- Pre-flight Checks section
-- Operations Executed section
-- Post-flight Verifications section
-- Result Summary section
-- Next Steps section
-- Numbered options for user choices (with [RECOMMENDED] marker)
+3. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: STASH_CHANGES', proceed to Stage 2 (Stash Current Work)
+   - If 'Next Stage: PROCEED_TO_SWAP', skip to Stage 3 (Switch to Target Branch)
+   - If 'Next Stage: COMMIT_FIRST', display message and terminate (user should commit manually then retry)
+   - If 'Next Stage: ABORTED', terminate workflow
+
+### Stage 2: Stash Current Work (Conditional)
+
+Only execute this stage if Stage 1 returned 'STASH_CHANGES'.
+
+1. **Use the Task tool** to invoke the git-droid sub-agent:
+   - **subagent_type:** "git-droid"
+   - **description:** "Stashing current work..."
+   - **prompt:** "Stash uncommitted changes on current branch. You must:
+     - Get current branch name
+     - Create stash with labeled reference: swap-from-{current-branch}
+     - Store stash reference in session metadata
+     - Verify stash succeeded
+     - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Operations Executed, Post-flight Verifications, Result Summary
+     - IMPORTANT: In your Result Summary section, include EXACTLY one of:
+       * 'Next Stage: PROCEED_TO_SWAP' (stash successful)
+       * 'Next Stage: ABORTED' (stash failed)"
+
+2. **Display git-droid's output verbatim** to the user
+   - Show the complete formatted output exactly as returned by git-droid
+   - Do NOT add commentary, summaries, or interpretations
+
+3. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: PROCEED_TO_SWAP', proceed to Stage 3 (Switch to Target Branch)
+   - If 'Next Stage: ABORTED', terminate workflow
+
+### Stage 3: Switch to Target Branch
+
+1. **Use the Task tool** to invoke the git-droid sub-agent:
+   - **subagent_type:** "git-droid"
+   - **description:** "Switching to target branch..."
+   - **prompt:** "Complete the swap to target branch with the following parameters: [pass all user arguments]. You must:
+     - Call `mcp__devsolo__devsolo_swap` MCP tool with parameters
+     - Checkout target branch
+     - Activate target session
+     - Check if target branch has stashed work
+     - Pop stash automatically if present
+     - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+     - IMPORTANT: In your Result Summary section, include EXACTLY one of:
+       * 'Next Stage: COMPLETED' (swap successful)"
+
+2. **Display git-droid's output verbatim** to the user
+   - Show the complete formatted output exactly as returned by git-droid
+   - Do NOT add commentary, summaries, or interpretations
+
+**Output Formatting:** Each git-droid stage handles its own output formatting following the git-droid output style
 
 ## Swap Workflow Details
 
-```
-1. Pre-flight Checks:
-   ✓ Target session exists
-   ✓ Target branch exists
-   ✓ Uncommitted changes handled (stashed, committed, or force)
+The swap command orchestrates three distinct stages:
 
-2. Stash Current Work (if needed):
-   - Check for uncommitted changes
-   - Stash with reference: stash@{swap-from-<current-branch>}
-   - Save stash reference in session metadata
+### Stage 1: Initialising swap workflow...
 
-3. Switch Branch:
-   - Checkout target branch
-   - Activate target session
+**Purpose:** Validate target session and detect uncommitted changes
 
-4. Restore Previous Work (if applicable):
-   - Check if target branch had stashed work
-   - Pop stash automatically if present
+**Operations:**
+- Verify target session exists on target branch
+- If not found: List available sessions, abort workflow
+- Check for uncommitted changes on current branch
+- Present options if changes detected
+- Return signal for next stage decision
 
-5. Post-flight Verifications:
-   ✓ On target branch
-   ✓ Target session active
-   ✓ Stash applied (if applicable)
-```
+**Output:**
+- Pre-flight Checks section
+- Result Summary
+- Signal: Next Stage: STASH_CHANGES | COMMIT_FIRST | PROCEED_TO_SWAP | ABORTED
+
+### Stage 2: Stashing current work... (Conditional)
+
+**Purpose:** Stash uncommitted changes before swapping
+
+**When Executed:** Only if Stage 1 returned STASH_CHANGES
+
+**Operations:**
+- Get current branch name
+- Create stash with labeled reference: swap-from-{current-branch}
+- Store stash reference in session metadata
+- Verify stash succeeded
+
+**Output:**
+- Operations Executed section
+- Post-flight Verifications
+- Result Summary
+- Signal: Next Stage: PROCEED_TO_SWAP | ABORTED
+
+### Stage 3: Switching to target branch...
+
+**Purpose:** Execute branch switch and restore stashed work if present
+
+**Operations:**
+- Call `mcp__devsolo__devsolo_swap` MCP tool
+- Checkout target branch
+- Activate target session
+- Check if target branch has stashed work
+- Pop stash automatically if present
+
+**Output:**
+- Operations Executed section
+- Post-flight Verifications
+- Result Summary
+- Next Steps
+- Signal: Next Stage: COMPLETED
 
 ## Examples
 

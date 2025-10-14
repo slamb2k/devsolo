@@ -12,7 +12,7 @@ This folder contains implementation plans, task lists, and roadmaps for upcoming
 
 ### Active Plans
 
-*No active plans currently*
+- **multi-stage-orchestration.md** - Multi-stage sub-agent orchestration pattern for complex workflows: breaks git-droid operations into distinct stages with clear progress indicators (ship, swap, abort, launch, cleanup commands)
 
 ## What Goes Here
 

@@ -17,75 +17,109 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
 ░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀░░░
 ```
 
+The cleanup workflow consists of two stages, each using a separate git-droid sub-agent invocation:
+
+### Stage 1: Analyze Repository
+
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
-   - **description:** "Coordinate cleanup workflow"
-   - **prompt:** "Execute the cleanup workflow with the following parameters: [pass all user arguments]. You must:
-     - Sync main branch first (pull latest changes)
-     - Identify orphaned branches and stale sessions
-     - Show summary of items to clean (use tables for multiple items)
-     - Confirm deletions (unless force=true)
-     - Call `mcp__devsolo__devsolo_cleanup` MCP tool with parameters
-     - Remove stale sessions
-     - Delete orphaned branches (if requested)
-     - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - Include these sections: Pre-flight Checks (analysis of what will be cleaned), Operations Executed, Post-flight Verifications, Result Summary (with counts), Next Steps"
+   - **description:** "Analyzing repository..."
+   - **prompt:** "Analyze the repository for cleanup candidates with the following parameters: [pass all user arguments]. You must:
+     - Sync main branch first (checkout main, pull latest changes)
+     - Scan `.devsolo/sessions/` directory for stale sessions (COMPLETE, ABORTED, expired, branch deleted)
+     - Scan git branches for orphaned branches (no active session, not main, not current)
+     - Present findings in tables if multiple items found
+     - Show summary of what will be cleaned
+     - Present numbered options to user:
+       1. Clean sessions and branches [RECOMMENDED]
+       2. Clean sessions only
+       3. Cancel cleanup
+     - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Pre-flight Checks (with tables showing candidates), Result Summary
+     - IMPORTANT: In your Result Summary section, include EXACTLY one of:
+       * 'Next Stage: EXECUTE_FULL_CLEANUP' (user chose option 1)
+       * 'Next Stage: EXECUTE_SESSION_CLEANUP' (user chose option 2)
+       * 'Next Stage: ABORTED' (user chose option 3, or nothing to clean)"
 
 2. **Display git-droid's output verbatim** to the user
    - Show the complete formatted output exactly as returned by git-droid
    - Do NOT add commentary, summaries, or interpretations
-   - Do NOT intercept or modify the output
-   - The user needs to see the options and formatted sections directly
 
-**Output Formatting:** git-droid handles all output formatting including:
-- Pre-flight Checks section (analysis of what will be cleaned)
-- Operations Executed section
-- Post-flight Verifications section
-- Result Summary section with counts
-- Next Steps section
+3. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: EXECUTE_FULL_CLEANUP', proceed to Stage 2 with deleteBranches=true
+   - If 'Next Stage: EXECUTE_SESSION_CLEANUP', proceed to Stage 2 with deleteBranches=false
+   - If 'Next Stage: ABORTED', terminate workflow
+
+### Stage 2: Execute Cleanup
+
+1. **Use the Task tool** to invoke the git-droid sub-agent:
+   - **subagent_type:** "git-droid"
+   - **description:** "Executing cleanup..."
+   - **prompt:** "Execute the cleanup operation. You must:
+     - Call `mcp__devsolo__devsolo_cleanup` MCP tool with parameters
+     - Pass --deleteBranches if Stage 1 returned 'EXECUTE_FULL_CLEANUP'
+     - Remove stale session files
+     - Delete orphaned branches (if deleteBranches=true): local and remote
+     - Prune stale remote-tracking refs
+     - Report counts (sessions removed, branches deleted)
+     - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
+     - Include these sections: Operations Executed, Post-flight Verifications, Result Summary (with counts), Next Steps
+     - IMPORTANT: In your Result Summary section, include EXACTLY one of:
+       * 'Next Stage: COMPLETED' (cleanup successful)"
+
+2. **Display git-droid's output verbatim** to the user
+   - Show the complete formatted output exactly as returned by git-droid
+   - Do NOT add commentary, summaries, or interpretations
+
+**Output Formatting:** Each git-droid stage handles its own output formatting following the git-droid output style
 
 ## Cleanup Workflow Details
 
-```
-1. Sync Main Branch:
-   - Checkout main branch
-   - Pull latest changes
-   - Ensures we have current state
+The cleanup command orchestrates two distinct stages:
 
-2. Analysis Phase:
-   🔍 Scanning for cleanup candidates...
+### Stage 1: Analyzing repository...
 
-   Orphaned Branches (branches without sessions):
-   | Branch                    | Last Commit   | Age       |
-   |--------------------------|---------------|-----------|
-   | feature/old-work         | 3 days ago    | 15 days   |
-   | fix/ancient-bug          | 2 weeks ago   | 30 days   |
+**Purpose:** Scan for cleanup candidates and get user confirmation
 
-   Stale Sessions (completed/aborted/expired):
-   | ID       | Branch              | State      | Age       |
-   |----------|---------------------|------------|-----------|
-   | 0c2a20a7 | feature/done        | COMPLETE   | 5 days    |
-   | 8f3d91bc | feature/abandoned   | ABORTED    | 10 days   |
+**Operations:**
+- Sync main branch (checkout main, pull latest)
+- Scan `.devsolo/sessions/` for stale sessions
+  - COMPLETE state (already merged)
+  - ABORTED state (user cancelled)
+  - Expired (>30 days inactivity)
+  - Branch no longer exists
+- Scan git branches for orphaned branches
+  - No active devsolo session
+  - Not main branch
+  - Not currently checked out
+- Present findings in tables
+- Show summary of what will be cleaned
+- Present numbered options to user
+- Return signal for next stage decision
 
-3. Confirmation:
-   ⚠ Cleanup will:
-   - Remove 2 stale sessions
-   - Delete 2 orphaned branches
+**Output:**
+- Pre-flight Checks section (with tables)
+- Result Summary
+- Signal: Next Stage: EXECUTE_FULL_CLEANUP | EXECUTE_SESSION_CLEANUP | ABORTED
 
-   Confirm? [y/N]
+### Stage 2: Executing cleanup...
 
-4. Cleanup Operations:
-   - Remove stale session files
-   - Delete orphaned branches (local)
-   - Delete orphaned branches (remote, if tracking)
-   - Prune stale remote-tracking refs
+**Purpose:** Remove stale sessions and orphaned branches
 
-5. Post-flight Verifications:
-   ✓ Sessions cleaned: 2
-   ✓ Branches deleted: 2
-   ✓ Remote-tracking refs pruned
-   ✓ On main branch
-```
+**Operations:**
+- Call `mcp__devsolo__devsolo_cleanup` MCP tool
+- Pass --deleteBranches based on Stage 1 choice
+- Remove stale session files
+- Delete orphaned branches (local and remote if requested)
+- Prune stale remote-tracking refs
+- Report counts (sessions removed, branches deleted)
+
+**Output:**
+- Operations Executed section
+- Post-flight Verifications
+- Result Summary (with counts)
+- Next Steps
+- Signal: Next Stage: COMPLETED
 
 ## What Gets Cleaned
 
