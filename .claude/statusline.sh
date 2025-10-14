@@ -54,31 +54,32 @@ if [ -d "$SESSION_DIR" ]; then
   done
 fi
 
-# Function to create a bar graph
-create_bar() {
+# Function to create a bar graph for remaining context
+create_remaining_bar() {
   local used=$1
   local total=$2
-  local width=10
+  local width=15
 
   if [ -z "$used" ] || [ -z "$total" ] || [ "$total" -eq 0 ]; then
     echo ""
     return
   fi
 
-  local percentage=$((used * 100 / total))
-  local filled=$((used * width / total))
+  local remaining=$((total - used))
+  local percentage=$((remaining * 100 / total))
+  local filled=$((remaining * width / total))
 
-  # Choose color based on usage
+  # Choose color based on remaining capacity (inverse of usage)
   local bar_color=""
-  if [ $percentage -lt 50 ]; then
+  if [ $percentage -gt 50 ]; then
     bar_color="$GREEN"
-  elif [ $percentage -lt 80 ]; then
+  elif [ $percentage -gt 20 ]; then
     bar_color="$YELLOW"
   else
     bar_color="$RED"
   fi
 
-  # Build the bar
+  # Build the bar showing remaining capacity
   local bar="${bar_color}"
   for ((i=0; i<filled; i++)); do
     bar+="█"
@@ -89,7 +90,22 @@ create_bar() {
   done
   bar+="${RESET}"
 
-  echo -e " ${bar} ${percentage}%"
+  # Format with K/M suffix for readability
+  local remaining_display
+  if [ $remaining -gt 1000 ]; then
+    remaining_display="$((remaining / 1000))K"
+  else
+    remaining_display="${remaining}"
+  fi
+
+  local total_display
+  if [ $total -gt 1000 ]; then
+    total_display="$((total / 1000))K"
+  else
+    total_display="${total}"
+  fi
+
+  echo -e " ${bar} ${CYAN}${remaining_display}${RESET}/${GRAY}${total_display}${RESET}"
 }
 
 # Build status line
@@ -133,8 +149,8 @@ if [ -n "$SESSION_ID" ]; then
   # Build context window display if available
   CONTEXT_DISPLAY=""
   if [ -n "$TOKEN_USED" ] && [ -n "$TOKEN_TOTAL" ]; then
-    BAR=$(create_bar "$TOKEN_USED" "$TOKEN_TOTAL")
-    CONTEXT_DISPLAY="${GRAY}|${RESET} ${CYAN}${TOKEN_USED}${RESET}/${CYAN}${TOKEN_TOTAL}${RESET}${BAR}"
+    BAR=$(create_remaining_bar "$TOKEN_USED" "$TOKEN_TOTAL")
+    CONTEXT_DISPLAY="${GRAY}|${RESET}${BAR}"
   elif [ -n "$TOKEN_BUDGET" ]; then
     CONTEXT_DISPLAY="${GRAY}|${RESET} ${CYAN}budget: ${TOKEN_BUDGET}${RESET}"
   fi
@@ -145,10 +161,10 @@ else
   # Build context window display if available
   CONTEXT_DISPLAY=""
   if [ -n "$TOKEN_USED" ] && [ -n "$TOKEN_TOTAL" ]; then
-    BAR=$(create_bar "$TOKEN_USED" "$TOKEN_TOTAL")
-    CONTEXT_DISPLAY=" ${GRAY}|${RESET} ${CYAN}${TOKEN_USED}${RESET}/${CYAN}${TOKEN_TOTAL}${RESET}${BAR}"
+    BAR=$(create_remaining_bar "$TOKEN_USED" "$TOKEN_TOTAL")
+    CONTEXT_DISPLAY="${GRAY}|${RESET}${BAR}"
   elif [ -n "$TOKEN_BUDGET" ]; then
-    CONTEXT_DISPLAY=" ${GRAY}|${RESET} ${CYAN}budget: ${TOKEN_BUDGET}${RESET}"
+    CONTEXT_DISPLAY="${GRAY}|${RESET} ${CYAN}budget: ${TOKEN_BUDGET}${RESET}"
   fi
 
   echo -e "${BOLD}[devsolo]${RESET} 📁 ${YELLOW}${BRANCH}${RESET} ${GRAY}|${RESET} ${GRAY}no session${RESET}${CONTEXT_DISPLAY}"

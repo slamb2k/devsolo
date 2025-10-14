@@ -29,7 +29,7 @@ Manage Claude Code status line display to show current devsolo workflow status.
 The status line displays workflow information directly in Claude Code:
 
 ```
-[devsolo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY
+[devsolo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY | ██████░░░░░░░░░ 92K/200K
 ```
 
 Components:
@@ -37,6 +37,10 @@ Components:
 - **Session ID**: Short form of session identifier (8 chars)
 - **Branch Name**: Current feature branch
 - **State**: Current workflow state
+- **Context Window**: Bar graph showing remaining tokens with color coding:
+  - 🟢 Green: >50% remaining (plenty of context)
+  - 🟡 Yellow: 20-50% remaining (getting low)
+  - 🔴 Red: <20% remaining (context nearly exhausted)
 
 ## Actions
 
@@ -202,3 +206,7 @@ Present status line configuration in a clear, structured format:
 - Provides at-a-glance workflow status
 - Can be customized to show only desired information
 - Persists across Claude Code sessions
+- **Context Window Bar Graph**: Displays remaining tokens in real-time with color-coded visual indicator
+  - Helps you monitor when to wrap up long conversations
+  - Green bar indicates plenty of context remaining
+  - Yellow/Red bars suggest starting a new conversation soon
