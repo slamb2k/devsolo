@@ -34,10 +34,10 @@ The launch workflow consists of up to four stages, each using a separate git-dro
      - Check for existing active session
      - Report all findings
      - If uncommitted changes detected: Present numbered options:
-       1. Commit changes first [RECOMMENDED]
-       2. Stash changes
-       3. Discard changes
-       4. Abort launch
+       1. Move changes to feature branch [RECOMMENDED]
+       2. Discard changes
+       3. Abort launch
+     - NOTE: If uncommitted changes are unrelated to the new feature, user should abort, launch current work as a feature first, then use /devsolo:swap to switch to new work
      - If existing session detected: Present numbered options:
        1. Abort existing session [RECOMMENDED]
        2. Keep both sessions
@@ -73,9 +73,8 @@ Only execute this stage if Stage 1 returned 'HANDLE_CHANGES' or 'HANDLE_BOTH'.
    - **subagent_type:** "git-droid"
    - **description:** "Handling uncommitted changes..."
    - **prompt:** "Handle uncommitted changes based on user's choice from Stage 1. You must:
-     - If user chose commit: Generate commit message, execute git add and git commit
-     - If user chose stash: Create labeled stash
-     - If user chose discard: Force clean working directory (git reset --hard)
+     - If user chose move changes (option 1): Changes will be auto-stashed and restored on feature branch (no action needed in this stage, proceed to next stage)
+     - If user chose discard (option 2): Force clean working directory (git reset --hard)
      - Verify action succeeded
      - Check again if existing session exists (for HANDLE_BOTH case)
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
@@ -176,12 +175,13 @@ The launch command orchestrates up to four distinct stages:
 **When Executed:** Only if Stage 1 returned HANDLE_CHANGES or HANDLE_BOTH
 
 **Operations:**
-- Execute user's choice (commit/stash/discard)
-- If commit: Generate message and commit
-- If stash: Create labeled stash
-- If discard: Force clean working directory
+- Execute user's choice (move to feature branch / discard)
+- If move to feature: No action needed (MCP tool auto-stashes and pops)
+- If discard: Force clean working directory (git reset --hard)
 - Verify action succeeded
 - Check again if existing session exists
+
+**Note:** If uncommitted changes are unrelated to the new feature, user should abort and use /devsolo:swap workflow instead (launch current work first, then swap to new work)
 
 **Output:**
 - Operations Executed section

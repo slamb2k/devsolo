@@ -53,7 +53,7 @@ Commands that perform workflow operations (launch, commit, ship, swap, abort, cl
 - ✓ Operation description 2
 - ✓ Operation description 3
 
-**Post-flight Verifications:**
+✓ **Post-flight Verifications:**
 
 - ✓ Verification 1
 - ✓ Verification 2
@@ -66,7 +66,7 @@ Commands that perform workflow operations (launch, commit, ship, swap, abort, cl
 **Another metric:** value
 **Status:** value
 
-**Details:**
+📋 **Details:**
 
 - Detail 1
 - Detail 2
@@ -92,25 +92,39 @@ Choose an option above to continue.
 
 **Formatting Rules:**
 
-1. **Section Breaks with Headers**: Every `---` MUST be on its own line, followed by a newline, then the icon and bold header
-   - ✅ Correct:
-     ```
-     ---
-     📊 **Summary**
-     ```
-   - ❌ Wrong: `---📊 **Summary**` (no newline after ---)
+1. **Section Breaks with Headers**: Every `---` MUST be on its own line with a newline character immediately after it, then the icon and bold header
+
+   **Correct format:**
+   ```
+   ---
+   📊 **Summary**
+   ```
+
+   **This means in your actual text output:**
+   - Type `---` then press Enter (newline)
+   - Type `📊 **Summary**`
+
+   **Common mistakes:**
+   - ❌ Wrong: `---📊 **Summary**` (MISSING NEWLINE - this is the most common error!)
    - ❌ Wrong: `---\n**Summary**\n` (missing icon)
    - ❌ Wrong: `---\n\n**Summary**\n` (extra blank line after ---)
+   - ❌ Wrong: `## 📊 **Summary**` (don't use markdown headers for main sections)
 
-2. **Compact Single-Line Items**: When a section has only simple key-value pairs, no blank lines between them
+   **CRITICAL**: The newline after `---` is essential for proper markdown rendering. Without it, the section break won't render correctly. Main workflow sections (Pre-flight Checks, Operations Executed, Result Summary, Next Steps) MUST use `---` + newline format.
+
+2. **Subsection Headers**: Subsections within a main section (like "Post-flight Verifications" under "Operations Executed") should have an icon
+   - ✅ Correct: `✓ **Post-flight Verifications:**`
+   - ❌ Wrong: `**Post-flight Verifications:**` (missing icon)
+
+3. **Compact Single-Line Items**: When a section has only simple key-value pairs, no blank lines between them
    - ✅ Correct: `**Status:** value\n**Session:** value\n**Branch:** value`
    - ❌ Wrong: `**Status:** value\n\n**Session:** value\n\n**Branch:** value`
 
-3. **Spacing for Lists**: Section headers followed by lists need one blank line
+4. **Spacing for Lists**: Section headers followed by lists need one blank line
    - ✅ Correct: `**Details:**\n\n- Detail 1\n- Detail 2`
    - ❌ Wrong: `**Details:**\n- Detail 1\n- Detail 2` (no blank line)
 
-4. **Icon Selection**: Use appropriate icons for section types
+5. **Icon Selection**: Use appropriate icons for section types
    - 📋 Pre-flight Checks, Pre-analysis
    - ✅ Operations Executed, Success summaries
    - 📊 Result Summary, Statistics
@@ -128,22 +142,22 @@ When presenting user options (from CheckOption arrays returned by MCP tools), fo
 
 **Options:**
 
-| # | Option | Risk | Action |
-|---|--------|------|--------|
-| 1 | Primary option label (brief description) [RECOMMENDED] | Low | What gets executed |
-| 2 | Alternative option label (brief description) | Medium | What gets executed |
-| 3 | Another option label (brief description) | High | What gets executed |
+| # | Option | Risk |
+|---|--------|------|
+| 1 | Primary option label [RECOMMENDED] | Low |
+| 2 | Alternative option | Medium |
+| 3 | Another option | High |
 
 Choose an option above to continue.
 ```
 
 **Rules:**
 - Options MUST be presented in Next Steps section, NOT after Pre-flight Checks
-- Use a markdown table with columns: #, Option, Risk, Action
+- Use a markdown table with columns: #, Option, Risk
 - Always number options (1, 2, 3, ...)
+- Keep option labels concise but descriptive (the option text should make it clear what will happen)
 - Exactly ONE option must have `[RECOMMENDED]` marker (the one with autoRecommended: true)
 - Show risk level: `Low`, `Medium`, or `High`
-- Show action: Brief description of what will be executed
 - Add a prompt below the table: "Choose an option above to continue."
 
 **Converting CheckOption to Table Format:**
@@ -177,12 +191,12 @@ Choose an option above to continue.
   }
 ]
 
-// Format as table in Next Steps:
-| # | Option | Risk | Action |
-|---|--------|------|--------|
-| 1 | Commit all changes and proceed (Stage and commit all changes) [RECOMMENDED] | Low | git add -A && git commit |
-| 2 | Commit only staged changes (Commit staged files only) | Medium | git commit |
-| 3 | Abort workflow (Cancel operation) | Low | exit |
+// Format as table in Next Steps (keep descriptions brief):
+| # | Option | Risk |
+|---|--------|------|
+| 1 | Commit all changes [RECOMMENDED] | Low |
+| 2 | Commit staged only | Medium |
+| 3 | Abort workflow | Low |
 ```
 
 ## Output Format for Operations
@@ -224,7 +238,7 @@ Format as markdown list:
 ### Post-Flight Verifications Section
 Format as markdown list:
 ```
-**Post-flight Verifications:**
+✓ **Post-flight Verifications:**
 
 - ✓ Verification description 1
 - ✓ Verification description 2
@@ -232,32 +246,30 @@ Format as markdown list:
 ```
 
 ### Result Summary
-Format with clear sections using markdown headers:
+Format using the standard section break pattern:
 ```
-## ✅ <Operation> Successful
+---
+📊 **Result Summary**
 
 **<Primary metric>:** <value>
+**<Another metric>:** <value>
 
-### Operations Completed
+📋 **Details:**
 
-- ✓ Operation 1
-- ✓ Operation 2
-- ✓ Operation 3
-
-### Next Steps
-
-<Guidance text>
+- Detail 1
+- Detail 2
 ```
 
 Or for errors:
 ```
-## ✗ Operation Failed
+---
+✗ **Error Summary**
 
 **Error:** <error-summary>
 
 **Issue:** <description-of-what-went-wrong>
 
-### Resolution
+📋 **Resolution:**
 
 - <actionable-fix-1>
 - <actionable-fix-2>
@@ -266,12 +278,6 @@ Or for errors:
 ## Example: Launch Workflow Output
 
 ```
-## ✅ Workflow Launched Successfully
-
-**Session Created:** `2d967326-881b-4167-9e52-fef1e07366f0`
-**Branch:** `feature/add-user-authentication`
-**State:** `BRANCH_READY`
-
 ---
 📋 **Pre-flight Checks**
 
@@ -288,11 +294,18 @@ Or for errors:
 - ✓ Checked out to new branch
 - ✓ Session initialized
 
-**Post-flight Verifications:**
+✓ **Post-flight Verifications:**
 
 - ✓ Branch created
 - ✓ Session created
 - ✓ Checked out to feature branch
+
+---
+📊 **Result Summary**
+
+**Session Created:** `2d967326-881b-4167-9e52-fef1e07366f0`
+**Branch:** `feature/add-user-authentication`
+**State:** `BRANCH_READY`
 
 ---
 🚀 **Next Steps**
@@ -306,10 +319,6 @@ When ready to ship your changes:
 ## Example: Commit Workflow Output
 
 ```
-## ✅ Commit Successful
-
-**Operation:** Changes committed to feature/add-user-authentication
-
 ---
 📋 **Pre-flight Checks**
 
@@ -322,23 +331,28 @@ When ready to ship your changes:
 - ✓ Created commit (abc1234)
 - ✓ Updated session state
 
-**Post-flight Verifications:**
+✓ **Post-flight Verifications:**
 
 - ✓ Commit created successfully
 - ✓ Session state updated to CHANGES_COMMITTED
 
 ---
-📊 **Commit Details**
+📊 **Result Summary**
+
+**Operation:** Changes committed to feature/add-user-authentication
+**Commit:** abc1234567890abcdef1234567890abcdef1234
+**Files Changed:** 3
+
+📋 **Commit Details:**
 
 ```
-Commit: abc1234567890abcdef1234567890abcdef1234
 Author: Your Name <your.email@example.com>
 Date:   Tue Oct 14 17:11:46 2025 +1100
 
 feat(auth): implement user authentication system
 ```
 
-**Files Changed:**
+📋 **Files Changed:**
 
 ```
 src/auth/login.ts     | 45 ++++++++++++++++++++++++++
@@ -361,10 +375,6 @@ Ready to ship! Use `/devsolo:ship` to:
 ## Example: Ship Workflow Output
 
 ```
-## ✅ Ship Successful
-
-**Operation:** Feature shipped via PR #123
-
 ---
 📋 **Pre-flight Checks**
 
@@ -383,7 +393,7 @@ Ready to ship! Use `/devsolo:ship` to:
 - ✓ Cleaned up branches
 - ✓ Switched to main branch
 
-**Post-flight Verifications:**
+✓ **Post-flight Verifications:**
 
 - ✓ Pushed to remote
 - ✓ PR created (#123)
@@ -394,13 +404,14 @@ Ready to ship! Use `/devsolo:ship` to:
 - ✓ Session completed
 
 ---
-📊 **Summary**
+📊 **Result Summary**
 
-- **PR:** https://github.com/owner/repo/pull/123
-- **Commits:** 3
-- **Files changed:** 5
-- **CI checks:** 3 passed
-- **Merge method:** squash
+**Operation:** Feature shipped via PR #123
+**PR URL:** https://github.com/owner/repo/pull/123
+**Commits:** 3
+**Files changed:** 5
+**CI checks:** 3 passed
+**Merge method:** squash
 
 ---
 🚀 **Next Steps**
@@ -411,10 +422,6 @@ You're back on the main branch. Ready to start a new feature with `/devsolo:laun
 ## Example: Error Handling Output
 
 ```
-## ✗ Operation Failed
-
-**Error:** Cannot commit without active session
-
 ---
 📋 **Pre-flight Checks**
 
@@ -423,27 +430,26 @@ You're back on the main branch. Ready to start a new feature with `/devsolo:laun
 - ✓ Changes detected (ready to commit)
 
 ---
-⚠️ **Issue**
+✗ **Error Summary**
+
+**Error:** Cannot commit without active session
+
+📋 **Issue:**
 
 You are on branch `feature/old-work` but there is no active devsolo session for this branch.
-
-**Options Required:**
-
-Please choose an option:
-
-1. Switch to a branch with an active session (View and switch to an existing session) [RECOMMENDED]
-   Risk: Low | Action: Run /devsolo:sessions then /devsolo:swap
-
-2. Start a new session (Create a fresh feature branch)
-   Risk: Low | Action: Run /devsolo:launch
-
-3. Continue with standard git (Work without devsolo workflow)
-   Risk: Medium | Action: Use git commit directly
 
 ---
 🚀 **Next Steps**
 
-Choose one of the options above to continue.
+**Options:**
+
+| # | Option | Risk |
+|---|--------|------|
+| 1 | Switch to active session [RECOMMENDED] | Low |
+| 2 | Start new session | Low |
+| 3 | Use standard git | Medium |
+
+Choose an option above to continue.
 ```
 
 ## Tables for Lists
