@@ -74,10 +74,12 @@ Clean up stale sessions and orphaned branches to keep your repository tidy.
    - Remove stale session files
    - Delete orphaned branches (local)
    - Delete orphaned branches (remote, if tracking)
+   - Prune stale remote-tracking refs
 
 5. Post-flight Verifications:
    ✓ Sessions cleaned: 2
    ✓ Branches deleted: 2
+   ✓ Remote-tracking refs pruned
    ✓ On main branch
 ```
 
@@ -180,3 +182,6 @@ The cleanup command will NOT remove:
 - Helps maintain clean git history
 - Reduces clutter in session storage
 - Safe to run frequently
+- Always prunes stale remote-tracking refs (local cache pointers to remote branches)
+- Pruning removes refs to branches deleted on GitHub/origin, keeping local git state synchronized
+- Remote prune operation is non-destructive and safe to run

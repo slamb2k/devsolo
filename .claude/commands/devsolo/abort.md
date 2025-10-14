@@ -64,7 +64,9 @@ Cancel the current workflow session and optionally delete the feature branch.
 3. Abort Operation:
    - Stash uncommitted changes (if requested)
    - Switch to main branch
-   - Delete feature branch (if requested)
+   - Delete local feature branch (if requested)
+   - Delete remote branch (if exists and requested)
+   - Prune stale remote-tracking refs (if remote branch deleted)
    - Mark session as aborted
    - Update session state
 
@@ -72,6 +74,7 @@ Cancel the current workflow session and optionally delete the feature branch.
    ✓ On main branch
    ✓ Session marked aborted
    ✓ Branch deleted (if requested)
+   ✓ Remote-tracking refs cleaned up
 ```
 
 ## Examples
@@ -151,3 +154,6 @@ Cancel the current workflow session and optionally delete the feature branch.
 - Use /devsolo:swap to switch between sessions without aborting
 - Aborted sessions remain in history for audit trail
 - Can view aborted sessions with /devsolo:sessions --all
+- When deleteBranch=true: removes local branch, remote branch (if exists), and stale remote-tracking refs
+- Remote-tracking refs (e.g., `origin/feature-branch`) are local cache pointers to remote branches
+- Pruning removes stale refs that point to deleted remote branches, keeping your local git state clean

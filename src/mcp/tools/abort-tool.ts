@@ -152,6 +152,13 @@ export class AbortTool extends BaseMCPTool<AbortToolInput, SessionToolResult> {
         // Delete remote branch if exists
         try {
           await this.gitOps.deleteRemoteBranch(targetBranch);
+
+          // Prune stale remote-tracking refs after deletion
+          try {
+            await this.gitOps.pruneRemoteRefs();
+          } catch {
+            // Non-fatal - remote refs may still be cleaned up later
+          }
         } catch {
           // Remote branch might not exist
         }

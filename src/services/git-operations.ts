@@ -60,6 +60,10 @@ export class GitOperations {
     await this.git.push('origin', branchName, ['--delete']);
   }
 
+  async pruneRemoteRefs(remote: string = 'origin'): Promise<void> {
+    await this.git.remote(['prune', remote]);
+  }
+
   async status(): Promise<StatusResult> {
     return await this.git.status();
   }

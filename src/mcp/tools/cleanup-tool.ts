@@ -85,9 +85,20 @@ export class CleanupTool extends BaseMCPTool<CleanupToolInput, QueryToolResult> 
       result['branches'] = staleBranches;
     }
 
+    // Prune stale remote-tracking refs
+    // This removes references to remote branches that have been deleted on GitHub
+    try {
+      await this.gitOps.pruneRemoteRefs();
+      result['remoteRefsPruned'] = true;
+    } catch (error) {
+      // Non-fatal - log but don't fail cleanup
+      console.warn('Failed to prune remote refs:', error);
+      result['remoteRefsPruned'] = false;
+    }
+
     result['message'] = `Cleaned up ${totalCleaned} session(s) (${expiredSessionCount} expired, ${completedSessionCount} completed)${
       input.deleteBranches ? ` and ${result['branchesRemoved']} branch(es)` : ''
-    }`;
+    }. Remote refs pruned: ${result['remoteRefsPruned'] ? 'yes' : 'no'}`;
 
     return {
       success: true,
