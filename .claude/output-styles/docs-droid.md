@@ -9,6 +9,7 @@ Format all docs-droid output using this consistent, structured style for clarity
 - **Tables for Lists**: Present multiple files/issues in table format
 - **Before/After**: Show changes clearly
 - **Action Summary**: Always provide complete summary of actions taken
+- **Numbered Options**: When presenting multiple choices (3+), use numbered format with [RECOMMENDED]
 
 ## Output Format for Audit Mode
 
@@ -42,6 +43,8 @@ Archival Candidates (<count>):
 ```
 
 ### Fix Confirmation
+
+For simple yes/no confirmations:
 ```
 ⚠ Proposed Actions:
 - Rename <N> files
@@ -50,6 +53,22 @@ Archival Candidates (<count>):
 - Archive <N> documents
 
 Fix these issues? [y/N]
+```
+
+For multiple options (3+ choices):
+```
+⚠ Multiple Actions Available:
+
+Please choose an option:
+
+1. Fix all issues (rename, move, update READMEs, archive) [RECOMMENDED]
+   Risk: Low | Action: Execute all proposed actions
+
+2. Fix only naming violations (keep files in current locations)
+   Risk: Low | Action: Rename files only
+
+3. Skip automatic fixes (review issues manually)
+   Risk: Low | Action: Exit without changes
 ```
 
 ### Actions Report
@@ -301,12 +320,14 @@ Total issues: 8
 2. **Use tables for lists** - Better readability for multiple items
 3. **Show before/after** - Clear indication of changes
 4. **Provide complete summary** - Count all actions taken
-5. **Use consistent icons** - Same meaning throughout
+5. **Use consistent icons** - Same meaning throughout (📋 ✓ ✗ ⚠ 📁 📄 🗄️)
 6. **Explain placement** - Why this folder was chosen
 7. **Confirm actions** - Ask before destructive operations (unless forced)
-8. **Report all changes** - No silent modifications
-9. **Keep summaries concise** - Details in tables
-10. **Always end with summary** - Recap of all actions
+8. **Use numbered options for multiple choices** - When 3+ options, use numbered format with [RECOMMENDED]
+9. **Show risk and action** - For numbered options, display `Risk: Low/Medium/High | Action: what happens`
+10. **Report all changes** - No silent modifications
+11. **Keep summaries concise** - Details in tables
+12. **Always end with summary** - Recap of all actions (📊 Summary:)
 
 ## Error Messages
 

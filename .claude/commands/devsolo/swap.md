@@ -10,15 +10,7 @@ Switch between active workflow sessions without aborting them.
 
 ## Workflow
 
-1. **Invoke git-droid sub-agent** to coordinate the swap workflow
-2. git-droid will:
-   - Verify target session exists
-   - If target session doesn't exist: list available sessions
-   - Check for uncommitted changes on current branch
-   - If uncommitted changes present:
-     - Offer to stash them (unless stash or force specified)
-     - Warn about potential data loss if force=true
-   - **Display the following banner immediately before calling the MCP tool:**
+**Display the following banner immediately before commencing the workflow:**
 
 ```
 ░█▀▀░█░█░█▀█░█▀█░█▀█░▀█▀░█▀█░█▀▀░
@@ -26,11 +18,23 @@ Switch between active workflow sessions without aborting them.
 ░▀▀▀░▀░▀░▀░▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
 ```
 
+1. **Invoke git-droid sub-agent** to coordinate the swap workflow
+2. git-droid will:
+   - Verify target session exists (list available sessions if not)
+   - Check for uncommitted changes (present numbered options if present)
    - Call `mcp__devsolo__devsolo_swap` with parameters
    - Switch to target branch
    - Activate target session
    - Pop stash if previously stashed on target branch
-   - Report results following git-droid output style
+   - Format results following git-droid output style (see `.claude/output-styles/git-droid.md`)
+
+**Output Formatting:** git-droid handles all output formatting including:
+- Pre-flight Checks section
+- Operations Executed section
+- Post-flight Verifications section
+- Result Summary section
+- Next Steps section
+- Numbered options for user choices (with [RECOMMENDED] marker)
 
 ## Swap Workflow Details
 
@@ -63,17 +67,17 @@ Switch between active workflow sessions without aborting them.
 
 ```
 # Swap to specific branch (prompts if uncommitted changes)
-/devsolo swap --branchName="feature/other-work"
+/devsolo:swap --branchName="feature/other-work"
 
 # Swap and automatically stash
-/devsolo swap --branchName="feature/other-work" --stash
+/devsolo:swap --branchName="feature/other-work" --stash
 
 # Force swap (loses uncommitted changes)
-/devsolo swap --branchName="feature/other-work" --force
+/devsolo:swap --branchName="feature/other-work" --force
 
 # List available sessions first, then swap
-/devsolo sessions
-/devsolo swap --branchName="feature/authentication"
+/devsolo:sessions
+/devsolo:swap --branchName="feature/authentication"
 ```
 
 ## Use Cases
@@ -82,36 +86,36 @@ Switch between active workflow sessions without aborting them.
 ```
 # Working on feature A, need to help with feature B
 # Current: feature/user-auth
-/devsolo swap --branchName="feature/api-client" --stash
+/devsolo:swap --branchName="feature/api-client" --stash
 
 # Later, return to feature A
-/devsolo swap --branchName="feature/user-auth"
+/devsolo:swap --branchName="feature/user-auth"
 # Automatically restores stashed work
 ```
 
 ### Scenario 2: Review Different Branches
 ```
 # Quickly review multiple feature branches
-/devsolo sessions
-/devsolo swap --branchName="feature/feature-1"
+/devsolo:sessions
+/devsolo:swap --branchName="feature/feature-1"
 # Review code...
-/devsolo swap --branchName="feature/feature-2"
+/devsolo:swap --branchName="feature/feature-2"
 # Review code...
-/devsolo swap --branchName="feature/feature-3"
+/devsolo:swap --branchName="feature/feature-3"
 ```
 
 ### Scenario 3: Emergency Interruption
 ```
 # Working on feature, need to fix critical bug immediately
 # Current: feature/new-dashboard (with uncommitted changes)
-/devsolo swap --branchName="fix/critical-login-bug" --stash
+/devsolo:swap --branchName="fix/critical-login-bug" --stash
 
 # Fix the bug and ship
-/devsolo commit
-/devsolo ship
+/devsolo:commit
+/devsolo:ship
 
 # Return to dashboard work
-/devsolo swap --branchName="feature/new-dashboard"
+/devsolo:swap --branchName="feature/new-dashboard"
 # Uncommitted work automatically restored
 ```
 
@@ -144,7 +148,7 @@ devsolo automatically manages stashes for you:
 git-droid will handle common errors:
 
 - **Target session not found**: Lists available sessions to choose from
-- **Target branch doesn't exist**: Reports error, suggests /devsolo sessions
+- **Target branch doesn't exist**: Reports error, suggests /devsolo:sessions
 - **Uncommitted changes**: Prompts to stash, commit, or force
 - **Stash conflict**: Guides to manually resolve stash conflicts
 - **Invalid branch name**: Validates branch name format
@@ -156,5 +160,5 @@ git-droid will handle common errors:
 - Can have multiple active sessions
 - Stashes are automatically managed
 - Can view all stashes with `git stash list`
-- Use /devsolo sessions to see all active sessions
+- Use /devsolo:sessions to see all active sessions
 - Swap is non-destructive (unlike abort)

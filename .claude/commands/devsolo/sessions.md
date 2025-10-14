@@ -10,7 +10,7 @@ List and manage workflow sessions.
 
 ## Workflow
 
-**Display the following banner immediately before calling the MCP tool:**
+**Display the following banner immediately before commencing the workflow:**
 
 ```
 ░█▀▀░█▀▀░█▀▀░█▀▀░▀█▀░█▀█░█▀█░█▀▀░
@@ -24,17 +24,30 @@ List and manage workflow sessions.
 
 ## Output Format
 
-Present sessions information as a table with columns:
-- Session ID (short form)
-- Branch Name
-- Workflow Type
-- Current State
-- Created At
-- Active Status
+Present sessions information in a clear, structured format:
 
-If verbose mode is enabled, also show:
-- Metadata (PR info, etc)
-- State History
+```
+## 📋 Active Sessions
 
-If cleanup mode is used, show:
-- Number of expired sessions cleaned up
+| ID       | Branch                      | Type    | State         | Created    |
+|----------|----------------------------|---------|---------------|------------|
+| 0c2a20a7 | feature/user-auth          | feature | BRANCH_READY  | 2025-10-12 |
+| 8f3d91bc | fix/login-bug              | fix     | PUSHED        | 2025-10-11 |
+
+**Total:** 2 active session(s)
+
+---
+
+**Next Steps:**
+
+- Use `/devsolo:swap --branchName=<branch>` to switch sessions
+- Use `/devsolo:info` to see detailed session info
+```
+
+**Formatting Guidelines:**
+- Use tables for session lists
+- Show clear totals
+- Provide actionable next steps
+- In verbose mode: show metadata and state history
+- In cleanup mode: show cleanup summary with counts
+- Follow markdown formatting standards

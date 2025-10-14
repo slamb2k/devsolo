@@ -6,7 +6,7 @@
 export { LaunchTool, LaunchToolInput } from './launch-tool';
 export { ShipTool, ShipToolInput } from './ship-tool';
 export { CommitTool, CommitToolInput } from './commit-tool';
-export { StatusTool, StatusToolInput } from './status-tool';
+export { InfoTool, InfoToolInput } from './info-tool';
 export { SessionsTool, SessionsToolInput } from './sessions-tool';
 export { AbortTool, AbortToolInput } from './abort-tool';
 export { SwapTool, SwapToolInput } from './swap-tool';

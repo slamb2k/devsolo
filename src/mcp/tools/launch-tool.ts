@@ -171,7 +171,7 @@ export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> 
         nextSteps: [
           'Make your code changes',
           'Use devsolo_ship to commit, push, and create PR',
-          'Use devsolo_status to check current state',
+          'Use devsolo_info to check current state',
         ],
       },
     };

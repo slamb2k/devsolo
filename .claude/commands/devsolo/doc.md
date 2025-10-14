@@ -11,6 +11,13 @@ Manage documentation following devsolo's documentation structure and conventions
 
 **Invoke docs-droid sub-agent** to manage documentation according to the mode:
 
+**Output Formatting:** docs-droid handles all output formatting including:
+- Structured findings reports with clear sections
+- Numbered options for multiple choices (3+ options) with [RECOMMENDED] marker
+- Yes/no confirmations for simple binary choices
+- Summary reports with action counts
+- Follow patterns from `.claude/output-styles/docs-droid.md`
+
 ### Mode 1: AUDIT MODE (No Arguments)
 
 When called without arguments, performs a comprehensive documentation audit.
@@ -32,21 +39,31 @@ When called without arguments, performs a comprehensive documentation audit.
 
 4. **Report Findings**
    - Show all issues in structured format
-   - Provide suggested fixes
-   - Count total issues
+   - Group by issue type (naming, placement, missing entries, archival candidates)
+   - Provide suggested fixes for each issue
+   - Count total issues by category
 
-5. **Fix Issues (if approved)**
+5. **Present Options** (if issues found)
+   - Use numbered options (1, 2, 3) for 3+ choices
+   - Mark recommended option with [RECOMMENDED]
+   - Show risk level and action for each option
+   - Example options:
+     1. Fix all issues (rename, move, update READMEs, archive) [RECOMMENDED]
+     2. Fix only naming violations
+     3. Skip fixes and report only
+
+6. **Fix Issues (if approved)**
    - Rename files to follow conventions
    - Move files to correct folders
    - Update all README.md files
    - Archive superseded documents
 
-6. **Summary Report**
-   - Files renamed
-   - Files moved
-   - READMEs updated
-   - Documents archived
-   - Total changes
+7. **Summary Report**
+   - Files renamed (count and list)
+   - Files moved (count and list)
+   - READMEs updated (count and list)
+   - Documents archived (count and list)
+   - Total changes made
 
 #### Example
 
@@ -92,9 +109,10 @@ When called with arguments, creates new documentation from provided content.
 
 6. **Report Actions**
    - Document created (path and size)
-   - Placement reasoning
-   - READMEs updated
-   - Documents archived (if any)
+   - Placement reasoning (why this folder was chosen)
+   - Naming applied (show before/after if converted)
+   - READMEs updated (list which ones)
+   - Documents archived (if any, with reason)
 
 #### Examples
 

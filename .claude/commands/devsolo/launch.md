@@ -10,7 +10,7 @@ Start a new feature workflow. Creates a feature branch and devsolo session.
 
 ## Workflow
 
-**Display the following banner immediately before commencing the workflow**
+**Display the following banner immediately before commencing the workflow:**
 
 ```
 ░█░░░█▀█░█░█░█▀█░█▀▀░█░█░▀█▀░█▀█░█▀▀░
@@ -20,18 +20,19 @@ Start a new feature workflow. Creates a feature branch and devsolo session.
 1. **Invoke git-droid sub-agent** to coordinate the launch workflow
 2. git-droid will:
    - Analyze current git state (check if on main, clean working directory)
-   - Handle uncommitted changes:
-     - If present: Ask user "You have uncommitted changes. Would you like to: (a) bring them, (b) discard them, (c) cancel?"
-     - If (a) stash: Stash changes so that they can be popped in the new session
-     - If (b) discard: Don't keep the changes and launch a fresh session
-     - If (c) cancel: Exit without launching
+   - Handle uncommitted changes (present numbered options if present)
    - Handle existing session (offer to abort using SlashCommand tool to invoke `/devsolo:abort`)
-   - Generate branch name if not provided:
-     - From description → convert to kebab-case with appropriate prefix (feature/, fix/, docs/, etc)
-     - From uncommitted changes → analyze diff to infer purpose
-     - Fallback to timestamp → feature/YYYY-MM-DD-HHMMSS
+   - Generate branch name if not provided (from description, diff analysis, or timestamp)
    - Call `mcp__devsolo__devsolo_launch` with appropriate parameters
-   - Report results following git-droid output style
+   - Format results following git-droid output style (see `.claude/output-styles/git-droid.md`)
+
+**Output Formatting:** git-droid handles all output formatting including:
+- Pre-flight Checks section
+- Operations Executed section
+- Post-flight Verifications section
+- Result Summary section
+- Next Steps section
+- Numbered options for user choices (with [RECOMMENDED] marker)
 
 ## Branch Name Generation Rules
 
@@ -53,13 +54,13 @@ Examples:
 
 ```
 # Launch with explicit branch name
-/devsolo launch --branchName="feature/my-feature"
+/devsolo:launch --branchName="feature/my-feature"
 
 # Launch with description (branch name auto-generated)
-/devsolo launch --description="Add user authentication system"
+/devsolo:launch --description="Add user authentication system"
 
 # Launch with auto mode (no prompts)
-/devsolo launch --description="Fix login bug" --auto
+/devsolo:launch --description="Fix login bug" --auto
 ```
 
 ## Notes

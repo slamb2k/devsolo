@@ -12,7 +12,7 @@ Manage Claude Code status line display to show current devsolo workflow status.
 
 ## Workflow
 
-**Display the following banner immediately before calling the MCP tool:**
+**Display the following banner immediately before commencing the workflow:**
 
 ```
 ░█▀▀░▀█▀░█▀█░▀█▀░█░█░█▀▀░░░█░░░▀█▀░█▀█░█▀▀░
@@ -44,14 +44,14 @@ Components:
 Turns on the status line display in Claude Code.
 
 ```
-/devsolo status-line --action="enable"
+/devsolo:status-line --action="enable"
 ```
 
 ### Disable
 Turns off the status line display.
 
 ```
-/devsolo status-line --action="disable"
+/devsolo:status-line --action="disable"
 ```
 
 ### Update
@@ -59,17 +59,17 @@ Updates status line configuration without disabling.
 
 ```
 # Show only branch and state
-/devsolo status-line --action="update" --showSessionInfo=false
+/devsolo:status-line --action="update" --showSessionInfo=false
 
 # Custom format
-/devsolo status-line --action="update" --format="{icon} {branch}"
+/devsolo:status-line --action="update" --format="{icon} {branch}"
 ```
 
 ### Show
 Displays current status line configuration.
 
 ```
-/devsolo status-line --action="show"
+/devsolo:status-line --action="show"
 ```
 
 ## Custom Format Strings
@@ -108,28 +108,92 @@ Examples:
 
 ```
 # Enable with default settings
-/devsolo status-line --action="enable"
+/devsolo:status-line --action="enable"
 
 # Enable with custom format
-/devsolo status-line --action="enable" --format="{icon} {branch} | {state}"
+/devsolo:status-line --action="enable" --format="{icon} {branch} | {state}"
 
 # Show only branch name
-/devsolo status-line --action="update" --showSessionInfo=false --showStateInfo=false
+/devsolo:status-line --action="update" --showSessionInfo=false --showStateInfo=false
 
 # Disable status line
-/devsolo status-line --action="disable"
+/devsolo:status-line --action="disable"
 
 # Check current configuration
-/devsolo status-line --action="show"
+/devsolo:status-line --action="show"
 ```
 
 ## Output Format
 
-Present status line configuration clearly:
-- Action performed: enabled/disabled/updated
-- Current format: show the format string
-- Components shown: session, branch, state
-- Example output: show what the status line looks like
+Present status line configuration in a clear, structured format:
+
+**For Enable/Update Actions:**
+```
+## 📊 Status Line Configured
+
+**Action:** Enabled
+**Format:** {icon} {session} | {branch} | {state}
+**Components:**
+- Session ID: ✓ Visible
+- Branch Name: ✓ Visible
+- State: ✓ Visible
+
+**Example Display:**
+[devsolo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY
+
+---
+
+**Next Steps:**
+
+- Status line will update automatically as workflow progresses
+- Use `/devsolo:status-line --action="show"` to view current configuration
+```
+
+**For Disable Action:**
+```
+## 📊 Status Line Disabled
+
+**Action:** Disabled
+**Status:** Status line hidden from Claude Code display
+
+---
+
+**Next Steps:**
+
+- Use `/devsolo:status-line --action="enable"` to re-enable
+- Use `/devsolo:info` to check workflow status manually
+```
+
+**For Show Action:**
+```
+## 📊 Current Status Line Configuration
+
+**Status:** Enabled
+**Format:** {icon} {session} | {branch} | {state}
+**Components:**
+- Session ID: ✓ Visible
+- Branch Name: ✓ Visible
+- State: ✓ Visible
+
+**Current Display:**
+[devsolo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY
+
+---
+
+**Next Steps:**
+
+- Use `/devsolo:status-line --action="update"` to modify configuration
+- Use `/devsolo:status-line --action="disable"` to hide status line
+```
+
+**Formatting Guidelines:**
+- Show clear action confirmation (enabled/disabled/updated/showing)
+- Display current format string
+- List which components are visible
+- Show example of actual status line output
+- Provide actionable next steps based on action type
+- Use consistent section structure
+- Follow markdown formatting standards
 
 ## Notes
 

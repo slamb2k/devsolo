@@ -316,7 +316,7 @@ This repository is configured with devsolo, an intelligent Git workflow automati
 - `/devsolo:hotfix` - Emergency production fix
 
 **Status and Management:**
-- `/devsolo:status` - Show all sessions and current state
+- `/devsolo:info` - Show all sessions and current state
 - `/devsolo:sessions` - List active workflow sessions
 - `/devsolo:swap` - Switch between active sessions
 - `/devsolo:cleanup` - Clean up merged branches
@@ -366,7 +366,7 @@ DevSolo uses session-based workflows:
 - Each workflow creates a unique session ID
 - Sessions persist across Claude conversations
 - Multiple concurrent sessions are supported
-- Use `/devsolo:status` to see all active sessions
+- Use `/devsolo:info` to see all active sessions
 - Use `/devsolo:swap` to switch between sessions
 
 ## Command Execution Behavior
@@ -418,7 +418,7 @@ When the MCP server returns an error:
 
 ## Best Practices
 
-1. **Always start with status**: Run `/devsolo:status` to understand current state
+1. **Always start with status**: Run `/devsolo:info` to understand current state
 2. **Use launch for new features**: `/devsolo:launch` creates branches safely
 3. **Ship completes everything**: `/devsolo:ship` handles the entire workflow
 4. **Trust the automation**: Don't try to "help" by doing manual operations
@@ -784,23 +784,23 @@ Status lines are installed by the npm installer to devsolo directories:
 
 ### 9.4 Manual Control via MCP Server
 
-The `/devsolo:status-line` command (provided by `manage_status_line` tool) allows runtime control:
+The `/devsolo:info-line` command (provided by `manage_status_line` tool) allows runtime control:
 
 ```bash
 # Enable full status line
-/devsolo:status-line enable
+/devsolo:info-line enable
 
 # Use minimal version
-/devsolo:status-line minimal
+/devsolo:info-line minimal
 
 # Disable status line
-/devsolo:status-line disable
+/devsolo:info-line disable
 
 # Show current configuration
-/devsolo:status-line current
+/devsolo:info-line current
 
 # Show help
-/devsolo:status-line help
+/devsolo:info-line help
 ```
 
 ## 10. Configuration
@@ -2417,7 +2417,7 @@ class DevSoloInstaller {
       chalk.yellow.bold('Next Steps:\n') +
       '1. Restart Claude Code or reload window\n' +
       '2. Run ' + chalk.cyan('/devsolo:init') + ' in your project\n' +
-      '3. Run ' + chalk.cyan('/devsolo:status-line help') + ' for status options\n\n' +
+      '3. Run ' + chalk.cyan('/devsolo:info-line help') + ' for status options\n\n' +
       chalk.green('Happy shipping! 🚀'),
       {
         padding: 1,

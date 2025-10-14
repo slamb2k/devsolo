@@ -148,14 +148,14 @@
 - [X] T075 Create src/commands/devsolo-launch.ts for /devsolo:launch command
 - [X] T076 Create src/commands/devsolo-ship.ts for /devsolo:ship command
 - [X] T077 Create src/commands/devsolo-hotfix.ts for /devsolo:hotfix command
-- [X] T078 Create src/commands/devsolo-status.ts for /devsolo:status command
+- [X] T078 Create src/commands/devsolo-status.ts for /devsolo:info command
 - [X] T079 Create src/commands/devsolo-sessions.ts for /devsolo:sessions command
 - [X] T080 Create src/commands/devsolo-swap.ts for /devsolo:swap command
 - [X] T081 Create src/commands/devsolo-abort.ts for /devsolo:abort command
 - [X] T082 Create src/commands/devsolo-cleanup.ts for /devsolo:cleanup command
 - [X] T083 Create src/commands/devsolo-validate.ts for /devsolo:validate command
 - [X] T084 Create src/commands/devsolo-config.ts for /devsolo:config command
-- [X] T085 Create src/commands/devsolo-status-line.ts for /devsolo:status-line command
+- [X] T085 Create src/commands/devsolo-status-line.ts for /devsolo:info-line command
 - [X] T086 Create src/commands/command-registry.ts registering all commands
 
 ### Hooks and Templates

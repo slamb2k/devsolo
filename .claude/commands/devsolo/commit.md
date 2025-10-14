@@ -10,17 +10,7 @@ Commit changes to the current feature branch with an auto-generated or custom me
 
 ## Workflow
 
-1. **Invoke git-droid sub-agent** to coordinate the commit workflow
-2. git-droid will:
-   - Verify active session exists (guide to /devsolo launch if not)
-   - Verify there are changes to commit
-   - Generate commit message if not provided:
-     - Analyze `git diff` to understand changes
-     - Identify changed files and their purposes
-     - Apply **Conventional Commits** format: `<type>(<scope>): <description>`
-     - Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert
-     - Infer type from changes (new files = feat, bug fixes = fix, docs = docs, etc)
-   - **Display the following banner immediately before calling the MCP tool:**
+**Display the following banner immediately before commencing the workflow:**
 
 ```
 ░█▀▀░█▀█░█▀▄▀█░█▀▄▀█░▀█▀░▀█▀░
@@ -28,8 +18,20 @@ Commit changes to the current feature branch with an auto-generated or custom me
 ░▀▀▀░▀▀▀░▀░░░▀░▀░░░▀░▀▀▀░░▀░░
 ```
 
+1. **Invoke git-droid sub-agent** to coordinate the commit workflow
+2. git-droid will:
+   - Verify active session exists (guide to /devsolo:launch if not)
+   - Verify there are changes to commit
+   - Generate commit message if not provided (analyze git diff, apply Conventional Commits format)
    - Call `mcp__devsolo__devsolo_commit` with message and stagedOnly flag
-   - Report results following git-droid output style
+   - Format results following git-droid output style (see `.claude/output-styles/git-droid.md`)
+
+**Output Formatting:** git-droid handles all output formatting including:
+- Pre-flight Checks section
+- Operations Executed section
+- Post-flight Verifications section
+- Result Summary section
+- Next Steps section
 
 ## Commit Message Generation Rules
 
@@ -73,21 +75,21 @@ Generated message: feat(auth): implement user authentication system
 ### Usage examples:
 ```
 # Commit with auto-generated message
-/devsolo commit
+/devsolo:commit
 
 # Commit with custom message
-/devsolo commit --message="feat(auth): add OAuth2 support"
+/devsolo:commit --message="feat(auth): add OAuth2 support"
 
 # Commit only staged files
-/devsolo commit --stagedOnly
+/devsolo:commit --stagedOnly
 
 # Commit staged files with custom message
-/devsolo commit --message="fix(auth): resolve token expiry bug" --stagedOnly
+/devsolo:commit --message="fix(auth): resolve token expiry bug" --stagedOnly
 ```
 
 ## Notes
 
-- Requires an active devsolo session (use /devsolo launch first)
+- Requires an active devsolo session (use /devsolo:launch first)
 - Updates session state to CHANGES_COMMITTED
 - When stagedOnly=true, only commits files added with `git add`
 - When stagedOnly=false (default), stages and commits all changes

@@ -4,10 +4,18 @@ This folder contains bug reports, code reviews, implementation summaries, and an
 
 ## Contents
 
+- **base-tool-refactoring-guide.md** - Guide for refactoring MCP tool base classes
 - **codebase-cleanup-phase1-summary.md** - Complete summary of Phase 1 codebase cleanup with metrics, validation results, and impact analysis
+- **command-output-consistency-review.md** - Comprehensive reference showing example outputs for all devsolo commands and workflows to ensure consistency
 - **command-review-report.md** - Analysis and review of command implementation
 - **critical-bug-report.md** - Documentation of critical bugs and their resolutions
+- **feature-request-staged-only-commits.md** - Feature request analysis for staged-only commit functionality
 - **implementation-summary.md** - Summary of major implementation milestones
+- **phase2-architecture-cleanup-summary.md** - Summary of Phase 2 architecture cleanup
+- **phase2-baseline-metrics.md** - Baseline metrics before Phase 2 cleanup
+- **phase2-before-metrics.md** - Metrics captured before Phase 2 cleanup
+- **phase2-progress-report.md** - Progress report for Phase 2 cleanup
+- **phase3-pivot-summary.md** - Summary of Phase 3 pivot to pure MCP architecture
 
 ## What Goes Here
 

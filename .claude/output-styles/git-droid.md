@@ -9,6 +9,131 @@ Format all git-droid output using this consistent, structured style for clarity 
 - **Tables for Lists**: Present multiple items (sessions, branches, files) in table format
 - **Actionable Guidance**: Always provide next steps or resolution guidance for errors
 - **Progressive Disclosure**: Show summary first, details on request
+- **Exact Section Labels**: Use exact section labels as specified below (capitalization and punctuation matter)
+
+## Standard Section Labels
+
+**IMPORTANT**: Use these exact labels in all output (note capitalization and colons):
+
+- **"Pre-flight Checks:"** - NOT "Pre-flight checks" or "PreFlight" or "Pre-Flight Checks"
+- **"Post-flight Verifications:"** - NOT "Post-flight verifications" or "PostFlight" or "Post-Flight Verifications"
+- **"Operations Executed:"** - NOT "Operations" or "Operations executed"
+- **"Next Steps:"** - NOT "Next steps" or "Next Actions"
+- **"Result Summary:"** or **"Error Summary:"** - For final result sections
+
+These labels ensure pattern recognition and visual consistency across all commands.
+
+## Standard Output Pattern for Validation Commands
+
+Commands that perform workflow operations (launch, commit, ship, swap, abort, cleanup, hotfix) MUST follow this pattern:
+
+```
+[ASCII Banner displayed by slash command]
+
+## 🔍 Analysis (optional - only if sub-agent does pre-work)
+
+- Item: value ✓
+- Item: value ⚠
+
+---
+
+**Pre-flight Checks:**
+
+- ✓ Check name (passed message)
+- ✓ Check name
+- ⚠ Check name (warning message)
+- ✗ Check name (failed message)
+
+**Options Required:** (only if a check has level='prompt')
+
+Please choose an option:
+
+1. Primary option label (brief description) [RECOMMENDED]
+   Risk: Low | Action: what gets executed
+
+2. Alternative option label (brief description)
+   Risk: Medium | Action: what gets executed
+
+3. Another option label (brief description)
+   Risk: High | Action: what gets executed
+
+---
+
+**Operations Executed:**
+
+- ✓ Operation description 1
+- ✓ Operation description 2
+- ✓ Operation description 3
+
+**Post-flight Verifications:**
+
+- ✓ Verification 1
+- ✓ Verification 2
+- ✓ Verification 3
+
+---
+
+## ✅ Result Summary (or ## ✗ Error Summary)
+
+**Key metric:** value
+
+**Details:**
+- Detail 1
+- Detail 2
+
+---
+
+**Next Steps:**
+
+- Actionable guidance 1
+- Actionable guidance 2
+```
+
+## Numbered Option Format
+
+When presenting user options (from CheckOption arrays returned by MCP tools), format as:
+
+```
+**Options Required:**
+
+Please choose an option:
+
+1. Option label (description) [RECOMMENDED]
+   Risk: Low | Action: specific action that will be executed
+
+2. Option label (description)
+   Risk: Medium | Action: specific action that will be executed
+
+3. Option label (description)
+   Risk: High | Action: specific action that will be executed
+```
+
+**Rules:**
+- Always number options (1, 2, 3, ...)
+- Exactly ONE option must have `[RECOMMENDED]` marker (the one with autoRecommended: true)
+- Show risk level: `Risk: Low`, `Risk: Medium`, or `Risk: High`
+- Show action: `Action: ` followed by what will be executed
+- Description in parentheses after label
+- Label uses Title Case
+- Each option separated by blank line for readability
+
+**Converting CheckOption to Numbered Format:**
+
+```typescript
+// MCP tool returns:
+{
+  id: 'stash_and_switch',
+  label: 'Stash changes and switch to main',
+  description: 'Safely stash your current changes and switch to main branch',
+  action: 'git stash push && git checkout main',
+  autoRecommended: true,
+  risk: 'low'
+}
+
+// Format as:
+1. Stash changes and switch to main (Safely stash your current changes) [RECOMMENDED]
+   Risk: Low | Action: git stash push && git checkout main
+```
 
 ## Output Format for Operations
 
@@ -25,10 +150,10 @@ Format as:
 - Generated <parameter>: <value>
 ```
 
-### Pre-Flight Checks
+### Pre-Flight Checks Section
 Format as markdown list with proper spacing:
 ```
-**Pre-flight checks:**
+**Pre-flight Checks:**
 
 - ✓ Check description 1
 - ✓ Check description 2
@@ -36,20 +161,20 @@ Format as markdown list with proper spacing:
 - ⚠ Check description 4 (warning)
 ```
 
-### Operation Steps
+### Operations Section
 Format as markdown list:
 ```
-**Operations:**
+**Operations Executed:**
 
 - ✓ Operation description 1
 - ✓ Operation description 2
 - ✓ Operation description 3
 ```
 
-### Post-Flight Verifications
+### Post-Flight Verifications Section
 Format as markdown list:
 ```
-**Post-flight verifications:**
+**Post-flight Verifications:**
 
 - ✓ Verification description 1
 - ✓ Verification description 2
@@ -101,7 +226,7 @@ Or for errors:
 
 ---
 
-### 🔍 Pre-flight Checks
+**Pre-flight Checks:**
 
 - ✓ On main branch
 - ✓ Working directory clean
@@ -109,20 +234,21 @@ Or for errors:
 - ✓ No existing session
 - ✓ Branch name available
 
-### ✅ Operations Completed
+**Operations Executed:**
 
 - ✓ Created branch: `feature/add-user-authentication`
 - ✓ Checked out to new branch
 - ✓ Session initialized
 
-### 📝 Current State
+**Post-flight Verifications:**
 
-- **Working directory:** Clean
-- **Ready for:** Feature development
+- ✓ Branch created
+- ✓ Session created
+- ✓ Checked out to feature branch
 
 ---
 
-### 🎯 Next Steps
+**Next Steps:**
 
 When ready to ship your changes:
 
@@ -137,12 +263,26 @@ When ready to ship your changes:
 
 **Operation:** Changes committed to feature/add-user-authentication
 
-### Pre-flight Checks
+---
+
+**Pre-flight Checks:**
 
 - ✓ Active session exists (2d967326...)
 - ✓ Changes to commit (3 files modified)
 
-### Commit Details
+**Operations Executed:**
+
+- ✓ Created commit (abc1234)
+- ✓ Updated session state
+
+**Post-flight Verifications:**
+
+- ✓ Commit created successfully
+- ✓ Session state updated to CHANGES_COMMITTED
+
+---
+
+**Commit Details:**
 
 ```
 Commit: abc1234567890abcdef1234567890abcdef1234
@@ -152,7 +292,7 @@ Date:   Tue Oct 14 17:11:46 2025 +1100
 feat(auth): implement user authentication system
 ```
 
-### Files Changed
+**Files Changed:**
 
 ```
 src/auth/login.ts     | 45 ++++++++++++++++++++++++++
@@ -161,12 +301,9 @@ src/auth/auth.test.ts | 89 ++++++++++++++++++++++++++++++++++++++++++
 3 files changed, 144 insertions(+), 0 deletions(-)
 ```
 
-### Session State Update
+---
 
-- **Previous State:** BRANCH_READY
-- **Current State:** CHANGES_COMMITTED
-
-### Next Steps
+**Next Steps:**
 
 Ready to ship! Use `/devsolo:ship` to:
 
@@ -185,14 +322,14 @@ Ready to ship! Use `/devsolo:ship` to:
 
 ---
 
-### Pre-flight Checks
+**Pre-flight Checks:**
 
 - ✓ All changes committed
 - ✓ Session ready to ship
 - ✓ GitHub authentication configured
 - ✓ CI configured in repository
 
-### Operations Executed
+**Operations Executed:**
 
 - ✓ Pushed to remote
 - ✓ Created PR #123
@@ -201,7 +338,7 @@ Ready to ship! Use `/devsolo:ship` to:
 - ✓ Cleaned up branches
 - ✓ Switched to main branch
 
-### Post-flight Verifications
+**Post-flight Verifications:**
 
 - ✓ Pushed to remote
 - ✓ PR created (#123)
@@ -213,7 +350,7 @@ Ready to ship! Use `/devsolo:ship` to:
 
 ---
 
-### 📊 Summary
+**Summary:**
 
 - **PR:** https://github.com/owner/repo/pull/123
 - **Commits:** 3
@@ -221,7 +358,9 @@ Ready to ship! Use `/devsolo:ship` to:
 - **CI checks:** 3 passed
 - **Merge method:** squash
 
-### Next Steps
+---
+
+**Next Steps:**
 
 You're back on the main branch. Ready to start a new feature with `/devsolo:launch`
 ```
@@ -235,7 +374,7 @@ You're back on the main branch. Ready to start a new feature with `/devsolo:laun
 
 ---
 
-### Pre-flight Checks
+**Pre-flight Checks:**
 
 - ✗ No active session on current branch
 - ⚠ On branch 'feature/old-work'
@@ -243,26 +382,28 @@ You're back on the main branch. Ready to start a new feature with `/devsolo:laun
 
 ---
 
-### Issue
+**Issue:**
 
 You are on branch `feature/old-work` but there is no active devsolo session for this branch.
 
-### Resolution
+**Options Required:**
 
-Choose one of the following options:
+Please choose an option:
 
-**Option 1: Switch to a branch with an active session**
+1. Switch to a branch with an active session (View and switch to an existing session) [RECOMMENDED]
+   Risk: Low | Action: Run /devsolo:sessions then /devsolo:swap
 
-- Run `/devsolo:sessions` to see active sessions
-- Run `/devsolo:swap <branch-name>` to switch to that session
+2. Start a new session (Create a fresh feature branch)
+   Risk: Low | Action: Run /devsolo:launch
 
-**Option 2: Start a new session on this branch**
+3. Continue with standard git (Work without devsolo workflow)
+   Risk: Medium | Action: Use git commit directly
 
-- Run `/devsolo:launch` to start a fresh session (will create new branch)
+---
 
-**Option 3: Continue with standard git**
+**Next Steps:**
 
-- Use standard `git commit` commands without devsolo workflow
+Choose one of the options above to continue.
 ```
 
 ## Tables for Lists
@@ -358,16 +499,18 @@ Details: <additional-information>
 
 ## Consistency Rules
 
-1. **Always use markdown formatting** - Use `##` and `###` for headers, `**bold**` for emphasis, proper list syntax with `-`
-2. **Always include blank lines** - Use double newlines (`\n\n`) between sections for proper rendering
-3. **Always show pre-flight checks** - Display validation checks with ✓/✗/⚠ before operations
-4. **Always show operations executed** - List what was done during the workflow
-5. **Always show post-flight verifications** - Confirm success after operations complete
-6. **Always provide next steps** - Guide user forward with actionable commands
-7. **Use consistent section headers** - "Pre-flight Checks", "Operations Executed", "Post-flight Verifications", "Next Steps"
-8. **Use consistent icons** - ✓ success, ✗ error, ⚠ warning, 🔍 analysis, 📋 info, ✅ complete, 📊 summary
-9. **Use horizontal rules** - Add `---` between major sections for visual separation
-10. **Make errors actionable** - Always suggest resolution steps clearly formatted
+1. **Always use exact section labels** - Use "Pre-flight Checks:", "Post-flight Verifications:", "Operations Executed:", "Next Steps:" exactly as written (capitalization and colons matter)
+2. **Always use markdown formatting** - Use `##` and `###` for headers, `**bold**` for emphasis, proper list syntax with `-`
+3. **Always include blank lines** - Use double newlines (`\n\n`) between sections for proper rendering
+4. **Always show pre-flight checks** - Display validation checks with ✓/✗/⚠ before operations for all workflow commands
+5. **Always show operations executed** - List what was done during the workflow
+6. **Always show post-flight verifications** - Confirm success after operations complete for all workflow commands
+7. **Always provide next steps** - Guide user forward with actionable commands
+8. **Use numbered options** - When presenting choices, use 1, 2, 3 format with [RECOMMENDED] marker
+9. **Show risk and action** - For all options, display `Risk: Low/Medium/High | Action: what happens`
+10. **Use consistent icons** - ✓ success, ✗ error, ⚠ warning, 🔍 analysis, 📋 info, ✅ complete, 📊 summary
+11. **Use horizontal rules** - Add `---` between major sections for visual separation
+12. **Make errors actionable** - Always suggest resolution steps as numbered options
 
 ## Verbose Mode
 

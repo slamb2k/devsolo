@@ -293,13 +293,13 @@ await gitDroid.ship({ prDescription });
 2. `/devsolo:launch` → `/devsolo launch`
 3. `/devsolo:commit` → `/devsolo commit`
 4. `/devsolo:ship` → `/devsolo ship`
-5. `/devsolo:status` → `/devsolo status`
+5. `/devsolo:info` → `/devsolo status`
 6. `/devsolo:sessions` → `/devsolo sessions`
 7. `/devsolo:swap` → `/devsolo swap`
 8. `/devsolo:abort` → `/devsolo abort`
 9. `/devsolo:cleanup` → `/devsolo cleanup`
 10. `/devsolo:hotfix` → `/devsolo hotfix`
-11. `/devsolo:status-line` → `/devsolo status-line`
+11. `/devsolo:info-line` → `/devsolo status-line`
 
 **From Existing .devsolo/commands (already slash commands, migrate to .claude/commands/devsolo/):**
 1. `.devsolo/commands/doc.md` → `.claude/commands/devsolo/doc.md`

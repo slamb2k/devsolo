@@ -11,15 +11,7 @@ Cancel the current workflow session and optionally delete the feature branch.
 
 ## Workflow
 
-1. **Invoke git-droid sub-agent** to coordinate the abort workflow
-2. git-droid will:
-   - Verify session exists for the target branch
-   - Check for uncommitted changes
-   - If uncommitted changes present:
-     - Offer to stash them (unless force=true)
-     - Warn about potential data loss
-   - Confirm abort (destructive action, unless yes=true)
-   - **Display the following banner immediately before calling the MCP tool:**
+**Display the following banner immediately before commencing the workflow:**
 
 ```
 ░█▀█░█▀▄░█▀█░█▀▄░▀█▀░▀█▀░█▀█░█▀▀░
@@ -27,11 +19,24 @@ Cancel the current workflow session and optionally delete the feature branch.
 ░▀░▀░▀▀░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀░
 ```
 
+1. **Invoke git-droid sub-agent** to coordinate the abort workflow
+2. git-droid will:
+   - Verify session exists for the target branch
+   - Check for uncommitted changes (present numbered options if present)
+   - Confirm abort (destructive action, unless yes=true)
    - Call `mcp__devsolo__devsolo_abort` with parameters
    - Switch to main branch
    - Optionally delete the feature branch
    - Mark session as aborted
-   - Report results following git-droid output style
+   - Format results following git-droid output style (see `.claude/output-styles/git-droid.md`)
+
+**Output Formatting:** git-droid handles all output formatting including:
+- Pre-flight Checks section
+- Operations Executed section
+- Post-flight Verifications section
+- Result Summary section
+- Next Steps section
+- Numbered options for user choices (with [RECOMMENDED] marker)
 
 ## Abort Workflow Details
 
@@ -67,19 +72,19 @@ Cancel the current workflow session and optionally delete the feature branch.
 
 ```
 # Abort current session (prompts for confirmation)
-/devsolo abort
+/devsolo:abort
 
 # Abort and delete branch
-/devsolo abort --deleteBranch
+/devsolo:abort --deleteBranch
 
 # Abort specific branch
-/devsolo abort --branchName="feature/old-work" --deleteBranch
+/devsolo:abort --branchName="feature/old-work" --deleteBranch
 
 # Force abort without prompts (loses uncommitted changes)
-/devsolo abort --force --yes
+/devsolo:abort --force --yes
 
 # Abort with stashing
-/devsolo abort --deleteBranch
+/devsolo:abort --deleteBranch
 # (will prompt to stash if uncommitted changes present)
 ```
 
@@ -106,7 +111,7 @@ Cancel the current workflow session and optionally delete the feature branch.
 ```
 # You started a feature but want to work on something else first
 # Keep the branch and work for later
-/devsolo abort
+/devsolo:abort
 # Branch exists, session aborted, can resume later
 ```
 
@@ -114,22 +119,22 @@ Cancel the current workflow session and optionally delete the feature branch.
 ```
 # You started a feature but decided not to continue
 # Remove everything
-/devsolo abort --deleteBranch
+/devsolo:abort --deleteBranch
 # Branch deleted, session aborted, clean state
 ```
 
 ### Scenario 3: Emergency Switch
 ```
 # Need to switch to hotfix immediately
-/devsolo abort --yes
+/devsolo:abort --yes
 # Quick abort without prompts
-/devsolo hotfix --issue="critical-bug"
+/devsolo:hotfix --issue="critical-bug"
 ```
 
 ### Scenario 4: Cleanup Old Branch
 ```
 # Abort old work and remove branch
-/devsolo abort --branchName="feature/old-experiment" --deleteBranch --yes
+/devsolo:abort --branchName="feature/old-experiment" --deleteBranch --yes
 ```
 
 ## Notes
@@ -137,6 +142,6 @@ Cancel the current workflow session and optionally delete the feature branch.
 - Destructive operation - be careful!
 - Uncommitted changes will be lost unless stashed
 - Session can be resumed later if branch not deleted
-- Use /devsolo swap to switch between sessions without aborting
+- Use /devsolo:swap to switch between sessions without aborting
 - Aborted sessions remain in history for audit trail
-- Can view aborted sessions with /devsolo sessions --all
+- Can view aborted sessions with /devsolo:sessions --all

@@ -76,7 +76,7 @@ If you prefer manual control or the plugin system isn't available, see [Manual I
 After installation, verify devsolo is working:
 
 1. **Check MCP server status**: The MCP server should auto-start when Claude Code loads
-2. **Test a slash command**: Try `/devsolo:status` to check workflow status
+2. **Test a slash command**: Try `/devsolo:info` to check workflow status
 3. **Verify tools are available**: MCP tools should be listed in Claude Code's tool panel
 
 ## Usage
@@ -88,13 +88,13 @@ Once installed as a plugin, use devsolo through its slash commands:
 /devsolo:launch       # Start a new feature workflow
 /devsolo:commit       # Commit changes
 /devsolo:ship         # Push, create PR, merge, and cleanup
-/devsolo:status       # Show current workflow status
+/devsolo:info       # Show current workflow status
 /devsolo:sessions     # List active workflow sessions
 /devsolo:swap         # Switch between workflow sessions
 /devsolo:abort        # Abort a workflow session
 /devsolo:hotfix       # Create emergency hotfix workflow
 /devsolo:cleanup      # Clean up expired sessions
-/devsolo:status-line  # Manage status line display
+/devsolo:info-line  # Manage status line display
 ```
 
 For detailed usage of each command, see the [Quickstart Guide](./quickstart.md).

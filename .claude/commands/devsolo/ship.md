@@ -13,24 +13,39 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 
 ## Workflow
 
-1. **Invoke git-droid sub-agent** to orchestrate the complete ship workflow
+**Display the following banner immediately before commencing the workflow:**
+
+```
+░█▀▀░█░█░▀█▀░█▀█░█▀█░▀█▀░█▀█░█▀▀░
+░▀▀█░█▀█░░█░░█▀▀░█▀▀░░█░░█░█░█░█░
+░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
+```
+
+1. **Invoke git-droid sub-agent** to coordinate the ship workflow
 2. git-droid will:
+   - Check for uncommitted changes (use SlashCommand to invoke `/devsolo:commit` if needed)
+   - Check for active session
+   - Generate PR description if not provided (analyze commits since main)
+   - Call `mcp__devsolo__devsolo_ship` with parameters
+   - Monitor CI checks (MCP tool handles)
+   - Format results following git-droid output style (see `.claude/output-styles/git-droid.md`)
 
-   **Step 1: Handle Uncommitted Changes**
+**Output Formatting:** git-droid handles all output formatting including:
+- Pre-flight Checks section
+- Operations Executed section
+- Post-flight Verifications section
+- Result Summary section with PR link and stats
+- Next Steps section
+
+## Ship Workflow Details
+
+**Step 1: Handle Uncommitted Changes**
    - Check for uncommitted changes using `git status`
-   - If present: Invoke the commit slash command using SlashCommand tool:
-     ```
-     SlashCommand with command="/devsolo:commit"
-     ```
-   - This delegates to the commit slash command which handles:
-     - Message generation (if not provided)
-     - Staging files
-     - Creating the commit
-   - Wait for commit slash command to complete before proceeding
+   - If present: Invoke `/devsolo:commit` using SlashCommand tool
+   - Wait for commit to complete before proceeding
 
-   **Step 2: Generate PR Description** (if not provided)
-   - Analyze all commits since main branch using `git log main..HEAD`
-   - Review changed files using `git diff --stat main...HEAD`
+**Step 2: Generate PR Description** (if not provided)
+   - Analyze all commits since main branch
    - Extract key changes and organize by component/area
    - Generate structured PR description:
      ```
@@ -49,12 +64,6 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
      ```
 
    **Step 3: Ship the Feature**
-   - **Display the following banner immediately before calling the MCP tool:**
-     ```
-     ░█▀▀░█░█░▀█▀░█▀█░█▀█░▀█▀░█▀█░█▀▀░
-     ░▀▀█░█▀█░░█░░█▀▀░█▀▀░░█░░█░█░█░█░
-     ░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░
-     ```
    - Call `mcp__devsolo__devsolo_ship` with all parameters
    - This single tool call handles:
      - Push to remote
@@ -99,10 +108,10 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 
 ```
 # Ship with auto-generated PR description
-/devsolo ship
+/devsolo:ship
 
 # Ship with custom PR description
-/devsolo ship --prDescription="Add OAuth2 authentication
+/devsolo:ship --prDescription="Add OAuth2 authentication
 
 This PR implements OAuth2 support for user authentication.
 
@@ -119,13 +128,13 @@ This PR implements OAuth2 support for user authentication.
 Fixes #42"
 
 # Ship but don't merge (for manual review)
-/devsolo ship --merge=false
+/devsolo:ship --merge=false
 
 # Ship only staged changes
-/devsolo ship --stagedOnly
+/devsolo:ship --stagedOnly
 
 # Push and create PR, but don't merge
-/devsolo ship --createPR --merge=false
+/devsolo:ship --createPR --merge=false
 ```
 
 ## What Happens During Ship
@@ -189,7 +198,7 @@ Fixes #42"
 
 git-droid will handle common errors and provide guidance:
 
-- **No active session**: Guide to /devsolo launch
+- **No active session**: Guide to /devsolo:launch
 - **GitHub auth missing**: Guide to run `gh auth login`
 - **CI checks failing**: Report which checks failed with logs
 - **Merge conflict**: Guide to resolve conflicts manually
