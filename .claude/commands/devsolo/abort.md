@@ -22,6 +22,11 @@ Cancel the current workflow session and optionally delete the feature branch.
 
 **⚠️ CRITICAL OUTPUT REQUIREMENT:** After EVERY Task tool invocation in this workflow, you MUST immediately output the complete git-droid response as text to the user. DO NOT proceed to check signals or continue to the next stage without first displaying the full output. The user needs to see all numbered options, formatted sections, and status information.
 
+**Before starting the workflow, resolve auto mode:**
+1. If `--auto` argument was provided: use that value (true or false)
+2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.autoMode`
+3. Pass the resolved auto mode to all nested MCP tool calls and slash command invocations using `--auto:true` or `--auto:false`
+
 The abort workflow consists of three stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Initialize Abort Workflow
@@ -29,25 +34,29 @@ The abort workflow consists of three stages, each using a separate git-droid sub
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Initialising abort workflow..."
-   - **prompt:** "Initialize the abort workflow with the following parameters: [pass all user arguments]. You must:
+   - **prompt:** "Initialize the abort workflow with the following parameters: [pass all user arguments]. Auto mode: [resolved auto mode value]. You must:
      - Verify session exists for the target branch
      - If session not found: Report error and abort
      - Check for uncommitted changes using `git status`
      - Present WARNING about destructive action
-     - If uncommitted changes exist: Present numbered options:
-       1. Stash changes and abort session [RECOMMENDED]
-       2. Discard changes and abort session (force)
-       3. Cancel abort workflow
-     - If no uncommitted changes: Present numbered options:
-       1. Abort session (keep branch) [RECOMMENDED]
-       2. Abort session and delete branch
-       3. Cancel abort workflow
+     - If uncommitted changes exist:
+       * If auto mode is TRUE: Automatically choose option 1 (stash) and set 'Next Stage: STASH_CHANGES'
+       * If auto mode is FALSE: Present numbered options:
+         1. Stash changes and abort session [RECOMMENDED]
+         2. Discard changes and abort session (force)
+         3. Cancel abort workflow
+     - If no uncommitted changes:
+       * If auto mode is TRUE: Automatically choose option 1 (delete branch) and set 'Next Stage: DELETE_BRANCH'
+       * If auto mode is FALSE: Present numbered options:
+         1. Abort session and delete branch [RECOMMENDED]
+         2. Abort session (keep branch)
+         3. Cancel abort workflow
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
      - Include these sections: Pre-flight Checks, Result Summary
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: STASH_CHANGES' (uncommitted changes: user chose option 1)
-       * 'Next Stage: PROCEED_TO_ABORT' (uncommitted changes: user chose option 2, OR no changes: user chose option 1)
-       * 'Next Stage: DELETE_BRANCH' (no changes: user chose option 2)
+       * 'Next Stage: PROCEED_TO_ABORT' (uncommitted changes: user chose option 2, OR no changes: user chose option 2)
+       * 'Next Stage: DELETE_BRANCH' (no changes: user chose option 1)
        * 'Next Stage: ABORTED' (user chose option 3, or session not found)"
 
 2. **⬆️ OUTPUT the complete git-droid response above as text to the user**

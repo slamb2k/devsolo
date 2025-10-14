@@ -24,6 +24,11 @@ Complete the entire workflow: commit any uncommitted changes, push to remote, cr
 
 **⚠️ CRITICAL OUTPUT REQUIREMENT:** After EVERY Task tool invocation in this workflow, you MUST immediately output the complete git-droid response as text to the user. DO NOT proceed to check signals or continue to the next stage without first displaying the full output. The user needs to see all numbered options, formatted sections, and status information.
 
+**Before starting the workflow, resolve auto mode:**
+1. If `--auto` argument was provided: use that value (true or false)
+2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.autoMode`
+3. Pass the resolved auto mode to all nested MCP tool calls and slash command invocations using `--auto:true` or `--auto:false`
+
 The ship workflow consists of three stages, each using a separate git-droid sub-agent invocation:
 
 ### Stage 1: Initialize Ship Workflow

@@ -125,6 +125,7 @@ export interface UserPreferences {
   autoCleanup: boolean;
   confirmBeforePush: boolean;
   colorOutput: boolean;
+  autoMode?: boolean; // Always use auto mode for all commands (can be overridden per-command)
   logLevel?: LogLevelConfig;
   logFile?: string;
   statusLineFormat?: {

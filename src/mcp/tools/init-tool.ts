@@ -77,6 +77,7 @@ export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
         autoCleanup: true,
         confirmBeforePush: false,
         colorOutput: true,
+        autoMode: false,
         prTemplate: {
           body: '## Summary\n\n{{description}}\n\n## Changes\n\n{{commits}}',
           footer: '\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>',

@@ -73,16 +73,24 @@ implements MCPTool<TInput, TResult> {
         return initCheck as TResult;
       }
 
+      // Phase 1.5: Resolve auto mode from config + explicit input
+      // Priority: explicit input.auto > config.autoMode > false
+      const effectiveAuto = await this.resolveAutoMode(input);
+      const effectiveInput = {
+        ...input,
+        auto: effectiveAuto,
+      };
+
       // Phase 2: Prompt-based parameter collection
-      const paramResult = await this.collectMissingParameters(input);
+      const paramResult = await this.collectMissingParameters(effectiveInput);
       if (!paramResult.collected && paramResult.result) {
         return paramResult.result as TResult;
       }
 
-      // Create workflow context
+      // Create workflow context with resolved auto mode
       const context: WorkflowContext = {
-        input,
-        ...await this.createContext(input),
+        input: effectiveInput,
+        ...await this.createContext(effectiveInput),
       };
 
       // Phase 3: Run pre-flight checks
@@ -130,6 +138,31 @@ implements MCPTool<TInput, TResult> {
       };
     }
     return { success: true };
+  }
+
+  /**
+   * Resolve auto mode from config and input
+   * Priority: explicit input.auto > config.autoMode > false
+   *
+   * This allows:
+   * - Global default via config: autoMode: true
+   * - Per-command override: auto: false (or --no-auto)
+   * - Per-command enable: auto: true
+   */
+  protected async resolveAutoMode(input: TInput): Promise<boolean> {
+    // If explicitly set in input (true or false), use it
+    if (input.auto !== undefined) {
+      return input.auto;
+    }
+
+    // Try to load config and get autoMode preference
+    try {
+      const config = await this.configManager.load();
+      return config.preferences.autoMode ?? false;
+    } catch {
+      // If config load fails, default to false
+      return false;
+    }
   }
 
   /**

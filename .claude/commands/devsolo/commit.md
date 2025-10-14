@@ -21,6 +21,11 @@ Commit changes to the current feature branch with an auto-generated or custom me
 
 **⚠️ CRITICAL OUTPUT REQUIREMENT:** After invoking the Task tool, you MUST immediately output the complete git-droid response as text to the user. DO NOT add commentary, summaries, or interpretations. The user needs to see all formatted sections and status information exactly as git-droid returns them.
 
+**Before starting the workflow, resolve auto mode:**
+1. If `--auto` argument was provided: use that value (true or false)
+2. Otherwise, read `.devsolo/config.yaml` and check for `preferences.autoMode`
+3. Pass the resolved auto mode to the nested MCP tool call using `--auto:true` or `--auto:false`
+
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Coordinate commit workflow"
