@@ -98,10 +98,30 @@ jobs:
       - name: Update package.json version locally
         run: npm version ${{ steps.new-version.outputs.version }} --no-git-tag-version
 
-      - name: Create and push git tag
+      - name: Update plugin.json version
+        run: |
+          jq '.version = "${{ steps.new-version.outputs.version }}"' \
+            .claude-plugin/plugin.json > .claude-plugin/plugin.json.tmp && \
+          mv .claude-plugin/plugin.json.tmp .claude-plugin/plugin.json
+          echo "✓ Updated plugin.json to version ${{ steps.new-version.outputs.version }}"
+
+      - name: Update marketplace.json version
+        run: |
+          jq '.metadata.version = "${{ steps.new-version.outputs.version }}" |
+              .plugins[0].version = "${{ steps.new-version.outputs.version }}"' \
+            .claude-plugin/marketplace.json > .claude-plugin/marketplace.json.tmp && \
+          mv .claude-plugin/marketplace.json.tmp .claude-plugin/marketplace.json
+          echo "✓ Updated marketplace.json to version ${{ steps.new-version.outputs.version }}"
+
+      - name: Commit version updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json .claude-plugin/plugin.json .claude-plugin/marketplace.json
+          git commit -m "chore(release): bump version to ${{ steps.new-version.outputs.version }}"
+
+      - name: Create and push git tag
+        run: |
           git tag -a "v${{ steps.new-version.outputs.version }}" -m "Release v${{ steps.new-version.outputs.version }}"
           git push origin "v${{ steps.new-version.outputs.version }}"
 
@@ -123,16 +143,80 @@ jobs:
             npx conventional-changelog -p angular -i CHANGELOG.md -s -r 0
           fi
 
+      - name: Create Claude Code plugin tarball
+        run: |
+          PLUGIN_NAME="devsolo-claude-plugin-${{ steps.new-version.outputs.version }}"
+
+          # Create a temporary directory for the plugin
+          mkdir -p "tmp/${PLUGIN_NAME}"
+
+          # Copy necessary files for the plugin
+          cp -r .claude-plugin "tmp/${PLUGIN_NAME}/"
+          cp -r dist "tmp/${PLUGIN_NAME}/"
+          cp package.json "tmp/${PLUGIN_NAME}/"
+          cp README.md "tmp/${PLUGIN_NAME}/"
+          cp LICENSE "tmp/${PLUGIN_NAME}/" 2>/dev/null || true
+
+          # Create tarball
+          cd tmp
+          tar -czf "../${PLUGIN_NAME}.tar.gz" "${PLUGIN_NAME}"
+          cd ..
+
+          echo "✓ Created plugin tarball: ${PLUGIN_NAME}.tar.gz"
+          ls -lh "${PLUGIN_NAME}.tar.gz"
+
+      - name: Generate installation instructions
+        id: install-info
+        run: |
+          VERSION="${{ steps.new-version.outputs.version }}"
+          REPO="${{ github.repository }}"
+
+          # Create installation info for release body
+          cat <<EOF > INSTALL_INFO.md
+
+          ---
+
+          ## 📦 Installation
+
+          ### NPM Package
+          \`\`\`bash
+          npm install -g devsolo@${VERSION}
+          \`\`\`
+
+          **NPM Package URL:** https://www.npmjs.com/package/devsolo/v/${VERSION}
+
+          ### Claude Code Plugin
+          Download the plugin tarball from this release and install it in Claude Code:
+
+          **Plugin Download:** [devsolo-claude-plugin-${VERSION}.tar.gz](https://github.com/${REPO}/releases/download/v${VERSION}/devsolo-claude-plugin-${VERSION}.tar.gz)
+
+          \`\`\`bash
+          # Extract and install
+          tar -xzf devsolo-claude-plugin-${VERSION}.tar.gz
+          # Follow Claude Code plugin installation instructions
+          \`\`\`
+
+          EOF
+
+          # Append to output for GitHub Release body
+          echo "info<<EOF" >> $GITHUB_OUTPUT
+          cat INSTALL_INFO.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.new-version.outputs.version }}
-          release_name: Release v${{ steps.new-version.outputs.version }}
-          body: ${{ steps.changelog.outputs.changes }}
+          name: Release v${{ steps.new-version.outputs.version }}
+          body: |
+            ${{ steps.changelog.outputs.changes }}
+            ${{ steps.install-info.outputs.info }}
           draft: false
           prerelease: false
+          files: |
+            devsolo-claude-plugin-${{ steps.new-version.outputs.version }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to npm
         run: npm publish

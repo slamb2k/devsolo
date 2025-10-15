@@ -1,0 +1,43 @@
+{
+  "name": "devsolo-tools",
+  "owner": {
+    "name": "slamb2k",
+    "email": "slamb2k@users.noreply.github.com"
+  },
+  "metadata": {
+    "description": "Solo developer git workflow management with AI-powered automation",
+    "version": "2.2.0",
+    "homepage": "https://github.com/slamb2k/devsolo",
+    "repository": "https://github.com/slamb2k/devsolo",
+    "license": "MIT"
+  },
+  "plugins": [
+    {
+      "name": "devsolo-plugin",
+      "source": "..",
+      "description": "MCP server providing git workflow management tools for solo developers",
+      "version": "2.2.0",
+      "author": "slamb2k",
+      "homepage": "https://github.com/slamb2k/devsolo",
+      "repository": "https://github.com/slamb2k/devsolo",
+      "license": "MIT",
+      "keywords": [
+        "git",
+        "workflow",
+        "automation",
+        "mcp",
+        "devsolo",
+        "branch-management",
+        "pr-automation",
+        "ci-integration"
+      ],
+      "category": "developer-tools",
+      "tags": [
+        "git",
+        "workflow",
+        "automation",
+        "productivity"
+      ]
+    }
+  ]
+}
