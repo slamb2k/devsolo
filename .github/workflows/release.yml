@@ -206,8 +206,8 @@ jobs:
         with:
           tag_name: v${{ steps.new-version.outputs.version }}
           name: Release v${{ steps.new-version.outputs.version }}
+          generate_release_notes: true
           body: |
-            ${{ steps.changelog.outputs.changes }}
             ${{ steps.install-info.outputs.info }}
           draft: false
           prerelease: false
