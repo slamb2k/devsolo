@@ -41,7 +41,7 @@ export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> 
     private branchNaming: BranchNamingService,
     _branchValidator: BranchValidator,
     _githubIntegration: GitHubIntegration,
-    private stashManager: StashManager,
+    _stashManager: StashManager,
     configManager: ConfigurationManager,
     _basePath: string = '.devsolo',
     server?: Server
@@ -102,27 +102,15 @@ export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> 
 
   protected async createContext(input: LaunchToolInput): Promise<Record<string, unknown>> {
     // Determine branch name from input
+    // NOTE: This only determines the name, does NOT modify state
+    // State modifications (stashing, aborting sessions) happen in executeWorkflow()
     const branchName = await this.determineBranchName(input);
     if (!branchName) {
       throw new Error('Failed to determine branch name');
     }
 
-    // Handle uncommitted changes
-    const stashResult = await this.handleUncommittedChanges(input);
-    if (!stashResult.success) {
-      throw new Error(stashResult.errors?.join(', ') || 'Failed to handle uncommitted changes');
-    }
-
-    // Abort active session if exists
-    const abortResult = await this.handleActiveSession();
-    if (!abortResult.success) {
-      throw new Error(abortResult.errors?.join(', ') || 'Failed to handle active session');
-    }
-
     return {
       branchName,
-      stashPopped: stashResult.stashPopped,
-      stashRef: stashResult.stashRef,
     };
   }
 
@@ -150,15 +138,28 @@ export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> 
     const input = context.input as LaunchToolInput;
     const branchName = context['branchName'] as string;
 
+    // NOTE: Pre-flight checks have already verified working directory is clean
+    // If we reach this point, there are no uncommitted changes to handle
+
+    // Abort active session if exists
+    const abortResult = await this.handleActiveSession();
+    if (!abortResult.success) {
+      return {
+        success: false,
+        errors: abortResult.errors || ['Failed to handle active session'],
+      };
+    }
+
     // Create session
     const session = await this.createSession(branchName, input.description);
 
     // Create and checkout branch
     await this.createBranch(branchName);
 
-    // Restore stashed work if stashRef provided
-    if (input.stashRef && input.popStash !== false) {
-      await this.gitOps.stashPopSpecific(input.stashRef);
+    // Restore stashed work if stashRef provided (user explicitly passed a stash to restore)
+    const stashPopped = !!(input.stashRef && input.popStash !== false);
+    if (stashPopped) {
+      await this.gitOps.stashPopSpecific(input.stashRef!);
     }
 
     return {
@@ -168,6 +169,7 @@ export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> 
         sessionId: session.id,
         branchName: session.branchName,
         state: session.currentState,
+        stashPopped,
         nextSteps: [
           'Make your code changes',
           'Use devsolo_ship to commit, push, and create PR',
@@ -183,7 +185,7 @@ export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> 
   ): Promise<PostFlightVerificationResult> {
     const session = (workflowResult.data as any).session as WorkflowSession;
     const branchName = context['branchName'] as string;
-    const stashPopped = context['stashPopped'] as boolean;
+    const stashPopped = (workflowResult.data as any).stashPopped as boolean;
 
     const checks = [
       'sessionCreated',
@@ -238,36 +240,6 @@ export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> 
       return this.branchNaming.generateFromTimestamp();
     } catch (error) {
       return null;
-    }
-  }
-
-  /**
-   * Handle uncommitted changes by stashing
-   */
-  private async handleUncommittedChanges(
-    _input: LaunchToolInput
-  ): Promise<{ success: boolean; stashRef?: string; stashPopped: boolean; errors?: string[] }> {
-    try {
-      const hasChanges = await this.stashManager.hasUncommittedChanges();
-
-      if (hasChanges) {
-        const currentBranch = await this.gitOps.getCurrentBranch();
-        const stashResult = await this.stashManager.stashChanges('launch', currentBranch);
-
-        return {
-          success: true,
-          stashRef: stashResult.stashRef,
-          stashPopped: false,
-        };
-      }
-
-      return { success: true, stashPopped: false };
-    } catch (error) {
-      return {
-        success: false,
-        stashPopped: false,
-        errors: [`Failed to stash changes: ${error instanceof Error ? error.message : String(error)}`],
-      };
     }
   }
 
