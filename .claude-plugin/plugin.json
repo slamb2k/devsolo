@@ -1,5 +1,5 @@
 {
-  "name": "devsolo",
+  "name": "devsolo-plugin",
   "displayName": "devsolo",
   "description": "AI-native Git workflow automation for Claude Code",
   "version": "2.0.0",
