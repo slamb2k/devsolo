@@ -151,9 +151,8 @@ export class DevSoloMCPServer {
 - `sessions-tool.ts` - List sessions
 - `status-tool.ts` - Show status
 - `hotfix-tool.ts` - Emergency fixes
-- `init-tool.ts` - Initialization
+- `init-tool.ts` - Initialization (includes status line setup)
 - `cleanup-tool.ts` - Maintenance
-- `status-line-tool.ts` - UI management
 
 **Tool Interface**:
 ```typescript

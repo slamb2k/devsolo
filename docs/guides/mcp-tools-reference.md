@@ -14,13 +14,12 @@ devsolo exposes 11 MCP tools for Git workflow automation via Claude Code. Each t
 
 | Category | Tools | Purpose |
 |----------|-------|---------|
-| **Setup** | `devsolo_init` | Initialize devsolo in project |
+| **Setup** | `devsolo_init` | Initialize devsolo in project (includes status line setup) |
 | **Workflow** | `devsolo_launch`, `devsolo_commit`, `devsolo_ship` | Core development cycle |
 | **Emergency** | `devsolo_hotfix` | Production hotfixes |
 | **Management** | `devsolo_sessions`, `devsolo_swap`, `devsolo_abort` | Session management |
 | **Info** | `devsolo_status` | Current state inspection |
 | **Maintenance** | `devsolo_cleanup` | Clean up old sessions/branches |
-| **UI** | `devsolo_status_line` | Claude Code status line |
 
 ## Common Result Types
 
@@ -624,58 +623,6 @@ Use devsolo_cleanup with deleteBranches true and force true
 - No sessions to clean
 - Branch deletion failed (unmerged changes without force)
 - Permission issues
-
----
-
-### 11. devsolo_status_line
-
-Manage Claude Code status line display.
-
-**Purpose**: Configure always-visible workflow status in Claude Code.
-
-#### Input Parameters
-```typescript
-{
-  action: 'enable' | 'disable' | 'update' | 'show'; // Action (required)
-  format?: string;                   // Custom format string
-  showBranchInfo?: boolean;          // Show branch name
-  showSessionInfo?: boolean;         // Show session ID
-  showStateInfo?: boolean;           // Show workflow state
-}
-```
-
-#### Returns
-`QueryToolResult` with status line configuration.
-
-#### Format String Tokens
-- `{icon}` - Workflow type icon
-- `{branch}` - Current branch name
-- `{state}` - Workflow state
-- `{session}` - Short session ID
-
-#### Usage Examples
-
-**Natural language**:
-```
-Enable the status line
-Disable the status line
-Show current status line configuration
-Update status line to show branch and state
-```
-
-**Direct invocation**:
-```
-Use devsolo_status_line with action "enable"
-Use devsolo_status_line with action "disable"
-Use devsolo_status_line with action "show"
-Use devsolo_status_line with action "update" and showBranchInfo true
-Use devsolo_status_line with action "update" and format "{icon} {branch} | {state}"
-```
-
-#### Common Errors
-- Invalid action
-- Invalid format string
-- Configuration save failed
 
 ---
 

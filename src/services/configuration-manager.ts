@@ -642,6 +642,27 @@ Closes #
     await fs.writeFile(path.join(templatesPath, 'pull-request.md'), prTemplate);
   }
 
+  async installClaudeCodeSettings(scope: 'local' | 'team'): Promise<void> {
+    const claudePath = '.claude';
+    await fs.mkdir(claudePath, { recursive: true });
+
+    const settingsFile = scope === 'local' ? 'settings.local.json' : 'settings.json';
+    const settingsPath = path.join(claudePath, settingsFile);
+
+    // Get absolute path to statusline.sh
+    const statusLineScriptPath = path.resolve(claudePath, 'statusline.sh');
+
+    const settings = {
+      statusLine: {
+        type: 'command',
+        command: statusLineScriptPath,
+        padding: 0,
+      },
+    };
+
+    await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2));
+  }
+
   async installStatusLine(): Promise<void> {
     const statusLinePath = '.claude';
     await fs.mkdir(statusLinePath, { recursive: true });

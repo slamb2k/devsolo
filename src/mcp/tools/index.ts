@@ -13,7 +13,6 @@ export { SwapTool, SwapToolInput } from './swap-tool';
 export { InitTool, InitToolInput } from './init-tool';
 export { CleanupTool, CleanupToolInput } from './cleanup-tool';
 export { HotfixTool, HotfixToolInput } from './hotfix-tool';
-export { StatusLineTool, StatusLineToolInput } from './status-line-tool';
 
 export {
   MCPTool,
