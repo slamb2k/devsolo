@@ -28,6 +28,7 @@ BOLD_DARK_GRAY='\033[1;30m'
 BOLD='\033[1m'
 BLACK='\033[0;30m'
 BOLD_BLACK='\033[1;30m'
+BOLD_DARK_ORANGE='\033[1;38;5;130m'
 RESET='\033[0m'
 
 # Read JSON input from Claude Code (optional, contains session info)
@@ -258,7 +259,17 @@ MODEL_DISPLAY_FIELD=""
 if [ -n "$MODEL_DISPLAY" ]; then
   # Center the model name in a fixed width of 16 characters
   CENTERED_MODEL=$(center_text "$MODEL_DISPLAY" 16)
-  MODEL_DISPLAY_FIELD=" ${GRAY}|${RESET} ${GRAY}${CENTERED_MODEL}${RESET}"
+
+  # Choose background color based on model type
+  if [[ "$MODEL_DISPLAY" =~ [Oo]pus ]]; then
+    # Dark blue background for Opus
+    BG_COLOR="\033[48;5;27m"
+  else
+    # Dark orange background for Sonnet and other models
+    BG_COLOR="\033[48;5;130m"
+  fi
+
+  MODEL_DISPLAY_FIELD=" ${GRAY}|${RESET} ${BG_COLOR}${BOLD_WHITE}${CENTERED_MODEL}${RESET}"
 fi
 
 # Build active sessions display
@@ -311,17 +322,17 @@ if [ -n "$SESSION_ID" ]; then
   esac
 
   # Show branch in green with branch emoji
-  echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}   ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
+  echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}${BOLD_DARK_ORANGE} *${RESET} ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
   echo -e "${BOLD_WHITE} solo${RESET} ${MODEL_DISPLAY_FIELD} ${GRAY}|${RESET} $EMOJI ${state_color}${status_msg}${RESET}"
 else
   # No active session
   if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
     # Main branch - show in green with branch emoji
-    echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}   ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
+    echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}${BOLD_DARK_ORANGE} *${RESET} ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
     echo -e "${BOLD_WHITE} solo${RESET} ${MODEL_DISPLAY_FIELD} ${GRAY}|${RESET} 📁 ${GRAY}No active session${RESET}"
   else
     # Other branch without session - show in green with branch emoji
-    echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}   ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
+    echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}${BOLD_DARK_ORANGE} *${RESET} ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
     echo -e "${BOLD_WHITE} solo${RESET} ${MODEL_DISPLAY_FIELD} ${GRAY}|${RESET} 📁 ${GRAY}No active session${RESET}"
   fi
 fi
