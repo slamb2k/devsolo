@@ -6,12 +6,24 @@
 # ANSI Color Codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+BOLD_GREEN='\033[1;32m'
 YELLOW='\033[0;33m'
+BOLD_YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+BRIGHT_BLUE='\033[0;94m'
+BOLD_BLUE='\033[1;34m'
 MAGENTA='\033[0;35m'
+BOLD_MAGENTA='\033[1;35m'
 CYAN='\033[0;36m'
+BOLD_CYAN='\033[1;36m'
+WHITE='\033[0;37m'
+BOLD_WHITE='\033[1;37m'
 GRAY='\033[0;90m'
+BOLD_GRAY='\033[1;90m'
+BOLD_DARK_GRAY='\033[1;30m'
 BOLD='\033[1m'
+BLACK='\033[0;30m'
+BOLD_BLACK='\033[1;30m'
 RESET='\033[0m'
 
 # Read JSON input from Claude Code (optional, contains session info)
@@ -37,13 +49,11 @@ if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
 fi
 
 # Extract model information if available
-# Try to extract model.id first (object format), then fall back to model as string
-MODEL_NAME=$(echo "$INPUT" | jq -r 'if .model | type == "object" then .model.id elif .model | type == "string" then .model else .model_name // empty end' 2>/dev/null)
-# Format model name to be shorter (e.g., "claude-sonnet-4-5" → "sonnet-4.5")
-if [ -n "$MODEL_NAME" ]; then
-  MODEL_DISPLAY=$(echo "$MODEL_NAME" | sed -E 's/^claude-//' | sed -E 's/-([0-9]+)-([0-9]+).*$/.\1.\2/' | sed 's/-20[0-9]{6}$//')
-else
-  MODEL_DISPLAY=""
+# Try to extract model display_name first (object format), then fall back to model as string
+MODEL_DISPLAY=$(echo "$INPUT" | jq -r 'if .model | type == "object" then .model.display_name elif .model | type == "string" then .model else .model_name // empty end' 2>/dev/null)
+# If we got an ID instead of display name, format it (e.g., "claude-sonnet-4-5" → "sonnet-4.5")
+if [ -n "$MODEL_DISPLAY" ] && [[ "$MODEL_DISPLAY" == claude-* ]]; then
+  MODEL_DISPLAY=$(echo "$MODEL_DISPLAY" | sed -E 's/^claude-//' | sed -E 's/-([0-9]+)-([0-9]+).*$/.\1.\2/' | sed 's/-20[0-9]{6}$//')
 fi
 
 # Change to workspace directory if provided
@@ -54,14 +64,25 @@ fi
 # Read current git branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "no-branch")
 
-# Get git stats: uncommitted changes and commits ahead/behind remote
+# Get git stats: Powerlevel10k-style indicators
 GIT_STATS=""
 GIT_STATS_CONTENT=""
 if [ "$BRANCH" != "no-branch" ]; then
-  # Check for uncommitted changes
-  CHANGED_FILES=$(git status --porcelain 2>/dev/null | wc -l)
-  if [ "$CHANGED_FILES" -gt 0 ]; then
-    GIT_STATS_CONTENT="✎ ${YELLOW}${CHANGED_FILES}${RESET}"
+  # Parse git status for different types of changes
+  STATUS_OUTPUT=$(git status --porcelain 2>/dev/null)
+
+  if [ -n "$STATUS_OUTPUT" ]; then
+    # Count different types of changes
+    STAGED=$(echo "$STATUS_OUTPUT" | grep -c '^[AMDRC]' 2>/dev/null || echo "0")
+    MODIFIED=$(echo "$STATUS_OUTPUT" | grep -c '^ M' 2>/dev/null || echo "0")
+    UNTRACKED=$(echo "$STATUS_OUTPUT" | grep -c '^??' 2>/dev/null || echo "0")
+    DELETED=$(echo "$STATUS_OUTPUT" | grep -c '^ D' 2>/dev/null || echo "0")
+
+    # Build stats string - only show non-zero counts (rainbow style colors, bold)
+    [ "$STAGED" -gt 0 ] 2>/dev/null && GIT_STATS_CONTENT+="${BOLD_GREEN}+${STAGED}${RESET} "
+    [ "$MODIFIED" -gt 0 ] 2>/dev/null && GIT_STATS_CONTENT+="${BOLD_YELLOW}*${MODIFIED}${RESET} "
+    [ "$UNTRACKED" -gt 0 ] 2>/dev/null && GIT_STATS_CONTENT+="${BOLD_BLUE}!${UNTRACKED}${RESET} "
+    [ "$DELETED" -gt 0 ] 2>/dev/null && GIT_STATS_CONTENT+="${BOLD_MAGENTA}-${DELETED}${RESET} "
   fi
 
   # Check if branch has upstream
@@ -71,17 +92,13 @@ if [ "$BRANCH" != "no-branch" ]; then
     AHEAD=$(git rev-list --count HEAD@{u}..HEAD 2>/dev/null || echo "0")
     BEHIND=$(git rev-list --count HEAD..HEAD@{u} 2>/dev/null || echo "0")
 
-    if [ "$AHEAD" != "0" ] || [ "$BEHIND" != "0" ]; then
-      [ -n "$GIT_STATS_CONTENT" ] && GIT_STATS_CONTENT+=" "
-      GIT_STATS_CONTENT+="🔀"
-      [ "$AHEAD" != "0" ] && GIT_STATS_CONTENT+=" ${GREEN}↑${AHEAD}${RESET}"
-      [ "$BEHIND" != "0" ] && GIT_STATS_CONTENT+=" ${RED}↓${BEHIND}${RESET}"
-    fi
+    [ "$AHEAD" != "0" ] && GIT_STATS_CONTENT+="${BOLD_CYAN}⇡${AHEAD}${RESET} "
+    [ "$BEHIND" != "0" ] && GIT_STATS_CONTENT+="${BOLD_MAGENTA}⇣${BEHIND}${RESET} "
   fi
 
-  # Add divider if we have git stats
+  # Add divider if we have git stats (trim trailing space)
   if [ -n "$GIT_STATS_CONTENT" ]; then
-    GIT_STATS=" ${GRAY}|${RESET} 🌿 ${GIT_STATS_CONTENT}"
+    GIT_STATS=" ${GRAY}|${RESET} ${GIT_STATS_CONTENT% }"
   fi
 fi
 
@@ -104,13 +121,24 @@ if [ -d "$SESSION_DIR" ]; then
       fi
     fi
   done
+
+  # Count active sessions (not COMPLETE or ABORTED)
+  ACTIVE_SESSION_COUNT=0
+  for session in "$SESSION_DIR"/*.json; do
+    if [ -f "$session" ]; then
+      STATE=$(jq -r '.currentState // empty' "$session" 2>/dev/null)
+      if [ "$STATE" != "COMPLETE" ] && [ "$STATE" != "ABORTED" ] && [ -n "$STATE" ]; then
+        ACTIVE_SESSION_COUNT=$((ACTIVE_SESSION_COUNT + 1))
+      fi
+    fi
+  done
 fi
 
 # Function to create a bar graph for remaining context
 create_remaining_bar() {
   local used=$1
   local total=$2
-  local width=15
+  local width=14
 
   if [ -z "$used" ] || [ -z "$total" ] || [ "$total" -eq 0 ]; then
     echo ""
@@ -121,26 +149,16 @@ create_remaining_bar() {
   local percentage=$((remaining * 100 / total))
   local filled=$((remaining * width / total))
 
-  # Choose color based on remaining capacity (inverse of usage)
-  local bar_color=""
+  # Choose background color based on remaining capacity (inverse of usage)
+  local bg_filled=""
+  local bg_empty="\033[100m"  # Dark gray background
   if [ $percentage -gt 50 ]; then
-    bar_color="$GREEN"
+    bg_filled="\033[42m"  # Green background
   elif [ $percentage -gt 20 ]; then
-    bar_color="$YELLOW"
+    bg_filled="\033[43m"  # Yellow background
   else
-    bar_color="$RED"
+    bg_filled="\033[41m"  # Red background
   fi
-
-  # Build the bar showing remaining capacity
-  local bar="${bar_color}"
-  for ((i=0; i<filled; i++)); do
-    bar+="█"
-  done
-  bar+="${GRAY}"
-  for ((i=filled; i<width; i++)); do
-    bar+="░"
-  done
-  bar+="${RESET}"
 
   # Format with K/M suffix for readability
   local remaining_display
@@ -157,7 +175,35 @@ create_remaining_bar() {
     total_display="${total}"
   fi
 
-  echo -e " ${bar} ${CYAN}${remaining_display}${RESET}/${GRAY}${total_display}${RESET}"
+  # Build text
+  local text="${remaining_display}/${total_display}"
+  local text_len=${#text}
+  local text_start=$(((width - text_len) / 2))
+  local text_end=$((text_start + text_len))
+
+  # Build the bar with text overlay - each character knows its background
+  local bar=""
+  for ((i=0; i<width; i++)); do
+    # Determine background color for this position
+    local bg=""
+    if [ $i -lt $filled ]; then
+      bg="$bg_filled"
+    else
+      bg="$bg_empty"
+    fi
+
+    # Determine if this position has text
+    if [ $i -ge $text_start ] && [ $i -lt $text_end ]; then
+      local char_idx=$((i - text_start))
+      local char="${text:$char_idx:1}"
+      bar+="${bg}\033[38;5;232m${char}"
+    else
+      bar+="${bg} "
+    fi
+  done
+  bar+="${RESET}"
+
+  echo -e " ${bar}"
 }
 
 # Build status line
@@ -173,53 +219,70 @@ fi
 # Build model display if available
 MODEL_DISPLAY_FIELD=""
 if [ -n "$MODEL_DISPLAY" ]; then
-  MODEL_DISPLAY_FIELD=" ${GRAY}|${RESET} ${BLUE}${MODEL_DISPLAY}${RESET}"
+  MODEL_DISPLAY_FIELD=" ${GRAY}|${RESET} 🤖 ${GRAY}${MODEL_DISPLAY}${RESET}"
+fi
+
+# Build active sessions display
+ACTIVE_SESSIONS_DISPLAY=""
+if [ -n "$ACTIVE_SESSION_COUNT" ] && [ "$ACTIVE_SESSION_COUNT" -gt 0 ]; then
+  ACTIVE_SESSIONS_DISPLAY=" ${GRAY}|${RESET} 🟢 ${GRAY}Sessions:${RESET} ${CYAN}${ACTIVE_SESSION_COUNT}${RESET}"
 fi
 
 if [ -n "$SESSION_ID" ]; then
   # Active session found - show branch with state icon
   # Color/emoji based on state
   state_color=""
+  status_msg=""
   case "$SESSION_STATE" in
     "COMPLETE")
       EMOJI="✅"
       state_color="$GREEN"
+      status_msg="Workflow completed successfully"
       ;;
     "ABORTED")
       EMOJI="❌"
       state_color="$RED"
+      status_msg="Workflow aborted"
       ;;
     "WAITING_APPROVAL"|"PR_CREATED")
       EMOJI="⏳"
       state_color="$YELLOW"
+      status_msg="Waiting for PR approval and CI checks"
       ;;
     "BRANCH_READY")
       EMOJI="📝"
       state_color="$BLUE"
+      status_msg="Branch ready for development"
       ;;
     "CHANGES_COMMITTED"|"PUSHED")
       EMOJI="🚀"
       state_color="$MAGENTA"
+      status_msg="Changes committed and ready to ship"
       ;;
     "REBASING"|"MERGING")
       EMOJI="🔄"
       state_color="$CYAN"
+      status_msg="Rebasing or merging in progress"
       ;;
     *)
       EMOJI="💻"
       state_color="$CYAN"
+      status_msg="Active development session"
       ;;
   esac
 
-  # Show branch in green with state-based emoji
-  echo -e "${BOLD}[devsolo]${RESET}  $EMOJI ${GREEN}${BRANCH}${RESET}${GIT_STATS} ${GRAY}|${RESET} ${state_color}${SESSION_STATE}${RESET}${MODEL_DISPLAY_FIELD}${CONTEXT_DISPLAY}"
+  # Show branch in green with branch emoji
+  echo -e "${BOLD_CYAN} dev${RESET}   ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
+  echo -e "${BOLD_WHITE}  solo${RESET} ${MODEL_DISPLAY_FIELD}  ${GRAY}|${RESET} $EMOJI ${state_color}${status_msg}${RESET}"
 else
   # No active session
   if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
-    # Main branch - show in dimmed white with folder icon
-    echo -e "${BOLD}[devsolo]${RESET}  📁 ${GRAY}${BRANCH}${RESET}${GIT_STATS}${MODEL_DISPLAY_FIELD}${CONTEXT_DISPLAY}"
+    # Main branch - show in green with branch emoji
+    echo -e "${BOLD_CYAN} dev${RESET}   ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
+    echo -e "${BOLD_WHITE}  solo${RESET} ${MODEL_DISPLAY_FIELD}  ${GRAY}|${RESET} 📁 ${GRAY}No active session${RESET}"
   else
-    # Other branch without session - show in yellow with folder icon
-    echo -e "${BOLD}[devsolo]${RESET}  📁 ${YELLOW}${BRANCH}${RESET}${GIT_STATS}${MODEL_DISPLAY_FIELD}${CONTEXT_DISPLAY}"
+    # Other branch without session - show in green with branch emoji
+    echo -e "${BOLD_CYAN} dev${RESET}   ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
+    echo -e "${BOLD_WHITE}  solo${RESET} ${MODEL_DISPLAY_FIELD}  ${GRAY}|${RESET} 📁 ${GRAY}No active session${RESET}"
   fi
 fi
