@@ -40,6 +40,19 @@ A pattern for handling missing optional parameters in MCP tools by returning suc
 
 ---
 
+### [Git-Droid Agent Workflow](git-droid-agent-workflow.md)
+**Status**: ✅ Active (v2.5.0) - Critical Workflow Pattern
+
+A mandatory pattern for routing all devsolo git operations through the git-droid agent using the Task tool. **NEVER** call MCP tools directly for git operations.
+
+**Key Insight**: The git-droid agent provides proper workflow coordination, state machine validation, auto-mode/verbose-mode handling, error recovery, and complete audit trail. Bypassing the agent breaks workflow coordination.
+
+**Used For**: All devsolo git operations (ship, commit, launch, swap, abort, hotfix)
+
+**Benefits**: Proper workflow coordination, state validation, auto-mode support, error recovery
+
+---
+
 ## Future Topics (To Document)
 
 Organize by topic:
