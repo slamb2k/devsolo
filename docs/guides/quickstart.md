@@ -410,10 +410,12 @@ gh auth status
 
 **Example**: "Working directory is not clean"
 
-**Solution**: devsolo validates before operations. Review the check results:
-- Clean uncommitted changes, or
-- Use `force: true` option if intentional, or
-- Stash changes before launching new feature
+**Solution**: devsolo strictly validates before operations. To resolve:
+- Commit your changes: `git commit -am "message"`
+- Stash your changes: `git stash`
+- Discard your changes: `git restore .`
+
+Pre-flight checks cannot be bypassed - you must have a clean working directory before launching.
 
 ### Can't Find Old Sessions
 

@@ -95,7 +95,7 @@ Use devsolo_hotfix with issue "security vulnerability in auth module" and severi
 
 Use devsolo_commit with message "fix: patch critical security vulnerability in auth"
 
-Use devsolo_ship with merge true and force true
+Use devsolo_ship with merge true
 ```
 
 ## Team Collaboration
@@ -643,14 +643,14 @@ git revert HEAD~1  # Revert the problematic commit
 ```
 
 ```
-"Ship this rollback immediately with force"
+"Ship this rollback immediately"
 ```
 
 Or:
 
 ```
 Use devsolo_hotfix with issue "rollback problematic feature" and severity "critical"
-Use devsolo_ship with force true
+Use devsolo_ship with merge true
 ```
 
 ### Scenario 7: Want to See All Sessions
