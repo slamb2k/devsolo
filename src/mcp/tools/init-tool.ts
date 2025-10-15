@@ -14,6 +14,9 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
  */
 export interface InitToolInput extends WorkflowToolInput {
   scope?: 'project' | 'user';
+  force?: boolean;
+  enableStatusLine?: boolean;
+  statusLineScope?: 'local' | 'team';
 }
 
 /**
@@ -44,8 +47,8 @@ export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
     // Check if already initialized
     const isInitialized = await this.configManager.isInitialized();
 
-    if (isInitialized && !input.auto) {
-      throw new Error('devsolo is already initialized. Use auto: true to reinitialize.');
+    if (isInitialized && !input.force && !input.auto) {
+      throw new Error('devsolo is already initialized. Use force: true to reinitialize.');
     }
 
     // Check if in a git repository
@@ -55,13 +58,19 @@ export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
       throw new Error('Not a git repository. Initialize git first with: git init');
     }
 
-    return { scope: input.scope || 'project' };
+    return {
+      scope: input.scope || 'project',
+      enableStatusLine: input.enableStatusLine ?? true, // Default to true
+      statusLineScope: input.statusLineScope || 'team',
+    };
   }
 
   protected async executeWorkflow(
     context: WorkflowContext
   ): Promise<WorkflowExecutionResult> {
     const scope = context['scope'] as 'project' | 'user';
+    const enableStatusLine = context['enableStatusLine'] as boolean;
+    const statusLineScope = context['statusLineScope'] as 'local' | 'team';
 
     // Initialize configuration
     await this.configManager.initialize();
@@ -90,14 +99,24 @@ export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
     // Install git hooks
     await this.configManager.installHooks();
 
+    const warnings: string[] = [
+      'devsolo initialized successfully!',
+      `Scope: ${config.scope}`,
+      'Git hooks installed',
+    ];
+
+    // Set up status line if requested
+    if (enableStatusLine) {
+      await this.configManager.installStatusLine();
+      await this.configManager.installClaudeCodeSettings(statusLineScope);
+      warnings.push(`Status line enabled (${statusLineScope} scope)`);
+    }
+
+    warnings.push('Use devsolo_launch to start a new workflow');
+
     return {
       success: true,
-      warnings: [
-        'devsolo initialized successfully!',
-        `Scope: ${config.scope}`,
-        'Git hooks installed',
-        'Use devsolo_launch to start a new workflow',
-      ],
+      warnings,
     };
   }
 }

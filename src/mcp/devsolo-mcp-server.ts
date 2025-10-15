@@ -18,7 +18,6 @@ import {
   SwapTool,
   CleanupTool,
   HotfixTool,
-  StatusLineTool,
 } from './tools';
 
 // Import services
@@ -34,6 +33,9 @@ import { StashManager } from '../services/stash-manager';
 const InitSchema = z.object({
   scope: z.enum(['project', 'user']).optional(),
   auto: z.boolean().optional(),
+  force: z.boolean().optional(),
+  enableStatusLine: z.boolean().optional(),
+  statusLineScope: z.enum(['local', 'team']).optional(),
 });
 
 const LaunchSchema = z.object({
@@ -87,14 +89,6 @@ const HotfixSchema = z.object({
   auto: z.boolean().optional(),
 });
 
-const StatusLineSchema = z.object({
-  action: z.enum(['enable', 'disable', 'update', 'show']),
-  format: z.string().optional(),
-  showSessionInfo: z.boolean().optional(),
-  showBranchInfo: z.boolean().optional(),
-  showStateInfo: z.boolean().optional(),
-  auto: z.boolean().optional(),
-});
 
 const CleanupSchema = z.object({
   deleteBranches: z.boolean().optional(),
@@ -118,7 +112,6 @@ export class DevSoloMCPServer {
   private swapTool: SwapTool;
   private cleanupTool: CleanupTool;
   private hotfixTool: HotfixTool;
-  private statusLineTool: StatusLineTool;
 
   constructor(basePath: string = '.devsolo') {
     // Detect plugin context
@@ -179,7 +172,6 @@ export class DevSoloMCPServer {
     this.swapTool = new SwapTool(sessionRepo, gitOps, stashManager, configManager, this.server);
     this.cleanupTool = new CleanupTool(sessionRepo, gitOps, configManager, this.server);
     this.hotfixTool = new HotfixTool(gitOps, sessionRepo, configManager, githubIntegration, this.server);
-    this.statusLineTool = new StatusLineTool(configManager, this.server);
 
     this.setupHandlers();
   }
@@ -203,6 +195,15 @@ export class DevSoloMCPServer {
                 force: {
                   type: 'boolean',
                   description: 'Force reinitialization',
+                },
+                enableStatusLine: {
+                  type: 'boolean',
+                  description: 'Enable Claude Code status line (default: true)',
+                },
+                statusLineScope: {
+                  type: 'string',
+                  enum: ['local', 'team'],
+                  description: 'Status line scope: local (settings.local.json) or team (settings.json)',
                 },
               },
             },
@@ -419,37 +420,6 @@ export class DevSoloMCPServer {
               },
             },
           },
-          {
-            name: 'devsolo_status_line',
-            description: 'Manage Claude Code status line display',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                action: {
-                  type: 'string',
-                  enum: ['enable', 'disable', 'update', 'show'],
-                  description: 'Action to perform on status line',
-                },
-                format: {
-                  type: 'string',
-                  description: 'Custom format string (e.g., "{icon} {branch} {state}")',
-                },
-                showSessionInfo: {
-                  type: 'boolean',
-                  description: 'Show session ID in status line',
-                },
-                showBranchInfo: {
-                  type: 'boolean',
-                  description: 'Show branch name in status line',
-                },
-                showStateInfo: {
-                  type: 'boolean',
-                  description: 'Show workflow state in status line',
-                },
-              },
-              required: ['action'],
-            },
-          },
         ],
       };
     });
@@ -590,20 +560,6 @@ export class DevSoloMCPServer {
         case 'devsolo_cleanup': {
           const params = CleanupSchema.parse(processedArgs);
           const result = await this.cleanupTool.execute(params);
-          return {
-            content: [
-              {
-                type: 'text',
-                text: this.formatToolResult(result),
-              },
-            ],
-            isError: !result.success,
-          };
-        }
-
-        case 'devsolo_status_line': {
-          const params = StatusLineSchema.parse(processedArgs);
-          const result = await this.statusLineTool.execute(params);
           return {
             content: [
               {

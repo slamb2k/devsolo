@@ -5,6 +5,7 @@
 
 # ANSI Color Codes
 RED='\033[0;31m'
+BOLD_RED='\033[1;31m'
 GREEN='\033[0;32m'
 BOLD_GREEN='\033[1;32m'
 YELLOW='\033[0;33m'
@@ -12,8 +13,11 @@ BOLD_YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 BRIGHT_BLUE='\033[0;94m'
 BOLD_BLUE='\033[1;34m'
+BOLD_BRIGHT_BLUE='\033[1;94m'
 MAGENTA='\033[0;35m'
 BOLD_MAGENTA='\033[1;35m'
+BRIGHT_MAGENTA='\033[0;95m'
+BOLD_BRIGHT_MAGENTA='\033[1;95m'
 CYAN='\033[0;36m'
 BOLD_CYAN='\033[1;36m'
 WHITE='\033[0;37m'
@@ -34,7 +38,7 @@ CWD=$(echo "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)
 
 # Extract context/token information from transcript
 TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
-TOKEN_USED=""
+TOKEN_USED="0"  # Default to 0 to show "Loading..." when no transcript data available
 TOKEN_TOTAL=200000  # Claude Code's standard context window
 TOKEN_BUDGET=""
 
@@ -42,9 +46,9 @@ if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
   # Sum all token usage from the transcript (only count actual input/output, not cache reads)
   TOKEN_USED=$(jq -s '[.[] | select(.message.usage != null) | .message.usage | ((.input_tokens // 0) + (.output_tokens // 0))] | add' "$TRANSCRIPT_PATH" 2>/dev/null)
 
-  # If transcript is empty or sum failed, set to empty
+  # If transcript is empty or sum failed, default to 0 to show "Loading..." state
   if [ "$TOKEN_USED" = "null" ] || [ -z "$TOKEN_USED" ]; then
-    TOKEN_USED=""
+    TOKEN_USED="0"
   fi
 fi
 
@@ -138,7 +142,7 @@ fi
 create_remaining_bar() {
   local used=$1
   local total=$2
-  local width=14
+  local width=16
 
   if [ -z "$used" ] || [ -z "$total" ] || [ "$total" -eq 0 ]; then
     echo ""
@@ -160,23 +164,29 @@ create_remaining_bar() {
     bg_filled="\033[41m"  # Red background
   fi
 
-  # Format with K/M suffix for readability
-  local remaining_display
-  if [ $remaining -gt 1000 ]; then
-    remaining_display="$((remaining / 1000))K"
+  # Build text - show "Pending..." when just starting
+  local text
+  if [ $used -lt 1000 ]; then
+    text="Pending..."
   else
-    remaining_display="${remaining}"
+    # Format with K/M suffix for readability
+    local remaining_display
+    if [ $remaining -gt 1000 ]; then
+      remaining_display="$((remaining / 1000))K"
+    else
+      remaining_display="${remaining}"
+    fi
+
+    local total_display
+    if [ $total -gt 1000 ]; then
+      total_display="$((total / 1000))K"
+    else
+      total_display="${total}"
+    fi
+
+    text="${remaining_display}/${total_display}"
   fi
 
-  local total_display
-  if [ $total -gt 1000 ]; then
-    total_display="$((total / 1000))K"
-  else
-    total_display="${total}"
-  fi
-
-  # Build text
-  local text="${remaining_display}/${total_display}"
   local text_len=${#text}
   local text_start=$(((width - text_len) / 2))
   local text_end=$((text_start + text_len))
@@ -216,10 +226,39 @@ elif [ -n "$TOKEN_BUDGET" ]; then
   CONTEXT_DISPLAY=" ${GRAY}|${RESET} ${CYAN}budget: ${TOKEN_BUDGET}${RESET}"
 fi
 
+# Function to center text within a fixed width
+center_text() {
+  local text=$1
+  local width=$2
+  local text_len=${#text}
+
+  if [ $text_len -ge $width ]; then
+    echo "$text"
+    return
+  fi
+
+  local total_padding=$((width - text_len))
+  local left_padding=$((total_padding / 2))
+  local right_padding=$((total_padding - left_padding))
+
+  local result=""
+  for ((i=0; i<left_padding; i++)); do
+    result+=" "
+  done
+  result+="$text"
+  for ((i=0; i<right_padding; i++)); do
+    result+=" "
+  done
+
+  echo "$result"
+}
+
 # Build model display if available
 MODEL_DISPLAY_FIELD=""
 if [ -n "$MODEL_DISPLAY" ]; then
-  MODEL_DISPLAY_FIELD=" ${GRAY}|${RESET} 🤖 ${GRAY}${MODEL_DISPLAY}${RESET}"
+  # Center the model name in a fixed width of 16 characters
+  CENTERED_MODEL=$(center_text "$MODEL_DISPLAY" 16)
+  MODEL_DISPLAY_FIELD=" ${GRAY}|${RESET} ${GRAY}${CENTERED_MODEL}${RESET}"
 fi
 
 # Build active sessions display
@@ -272,17 +311,17 @@ if [ -n "$SESSION_ID" ]; then
   esac
 
   # Show branch in green with branch emoji
-  echo -e "${BOLD_CYAN} dev${RESET}   ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
-  echo -e "${BOLD_WHITE}  solo${RESET} ${MODEL_DISPLAY_FIELD}  ${GRAY}|${RESET} $EMOJI ${state_color}${status_msg}${RESET}"
+  echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}   ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
+  echo -e "${BOLD_WHITE} solo${RESET} ${MODEL_DISPLAY_FIELD} ${GRAY}|${RESET} $EMOJI ${state_color}${status_msg}${RESET}"
 else
   # No active session
   if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
     # Main branch - show in green with branch emoji
-    echo -e "${BOLD_CYAN} dev${RESET}   ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
-    echo -e "${BOLD_WHITE}  solo${RESET} ${MODEL_DISPLAY_FIELD}  ${GRAY}|${RESET} 📁 ${GRAY}No active session${RESET}"
+    echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}   ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
+    echo -e "${BOLD_WHITE} solo${RESET} ${MODEL_DISPLAY_FIELD} ${GRAY}|${RESET} 📁 ${GRAY}No active session${RESET}"
   else
     # Other branch without session - show in green with branch emoji
-    echo -e "${BOLD_CYAN} dev${RESET}   ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
-    echo -e "${BOLD_WHITE}  solo${RESET} ${MODEL_DISPLAY_FIELD}  ${GRAY}|${RESET} 📁 ${GRAY}No active session${RESET}"
+    echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}   ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
+    echo -e "${BOLD_WHITE} solo${RESET} ${MODEL_DISPLAY_FIELD} ${GRAY}|${RESET} 📁 ${GRAY}No active session${RESET}"
   fi
 fi

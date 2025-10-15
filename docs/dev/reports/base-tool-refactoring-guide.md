@@ -185,9 +185,7 @@ export class AbortTool extends BaseMCPTool<AbortToolInput, SessionToolResult> {
 - Add: `auto` flag for confirming deletions
 - Add: Pre-flight checks showing what will be cleaned
 
-**StatusLineTool** - Minimal changes
-- Extend BaseMCPTool but override most phases to do nothing
-- Keep: Simple configuration logic
+**Note:** StatusLineTool has been removed - status line configuration is now handled by InitTool.
 
 ## Standard Input Interface
 
