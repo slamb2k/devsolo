@@ -30,27 +30,36 @@ The status line displays workflow information directly in Claude Code:
 
 **With Active Session:**
 ```
-[devsolo] 💻 feature/my-feature | BRANCH_READY | sonnet.4.5 | █████████████░░ 180K/200K
+[devsolo]  🌿 feature/my-feature | +2 *3 | BRANCH_READY | sonnet.4.5 | █████████████░░ 180K/200K
+           📝 Branch ready for development
 ```
 
 **On Main Branch (No Session):**
 ```
-[devsolo] 📁 main | sonnet.4.5 | █████████████░░ 180K/200K
+[devsolo]  🌿 main | ⇡2 | sonnet.4.5 | █████████████░░ 180K/200K
+           📁 No active session
 ```
 
 **On Feature Branch (No Session):**
 ```
-[devsolo] 📁 feature/other-work | sonnet.4.5 | █████████████░░ 180K/200K
+[devsolo]  🌿 feature/other-work | *2 !3 | sonnet.4.5 | █████████████░░ 180K/200K
+           📁 No active session
 ```
 
 Components:
-- **Icon**: State-based emoji when session active (💻 working, 📝 committed, 🚀 pushed, etc.), 📁 folder icon when no session
-- **Branch Name**:
-  - Green when session active
-  - Gray (dimmed) for main/master branch without session
-  - Yellow for other branches without session
+- **[devsolo] prefix**: Displayed in bold dim white (gray)
+- **🌿 branch emoji**: Git branch indicator before branch name
+- **Branch Name**: Always displayed in green
+- **Status line 2**: Icon with grey status message explaining current state
+- **Git Stats**: Powerlevel10k-style rainbow indicators showing repository status (bold)
+  - +N - N staged files (in bold green)
+  - *N - N modified unstaged files (in bold yellow)
+  - !N - N untracked files (in bold blue)
+  - -N - N deleted files (in bold magenta)
+  - ⇡N - N commits ahead of remote (in bold cyan)
+  - ⇣N - N commits behind remote (in bold magenta)
 - **State**: Current workflow state (only shown when session active)
-- **Model**: Current Claude model in use (e.g., "sonnet.4.5", "opus.3.5")
+- **Model**: Current Claude model in use (e.g., "sonnet.4.5", "opus.3.5") - displayed in bright blue
 - **Context Window**: Bar graph showing remaining tokens with color coding:
   - 🟢 Green: >50% remaining (plenty of context)
   - 🟡 Yellow: 20-50% remaining (getting low)
@@ -157,7 +166,8 @@ Present status line configuration in a clear, structured format:
 - State: ✓ Visible
 
 **Example Display:**
-[devsolo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY
+[devsolo]  🌿 feature/my-feature | BRANCH_READY
+           💻 Active development session
 
 ---
 
@@ -194,7 +204,8 @@ Present status line configuration in a clear, structured format:
 - State: ✓ Visible
 
 **Current Display:**
-[devsolo] 💻 0c2a20a7 | feature/my-feature | BRANCH_READY
+[devsolo]  🌿 feature/my-feature | BRANCH_READY
+           💻 Active development session
 
 ---
 
@@ -222,5 +233,5 @@ Present status line configuration in a clear, structured format:
 - Persists across Claude Code sessions
 - **Context Window Bar Graph**: Displays remaining tokens in real-time with color-coded visual indicator
   - Helps you monitor when to wrap up long conversations
-  - Green bar indicates plenty of context remaining
+  - Green bar indicates plenty of context remaining to use
   - Yellow/Red bars suggest starting a new conversation soon
