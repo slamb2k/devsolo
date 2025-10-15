@@ -28,7 +28,7 @@ BOLD_DARK_GRAY='\033[1;30m'
 BOLD='\033[1m'
 BLACK='\033[0;30m'
 BOLD_BLACK='\033[1;30m'
-BOLD_DARK_ORANGE='\033[1;38;5;130m'
+BOLD_DARK_ORANGE='\033[1;38;5;58m'
 RESET='\033[0m'
 
 # Read JSON input from Claude Code (optional, contains session info)
@@ -266,7 +266,7 @@ if [ -n "$MODEL_DISPLAY" ]; then
     BG_COLOR="\033[48;5;27m"
   else
     # Dark orange background for Sonnet and other models
-    BG_COLOR="\033[48;5;130m"
+    BG_COLOR="\033[48;5;58m"
   fi
 
   MODEL_DISPLAY_FIELD=" ${GRAY}|${RESET} ${BG_COLOR}${BOLD_WHITE}${CENTERED_MODEL}${RESET}"
