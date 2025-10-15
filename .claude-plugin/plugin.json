@@ -2,7 +2,7 @@
   "name": "devsolo-plugin",
   "displayName": "devsolo",
   "description": "AI-native Git workflow automation for Claude Code",
-  "version": "2.0.0",
+  "version": "2.3.0",
   "author": "devsolo contributors",
   "license": "MIT",
   "homepage": "https://github.com/slamb2k/devsolo",
@@ -13,7 +13,9 @@
   "mcpServers": {
     "devsolo": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/mcp/devsolo-mcp-server.js"],
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/dist/mcp/devsolo-mcp-server.js"
+      ],
       "env": {}
     }
   }
