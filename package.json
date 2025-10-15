@@ -1,6 +1,6 @@
 {
   "name": "devsolo-mcp",
-  "version": "2.5.2",
+  "version": "2.5.3",
   "description": "AI-native git workflow automation via Model Context Protocol (MCP) for Claude Code",
   "main": "dist/index.js",
   "bin": {
