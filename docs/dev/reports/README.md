@@ -16,6 +16,7 @@ This folder contains bug reports, code reviews, implementation summaries, and an
 - **phase2-before-metrics.md** - Metrics captured before Phase 2 cleanup
 - **phase2-progress-report.md** - Progress report for Phase 2 cleanup
 - **phase3-pivot-summary.md** - Summary of Phase 3 pivot to pure MCP architecture
+- **pre-flight-check-execution-order-fix.md** - Fix for launch tool bypassing pre-flight checks by auto-stashing before checks run
 
 ## What Goes Here
 
