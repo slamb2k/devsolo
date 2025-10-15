@@ -103,8 +103,8 @@ git commit -m "WIP: Save changes"
 # Option 2: Stash changes
 git stash
 
-# Option 3: Force launch (not recommended)
-devsolo launch feature/new --force
+# Then launch normally
+devsolo launch feature/new
 ```
 
 #### Error: Branch already exists

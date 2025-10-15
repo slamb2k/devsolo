@@ -138,9 +138,9 @@ Start a new feature workflow.
 {
   branchName?: string;               // Branch name (auto-generated if omitted)
   description?: string;              // Feature description
-  force?: boolean;                   // Force launch with uncommitted changes
-  stashRef?: string;                 // Git stash reference to restore
+  stashRef?: string;                 // Git stash reference to restore (optional)
   popStash?: boolean;                // Whether to pop stash (default: true if stashRef provided)
+  auto?: boolean;                    // Auto-resolve prompts (default: from config)
 }
 ```
 
@@ -149,9 +149,9 @@ Start a new feature workflow.
 
 #### Pre-flight Checks
 - On main/master branch
-- Working directory clean (unless force/stash)
-- Main branch up to date
-- No existing session
+- Working directory clean (strictly enforced - must commit or stash first)
+- Main branch up to date with remote
+- No existing session on current branch
 - Branch name available
 
 #### Post-flight Verifications
@@ -179,10 +179,10 @@ Use devsolo_launch with branchName "feature/payments" and description "Stripe in
 ```
 
 #### Common Errors
-- Not on main branch
-- Uncommitted changes (use `force: true` or commit first)
-- Branch name already exists
-- Active session exists (abort it first)
+- Not on main branch (checkout main first)
+- Uncommitted changes (commit with `git commit` or stash with `git stash` first)
+- Branch name already exists or was previously used for a merged PR
+- Active session exists (abort it first with devsolo_abort)
 
 ---
 
@@ -249,9 +249,8 @@ Complete workflow: push, create PR, wait for CI, merge, cleanup.
   createPR?: boolean;                // Create pull request (default: true)
   merge?: boolean;                   // Auto-merge after CI (default: true)
   prDescription?: string;            // PR description (required for new PRs)
-  force?: boolean;                   // Override pre-flight failures
-  yes?: boolean;                     // Skip confirmations
   stagedOnly?: boolean;              // Only commit staged files (default: false)
+  auto?: boolean;                    // Auto-resolve prompts (default: from config)
 }
 ```
 
@@ -282,7 +281,7 @@ Push and create PR but don't merge yet
 ```
 Use devsolo_ship with prDescription "Add new feature"
 Use devsolo_ship with prDescription "Bug fix" and merge false
-Use devsolo_ship with force true (override checks)
+Use devsolo_ship with push true and createPR true and merge false
 ```
 
 #### What It Does
@@ -460,12 +459,12 @@ Go back to the feature/dashboard branch
 ```
 Use devsolo_swap with branchName "feature/auth"
 Use devsolo_swap with branchName "main" and stash true
-Use devsolo_swap with branchName "feature/test" and force true
+Use devsolo_swap with branchName "feature/test" and auto true
 ```
 
 #### Common Errors
 - Branch doesn't exist
-- Uncommitted changes (use stash or force)
+- Uncommitted changes (commit or use stash: true)
 - Invalid target branch
 
 ---
@@ -616,12 +615,12 @@ Remove expired sessions forcefully
 ```
 Use devsolo_cleanup
 Use devsolo_cleanup with deleteBranches true
-Use devsolo_cleanup with deleteBranches true and force true
+Use devsolo_cleanup with deleteBranches true and auto true
 ```
 
 #### Common Errors
 - No sessions to clean
-- Branch deletion failed (unmerged changes without force)
+- Branch deletion failed (unmerged changes)
 - Permission issues
 
 ---

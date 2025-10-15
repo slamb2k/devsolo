@@ -31,8 +31,8 @@ All devsolo commands implement comprehensive pre-flight and post-flight checks t
 
 | Check | Purpose | Failure Action |
 |-------|---------|----------------|
-| **On main/master branch** | Ensure starting from correct base | Block unless --force |
-| **Working directory clean** | No uncommitted changes present | Block unless --force |
+| **On main/master branch** | Ensure starting from correct base | Block |
+| **Working directory clean** | No uncommitted changes present | Block (strictly enforced) |
 | **Main up to date with origin** | Latest changes pulled | Warn but allow |
 | **No existing session** | No active session on current branch | Block (prevents conflicts) |
 | **Branch name available** | Branch not previously used for merged PR | Block (prevents reuse) |
@@ -235,15 +235,21 @@ All commands enforce these invariants:
 
 ## Override Mechanisms
 
-### --force Flag
-- Bypasses non-critical checks (working directory clean, uncommitted changes)
-- Does NOT bypass critical checks (session exists, branch reuse, PR conflicts)
-- Use with caution - can lead to lost work
+### auto: true Parameter
+- Automatically resolves prompts by choosing recommended options
+- Does NOT bypass validation checks
+- Pre-flight checks must still pass
+- Useful for automation and when you trust the defaults
 
-### --yes Flag
-- Skips confirmation prompts
+### --yes Flag (CLI only)
+- Skips confirmation prompts in interactive scenarios
 - Does NOT skip validation checks
 - Safe for automation/scripting
+
+**Important**: Pre-flight checks cannot be bypassed. If a check fails, you must resolve the issue before proceeding. For example:
+- Working directory not clean → Commit or stash changes first
+- Not on main branch → Checkout main first
+- Branch name in use → Choose a different branch name
 
 ## Check Framework
 
