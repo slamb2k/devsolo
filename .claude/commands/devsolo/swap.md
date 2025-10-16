@@ -66,6 +66,24 @@ The swap workflow consists of three stages, each using a separate git-droid sub-
      - If no uncommitted changes: Indicate ready to swap
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
      - Include these sections: Pre-flight Checks, Result Summary
+     - IMPORTANT: Create workflow state object and include it in your response:
+       ```json
+       {
+         \"workflowId\": \"swap-[timestamp]\",
+         \"stage\": \"STAGE_1\",
+         \"verified\": {
+           \"targetSessionExists\": [true/false],
+           \"targetSessionId\": \"[session-id]\",
+           \"changesChecked\": true
+         },
+         \"context\": {
+           \"currentBranch\": \"[current-branch]\",
+           \"targetBranch\": \"[target-branch]\",
+           \"hasUncommittedChanges\": [true/false],
+           \"userChoice\": \"[STASH_CHANGES/COMMIT_FIRST/PROCEED_TO_SWAP/ABORTED]\"
+         }
+       }
+       ```
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: STASH_CHANGES' (user chose option 1)
        * 'Next Stage: COMMIT_FIRST' (user chose option 2, terminal state)
@@ -78,9 +96,11 @@ The swap workflow consists of three stages, each using a separate git-droid sub-
    - Do NOT summarize, skip sections, or add commentary
    - The user MUST see this output before you proceed
 
-3. **Check the response** for the "Next Stage:" directive in Result Summary:
-   - If 'Next Stage: STASH_CHANGES', proceed to Stage 2 (Stash Current Work)
-   - If 'Next Stage: PROCEED_TO_SWAP', skip to Stage 3 (Switch to Target Branch)
+3. **Extract workflow state** from git-droid response and store it for passing to next stage
+
+4. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: STASH_CHANGES', proceed to Stage 2 (Stash Current Work) with workflow state
+   - If 'Next Stage: PROCEED_TO_SWAP', skip to Stage 3 (Switch to Target Branch) with workflow state
    - If 'Next Stage: COMMIT_FIRST', display message and terminate (user should commit manually then retry)
    - If 'Next Stage: ABORTED', terminate workflow
 
@@ -91,11 +111,25 @@ Only execute this stage if Stage 1 returned 'STASH_CHANGES'.
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Stashing current work..."
-   - **prompt:** "Stash uncommitted changes on current branch. You must:
+   - **prompt:** "Stash uncommitted changes on current branch, using workflow state from Stage 1: [pass workflow state object]. You must:
+     - SKIP target session verification (already verified in Stage 1 - check workflow state)
+     - SKIP uncommitted changes check (already checked in Stage 1 - check workflow state)
      - Get current branch name
      - Create stash with labeled reference: swap-from-{current-branch}
      - Store stash reference in session metadata
      - Verify stash succeeded
+     - Update workflow state object:
+       ```json
+       {
+         \"stage\": \"STAGE_2\",
+         \"verified\": { ...previous verified fields... },
+         \"context\": {
+           ...previous context fields...,
+           \"stashCreated\": [true/false],
+           \"stashRef\": \"[stash-ref]\"
+         }
+       }
+       ```
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
      - Include these sections: Operations Executed, Post-flight Verifications, Result Summary
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
@@ -108,8 +142,10 @@ Only execute this stage if Stage 1 returned 'STASH_CHANGES'.
    - Do NOT summarize, skip sections, or add commentary
    - The user MUST see this output before you proceed
 
-3. **Check the response** for the "Next Stage:" directive in Result Summary:
-   - If 'Next Stage: PROCEED_TO_SWAP', proceed to Stage 3 (Switch to Target Branch)
+3. **Extract updated workflow state** from git-droid response and store it for passing to next stage
+
+4. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: PROCEED_TO_SWAP', proceed to Stage 3 (Switch to Target Branch) with workflow state
    - If 'Next Stage: ABORTED', terminate workflow
 
 ### Stage 3: Switch to Target Branch
@@ -117,12 +153,26 @@ Only execute this stage if Stage 1 returned 'STASH_CHANGES'.
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Switching to target branch..."
-   - **prompt:** "Complete the swap to target branch with the following parameters: [pass all user arguments]. You must:
+   - **prompt:** "Complete the swap to target branch with the following parameters: [pass all user arguments] and workflow state from previous stages: [pass workflow state object]. You must:
+     - SKIP target session verification (already verified in Stage 1 - check workflow state)
+     - SKIP uncommitted changes check (already handled in Stage 2 if needed - check workflow state)
      - Call `mcp__devsolo__devsolo_swap` MCP tool with parameters
      - Checkout target branch
      - Activate target session
      - Check if target branch has stashed work
      - Pop stash automatically if present
+     - Update workflow state object:
+       ```json
+       {
+         \"stage\": \"STAGE_3\",
+         \"verified\": { ...previous verified fields... },
+         \"context\": {
+           ...previous context fields...,
+           \"swapped\": [true/false],
+           \"stashPopped\": [true/false if applicable]
+         }
+       }
+       ```
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
      - Include these sections: Operations Executed, Post-flight Verifications, Result Summary, Next Steps
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
@@ -281,6 +331,20 @@ git-droid will handle common errors:
 - **Uncommitted changes**: Prompts to stash, commit, or force
 - **Stash conflict**: Guides to manually resolve stash conflicts
 - **Invalid branch name**: Validates branch name format
+
+## Workflow State Management
+
+This workflow uses a state indicator system to avoid redundant checks across stages:
+
+- **Stage 1** performs all pre-flight checks (target session verification, uncommitted changes) and creates workflow state object
+- **Stage 2** (conditional) receives state, skips session/changes checks, handles stashing
+- **Stage 3** receives state, skips all prior verifications, executes swap operation
+
+Each stage updates the state object with new context before passing to the next stage. This ensures:
+- No redundant target session verification
+- No redundant git status checks
+- Faster execution
+- Clear workflow progress tracking
 
 ## Notes
 

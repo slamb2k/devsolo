@@ -57,26 +57,53 @@ The ship workflow consists of three stages, each using a separate git-droid sub-
 2. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Initialising ship workflow..."
-   - **prompt:** "Initialize the ship workflow with the following parameters: [pass all user arguments including verbose flag]. You must:
+   - **prompt:** "Initialize the ship workflow with the following parameters: [pass all user arguments including verbose flag and auto mode]. Auto mode: [resolved auto mode value]. You must:
      - Check for active devsolo session
      - Check for uncommitted changes using `git status`
      - Verify session is ready to ship
-     - If uncommitted changes exist: Present numbered options to user:
-       1. Commit all changes and proceed with ship [RECOMMENDED]
-       2. Commit only staged changes and proceed with ship
-       3. Abort ship workflow
-     - If no uncommitted changes: Indicate ready to proceed with ship
+     - Handle scenarios based on auto mode:
+       * If NO active session found:
+         - If auto mode is TRUE: Automatically launch a feature workflow first (use SlashCommand to invoke /devsolo:launch with auto mode), then set 'Next Stage: LAUNCH_THEN_SHIP'
+         - If auto mode is FALSE: Report error, guide user to run /devsolo:launch first, set 'Next Stage: ABORTED'
+       * If uncommitted changes exist (and session exists):
+         - If auto mode is TRUE: Automatically choose option 1 (commit all changes) and set 'Next Stage: COMMIT_ALL'
+         - If auto mode is FALSE: Present numbered options to user:
+           1. Commit all changes and proceed with ship [RECOMMENDED]
+           2. Commit only staged changes and proceed with ship
+           3. Abort ship workflow
+       * If no uncommitted changes: Indicate ready to proceed with ship and set 'Next Stage: PROCEED_TO_SHIP'
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
      - CRITICAL - Output formatting based on verbose flag:
        * If verbose=false (brief mode):
          - DO NOT OUTPUT: "Pre-flight Checks", "Post-flight Verifications", "Operations Executed", or "Analysis" sections
-         - ONLY OUTPUT: Result Summary (and options table if user input needed)
+         - ONLY OUTPUT: Result Summary (and options table if user input needed - only show table if auto mode is FALSE)
        * If verbose=true (verbose mode): Include all sections: Pre-flight Checks, Result Summary
+     - IMPORTANT: Create workflow state object and include it in your response:
+       ```json
+       {
+         \"workflowId\": \"ship-[timestamp]\",
+         \"stage\": \"STAGE_1\",
+         \"verified\": {
+           \"sessionActive\": [true/false],
+           \"sessionId\": \"[session-id]\",
+           \"changesChecked\": true,
+           \"sessionReady\": [true/false]
+         },
+         \"context\": {
+           \"branchName\": \"[branch-name]\",
+           \"hasUncommittedChanges\": [true/false],
+           \"userChoice\": \"[LAUNCH_THEN_SHIP/COMMIT_ALL/COMMIT_STAGED/PROCEED_TO_SHIP/ABORTED]\",
+           \"autoModeUsed\": [true/false],
+           \"launchedFeatureBranch\": \"[branch-name if launched]\"
+         }
+       }
+       ```
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
-       * 'Next Stage: COMMIT_ALL' (user chose option 1)
+       * 'Next Stage: LAUNCH_THEN_SHIP' (auto mode launched feature workflow, ready to ship)
+       * 'Next Stage: COMMIT_ALL' (auto mode chose option 1, or user chose option 1)
        * 'Next Stage: COMMIT_STAGED' (user chose option 2)
-       * 'Next Stage: PROCEED_TO_SHIP' (no uncommitted changes)
-       * 'Next Stage: ABORTED' (user chose option 3)"
+       * 'Next Stage: PROCEED_TO_SHIP' (no uncommitted changes, ready to ship)
+       * 'Next Stage: ABORTED' (no active session in manual mode, or user chose option 3)"
 
 3. **⬆️ OUTPUT the complete git-droid response above as text to the user**
    - Display the ENTIRE formatted output exactly as git-droid returned it
@@ -84,12 +111,15 @@ The ship workflow consists of three stages, each using a separate git-droid sub-
    - Do NOT summarize, skip sections, or add commentary
    - The user MUST see this output before you proceed
 
-4. **Check the response** for the "Next Stage:" directive in Result Summary:
-   - If 'Next Stage: COMMIT_ALL' or 'Next Stage: COMMIT_STAGED', proceed to Stage 2 (Commit Changes)
-   - If 'Next Stage: PROCEED_TO_SHIP', skip to Stage 3 (Complete Ship Workflow) and mark "Commit changes" as completed
+4. **Extract workflow state** from git-droid response and store it for passing to next stage
+
+5. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: LAUNCH_THEN_SHIP', proceed directly to Stage 3 (Complete Ship Workflow) with workflow state and mark "Commit changes" as completed
+   - If 'Next Stage: COMMIT_ALL' or 'Next Stage: COMMIT_STAGED', proceed to Stage 2 (Commit Changes) with workflow state
+   - If 'Next Stage: PROCEED_TO_SHIP', skip to Stage 3 (Complete Ship Workflow) with workflow state and mark "Commit changes" as completed
    - If 'Next Stage: ABORTED', terminate workflow
 
-5. **Mark todo as completed:** Update "Initialize ship workflow" to completed status
+6. **Mark todo as completed:** Update "Initialize ship workflow" to completed status
 
 ### Stage 2: Commit Changes (Conditional)
 
@@ -100,13 +130,27 @@ Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
 2. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Committing changes..."
-   - **prompt:** "Commit the uncommitted changes with the following parameters: [pass verbose flag]. You must:
+   - **prompt:** "Commit the uncommitted changes with the following parameters: [pass verbose flag] and workflow state from Stage 1: [pass workflow state object]. You must:
+     - SKIP session verification (already verified in Stage 1 - check workflow state)
+     - SKIP uncommitted changes check (already checked in Stage 1 - check workflow state)
      - Use SlashCommand tool to invoke `/devsolo:commit` with appropriate parameters
      - If Stage 1 returned 'COMMIT_STAGED': Pass --stagedOnly flag
      - If Stage 1 returned 'COMMIT_ALL': Do not pass --stagedOnly flag
      - Pass --auto flag if provided in user arguments
      - Wait for commit to complete
      - Verify commit was successful
+     - Update workflow state object:
+       ```json
+       {
+         \"stage\": \"STAGE_2\",
+         \"verified\": { ...previous verified fields... },
+         \"context\": {
+           ...previous context fields...,
+           \"commitCompleted\": [true/false],
+           \"commitSha\": \"[commit-sha]\"
+         }
+       }
+       ```
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
      - CRITICAL - Output formatting based on verbose flag:
        * If verbose=false (brief mode):
@@ -123,11 +167,13 @@ Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
    - Do NOT summarize, skip sections, or add commentary
    - The user MUST see this output before you proceed
 
-4. **Check the response** for the "Next Stage:" directive in Result Summary:
-   - If 'Next Stage: PROCEED_TO_SHIP', proceed to Stage 3 (Complete Ship Workflow)
+4. **Extract updated workflow state** from git-droid response and store it for passing to next stage
+
+5. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: PROCEED_TO_SHIP', proceed to Stage 3 (Complete Ship Workflow) with workflow state
    - If 'Next Stage: ABORTED', terminate workflow
 
-5. **Mark todo as completed:** Update "Commit changes (if needed)" to completed status
+6. **Mark todo as completed:** Update "Commit changes (if needed)" to completed status
 
 ### Stage 3: Complete Ship Workflow
 
@@ -136,10 +182,26 @@ Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
 2. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Completing ship workflow..."
-   - **prompt:** "Complete the ship workflow with the following parameters: [pass all user arguments including verbose flag]. You must:
+   - **prompt:** "Complete the ship workflow with the following parameters: [pass all user arguments including verbose flag] and workflow state from previous stages: [pass workflow state object]. You must:
+     - SKIP session verification (already verified in Stage 1 - check workflow state)
+     - SKIP uncommitted changes check (already checked in Stage 1 - check workflow state)
+     - SKIP commit verification (handled in Stage 2 if needed - check workflow state)
      - Generate PR description if not provided (analyze commits since main)
      - Call `mcp__devsolo__devsolo_ship` MCP tool with all parameters
      - Monitor CI checks (MCP tool handles this)
+     - Update workflow state object:
+       ```json
+       {
+         \"stage\": \"STAGE_3\",
+         \"verified\": { ...previous verified fields... },
+         \"context\": {
+           ...previous context fields...,
+           \"prNumber\": [pr-number],
+           \"prUrl\": \"[pr-url]\",
+           \"merged\": [true/false]
+         }
+       }
+       ```
      - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
      - CRITICAL - Output formatting based on verbose flag:
        * If verbose=false (brief mode):
@@ -349,6 +411,20 @@ Fixes #42"
    ✓ On main branch
    ✓ Session completed
 ```
+
+## Workflow State Management
+
+This workflow uses a state indicator system to avoid redundant checks across stages:
+
+- **Stage 1** performs all pre-flight checks and creates workflow state object
+- **Stage 2** receives state, skips session/changes verification, performs commit
+- **Stage 3** receives state, skips all prior verifications, performs ship operations
+
+Each stage updates the state object with new context before passing to the next stage. This ensures:
+- No redundant session verification
+- No redundant git status checks
+- Faster execution
+- Clear workflow progress tracking
 
 ## Notes
 
