@@ -5,7 +5,10 @@ export class GitOperations {
   private git: SimpleGit;
 
   constructor(basePath?: string) {
-    this.git = simpleGit(basePath || process.cwd());
+    // Use basePath if provided, otherwise default to cwd
+    // Use proper options format to avoid simple-git validation errors
+    const workingDir = basePath || process.cwd();
+    this.git = simpleGit({ baseDir: workingDir, binary: 'git', maxConcurrentProcesses: 6 });
   }
 
   async init(): Promise<void> {
