@@ -32,8 +32,13 @@ export class SessionsTool extends BaseMCPTool<SessionsToolInput, QueryToolResult
 
   protected getBanner(): string {
     return `░█▀▀░█▀▀░█▀▀░█▀▀░▀█▀░█▀█░█▀█░█▀▀░
-░▀▀█░█▀▀░▀▀█░▀▀█░░█░░█░█░█░█░▀▀█░
+░▀▀█░█▀▀░▀▀█░▀▀█░░█░░█░░█░█░█░█░▀▀█░
 ░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░`;
+  }
+
+  protected getSlashCommand(): string | null {
+    // Read-only query tool - doesn't need slash command context
+    return null;
   }
 
   protected async executeWorkflow(

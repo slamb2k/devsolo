@@ -36,6 +36,11 @@ export class InfoTool extends BaseMCPTool<InfoToolInput, QueryToolResult> {
 ░▀▀▀░▀░▀░▀░░░▀▀▀░`;
   }
 
+  protected getSlashCommand(): string | null {
+    // Read-only query tool - doesn't need slash command context
+    return null;
+  }
+
   protected async executeWorkflow(
     _context: WorkflowContext
   ): Promise<WorkflowExecutionResult> {

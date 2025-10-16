@@ -44,6 +44,10 @@ export class HotfixTool extends BaseMCPTool<HotfixToolInput, SessionToolResult> 
 ░▀░▀░▀▀▀░░▀░░▀░░░▀▀▀░▀░▀░`;
   }
 
+  protected getSlashCommand(): string | null {
+    return '/devsolo:hotfix';
+  }
+
   protected async collectMissingParameters(
     input: HotfixToolInput
   ): Promise<PromptCollectionResult> {

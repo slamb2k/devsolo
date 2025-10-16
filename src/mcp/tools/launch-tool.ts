@@ -57,6 +57,10 @@ export class LaunchTool extends BaseMCPTool<LaunchToolInput, SessionToolResult> 
 ░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀░`;
   }
 
+  protected getSlashCommand(): string | null {
+    return '/devsolo:launch';
+  }
+
   protected async collectMissingParameters(
     input: LaunchToolInput
   ): Promise<PromptCollectionResult> {

@@ -36,6 +36,10 @@ export class CleanupTool extends BaseMCPTool<CleanupToolInput, QueryToolResult> 
 ░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀░░░`;
   }
 
+  protected getSlashCommand(): string | null {
+    return '/devsolo:cleanup';
+  }
+
   protected async executeWorkflow(
     context: WorkflowContext
   ): Promise<WorkflowExecutionResult> {

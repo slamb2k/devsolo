@@ -435,6 +435,32 @@ ${MARKER_END}${after}`;
 
 This section is automatically managed by devsolo. Last updated: ${new Date().toISOString()}
 
+### IMPORTANT: Always Use Slash Commands for devsolo Operations
+
+When working with devsolo workflows, **ALWAYS use slash commands** instead of calling MCP tools directly:
+
+✅ **CORRECT**: Use \`SlashCommand\` tool
+- \`/devsolo:launch\` - Start new feature workflow
+- \`/devsolo:commit\` - Commit changes
+- \`/devsolo:ship\` - Push, create PR, and merge
+- \`/devsolo:hotfix\` - Create emergency hotfix
+- \`/devsolo:swap\` - Switch between workflow sessions
+- \`/devsolo:abort\` - Abort current workflow
+- \`/devsolo:cleanup\` - Clean up expired sessions
+
+❌ **INCORRECT**: Direct MCP tool calls (e.g., \`mcp__devsolo__devsolo_launch\`)
+
+**Why slash commands?**
+Slash commands provide essential context that MCP tools need:
+- Load configuration (autoMode, verboseMode) from .devsolo/config.yaml
+- Provide commit message guidance and PR description templates
+- Set up proper workflow context and instructions
+- Ensure consistent behavior across operations
+
+**Exception**: Read-only query tools can be called directly:
+- \`devsolo_info\` - Show current workflow information
+- \`devsolo_sessions\` - List workflow sessions
+
 ### Workflow Detection
 
 Before performing git operations, check for active devsolo session on current branch:

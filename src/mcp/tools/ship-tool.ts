@@ -55,6 +55,10 @@ export class ShipTool extends BaseMCPTool<ShipToolInput, GitHubToolResult> {
 ░▀▀▀░▀░▀░▀▀▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░`;
   }
 
+  protected getSlashCommand(): string | null {
+    return '/devsolo:ship';
+  }
+
   protected async collectMissingParameters(
     input: ShipToolInput
   ): Promise<PromptCollectionResult> {

@@ -37,6 +37,11 @@ export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
 ░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░`;
   }
 
+  protected getSlashCommand(): string | null {
+    // Initialization tool - doesn't need slash command context
+    return null;
+  }
+
   // Override to allow running when not initialized
   protected async checkInitialization(): Promise<BaseToolResult> {
     // InitTool is allowed to run even when not initialized
