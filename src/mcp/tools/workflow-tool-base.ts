@@ -67,6 +67,12 @@ implements MCPTool<TInput, TResult> {
       // Note: Banner display is now handled by slash commands, not MCP tools
       // Slash commands display the banner before invoking MCP tools
 
+      // Phase 0: Check if called via slash command (for tools that require it)
+      const slashCommandCheck = await this.checkSlashCommandContext(input);
+      if (slashCommandCheck) {
+        return slashCommandCheck as TResult;
+      }
+
       // Phase 1: Check initialization
       const initCheck = await this.checkInitialization();
       if (!initCheck.success) {
@@ -124,6 +130,53 @@ implements MCPTool<TInput, TResult> {
       return this.createErrorResult(error);
     }
   }
+
+  /**
+   * Phase 0: Check if tool was called via slash command
+   * Tools that require rich context (commit guidance, PR templates, etc.)
+   * should be called via slash commands, not directly as MCP tools
+   * Returns null if check passes, returns redirect prompt if should use slash command
+   */
+  protected async checkSlashCommandContext(input: TInput): Promise<BaseToolResult | null> {
+    // Get the slash command for this tool (null for read-only tools)
+    const slashCommand = this.getSlashCommand();
+
+    // If no slash command, this tool doesn't require slash command context
+    if (!slashCommand) {
+      return null;
+    }
+
+    // Check if auto was explicitly provided (indicates call via slash command)
+    // Slash commands read config and pass auto explicitly
+    // Direct MCP calls leave auto undefined
+    if (input.auto === undefined) {
+      // Not called via slash command - return redirect prompt
+      const result: any = {
+        success: true,
+        message: 'This operation requires configuration context. Please use the slash command instead.',
+        nextSteps: [
+          `Use SlashCommand tool with command: '${slashCommand}'`,
+          'The slash command will:',
+          '  - Load configuration (autoMode, verboseMode) from .devsolo/config.yaml',
+          '  - Provide commit message guidance and PR description templates',
+          '  - Set up proper context for the operation',
+          '  - Then call this MCP tool with all required parameters',
+          'After the slash command prepares everything, the operation will execute automatically.',
+        ],
+      };
+      return result;
+    }
+
+    // auto was provided, assume called via slash command
+    return null;
+  }
+
+  /**
+   * Get the slash command name for this tool
+   * Returns null for read-only tools that don't require slash command context
+   * Override in concrete tool classes
+   */
+  protected abstract getSlashCommand(): string | null;
 
   /**
    * Phase 1: Check initialization

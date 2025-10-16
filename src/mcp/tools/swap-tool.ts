@@ -41,6 +41,10 @@ export class SwapTool extends BaseMCPTool<SwapToolInput, SessionToolResult> {
 ░▀▀▀░▀░▀░▀░▀░▀░░░▀░░░▀▀▀░▀░▀░▀▀▀░`;
   }
 
+  protected getSlashCommand(): string | null {
+    return '/devsolo:swap';
+  }
+
   protected async createContext(input: SwapToolInput): Promise<Record<string, unknown>> {
     // Get target session (will be validated in pre-flight checks)
     const targetSession = await this.sessionRepo.getSessionByBranch(input.branchName);

@@ -43,6 +43,10 @@ export class CommitTool extends BaseMCPTool<CommitToolInput, SessionToolResult> 
 ░▀▀▀░▀▀▀░▀░░░▀░▀░░░▀░▀▀▀░░▀░░`;
   }
 
+  protected getSlashCommand(): string | null {
+    return '/devsolo:commit';
+  }
+
   protected async collectMissingParameters(
     input: CommitToolInput
   ): Promise<PromptCollectionResult> {

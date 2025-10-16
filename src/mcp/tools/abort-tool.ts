@@ -39,6 +39,10 @@ export class AbortTool extends BaseMCPTool<AbortToolInput, SessionToolResult> {
 ░▀░▀░▀▀░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀░`;
   }
 
+  protected getSlashCommand(): string | null {
+    return '/devsolo:abort';
+  }
+
   protected async createContext(input: AbortToolInput): Promise<Record<string, unknown>> {
     // Get session to abort (will be validated in pre-flight checks)
     const targetBranch = input.branchName || (await this.gitOps.getCurrentBranch());
