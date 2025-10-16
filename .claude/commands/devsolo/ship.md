@@ -67,8 +67,10 @@ The ship workflow consists of three stages, each using a separate git-droid sub-
        3. Abort ship workflow
      - If no uncommitted changes: Indicate ready to proceed with ship
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - IMPORTANT - Output formatting based on verbose flag:
-       * If verbose=false (brief mode): Show only status indicator + Result Summary
+     - CRITICAL - Output formatting based on verbose flag:
+       * If verbose=false (brief mode):
+         - DO NOT OUTPUT: "Pre-flight Checks", "Post-flight Verifications", "Operations Executed", or "Analysis" sections
+         - ONLY OUTPUT: Result Summary (and options table if user input needed)
        * If verbose=true (verbose mode): Include all sections: Pre-flight Checks, Result Summary
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: COMMIT_ALL' (user chose option 1)
@@ -106,8 +108,10 @@ Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
      - Wait for commit to complete
      - Verify commit was successful
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - IMPORTANT - Output formatting based on verbose flag:
-       * If verbose=false (brief mode): Show only status indicator + Result Summary
+     - CRITICAL - Output formatting based on verbose flag:
+       * If verbose=false (brief mode):
+         - DO NOT OUTPUT: "Pre-flight Checks", "Post-flight Verifications", "Operations Executed", or "Analysis" sections
+         - ONLY OUTPUT: Result Summary (and options table if user input needed)
        * If verbose=true (verbose mode): Include all sections: Operations Executed, Post-flight Verifications, Result Summary
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: PROCEED_TO_SHIP' (commit successful)
@@ -137,8 +141,10 @@ Only execute this stage if Stage 1 returned 'COMMIT_ALL' or 'COMMIT_STAGED'.
      - Call `mcp__devsolo__devsolo_ship` MCP tool with all parameters
      - Monitor CI checks (MCP tool handles this)
      - Format all results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - IMPORTANT - Output formatting based on verbose flag:
-       * If verbose=false (brief mode): Show only status indicator + Result Summary (with PR link)
+     - CRITICAL - Output formatting based on verbose flag:
+       * If verbose=false (brief mode):
+         - DO NOT OUTPUT: "Pre-flight Checks", "Post-flight Verifications", "Operations Executed", or "Analysis" sections
+         - ONLY OUTPUT: Result Summary (with PR link, and options table if user input needed)
        * If verbose=true (verbose mode): Include all sections: Operations Executed, Post-flight Verifications, Result Summary (with PR link and stats), Next Steps
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: COMPLETED' (ship successful)
