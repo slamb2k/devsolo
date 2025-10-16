@@ -14,10 +14,13 @@
   "plugins": [
     {
       "name": "devsolo-plugin",
-      "source": "..",
+      "source": "./",
       "description": "MCP server providing git workflow management tools for solo developers",
       "version": "2.5.4",
-      "author": "slamb2k",
+      "author": {
+        "name": "slamb2k",
+        "email": "slamb2k@users.noreply.github.com"
+      },
       "homepage": "https://github.com/slamb2k/devsolo",
       "repository": "https://github.com/slamb2k/devsolo",
       "license": "MIT",
