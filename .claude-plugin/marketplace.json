@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Solo developer git workflow management with AI-powered automation",
-    "version": "2.5.8",
+    "version": "2.5.9",
     "homepage": "https://github.com/slamb2k/devsolo",
     "repository": "https://github.com/slamb2k/devsolo",
     "license": "MIT"
@@ -16,7 +16,7 @@
       "name": "devsolo-plugin",
       "source": "./",
       "description": "MCP server providing git workflow management tools for solo developers",
-      "version": "2.5.8",
+      "version": "2.5.9",
       "author": {
         "name": "slamb2k",
         "email": "slamb2k@users.noreply.github.com"
