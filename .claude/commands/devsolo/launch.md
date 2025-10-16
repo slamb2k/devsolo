@@ -70,7 +70,11 @@ The launch workflow consists of up to four stages, each using a separate git-dro
        3. Abort launch
      - If both issues detected: Present combined options handling both
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - Include these sections: Pre-flight Checks, Result Summary
+     - CRITICAL - Output formatting based on verbose flag:
+       * If verbose=false (brief mode):
+         - DO NOT OUTPUT: "Pre-flight Checks", "Post-flight Verifications", "Operations Executed", or "Analysis" sections
+         - ONLY OUTPUT: Result Summary (and options table if user input needed)
+       * If verbose=true (verbose mode): Include all sections: Pre-flight Checks, Result Summary
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: HANDLE_CHANGES' (uncommitted changes detected)
        * 'Next Stage: HANDLE_SESSION' (existing session detected, no changes)
@@ -104,7 +108,11 @@ Only execute this stage if Stage 1 returned 'HANDLE_CHANGES' or 'HANDLE_BOTH'.
      - Verify action succeeded
      - Check again if existing session exists (for HANDLE_BOTH case)
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - Include these sections: Operations Executed, Post-flight Verifications, Result Summary
+     - CRITICAL - Output formatting based on verbose flag:
+       * If verbose=false (brief mode):
+         - DO NOT OUTPUT: "Pre-flight Checks", "Post-flight Verifications", "Operations Executed", or "Analysis" sections
+         - ONLY OUTPUT: Result Summary (and options table if user input needed)
+       * If verbose=true (verbose mode): Include all sections: Operations Executed, Post-flight Verifications, Result Summary
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: HANDLE_SESSION' (if existing session also detected)
        * 'Next Stage: CREATE_BRANCH' (if no session conflict)
@@ -133,7 +141,11 @@ Only execute this stage if Stage 1 or 2 returned 'HANDLE_SESSION'.
      - If user chose keep both: Continue to CREATE_BRANCH
      - Verify session handling succeeded
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - Include these sections: Operations Executed, Post-flight Verifications, Result Summary
+     - CRITICAL - Output formatting based on verbose flag:
+       * If verbose=false (brief mode):
+         - DO NOT OUTPUT: "Pre-flight Checks", "Post-flight Verifications", "Operations Executed", or "Analysis" sections
+         - ONLY OUTPUT: Result Summary (and options table if user input needed)
+       * If verbose=true (verbose mode): Include all sections: Operations Executed, Post-flight Verifications, Result Summary
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: CREATE_BRANCH' (session handled successfully)
        * 'Next Stage: ABORTED' (user cancelled or abort failed)"
@@ -160,7 +172,11 @@ Only execute this stage if Stage 1 or 2 returned 'HANDLE_SESSION'.
      - Create session
      - Checkout to new branch
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
-     - Include these sections: Operations Executed, Post-flight Verifications, Result Summary, Next Steps
+     - CRITICAL - Output formatting based on verbose flag:
+       * If verbose=false (brief mode):
+         - DO NOT OUTPUT: "Pre-flight Checks", "Post-flight Verifications", "Operations Executed", or "Analysis" sections
+         - ONLY OUTPUT: Result Summary (with Next Steps, and options table if user input needed)
+       * If verbose=true (verbose mode): Include all sections: Operations Executed, Post-flight Verifications, Result Summary, Next Steps
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: COMPLETED' (launch successful)"
 
