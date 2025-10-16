@@ -1,15 +1,14 @@
 {
   "name": "devsolo-plugin",
-  "displayName": "devsolo",
   "description": "AI-native Git workflow automation for Claude Code",
   "version": "2.5.5",
-  "author": "devsolo contributors",
+  "author": {
+    "name": "slamb2k",
+    "email": "slamb2k@users.noreply.github.com"
+  },
   "license": "MIT",
   "homepage": "https://github.com/slamb2k/devsolo",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/slamb2k/devsolo.git"
-  },
+  "repository": "https://github.com/slamb2k/devsolo",
   "mcpServers": {
     "devsolo": {
       "command": "node",
