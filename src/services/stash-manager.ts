@@ -14,8 +14,10 @@ export interface StashResult {
 export class StashManager {
   private gitOps: GitOperations;
 
-  constructor(basePath?: string) {
-    this.gitOps = new GitOperations(basePath);
+  constructor(_basePath?: string) {
+    // Don't pass basePath to GitOperations - it should use cwd (the git repo root)
+    // basePath is for devsolo data storage (.devsolo directory), not git operations
+    this.gitOps = new GitOperations();
   }
 
   /**
