@@ -34,36 +34,28 @@ RESET='\033[0m'
 # Read JSON input from Claude Code (optional, contains session info)
 INPUT=$(cat)
 
+# DEBUG: Log the input for troubleshooting
+echo "$INPUT" > /tmp/statusline-input-debug.json 2>/dev/null || true
+
 # Extract working directory from JSON input if available
 CWD=$(echo "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)
 
-# Extract context/token information
-# First, try to get from Claude Code's JSON input directly
-TOKEN_USED=$(echo "$INPUT" | jq -r '.context_used // .tokens_used // .context.used // empty' 2>/dev/null)
-TOKEN_TOTAL=$(echo "$INPUT" | jq -r '.context_limit // .tokens_total // .context.total // .context.limit // empty' 2>/dev/null)
-TOKEN_BUDGET=$(echo "$INPUT" | jq -r '.budget.token_budget // .token_budget // empty' 2>/dev/null)
+# Extract context/token information from transcript
+TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
+TOKEN_USED="0"  # Default to 0 to show "Pending..." when no transcript data available
+TOKEN_TOTAL=200000  # Claude Code's standard context window
+TOKEN_BUDGET=""
 
-# If not provided directly, try transcript file
-if [ -z "$TOKEN_USED" ]; then
-  TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
+if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
+  # Get context length from the MOST RECENT message (inspired by ccstatusline)
+  # Context = input_tokens + cache_read_input_tokens + cache_creation_input_tokens
+  # This represents the actual context window size including cached content
+  TOKEN_USED=$(tail -1 "$TRANSCRIPT_PATH" | jq '.message.usage | (.input_tokens + (.cache_read_input_tokens // 0) + (.cache_creation_input_tokens // 0))' 2>/dev/null)
 
-  if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
-    # Get the MOST RECENT (last) cumulative token usage, NOT sum of all messages
-    # Each message has cumulative usage, so we want the latest value
-    TOKEN_USED=$(jq -s 'map(select(.message.usage != null)) | last | .message.usage | ((.input_tokens // 0) + (.output_tokens // 0))' "$TRANSCRIPT_PATH" 2>/dev/null)
-
-    # If transcript is empty or extraction failed, default to 0 to show "Pending..." state
-    if [ "$TOKEN_USED" = "null" ] || [ -z "$TOKEN_USED" ]; then
-      TOKEN_USED="0"
-    fi
-  else
-    TOKEN_USED="0"  # No transcript available, show "Pending..."
+  # If transcript is empty or extraction failed, default to 0 to show "Pending..." state
+  if [ "$TOKEN_USED" = "null" ] || [ -z "$TOKEN_USED" ]; then
+    TOKEN_USED="0"
   fi
-fi
-
-# Default to Claude Code's standard context window if not provided
-if [ -z "$TOKEN_TOTAL" ]; then
-  TOKEN_TOTAL=200000
 fi
 
 # Extract model information if available
