@@ -72,6 +72,24 @@ The abort workflow consists of three stages, each using a separate git-droid sub
          3. Cancel abort workflow
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
      - Include these sections: Pre-flight Checks, Result Summary
+     - IMPORTANT: Create workflow state object and include it in your response:
+       ```json
+       {
+         \"workflowId\": \"abort-[timestamp]\",
+         \"stage\": \"STAGE_1\",
+         \"verified\": {
+           \"sessionExists\": [true/false],
+           \"sessionId\": \"[session-id]\",
+           \"changesChecked\": true
+         },
+         \"context\": {
+           \"branchName\": \"[branch-name]\",
+           \"hasUncommittedChanges\": [true/false],
+           \"userChoice\": \"[STASH_CHANGES/PROCEED_TO_ABORT/DELETE_BRANCH/ABORTED]\",
+           \"deleteBranchRequested\": [true/false]
+         }
+       }
+       ```
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
        * 'Next Stage: STASH_CHANGES' (uncommitted changes: user chose option 1)
        * 'Next Stage: PROCEED_TO_ABORT' (uncommitted changes: user chose option 2, OR no changes: user chose option 2)
@@ -84,10 +102,12 @@ The abort workflow consists of three stages, each using a separate git-droid sub
    - Do NOT summarize, skip sections, or add commentary
    - The user MUST see this output before you proceed
 
-3. **Check the response** for the "Next Stage:" directive in Result Summary:
-   - If 'Next Stage: STASH_CHANGES', proceed to Stage 2 (Handle Uncommitted Changes)
-   - If 'Next Stage: PROCEED_TO_ABORT', skip to Stage 3 (Abort Session)
-   - If 'Next Stage: DELETE_BRANCH', skip to Stage 3 with deleteBranch=true
+3. **Extract workflow state** from git-droid response and store it for passing to next stage
+
+4. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: STASH_CHANGES', proceed to Stage 2 (Handle Uncommitted Changes) with workflow state
+   - If 'Next Stage: PROCEED_TO_ABORT', skip to Stage 3 (Abort Session) with workflow state
+   - If 'Next Stage: DELETE_BRANCH', skip to Stage 3 (Abort Session) with workflow state and deleteBranch=true
    - If 'Next Stage: ABORTED', terminate workflow
 
 ### Stage 2: Handle Uncommitted Changes (Conditional)
@@ -97,11 +117,25 @@ Only execute this stage if Stage 1 returned 'STASH_CHANGES'.
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Handling uncommitted changes..."
-   - **prompt:** "Stash uncommitted changes before aborting. You must:
+   - **prompt:** "Stash uncommitted changes before aborting, using workflow state from Stage 1: [pass workflow state object]. You must:
+     - SKIP session verification (already verified in Stage 1 - check workflow state)
+     - SKIP uncommitted changes check (already checked in Stage 1 - check workflow state)
      - Get current branch name
      - Create stash with labeled reference: abort-from-{branch}
      - Store stash reference for potential recovery
      - Verify stash succeeded
+     - Update workflow state object:
+       ```json
+       {
+         \"stage\": \"STAGE_2\",
+         \"verified\": { ...previous verified fields... },
+         \"context\": {
+           ...previous context fields...,
+           \"stashCreated\": [true/false],
+           \"stashRef\": \"[stash-ref]\"
+         }
+       }
+       ```
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
      - Include these sections: Operations Executed, Post-flight Verifications, Result Summary
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
@@ -114,8 +148,10 @@ Only execute this stage if Stage 1 returned 'STASH_CHANGES'.
    - Do NOT summarize, skip sections, or add commentary
    - The user MUST see this output before you proceed
 
-3. **Check the response** for the "Next Stage:" directive in Result Summary:
-   - If 'Next Stage: PROCEED_TO_ABORT', proceed to Stage 3 (Abort Session)
+3. **Extract updated workflow state** from git-droid response and store it for passing to next stage
+
+4. **Check the response** for the "Next Stage:" directive in Result Summary:
+   - If 'Next Stage: PROCEED_TO_ABORT', proceed to Stage 3 (Abort Session) with workflow state
    - If 'Next Stage: ABORTED', terminate workflow
 
 ### Stage 3: Abort Session
@@ -123,12 +159,26 @@ Only execute this stage if Stage 1 returned 'STASH_CHANGES'.
 1. **Use the Task tool** to invoke the git-droid sub-agent:
    - **subagent_type:** "git-droid"
    - **description:** "Aborting session..."
-   - **prompt:** "Complete the abort operation with the following parameters: [pass all user arguments]. You must:
+   - **prompt:** "Complete the abort operation with the following parameters: [pass all user arguments] and workflow state from previous stages: [pass workflow state object]. You must:
+     - SKIP session verification (already verified in Stage 1 - check workflow state)
+     - SKIP uncommitted changes check (already handled in Stage 2 if needed - check workflow state)
      - Call `mcp__devsolo__devsolo_abort` MCP tool with parameters
      - Pass --deleteBranch if Stage 1 returned 'DELETE_BRANCH'
      - Switch to main branch
      - Delete feature branch (if requested)
      - Mark session as aborted
+     - Update workflow state object:
+       ```json
+       {
+         \"stage\": \"STAGE_3\",
+         \"verified\": { ...previous verified fields... },
+         \"context\": {
+           ...previous context fields...,
+           \"sessionAborted\": [true/false],
+           \"branchDeleted\": [true/false]
+         }
+       }
+       ```
      - Format results following git-droid output style from `.claude/output-styles/git-droid.md`
      - Include these sections: Operations Executed, Post-flight Verifications, Result Summary, Next Steps
      - IMPORTANT: In your Result Summary section, include EXACTLY one of:
@@ -269,6 +319,20 @@ The abort command orchestrates three distinct stages:
 # Abort old work and remove branch
 /devsolo:abort --branchName="feature/old-experiment" --deleteBranch --yes
 ```
+
+## Workflow State Management
+
+This workflow uses a state indicator system to avoid redundant checks across stages:
+
+- **Stage 1** performs all pre-flight checks (session verification, uncommitted changes) and creates workflow state object
+- **Stage 2** (conditional) receives state, skips session/changes checks, handles stashing
+- **Stage 3** receives state, skips all prior verifications, executes abort operation
+
+Each stage updates the state object with new context before passing to the next stage. This ensures:
+- No redundant session verification
+- No redundant git status checks
+- Faster execution
+- Clear workflow progress tracking
 
 ## Notes
 

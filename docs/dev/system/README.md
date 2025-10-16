@@ -48,6 +48,12 @@ The `dev/system/` folder is for **comprehensive technical documentation** about 
   - Defensive guarantees
   - Error handling specifications
 
+- **workflow-state-management.md** - Workflow state indicator system documentation:
+  - Multi-stage workflow optimization
+  - State object structure and propagation
+  - Elimination of redundant checks
+  - Workflow-specific state implementations
+
 ### Developer Installation
 - **installation.md** - Developer installation methods:
   - npm link for local development
