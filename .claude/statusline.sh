@@ -48,9 +48,10 @@ TOKEN_BUDGET=""
 
 if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
   # Get context length from the MOST RECENT message (inspired by ccstatusline)
-  # Context = input_tokens + cache_read_input_tokens + cache_creation_input_tokens
-  # This represents the actual context window size including cached content
-  TOKEN_USED=$(tail -1 "$TRANSCRIPT_PATH" | jq '.message.usage | (.input_tokens + (.cache_read_input_tokens // 0) + (.cache_creation_input_tokens // 0))' 2>/dev/null)
+  # Context = input_tokens + cache_read_input_tokens
+  # Note: cache_creation_input_tokens represents tokens WRITTEN to cache and should NOT be added
+  # as they are already included in the input - adding them would double-count those tokens
+  TOKEN_USED=$(tail -1 "$TRANSCRIPT_PATH" | jq '.message.usage | (.input_tokens + (.cache_read_input_tokens // 0))' 2>/dev/null)
 
   # If transcript is empty or extraction failed, default to 0 to show "Pending..." state
   if [ "$TOKEN_USED" = "null" ] || [ -z "$TOKEN_USED" ]; then
@@ -144,7 +145,7 @@ if [ -d "$SESSION_DIR" ]; then
   done
 fi
 
-# Function to create a bar graph for remaining context
+# Function to create a bar graph for context usage
 create_remaining_bar() {
   local used=$1
   local total=$2
@@ -155,19 +156,32 @@ create_remaining_bar() {
     return
   fi
 
-  local remaining=$((total - used))
-  local percentage=$((remaining * 100 / total))
-  local filled=$((remaining * width / total))
+  # Calculate autocompact buffer (22.5% of total, matches Claude Code's setting)
+  local autocompact=$((total * 225 / 1000))
+  local effective_limit=$((total - autocompact))
 
-  # Choose background color based on remaining capacity (inverse of usage)
+  # Calculate usage percentage against effective limit (not total)
+  local usage_percentage=$((used * 100 / effective_limit))
+  local filled=$((used * width / effective_limit))
+
+  # Cap filled at width to handle edge cases
+  if [ $filled -gt $width ]; then
+    filled=$width
+  fi
+
+  # Calculate where the free space ends and autocompact buffer begins
+  local free_end=$((effective_limit * width / total))
+
+  # Choose background color based on usage (bar fills as you use more)
   local bg_filled=""
-  local bg_empty="\033[100m"  # Dark gray background
-  if [ $percentage -gt 50 ]; then
-    bg_filled="\033[42m"  # Green background
-  elif [ $percentage -gt 20 ]; then
-    bg_filled="\033[43m"  # Yellow background
+  local bg_free="\033[100m"  # Dark gray background for free usable space
+  local bg_buffer="\033[48;5;240m"  # Medium gray for autocompact buffer (reserved, lighter for dark text)
+  if [ $usage_percentage -lt 50 ]; then
+    bg_filled="\033[42m"  # Green background - plenty of space
+  elif [ $usage_percentage -lt 80 ]; then
+    bg_filled="\033[43m"  # Yellow background - getting full
   else
-    bg_filled="\033[41m"  # Red background
+    bg_filled="\033[41m"  # Red background - almost full
   fi
 
   # Build text - show "Pending..." when just starting
@@ -175,44 +189,49 @@ create_remaining_bar() {
   if [ $used -lt 1000 ]; then
     text="Pending..."
   else
-    # Format with K/M suffix for readability
-    local remaining_display
-    if [ $remaining -gt 1000 ]; then
-      remaining_display="$((remaining / 1000))K"
+    # Format with K/M suffix for readability - show used/effective_limit
+    local used_display
+    if [ $used -gt 1000 ]; then
+      used_display="$((used / 1000))K"
     else
-      remaining_display="${remaining}"
+      used_display="${used}"
     fi
 
-    local total_display
-    if [ $total -gt 1000 ]; then
-      total_display="$((total / 1000))K"
+    local limit_display
+    if [ $effective_limit -gt 1000 ]; then
+      limit_display="$((effective_limit / 1000))K"
     else
-      total_display="${total}"
+      limit_display="${effective_limit}"
     fi
 
-    text="${remaining_display}/${total_display}"
+    text="${used_display}/${limit_display}"
   fi
 
   local text_len=${#text}
   local text_start=$(((width - text_len) / 2))
   local text_end=$((text_start + text_len))
 
-  # Build the bar with text overlay - each character knows its background
+  # Build the bar with text overlay - three sections:
+  # 1. Used tokens (0 to filled)
+  # 2. Free usable space (filled to free_end)
+  # 3. Autocompact buffer (free_end to width)
   local bar=""
   for ((i=0; i<width; i++)); do
     # Determine background color for this position
     local bg=""
     if [ $i -lt $filled ]; then
-      bg="$bg_filled"
+      bg="$bg_filled"  # Used tokens
+    elif [ $i -lt $free_end ]; then
+      bg="$bg_free"  # Free usable space
     else
-      bg="$bg_empty"
+      bg="$bg_buffer"  # Autocompact buffer (reserved)
     fi
 
     # Determine if this position has text
     if [ $i -ge $text_start ] && [ $i -lt $text_end ]; then
       local char_idx=$((i - text_start))
       local char="${text:$char_idx:1}"
-      bar+="${bg}\033[38;5;232m${char}"
+      bar+="${bg}\033[1;38;5;232m${char}"  # Bold text
     else
       bar+="${bg} "
     fi
