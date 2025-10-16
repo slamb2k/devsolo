@@ -6,7 +6,37 @@ const fs = require('fs');
 try {
   // Resolve the real path (follows symlinks) to find where the package is actually installed
   const realPath = fs.realpathSync(__filename);
-  const serverPath = path.join(path.dirname(realPath), '../dist/mcp/devsolo-mcp-server.js');
+  const packageRoot = path.join(path.dirname(realPath), '..');
+
+  // Auto-detection: Check if we're running from a plugin installation
+  // and if a local dev version exists, defer to it
+  const isPlugin = realPath.includes('.claude') ||
+                   realPath.includes('node_modules') ||
+                   realPath.includes('.npm') ||
+                   packageRoot.includes('claude-plugins');
+
+  if (isPlugin) {
+    // Look for a local dev version in the working directory
+    const cwd = process.cwd();
+    const localMcpJson = path.join(cwd, '.mcp.json');
+
+    if (fs.existsSync(localMcpJson)) {
+      try {
+        const mcpConfig = JSON.parse(fs.readFileSync(localMcpJson, 'utf-8'));
+
+        // If local dev version exists, exit gracefully to let it handle requests
+        if (mcpConfig.mcpServers && mcpConfig.mcpServers.devsolo) {
+          console.error('[devsolo-mcp] Local dev version detected in .mcp.json, deferring to it');
+          process.exit(0); // Exit gracefully without error
+        }
+      } catch (parseError) {
+        // If .mcp.json is malformed, continue with plugin version
+        console.error('[devsolo-mcp] Warning: Could not parse .mcp.json:', parseError.message);
+      }
+    }
+  }
+
+  const serverPath = path.join(packageRoot, 'dist/mcp/devsolo-mcp-server.js');
 
   if (!fs.existsSync(serverPath)) {
     console.error('[devsolo-mcp] ERROR: Server file not found at:', serverPath);
