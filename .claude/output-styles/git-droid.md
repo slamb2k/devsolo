@@ -22,15 +22,22 @@ All workflow commands support two output modes controlled by the `--verbose` fla
 
 **Purpose:** Show only essential information for quick scanning
 
+**CRITICAL RULE:** In brief mode, you MUST NOT output these section headers:
+- ❌ **"Pre-flight Checks"** or **"Pre-flight Checks:"** or **"📋 Pre-flight Checks"**
+- ❌ **"Post-flight Verifications"** or **"Post-flight Verifications:"** or **"✓ Post-flight Verifications:"**
+- ❌ **"Operations Executed"** or **"Operations Executed:"** or **"✅ Operations Executed"**
+- ❌ **"Analysis"** or any analysis section headers
+
 **What to include:**
-- Current operation status (✓ success, ✗ error, ⚠ warning)
-- Key result (e.g., branch name, commit hash, PR URL)
+- Current operation status indicator ONLY (✓ success, ✗ error, ⚠ warning)
+- Key result information (e.g., branch name, commit hash, PR URL)
 - Options table (if user input required)
-- Critical errors or warnings
+- Critical errors or warnings (as simple text, not in a section)
+- Result Summary section (if specifically requested)
 
 **What to OMIT:**
-- Pre-flight Checks section
-- Post-flight Verifications section
+- All section headers except Result Summary
+- Bulleted lists of checks or verifications
 - Detailed file lists
 - Verbose operation descriptions
 - Analysis sections

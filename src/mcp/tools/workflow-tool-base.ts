@@ -223,10 +223,55 @@ implements MCPTool<TInput, TResult> {
       return result;
     }
 
-    // auto mode: execute recommended actions
-    // TODO: Implement auto-resolution logic
-    // For now, continue with workflow (assumes checks can be bypassed)
-    return null;
+    // auto mode: auto-select recommended options
+    const promptChecks = preFlightResult.checks.filter(c => c.level === 'prompt' && !c.passed);
+
+    if (promptChecks.length === 0) {
+      // No prompts, continue with workflow
+      return null;
+    }
+
+    // Collect auto-recommended actions
+    const recommendedActions: Array<{check: string; option: any}> = [];
+    const issues: string[] = [];
+
+    for (const check of promptChecks) {
+      const recommendedOption = check.options?.find(opt => opt.autoRecommended);
+
+      if (recommendedOption) {
+        recommendedActions.push({
+          check: check.name,
+          option: recommendedOption,
+        });
+      } else {
+        // No auto-recommended option, this is a blocker
+        issues.push(`${check.name}: ${check.message || 'No auto-resolution available'}`);
+      }
+    }
+
+    if (issues.length > 0) {
+      // Some checks have no auto-resolution, must fail
+      const result: any = {
+        success: false,
+        message: 'Pre-flight checks failed with no auto-resolution available.',
+        errors: issues,
+        preFlightChecks: preFlightResult.checks,
+      };
+      return result;
+    }
+
+    // Return success with recommended actions for caller to execute
+    const result: any = {
+      success: true,
+      message: 'Pre-flight issues detected. Auto-resolving with recommended actions.',
+      preFlightChecks: preFlightResult.checks,
+      recommendedActions,
+      nextSteps: [
+        'Execute the recommended actions',
+        'Retry the operation',
+      ],
+    };
+    return result;
   }
 
   /**
