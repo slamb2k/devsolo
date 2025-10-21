@@ -2,7 +2,7 @@
   "name": "devsolo-plugin",
   "displayName": "DevSolo",
   "description": "AI-native Git workflow automation for Claude Code",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "author": {
     "name": "slamb2k",
     "email": "slamb2k@users.noreply.github.com"
