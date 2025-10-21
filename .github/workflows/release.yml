@@ -141,27 +141,19 @@ jobs:
             npx conventional-changelog -p angular -i CHANGELOG.md -s -r 0
           fi
 
-      - name: Create Claude Code plugin tarball
+      - name: Build and package Claude Code plugin
         run: |
-          PLUGIN_NAME="devsolo-claude-plugin-${{ steps.new-version.outputs.version }}"
+          VERSION="${{ steps.new-version.outputs.version }}"
 
-          # Create a temporary directory for the plugin
-          mkdir -p "tmp/${PLUGIN_NAME}"
+          # Build plugin with proper bundling, slash commands, and sub-agents
+          npm run build:plugin
 
-          # Copy necessary files for the plugin
-          cp -r .claude-plugin "tmp/${PLUGIN_NAME}/"
-          cp -r dist "tmp/${PLUGIN_NAME}/"
-          cp package.json "tmp/${PLUGIN_NAME}/"
-          cp README.md "tmp/${PLUGIN_NAME}/"
-          cp LICENSE "tmp/${PLUGIN_NAME}/" 2>/dev/null || true
+          # Package plugin with validation and checksumming
+          npm run package:plugin
 
-          # Create tarball
-          cd tmp
-          tar -czf "../${PLUGIN_NAME}.tar.gz" "${PLUGIN_NAME}"
-          cd ..
-
-          echo "✓ Created plugin tarball: ${PLUGIN_NAME}.tar.gz"
-          ls -lh "${PLUGIN_NAME}.tar.gz"
+          # The package is created at packages/devsolo-plugin-v${VERSION}.tar.gz
+          echo "✓ Created plugin package: packages/devsolo-plugin-v${VERSION}.tar.gz"
+          ls -lh packages/devsolo-plugin-v${VERSION}.tar.gz
 
       - name: Generate installation instructions
         id: install-info
@@ -186,11 +178,11 @@ jobs:
           ### Claude Code Plugin
           Download the plugin tarball from this release and install it in Claude Code:
 
-          **Plugin Download:** [devsolo-claude-plugin-${VERSION}.tar.gz](https://github.com/${REPO}/releases/download/v${VERSION}/devsolo-claude-plugin-${VERSION}.tar.gz)
+          **Plugin Download:** [devsolo-plugin-v${VERSION}.tar.gz](https://github.com/${REPO}/releases/download/v${VERSION}/devsolo-plugin-v${VERSION}.tar.gz)
 
           \`\`\`bash
           # Extract and install
-          tar -xzf devsolo-claude-plugin-${VERSION}.tar.gz
+          tar -xzf devsolo-plugin-v${VERSION}.tar.gz
           # Follow Claude Code plugin installation instructions
           \`\`\`
 
@@ -212,7 +204,7 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            devsolo-claude-plugin-${{ steps.new-version.outputs.version }}.tar.gz
+            packages/devsolo-plugin-v${{ steps.new-version.outputs.version }}.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
