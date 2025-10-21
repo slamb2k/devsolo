@@ -184,27 +184,12 @@ create_remaining_bar() {
     bg_filled="\033[41m"  # Red background - almost full
   fi
 
-  # Build text - show "Pending..." when just starting
+  # Build text - show percentage
   local text
   if [ $used -lt 1000 ]; then
     text="Pending..."
   else
-    # Format with K/M suffix for readability - show used/effective_limit
-    local used_display
-    if [ $used -gt 1000 ]; then
-      used_display="$((used / 1000))K"
-    else
-      used_display="${used}"
-    fi
-
-    local limit_display
-    if [ $effective_limit -gt 1000 ]; then
-      limit_display="$((effective_limit / 1000))K"
-    else
-      limit_display="${effective_limit}"
-    fi
-
-    text="${used_display}/${limit_display}"
+    text="${usage_percentage}%"
   fi
 
   local text_len=${#text}
@@ -346,17 +331,17 @@ if [ -n "$SESSION_ID" ]; then
   esac
 
   # Show branch in green with branch emoji
-  echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}${BOLD_DARK_ORANGE} *${RESET} ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
+  echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}${BOLD_DARK_ORANGE} •${RESET} ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
   echo -e "${BOLD_WHITE} solo${RESET} ${MODEL_DISPLAY_FIELD} ${GRAY}|${RESET} $EMOJI ${state_color}${status_msg}${RESET}"
 else
   # No active session
   if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
     # Main branch - show in green with branch emoji
-    echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}${BOLD_DARK_ORANGE} *${RESET} ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
+    echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}${BOLD_DARK_ORANGE} •${RESET} ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
     echo -e "${BOLD_WHITE} solo${RESET} ${MODEL_DISPLAY_FIELD} ${GRAY}|${RESET} 📁 ${GRAY}No active session${RESET}"
   else
     # Other branch without session - show in green with branch emoji
-    echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}${BOLD_DARK_ORANGE} *${RESET} ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
+    echo -e "${BOLD_BRIGHT_MAGENTA}dev${RESET}${BOLD_DARK_ORANGE} •${RESET} ${CONTEXT_DISPLAY} ${GRAY}|${RESET} 🌿 ${GREEN}${BRANCH}${RESET}${GIT_STATS}${ACTIVE_SESSIONS_DISPLAY}"
     echo -e "${BOLD_WHITE} solo${RESET} ${MODEL_DISPLAY_FIELD} ${GRAY}|${RESET} 📁 ${GRAY}No active session${RESET}"
   fi
 fi
