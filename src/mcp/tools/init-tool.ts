@@ -63,6 +63,19 @@ export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
       throw new Error('Not a git repository. Initialize git first with: git init');
     }
 
+    // Check if we're at the project root (where .git directory is)
+    const gitRoot = await this.gitOps.getRepositoryRoot();
+    const currentDir = process.cwd();
+
+    if (gitRoot !== currentDir) {
+      throw new Error(
+        'Must run init from project root.\n' +
+        `Current directory: ${currentDir}\n` +
+        `Git root: ${gitRoot}\n\n` +
+        'Please cd to the project root and try again.'
+      );
+    }
+
     return {
       scope: input.scope || 'project',
       enableStatusLine: input.enableStatusLine ?? true, // Default to true
@@ -91,7 +104,8 @@ export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
         autoCleanup: true,
         confirmBeforePush: false,
         colorOutput: true,
-        autoMode: false,
+        autoMode: true,
+        verboseMode: false,
         prTemplate: {
           body: '## Summary\n\n{{description}}\n\n## Changes\n\n{{commits}}',
           footer: '\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>',
@@ -115,6 +129,10 @@ export class InitTool extends BaseMCPTool<InitToolInput, BaseToolResult> {
       await this.configManager.installStatusLine();
       await this.configManager.installClaudeCodeSettings(statusLineScope);
       warnings.push(`Status line enabled (${statusLineScope} scope)`);
+      warnings.push('');
+      warnings.push('⚠️  IMPORTANT: Restart Claude Code to activate the status line');
+      warnings.push('   When prompted, allow .claude/statusline.sh to execute');
+      warnings.push('');
     }
 
     warnings.push('Use devsolo_launch to start a new workflow');
