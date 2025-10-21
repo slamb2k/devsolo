@@ -29,7 +29,8 @@ export class Configuration {
       autoCleanup: true,
       confirmBeforePush: true,
       colorOutput: true,
-      autoMode: false,
+      autoMode: true,
+      verboseMode: false,
       logLevel: 'warn' as const,
       commitTemplate: {
         body: `{{description}}

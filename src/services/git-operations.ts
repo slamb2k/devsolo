@@ -575,4 +575,9 @@ export class GitOperations {
     const result = await this.git.stash(['list']);
     return result.split('\n').filter(line => line.trim());
   }
+
+  async getRepositoryRoot(): Promise<string> {
+    const result = await this.git.revparse(['--show-toplevel']);
+    return result.trim();
+  }
 }
